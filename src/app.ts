@@ -2,7 +2,11 @@ import cors from "@fastify/cors";
 import Fastify from "fastify";
 import { registerHealthRoutes } from "./modules/health/health.routes.js";
 
-export async function buildApp() {
+type AppOptions = {
+  supabaseHealthCheck?: () => Promise<void>;
+};
+
+export async function buildApp(options: AppOptions = {}) {
   const app = Fastify({
     logger: true
   });
@@ -11,7 +15,9 @@ export async function buildApp() {
     origin: true
   });
 
-  await app.register(registerHealthRoutes);
+  await app.register(registerHealthRoutes, {
+    supabaseHealthCheck: options.supabaseHealthCheck
+  });
 
   return app;
 }

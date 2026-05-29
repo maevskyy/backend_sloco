@@ -26,9 +26,14 @@ NODE_ENV=production
 HOST=0.0.0.0
 PORT=3000
 BACKEND_IMAGE=ghcr.io/maevskyy/backend_sloco:prod-latest
+SUPABASE_URL=
+SUPABASE_SERVICE_ROLE_KEY=
 ```
 
 Do not commit production secrets.
+
+`SUPABASE_SERVICE_ROLE_KEY` must stay server-side only. Do not expose it to the
+iOS app or any public frontend.
 
 ## Nginx
 
@@ -67,4 +72,3 @@ Optional if the server must authenticate to pull from GHCR:
 GHCR_USERNAME
 GHCR_READ_TOKEN
 ```
-

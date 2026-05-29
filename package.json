@@ -18,6 +18,7 @@
   "packageManager": "pnpm@10.11.0",
   "dependencies": {
     "@fastify/cors": "^11.2.0",
+    "@supabase/supabase-js": "^2.106.2",
     "dotenv": "^17.4.2",
     "fastify": "^5.8.5",
     "zod": "^4.4.3"

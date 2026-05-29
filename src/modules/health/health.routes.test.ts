@@ -17,4 +17,42 @@ describe("health routes", () => {
       status: "ok"
     });
   });
+
+  it("returns ok status for Supabase health when the check passes", async () => {
+    const app = await buildApp({
+      supabaseHealthCheck: async () => {}
+    });
+
+    const response = await app.inject({
+      method: "GET",
+      url: "/health/supabase"
+    });
+
+    await app.close();
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({
+      status: "ok"
+    });
+  });
+
+  it("returns error status for Supabase health when the check fails", async () => {
+    const app = await buildApp({
+      supabaseHealthCheck: async () => {
+        throw new Error("Supabase is unavailable");
+      }
+    });
+
+    const response = await app.inject({
+      method: "GET",
+      url: "/health/supabase"
+    });
+
+    await app.close();
+
+    expect(response.statusCode).toBe(500);
+    expect(response.json()).toEqual({
+      status: "error"
+    });
+  });
 });
