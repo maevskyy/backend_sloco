@@ -105,5 +105,29 @@ jobs:
             docker compose up -d backend
             docker image prune -f
 
+            for attempt in $(seq 1 12); do
+              if curl --fail --silent --show-error http://127.0.0.1:3000/health; then
+                exit 0
+              fi
+
+              echo "Backend is not healthy yet. Attempt ${attempt}/12"
+              sleep 5
+            done
+
+            docker compose ps
+            docker compose logs --tail=100 backend
+            exit 1
+
       - name: Healthcheck
-        run: curl --fail "${{ secrets.PRODUCTION_API_URL }}/health"
+        run: |
+          for attempt in $(seq 1 12); do
+            if curl --fail --silent --show-error "${{ secrets.PRODUCTION_API_URL }}/health"; then
+              exit 0
+            fi
+
+            echo "Production API is not healthy yet. Attempt ${attempt}/12"
+            sleep 5
+          done
+
+          curl --verbose "${{ secrets.PRODUCTION_API_URL }}/health"
+          exit 1
