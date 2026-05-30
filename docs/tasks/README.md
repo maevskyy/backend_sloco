@@ -19,6 +19,7 @@ Task files live here as `TASKS_N_NAME.md`.
 - `TASKS_11_DB_PLACES.md` - unified source-agnostic `places` table.
 - `TASKS_12_INTEGRATION_MAPPERS.md` - per-source mappers into the `places` import format.
 - `TASKS_13_MAP_DENSITY_RANKING.md` - zoom-based map density and ranking.
+- `TASKS_14_MAP_BBOX_ONLY.md` - drop required `city`, make the map endpoint bbox-only.
 
 ## TBD Backlog
 

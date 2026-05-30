@@ -1,6 +1,5 @@
 export type MapRankingContext = {
   zoom?: number;
-  city: string;
   userId?: string;
 };
 

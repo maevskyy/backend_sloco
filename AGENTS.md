@@ -109,7 +109,7 @@ Useful checks:
 ```bash
 curl http://52.18.13.69/v1/health
 curl http://52.18.13.69/v1/health/supabase
-curl "http://52.18.13.69/v1/map/places?city=Berlin&swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700&limit=100"
+curl "http://52.18.13.69/v1/map/places?swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700&zoom=13"
 ```
 
 ## Important API
@@ -117,7 +117,7 @@ curl "http://52.18.13.69/v1/map/places?city=Berlin&swLat=52.4800&swLng=13.3300&n
 Current frontend-facing map endpoint:
 
 ```http
-GET /v1/map/places?city=Berlin&swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700&limit=100
+GET /v1/map/places?swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700&zoom=13
 ```
 
 Contract docs:

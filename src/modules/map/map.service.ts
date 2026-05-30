@@ -52,7 +52,6 @@ export const getMapPlaces: MapPlacesService = async (query) => {
   const candidateLimit = getCandidateLimit(effectiveLimit);
 
   const { data, error } = await getSupabaseClient().rpc("places_in_bbox", {
-    city_filter: query.city,
     sw_lat: query.swLat,
     sw_lng: query.swLng,
     ne_lat: query.neLat,
@@ -65,7 +64,7 @@ export const getMapPlaces: MapPlacesService = async (query) => {
   }
 
   const rows = (data ?? []) as unknown as PlaceRow[];
-  const context: MapRankingContext = { zoom: query.zoom, city: query.city };
+  const context: MapRankingContext = { zoom: query.zoom };
   const ranked = rankMapPlaces(rows, context, effectiveLimit);
 
   return {

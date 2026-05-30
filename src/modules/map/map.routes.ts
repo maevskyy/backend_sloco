@@ -36,7 +36,6 @@ export async function registerMapRoutes(
             eventType: LogEventType.Response,
             event: LogEvent.ResponseSummary,
             path: VersionedAppRoute.mapPlaces,
-            city: query.city,
             zoom: query.zoom,
             limit: query.limit,
             placesCount: result.places.length,

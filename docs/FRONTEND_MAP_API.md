@@ -88,7 +88,7 @@ GET /v1/map/places
 Example:
 
 ```bash
-curl "http://52.18.13.69/v1/map/places?city=Berlin&swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700&zoom=13"
+curl "http://52.18.13.69/v1/map/places?swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700&zoom=13"
 ```
 
 ## Query Parameters
@@ -96,7 +96,6 @@ curl "http://52.18.13.69/v1/map/places?city=Berlin&swLat=52.4800&swLng=13.3300&n
 Required:
 
 ```text
-city
 swLat
 swLng
 neLat
@@ -114,7 +113,6 @@ Parameters:
 
 | Name | Type | Required | Description |
 | --- | --- | --- | --- |
-| `city` | string | yes | City name. For now use `Berlin`. |
 | `swLat` | number | yes | South-west map corner latitude. |
 | `swLng` | number | yes | South-west map corner longitude. |
 | `neLat` | number | yes | North-east map corner latitude. |
@@ -224,7 +222,6 @@ struct MapPlace: Decodable, Identifiable {
 func fetchMapPlaces() async throws -> [MapPlace] {
     var components = URLComponents(string: "http://52.18.13.69/v1/map/places")!
     components.queryItems = [
-        URLQueryItem(name: "city", value: "Berlin"),
         URLQueryItem(name: "swLat", value: "52.4800"),
         URLQueryItem(name: "swLng", value: "13.3300"),
         URLQueryItem(name: "neLat", value: "52.5600"),
@@ -327,5 +324,5 @@ Example response:
 Open this in a browser or use curl:
 
 ```text
-http://52.18.13.69/v1/map/places?city=Berlin&swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700&zoom=13
+http://52.18.13.69/v1/map/places?swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700&zoom=13
 ```

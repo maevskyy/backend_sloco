@@ -49,14 +49,8 @@ export const mapPlacesQuerySchemaOpenApi = {
   title: "MapPlacesQuery",
   type: "object",
   additionalProperties: false,
-  required: ["city", "swLat", "swLng", "neLat", "neLng"],
+  required: ["swLat", "swLng", "neLat", "neLng"],
   properties: {
-    city: {
-      type: "string",
-      minLength: 1,
-      description: "City name. MVP supports Berlin.",
-      example: "Berlin"
-    },
     swLat: {
       type: "number",
       description: "South-west map corner latitude.",

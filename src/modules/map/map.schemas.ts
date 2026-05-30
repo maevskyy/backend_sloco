@@ -4,7 +4,6 @@ const coordinateSchema = z.coerce.number().finite();
 
 export const mapPlacesQuerySchema = z
   .object({
-    city: z.string().trim().min(1),
     swLat: coordinateSchema,
     swLng: coordinateSchema,
     neLat: coordinateSchema,

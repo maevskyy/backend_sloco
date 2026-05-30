@@ -11,7 +11,7 @@ import {
   type ScorablePlace
 } from "./map.ranking.js";
 
-const context: MapRankingContext = { city: "Bucharest" };
+const context: MapRankingContext = {};
 
 function place(overrides: Partial<ScorablePlace>): ScorablePlace {
   return {
