@@ -16,11 +16,12 @@ describe("map routes", () => {
             source: "tripadvisor",
             sourceId: "d5529357",
             name: "Pane e Vino",
+            country: "Germany",
             city: "Berlin",
             latitude: 52.552578,
             longitude: 13.352883,
             rating: 4,
-            priceRange: null,
+            priceLevel: null,
             numberOfReviews: 17,
             rawCuisineStyle: null
           }
@@ -43,11 +44,12 @@ describe("map routes", () => {
           source: "tripadvisor",
           sourceId: "d5529357",
           name: "Pane e Vino",
+          country: "Germany",
           city: "Berlin",
           latitude: 52.552578,
           longitude: 13.352883,
           rating: 4,
-          priceRange: null,
+          priceLevel: null,
           numberOfReviews: 17,
           rawCuisineStyle: null
         }

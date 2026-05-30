@@ -98,11 +98,12 @@ export const mapPlaceSchema = {
     "source",
     "sourceId",
     "name",
+    "country",
     "city",
     "latitude",
     "longitude",
     "rating",
-    "priceRange",
+    "priceLevel",
     "numberOfReviews",
     "rawCuisineStyle"
   ],
@@ -113,7 +114,6 @@ export const mapPlaceSchema = {
     },
     source: {
       type: "string",
-      enum: ["tripadvisor"],
       example: "tripadvisor"
     },
     sourceId: {
@@ -123,6 +123,10 @@ export const mapPlaceSchema = {
     name: {
       type: "string",
       example: "Pane e Vino"
+    },
+    country: {
+      type: "string",
+      example: "Germany"
     },
     city: {
       type: "string",
@@ -141,10 +145,12 @@ export const mapPlaceSchema = {
       nullable: true,
       example: 4
     },
-    priceRange: {
-      type: "string",
+    priceLevel: {
+      type: "integer",
       nullable: true,
-      example: "$$ - $$$"
+      minimum: 1,
+      maximum: 4,
+      example: 2
     },
     numberOfReviews: {
       type: "integer",
@@ -180,11 +186,12 @@ export const mapPlacesResponseSchema = {
         source: "tripadvisor",
         sourceId: "d5529357",
         name: "Pane e Vino",
+        country: "Germany",
         city: "Berlin",
         latitude: 52.552578,
         longitude: 13.352883,
         rating: 4,
-        priceRange: "$$ - $$$",
+        priceLevel: 2,
         numberOfReviews: 17,
         rawCuisineStyle: null
       }

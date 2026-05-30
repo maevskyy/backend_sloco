@@ -1,29 +1,32 @@
 import { getSupabaseClient } from "../../lib/supabase.js";
 import type { MapPlacesQuery } from "./map.schemas.js";
 
-type RawTripAdvisorRestaurantRow = {
+export type PlaceRow = {
   id: number;
-  tripadvisor_id: string;
+  source: string;
+  source_id: string;
   name: string;
+  country: string;
   city: string;
   latitude: number;
   longitude: number;
   rating: number | null;
-  price_range: string | null;
-  number_of_reviews: number | null;
-  raw_cuisine_style: string | null;
+  price_level: number | null;
+  reviews_count: number | null;
+  attributes: Record<string, unknown> | null;
 };
 
 export type MapPlacePin = {
   id: number;
-  source: "tripadvisor";
+  source: string;
   sourceId: string;
   name: string;
+  country: string;
   city: string;
   latitude: number;
   longitude: number;
   rating: number | null;
-  priceRange: string | null;
+  priceLevel: number | null;
   numberOfReviews: number | null;
   rawCuisineStyle: string | null;
 };
@@ -37,56 +40,50 @@ export type MapPlacesService = (
 ) => Promise<MapPlacesResult>;
 
 export const getMapPlaces: MapPlacesService = async (query) => {
-  const { data, error } = await getSupabaseClient()
-    .from("raw_tripadvisor_restaurants")
-    .select(
-      [
-        "id",
-        "tripadvisor_id",
-        "name",
-        "city",
-        "latitude",
-        "longitude",
-        "rating",
-        "price_range",
-        "number_of_reviews",
-        "raw_cuisine_style"
-      ].join(",")
-    )
-    .eq("city", query.city)
-    .gte("latitude", query.swLat)
-    .lte("latitude", query.neLat)
-    .gte("longitude", query.swLng)
-    .lte("longitude", query.neLng)
-    .order("rating", {
-      ascending: false,
-      nullsFirst: false
-    })
-    .limit(query.limit);
+  const { data, error } = await getSupabaseClient().rpc("places_in_bbox", {
+    city_filter: query.city,
+    sw_lat: query.swLat,
+    sw_lng: query.swLng,
+    ne_lat: query.neLat,
+    ne_lng: query.neLng,
+    result_limit: query.limit
+  });
 
   if (error) {
     throw error;
   }
 
-  const rows = (data ?? []) as unknown as RawTripAdvisorRestaurantRow[];
+  const rows = (data ?? []) as unknown as PlaceRow[];
 
   return {
-    places: rows.map(mapRawRestaurantToPin)
+    places: rows.map(mapPlaceRowToPin)
   };
 };
 
-function mapRawRestaurantToPin(row: RawTripAdvisorRestaurantRow): MapPlacePin {
+export function mapPlaceRowToPin(row: PlaceRow): MapPlacePin {
   return {
     id: row.id,
-    source: "tripadvisor",
-    sourceId: row.tripadvisor_id,
+    source: row.source,
+    sourceId: row.source_id,
     name: row.name,
+    country: row.country,
     city: row.city,
     latitude: row.latitude,
     longitude: row.longitude,
     rating: row.rating,
-    priceRange: row.price_range,
-    numberOfReviews: row.number_of_reviews,
-    rawCuisineStyle: row.raw_cuisine_style
+    priceLevel: row.price_level,
+    numberOfReviews: row.reviews_count,
+    rawCuisineStyle:
+      getStringAttribute(row.attributes, "raw_cuisine_style") ??
+      getStringAttribute(row.attributes, "cuisine")
   };
+}
+
+function getStringAttribute(
+  attributes: Record<string, unknown> | null,
+  key: string
+) {
+  const value = attributes?.[key];
+
+  return typeof value === "string" && value.trim().length > 0 ? value : null;
 }

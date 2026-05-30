@@ -16,6 +16,8 @@ Task files live here as `TASKS_N_NAME.md`.
 - `TASKS_8_REPO_REFACTORING.md` - repo structure cleanup plan.
 - `TASKS_9_SWAGGER.md` - Swagger/OpenAPI contract for frontend.
 - `TASKS_10_SERVER_METRICS.md` - server and backend container metrics dashboard.
+- `TASKS_11_DB_PLACES.md` - unified source-agnostic `places` table.
+- `TASKS_12_INTEGRATION_MAPPERS.md` - per-source mappers into the `places` import format.
 
 ## TBD Backlog
 

@@ -143,11 +143,12 @@ Successful response:
       "source": "tripadvisor",
       "sourceId": "d5529357",
       "name": "Pane e Vino",
+      "country": "Germany",
       "city": "Berlin",
       "latitude": 52.552578,
       "longitude": 13.352883,
       "rating": 4,
-      "priceRange": "$$ - $$$",
+      "priceLevel": 2,
       "numberOfReviews": 17,
       "rawCuisineStyle": null
     }
@@ -160,18 +161,20 @@ Fields:
 | Field | Type | Description |
 | --- | --- | --- |
 | `id` | number | Backend row id. |
-| `source` | string | Data source. Currently always `tripadvisor`. |
-| `sourceId` | string | Source-specific id, TripAdvisor id for now. |
+| `source` | string | Data source, e.g. `tripadvisor` or `osm`. |
+| `sourceId` | string | Source-specific id, e.g. TripAdvisor id or OSM id. |
 | `name` | string | Place name. |
+| `country` | string | Country name or code from the normalized place record. |
 | `city` | string | City name. |
 | `latitude` | number | Pin latitude. |
 | `longitude` | number | Pin longitude. |
 | `rating` | number or null | TripAdvisor rating. |
-| `priceRange` | string or null | Raw price range, e.g. `$`, `$$ - $$$`, `$$$$`. |
-| `numberOfReviews` | number or null | Number of TripAdvisor reviews. |
+| `priceLevel` | number or null | Normalized price level from `1` to `4`. |
+| `numberOfReviews` | number or null | Number of source reviews. |
 | `rawCuisineStyle` | string or null | Raw cuisine/tags string from source data. |
 
 The response does not include heavy fields like reviews or embedding text.
+Missing numeric signals are returned as `null`.
 
 ## Swift Model Example
 
@@ -185,11 +188,12 @@ struct MapPlace: Decodable, Identifiable {
     let source: String
     let sourceId: String
     let name: String
+    let country: String
     let city: String
     let latitude: Double
     let longitude: Double
     let rating: Double?
-    let priceRange: String?
+    let priceLevel: Int?
     let numberOfReviews: Int?
     let rawCuisineStyle: String?
 }

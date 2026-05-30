@@ -24,7 +24,7 @@ export function getSupabaseClient() {
 
 export async function checkSupabaseConnection() {
   const { error } = await getSupabaseClient()
-    .from("raw_tripadvisor_restaurants")
+    .from("places")
     .select("id", {
       count: "exact",
       head: true
