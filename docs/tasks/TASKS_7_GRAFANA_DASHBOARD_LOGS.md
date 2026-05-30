@@ -79,12 +79,12 @@ The dashboard contains:
 
 - `Map Endpoint`
   ```logql
-  {service="backend"} | json | path = "/map/places"
+  {service="backend"} | json | path = "/v1/map/places"
   ```
 
 - `Healthchecks`
   ```logql
-  {service="backend"} | json | path =~ "/health.*"
+  {service="backend"} | json | path =~ "/v1/health.*"
   ```
 
 - `Errors`
@@ -130,9 +130,9 @@ These queries assume the polished log shape from `TASKS_6_POLISHED_LOGS.md`.
 7. Generate traffic:
 
    ```bash
-   curl http://52.18.13.69/health
-   curl http://52.18.13.69/health/supabase
-   curl "http://52.18.13.69/map/places?city=Berlin&swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700&limit=100"
+   curl http://52.18.13.69/v1/health
+   curl http://52.18.13.69/v1/health/supabase
+   curl "http://52.18.13.69/v1/map/places?city=Berlin&swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700&limit=100"
    ```
 
 8. Confirm new logs appear in the dashboard.
@@ -150,7 +150,7 @@ Manual Grafana validation:
 - dashboard imports successfully;
 - datasource selector appears during import;
 - `Live Backend Logs` shows recent logs;
-- `/health`, `/health/supabase`, and `/map/places` appear after curl traffic;
+- `/v1/health`, `/v1/health/supabase`, and `/v1/map/places` appear after curl traffic;
 - error panels show existing 4xx/5xx logs or remain empty without breaking;
 - no secrets are present in the dashboard JSON.
 

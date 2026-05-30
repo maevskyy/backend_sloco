@@ -9,6 +9,7 @@ Backend API for a taste-based city discovery MVP.
 - Fastify
 - Supabase Postgres
 - Zod
+- Swagger/OpenAPI
 - Docker
 
 ## Local Development
@@ -57,21 +58,30 @@ Never commit real secrets.
 ## Health Checks
 
 ```http
-GET /health
-GET /health/supabase
+GET /v1/health
+GET /v1/health/supabase
 ```
 
 Production:
 
 ```bash
-curl http://52.18.13.69/health
-curl http://52.18.13.69/health/supabase
+curl http://52.18.13.69/v1/health
+curl http://52.18.13.69/v1/health/supabase
 ```
+
+## API Contract
+
+```http
+GET /v1/swagger/docs
+GET /v1/swagger/openapi.json
+```
+
+Frontend agents should use `/v1/swagger/openapi.json` as the source of truth.
 
 ## Current Map API
 
 ```http
-GET /map/places?city=Berlin&swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700&limit=100
+GET /v1/map/places?city=Berlin&swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700&limit=100
 ```
 
 Frontend handoff docs:

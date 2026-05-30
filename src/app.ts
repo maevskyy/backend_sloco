@@ -5,6 +5,7 @@ import {
   createLoggerConfig,
   logRequestCompletion
 } from "./config/logger.js";
+import { registerSwaggerDocs } from "./config/swagger.js";
 import { registerHealthRoutes } from "./modules/health/health.routes.js";
 import { registerMapRoutes } from "./modules/map/map.routes.js";
 import type { MapPlacesService } from "./modules/map/map.service.js";
@@ -28,11 +29,15 @@ export async function buildApp(options: AppOptions = {}) {
     origin: true
   });
 
+  await registerSwaggerDocs(app);
+
   await app.register(registerHealthRoutes, {
+    prefix: "/v1",
     supabaseHealthCheck: options.supabaseHealthCheck
   });
 
   await app.register(registerMapRoutes, {
+    prefix: "/v1",
     mapPlacesService: options.mapPlacesService
   });
 

@@ -3,7 +3,7 @@ import { buildApp } from "../../app.js";
 import type { MapPlacesService } from "./map.service.js";
 
 const validQuery =
-  "/map/places?city=Berlin&swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700";
+  "/v1/map/places?city=Berlin&swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700";
 
 describe("map routes", () => {
   it("returns map places for a valid bbox query", async () => {
@@ -59,7 +59,7 @@ describe("map routes", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: "/map/places?city=Berlin"
+      url: "/v1/map/places?city=Berlin"
     });
 
     await app.close();
@@ -72,7 +72,7 @@ describe("map routes", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: "/map/places?city=Berlin&swLat=52.5600&swLng=13.3300&neLat=52.4800&neLng=13.4700"
+      url: "/v1/map/places?city=Berlin&swLat=52.5600&swLng=13.3300&neLat=52.4800&neLng=13.4700"
     });
 
     await app.close();
@@ -134,5 +134,18 @@ describe("map routes", () => {
     expect(response.json()).toEqual({
       status: "error"
     });
+  });
+
+  it("does not expose unversioned map routes", async () => {
+    const app = await buildApp();
+
+    const response = await app.inject({
+      method: "GET",
+      url: "/map/places"
+    });
+
+    await app.close();
+
+    expect(response.statusCode).toBe(404);
   });
 });

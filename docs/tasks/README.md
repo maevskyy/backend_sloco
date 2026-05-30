@@ -14,6 +14,7 @@ Task files live here as `TASKS_N_NAME.md`.
 - `TASKS_6_POLISHED_LOGS.md` - structured backend logging.
 - `TASKS_7_GRAFANA_DASHBOARD_LOGS.md` - Grafana logs dashboard.
 - `TASKS_8_REPO_REFACTORING.md` - repo structure cleanup plan.
+- `TASKS_9_SWAGGER.md` - Swagger/OpenAPI contract for frontend.
 
 ## Naming Rule
 

@@ -106,7 +106,7 @@ jobs:
             docker image prune -f
 
             for attempt in $(seq 1 12); do
-              if curl --fail --silent --show-error http://127.0.0.1:3000/health; then
+              if curl --fail --silent --show-error http://127.0.0.1:3000/v1/health; then
                 exit 0
               fi
 
@@ -121,7 +121,7 @@ jobs:
       - name: Healthcheck
         run: |
           for attempt in $(seq 1 12); do
-            if curl --fail --silent --show-error "${{ secrets.PRODUCTION_API_URL }}/health"; then
+            if curl --fail --silent --show-error "${{ secrets.PRODUCTION_API_URL }}/v1/health"; then
               exit 0
             fi
 
@@ -129,5 +129,5 @@ jobs:
             sleep 5
           done
 
-          curl --verbose "${{ secrets.PRODUCTION_API_URL }}/health"
+          curl --verbose "${{ secrets.PRODUCTION_API_URL }}/v1/health"
           exit 1

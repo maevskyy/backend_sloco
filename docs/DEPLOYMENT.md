@@ -94,7 +94,7 @@ Useful Grafana Loki queries:
 ```
 
 ```logql
-{service="backend"} | json | path = "/map/places"
+{service="backend"} | json | path = "/v1/map/places"
 ```
 
 ```logql

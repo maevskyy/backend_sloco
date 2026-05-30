@@ -104,9 +104,9 @@ http://52.18.13.69
 Useful checks:
 
 ```bash
-curl http://52.18.13.69/health
-curl http://52.18.13.69/health/supabase
-curl "http://52.18.13.69/map/places?city=Berlin&swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700&limit=100"
+curl http://52.18.13.69/v1/health
+curl http://52.18.13.69/v1/health/supabase
+curl "http://52.18.13.69/v1/map/places?city=Berlin&swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700&limit=100"
 ```
 
 ## Important API
@@ -114,12 +114,13 @@ curl "http://52.18.13.69/map/places?city=Berlin&swLat=52.4800&swLng=13.3300&neLa
 Current frontend-facing map endpoint:
 
 ```http
-GET /map/places?city=Berlin&swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700&limit=100
+GET /v1/map/places?city=Berlin&swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700&limit=100
 ```
 
 Contract docs:
 
 ```text
+http://52.18.13.69/v1/swagger/openapi.json
 docs/FRONTEND_MAP_API.md
 ```
 

@@ -23,13 +23,13 @@ Current production is HTTP-only. HTTPS will be added later when we attach a doma
 Backend health:
 
 ```http
-GET /health
+GET /v1/health
 ```
 
 Example:
 
 ```bash
-curl http://52.18.13.69/health
+curl http://52.18.13.69/v1/health
 ```
 
 Expected response:
@@ -43,13 +43,13 @@ Expected response:
 Supabase/database health:
 
 ```http
-GET /health/supabase
+GET /v1/health/supabase
 ```
 
 Example:
 
 ```bash
-curl http://52.18.13.69/health/supabase
+curl http://52.18.13.69/v1/health/supabase
 ```
 
 Expected response:
@@ -60,18 +60,35 @@ Expected response:
 }
 ```
 
+## OpenAPI Contract
+
+Frontend agents should read this contract before generating models or API
+clients:
+
+```text
+http://52.18.13.69/v1/swagger/openapi.json
+```
+
+Human Swagger UI:
+
+```text
+http://52.18.13.69/v1/swagger/docs
+```
+
+Use OpenAPI as the source of truth if this Markdown doc ever drifts.
+
 ## Map Places Endpoint
 
 Use this endpoint when the map opens or when the visible map region changes.
 
 ```http
-GET /map/places
+GET /v1/map/places
 ```
 
 Example:
 
 ```bash
-curl "http://52.18.13.69/map/places?city=Berlin&swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700&limit=100"
+curl "http://52.18.13.69/v1/map/places?city=Berlin&swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700&limit=100"
 ```
 
 ## Query Parameters
@@ -182,7 +199,7 @@ struct MapPlace: Decodable, Identifiable {
 
 ```swift
 func fetchMapPlaces() async throws -> [MapPlace] {
-    var components = URLComponents(string: "http://52.18.13.69/map/places")!
+    var components = URLComponents(string: "http://52.18.13.69/v1/map/places")!
     components.queryItems = [
         URLQueryItem(name: "city", value: "Berlin"),
         URLQueryItem(name: "swLat", value: "52.4800"),
@@ -219,7 +236,7 @@ Frontend flow:
    neLng
    ```
 
-4. iOS calls `GET /map/places`.
+4. iOS calls `GET /v1/map/places`.
 5. iOS renders one pin per item using:
 
    ```text
@@ -285,6 +302,5 @@ Example response:
 Open this in a browser or use curl:
 
 ```text
-http://52.18.13.69/map/places?city=Berlin&swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700&limit=100
+http://52.18.13.69/v1/map/places?city=Berlin&swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700&limit=100
 ```
-

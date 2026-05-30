@@ -142,7 +142,7 @@
             "uid": "${DS_LOKI}"
           },
           "editorMode": "code",
-          "expr": "{service=\"backend\"} | json | path = \"/map/places\"",
+          "expr": "{service=\"backend\"} | json | path = \"/v1/map/places\"",
           "queryType": "range",
           "refId": "A"
         }
@@ -179,7 +179,7 @@
             "uid": "${DS_LOKI}"
           },
           "editorMode": "code",
-          "expr": "{service=\"backend\"} | json | path =~ \"/health.*\"",
+          "expr": "{service=\"backend\"} | json | path =~ \"/v1/health.*\"",
           "queryType": "range",
           "refId": "A"
         }

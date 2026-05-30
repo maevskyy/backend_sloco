@@ -32,6 +32,16 @@ This folder is the main navigation point for backend documentation.
 
 ## API Docs
 
+- Swagger UI:
+  ```text
+  http://52.18.13.69/v1/swagger/docs
+  ```
+
+- OpenAPI JSON for frontend agents:
+  ```text
+  http://52.18.13.69/v1/swagger/openapi.json
+  ```
+
 - Frontend map endpoint contract:
   ```text
   FRONTEND_MAP_API.md
@@ -40,8 +50,8 @@ This folder is the main navigation point for backend documentation.
 Current note:
 
 - Markdown API docs are usage docs.
-- Future Swagger/OpenAPI should be generated from route schemas, not maintained
-  as a separate hand-written source of truth.
+- Swagger/OpenAPI is generated from route schemas, not maintained as a separate
+  hand-written source of truth.
 
 ## Operations Docs
 

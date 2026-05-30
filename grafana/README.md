@@ -51,8 +51,8 @@ When dashboard JSON changes:
 Example traffic:
 
 ```bash
-curl http://52.18.13.69/health
-curl "http://52.18.13.69/map/places?city=Berlin&swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700&limit=100"
+curl http://52.18.13.69/v1/health
+curl "http://52.18.13.69/v1/map/places?city=Berlin&swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700&limit=100"
 ```
 
 ## Safety Rules

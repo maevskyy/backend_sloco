@@ -7,7 +7,7 @@ describe("health routes", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: "/health"
+      url: "/v1/health"
     });
 
     await app.close();
@@ -25,7 +25,7 @@ describe("health routes", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: "/health/supabase"
+      url: "/v1/health/supabase"
     });
 
     await app.close();
@@ -45,7 +45,7 @@ describe("health routes", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: "/health/supabase"
+      url: "/v1/health/supabase"
     });
 
     await app.close();
@@ -54,5 +54,18 @@ describe("health routes", () => {
     expect(response.json()).toEqual({
       status: "error"
     });
+  });
+
+  it("does not expose unversioned health routes", async () => {
+    const app = await buildApp();
+
+    const response = await app.inject({
+      method: "GET",
+      url: "/health"
+    });
+
+    await app.close();
+
+    expect(response.statusCode).toBe(404);
   });
 });

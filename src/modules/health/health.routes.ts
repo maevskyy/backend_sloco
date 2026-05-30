@@ -1,5 +1,9 @@
 import type { FastifyInstance } from "fastify";
 import { checkSupabaseConnection } from "../../lib/supabase.js";
+import {
+  healthRouteSchema,
+  supabaseHealthRouteSchema
+} from "./health.openapi.js";
 
 type HealthRoutesOptions = {
   supabaseHealthCheck?: () => Promise<void>;
@@ -12,23 +16,35 @@ export async function registerHealthRoutes(
   const supabaseHealthCheck =
     options.supabaseHealthCheck ?? checkSupabaseConnection;
 
-  app.get("/health", async () => ({
-    status: "ok"
-  }));
+  app.get(
+    "/health",
+    {
+      schema: healthRouteSchema
+    },
+    async () => ({
+      status: "ok"
+    })
+  );
 
-  app.get("/health/supabase", async (request, reply) => {
-    try {
-      await supabaseHealthCheck();
+  app.get(
+    "/health/supabase",
+    {
+      schema: supabaseHealthRouteSchema
+    },
+    async (request, reply) => {
+      try {
+        await supabaseHealthCheck();
 
-      return {
-        status: "ok"
-      };
-    } catch (error) {
-      request.log.error(error);
+        return {
+          status: "ok"
+        };
+      } catch (error) {
+        request.log.error(error);
 
-      return reply.code(500).send({
-        status: "error"
-      });
+        return reply.code(500).send({
+          status: "error"
+        });
+      }
     }
-  });
+  );
 }
