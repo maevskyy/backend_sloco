@@ -6,13 +6,26 @@ This folder stores Grafana dashboard-as-code files for the backend.
 
 ```text
 dashboards/backend-logs.json
+dashboards/server-metrics.json
 ```
 
 Purpose:
 
-- view backend logs from Grafana Cloud Loki;
-- show live logs, request/response logs, map endpoint logs, healthchecks,
-  errors, bad requests, and slow requests.
+- `backend-logs.json` (Loki): view backend logs from Grafana Cloud Loki — live
+  logs, request/response logs, map endpoint logs, healthchecks, errors, bad
+  requests, and slow requests.
+- `server-metrics.json` (Prometheus): host and backend container metrics — CPU
+  per core, load, RAM/swap, disk, network, and container CPU/memory/restarts.
+
+## Datasource Per Dashboard
+
+Each dashboard prompts for a datasource at import time:
+
+- `backend-logs.json` -> Loki (`grafanacloud-maevskyy-logs`).
+- `server-metrics.json` -> Prometheus (`grafanacloud-maevskyy-prom`).
+
+The metrics dashboard needs the Alloy metrics pipeline running on the host. See
+`docs/tasks/TASKS_10_SERVER_METRICS.md` for the server-side Alloy setup.
 
 ## Import Flow
 

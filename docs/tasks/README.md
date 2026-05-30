@@ -15,6 +15,7 @@ Task files live here as `TASKS_N_NAME.md`.
 - `TASKS_7_GRAFANA_DASHBOARD_LOGS.md` - Grafana logs dashboard.
 - `TASKS_8_REPO_REFACTORING.md` - repo structure cleanup plan.
 - `TASKS_9_SWAGGER.md` - Swagger/OpenAPI contract for frontend.
+- `TASKS_10_SERVER_METRICS.md` - server and backend container metrics dashboard.
 
 ## TBD Backlog
 
