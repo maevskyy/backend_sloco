@@ -16,6 +16,10 @@ Task files live here as `TASKS_N_NAME.md`.
 - `TASKS_8_REPO_REFACTORING.md` - repo structure cleanup plan.
 - `TASKS_9_SWAGGER.md` - Swagger/OpenAPI contract for frontend.
 
+## TBD Backlog
+
+- `TBD_DOMAIN_HTTPS_NGINX_HARDENING.md` - future domain, HTTPS, and Nginx hardening.
+
 ## Naming Rule
 
 New task files should use:
