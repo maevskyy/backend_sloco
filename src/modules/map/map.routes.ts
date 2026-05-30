@@ -16,7 +16,25 @@ export async function registerMapRoutes(
   app.get("/map/places", async (request, reply) => {
     try {
       const query = mapPlacesQuerySchema.parse(request.query);
-      return await mapPlacesService(query);
+      const result = await mapPlacesService(query);
+
+      request.log.info(
+        {
+          path: "/map/places",
+          city: query.city,
+          limit: query.limit,
+          placesCount: result.places.length,
+          bbox: {
+            swLat: query.swLat,
+            swLng: query.swLng,
+            neLat: query.neLat,
+            neLng: query.neLng
+          }
+        },
+        "map places response"
+      );
+
+      return result;
     } catch (error) {
       if (error instanceof ZodError) {
         return reply.code(400).send({
