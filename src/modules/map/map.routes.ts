@@ -1,5 +1,11 @@
 import type { FastifyInstance } from "fastify";
 import { ZodError } from "zod";
+import {
+  LogEvent,
+  LogEventType,
+  LogMessagePrefix
+} from "../../config/log-events.js";
+import { AppRoute, VersionedAppRoute } from "../../config/routes.js";
 import { mapPlacesRouteSchema } from "./map.openapi.js";
 import { mapPlacesQuerySchema } from "./map.schemas.js";
 import { getMapPlaces, type MapPlacesService } from "./map.service.js";
@@ -15,7 +21,7 @@ export async function registerMapRoutes(
   const mapPlacesService = options.mapPlacesService ?? getMapPlaces;
 
   app.get(
-    "/map/places",
+    AppRoute.MapPlaces,
     {
       schema: mapPlacesRouteSchema,
       validatorCompiler: () => () => true
@@ -27,9 +33,9 @@ export async function registerMapRoutes(
 
         request.log.info(
           {
-            eventType: "response",
-            event: "response summary",
-            path: "/v1/map/places",
+            eventType: LogEventType.Response,
+            event: LogEvent.ResponseSummary,
+            path: VersionedAppRoute.mapPlaces,
             city: query.city,
             limit: query.limit,
             placesCount: result.places.length,
@@ -40,7 +46,7 @@ export async function registerMapRoutes(
               neLng: query.neLng
             }
           },
-          `RESPONSE /v1/map/places ${result.places.length} places`
+          `${LogMessagePrefix.Response} ${VersionedAppRoute.mapPlaces} ${result.places.length} places`
         );
 
         return result;

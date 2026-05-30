@@ -1,4 +1,5 @@
 import type { FastifyInstance } from "fastify";
+import { AppRoute } from "../../config/routes.js";
 import { checkSupabaseConnection } from "../../lib/supabase.js";
 import {
   healthRouteSchema,
@@ -17,7 +18,7 @@ export async function registerHealthRoutes(
     options.supabaseHealthCheck ?? checkSupabaseConnection;
 
   app.get(
-    "/health",
+    AppRoute.Health,
     {
       schema: healthRouteSchema
     },
@@ -27,7 +28,7 @@ export async function registerHealthRoutes(
   );
 
   app.get(
-    "/health/supabase",
+    AppRoute.SupabaseHealth,
     {
       schema: supabaseHealthRouteSchema
     },

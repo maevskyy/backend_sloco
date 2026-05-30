@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { buildApp } from "../../app.js";
+import { AppRoute, VersionedAppRoute } from "../../config/routes.js";
 import type { MapPlacesService } from "./map.service.js";
 
 const validQuery =
-  "/v1/map/places?city=Berlin&swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700";
+  `${VersionedAppRoute.mapPlaces}?city=Berlin&swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700`;
 
 describe("map routes", () => {
   it("returns map places for a valid bbox query", async () => {
@@ -59,7 +60,7 @@ describe("map routes", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: "/v1/map/places?city=Berlin"
+      url: `${VersionedAppRoute.mapPlaces}?city=Berlin`
     });
 
     await app.close();
@@ -72,7 +73,7 @@ describe("map routes", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: "/v1/map/places?city=Berlin&swLat=52.5600&swLng=13.3300&neLat=52.4800&neLng=13.4700"
+      url: `${VersionedAppRoute.mapPlaces}?city=Berlin&swLat=52.5600&swLng=13.3300&neLat=52.4800&neLng=13.4700`
     });
 
     await app.close();
@@ -141,7 +142,7 @@ describe("map routes", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: "/map/places"
+      url: AppRoute.MapPlaces
     });
 
     await app.close();

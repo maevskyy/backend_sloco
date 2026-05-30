@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { buildApp } from "../../app.js";
+import { AppRoute, VersionedAppRoute } from "../../config/routes.js";
 
 describe("health routes", () => {
   it("returns ok status", async () => {
@@ -7,7 +8,7 @@ describe("health routes", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: "/v1/health"
+      url: VersionedAppRoute.health
     });
 
     await app.close();
@@ -25,7 +26,7 @@ describe("health routes", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: "/v1/health/supabase"
+      url: VersionedAppRoute.supabaseHealth
     });
 
     await app.close();
@@ -45,7 +46,7 @@ describe("health routes", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: "/v1/health/supabase"
+      url: VersionedAppRoute.supabaseHealth
     });
 
     await app.close();
@@ -61,7 +62,7 @@ describe("health routes", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: "/health"
+      url: AppRoute.Health
     });
 
     await app.close();

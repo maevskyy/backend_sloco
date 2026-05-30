@@ -11,6 +11,7 @@ import {
   mapPlacesResponseSchema,
   validationErrorResponseSchema
 } from "../modules/map/map.openapi.js";
+import { VersionedAppRoute } from "./routes.js";
 
 type AppWithSwagger = FastifyInstance & {
   swagger: () => unknown;
@@ -60,7 +61,7 @@ export async function registerSwaggerDocs(app: FastifyInstance) {
   });
 
   await app.register(swaggerUi, {
-    routePrefix: "/v1/swagger/docs",
+    routePrefix: VersionedAppRoute.swaggerDocs,
     uiConfig: {
       deepLinking: true,
       docExpansion: "list"
@@ -69,7 +70,7 @@ export async function registerSwaggerDocs(app: FastifyInstance) {
   });
 
   app.get(
-    "/v1/swagger/openapi.json",
+    VersionedAppRoute.swaggerOpenApiJson,
     {
       schema: {
         hide: true

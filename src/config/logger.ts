@@ -3,6 +3,11 @@ import type {
   FastifyRequest,
   FastifyServerOptions
 } from "fastify";
+import {
+  LogEvent,
+  LogEventType,
+  LogMessagePrefix
+} from "./log-events.js";
 
 type NodeEnv = "development" | "test" | "production";
 
@@ -66,12 +71,12 @@ export function logRequestCompletion(
   const statusCode = reply.statusCode;
   const responseTimeMs = Math.round(reply.elapsedTime);
   const level = getRequestLogLevel(statusCode);
-  const message = `REQUEST ${request.method} ${path} ${statusCode} ${responseTimeMs}ms`;
+  const message = `${LogMessagePrefix.Request} ${request.method} ${path} ${statusCode} ${responseTimeMs}ms`;
 
   request.log[level](
     {
-      eventType: "request",
-      event: "request completed",
+      eventType: LogEventType.Request,
+      event: LogEvent.RequestCompleted,
       method: request.method,
       url: request.url,
       path,

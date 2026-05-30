@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { buildApp } from "../app.js";
+import { VersionedAppRoute } from "./routes.js";
 
 describe("swagger docs", () => {
   it("serves Swagger UI under the v1 swagger namespace", async () => {
@@ -7,7 +8,7 @@ describe("swagger docs", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: "/v1/swagger/docs"
+      url: VersionedAppRoute.swaggerDocs
     });
 
     await app.close();
@@ -20,7 +21,7 @@ describe("swagger docs", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: "/v1/swagger/openapi.json"
+      url: VersionedAppRoute.swaggerOpenApiJson
     });
 
     await app.close();
@@ -30,9 +31,9 @@ describe("swagger docs", () => {
     const openApi = response.json();
     expect(openApi.openapi).toBeDefined();
     expect(openApi.info.title).toBe("Sloco Backend API");
-    expect(openApi.paths["/v1/health"]).toBeDefined();
-    expect(openApi.paths["/v1/health/supabase"]).toBeDefined();
-    expect(openApi.paths["/v1/map/places"]).toBeDefined();
+    expect(openApi.paths[VersionedAppRoute.health]).toBeDefined();
+    expect(openApi.paths[VersionedAppRoute.supabaseHealth]).toBeDefined();
+    expect(openApi.paths[VersionedAppRoute.mapPlaces]).toBeDefined();
     expect(openApi.components.schemas.MapPlace).toBeDefined();
     expect(openApi.components.schemas.MapPlacesResponse).toBeDefined();
   });
