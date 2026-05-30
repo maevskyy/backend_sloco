@@ -47,6 +47,56 @@ http://127.0.0.1:3000
 
 Add HTTPS with Certbot after a domain is ready.
 
+## Logs
+
+Production logs are written by the backend container to stdout/stderr.
+
+On the server, Docker log rotation should be enabled in:
+
+```text
+/opt/backend_sloco/docker-compose.yml
+```
+
+Expected logging config:
+
+```yaml
+logging:
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+```
+
+This keeps local Docker logs bounded to roughly 30 MB for the backend
+container.
+
+Grafana Alloy runs on the Lightsail host and ships Docker logs to Grafana Cloud
+Loki.
+
+Useful server commands:
+
+```bash
+cd /opt/backend_sloco
+docker compose logs --tail=100 backend
+docker compose logs -f backend
+sudo systemctl status alloy
+sudo journalctl -u alloy -n 100 --no-pager
+```
+
+Useful Grafana Loki queries:
+
+```logql
+{service="backend"}
+```
+
+```logql
+{service="backend"} | json
+```
+
+```logql
+{service="backend"} | json | msg = "request completed"
+```
+
 ## Manual Deploy Workflow
 
 GitHub Actions workflow:
