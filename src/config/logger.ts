@@ -66,10 +66,12 @@ export function logRequestCompletion(
   const statusCode = reply.statusCode;
   const responseTimeMs = Math.round(reply.elapsedTime);
   const level = getRequestLogLevel(statusCode);
-  const message = `${request.method} ${path} ${statusCode} ${responseTimeMs}ms`;
+  const message = `REQUEST ${request.method} ${path} ${statusCode} ${responseTimeMs}ms`;
 
   request.log[level](
     {
+      eventType: "request",
+      event: "request completed",
       method: request.method,
       url: request.url,
       path,

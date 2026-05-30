@@ -110,7 +110,7 @@
           "refId": "A"
         }
       ],
-      "title": "Request Logs",
+      "title": "Request / Response Logs",
       "type": "logs"
     },
     {

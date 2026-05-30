@@ -20,6 +20,8 @@ export async function registerMapRoutes(
 
       request.log.info(
         {
+          eventType: "response",
+          event: "response summary",
           path: "/map/places",
           city: query.city,
           limit: query.limit,
@@ -31,7 +33,7 @@ export async function registerMapRoutes(
             neLng: query.neLng
           }
         },
-        "map places response"
+        `RESPONSE /map/places ${result.places.length} places`
       );
 
       return result;

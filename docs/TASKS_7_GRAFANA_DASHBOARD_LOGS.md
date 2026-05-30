@@ -72,7 +72,7 @@ The dashboard contains:
   {service="backend"} | json
   ```
 
-- `Request Logs`
+- `Request / Response Logs`
   ```logql
   {service="backend"} | json | path != ""
   ```
