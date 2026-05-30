@@ -81,9 +81,17 @@ export const mapPlacesQuerySchemaOpenApi = {
       type: "integer",
       minimum: 1,
       maximum: 200,
-      default: 100,
-      description: "Max places to return.",
+      description:
+        "Optional user/debug cap. Backend still clamps it against zoom-based density.",
       example: 100
+    },
+    zoom: {
+      type: "integer",
+      minimum: 1,
+      maximum: 22,
+      description:
+        "Frontend map zoom level. Optional. If omitted, density is derived from the bbox span.",
+      example: 13
     }
   }
 } as const;

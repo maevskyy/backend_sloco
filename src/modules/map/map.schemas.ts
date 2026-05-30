@@ -9,7 +9,8 @@ export const mapPlacesQuerySchema = z
     swLng: coordinateSchema,
     neLat: coordinateSchema,
     neLng: coordinateSchema,
-    limit: z.coerce.number().int().positive().max(200).default(100)
+    limit: z.coerce.number().int().positive().max(200).optional(),
+    zoom: z.coerce.number().int().min(1).max(22).optional()
   })
   .refine((query) => query.swLat <= query.neLat, {
     message: "swLat must be less than or equal to neLat",

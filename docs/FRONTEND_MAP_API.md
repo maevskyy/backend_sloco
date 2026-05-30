@@ -88,7 +88,7 @@ GET /v1/map/places
 Example:
 
 ```bash
-curl "http://52.18.13.69/v1/map/places?city=Berlin&swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700&limit=100"
+curl "http://52.18.13.69/v1/map/places?city=Berlin&swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700&zoom=13"
 ```
 
 ## Query Parameters
@@ -106,6 +106,7 @@ neLng
 Optional:
 
 ```text
+zoom
 limit
 ```
 
@@ -118,7 +119,8 @@ Parameters:
 | `swLng` | number | yes | South-west map corner longitude. |
 | `neLat` | number | yes | North-east map corner latitude. |
 | `neLng` | number | yes | North-east map corner longitude. |
-| `limit` | number | no | Max places to return. Default `100`, max `200`. |
+| `zoom` | number | no | Map zoom level (`1`-`22`). Controls how many places the backend returns. If omitted, density is derived from the bbox span. |
+| `limit` | number | no | Optional cap, max `200`. Backend still clamps it against zoom-based density. |
 
 The frontend gets these values from the current visible map rectangle.
 
@@ -130,6 +132,23 @@ swLng=13.3300
 neLat=52.5600
 neLng=13.4700
 ```
+
+## Density And Zoom
+
+The backend, not the frontend, decides how many places to show. Send the current
+map `zoom` and the backend returns a readable number of the best-ranked places
+for that zoom:
+
+| Zoom | Level | Approx. max places |
+| --- | --- | --- |
+| `< 11` | city | 8 |
+| `11-12` | district | 15 |
+| `13-14` | neighborhood | 25 |
+| `>= 15` | street | 40 |
+
+`limit` can only lower this, never raise it: requesting `limit=200` at zoom `13`
+still returns about `25`. If `zoom` is omitted, the backend derives density from
+the bbox span.
 
 ## Response
 
@@ -210,7 +229,7 @@ func fetchMapPlaces() async throws -> [MapPlace] {
         URLQueryItem(name: "swLng", value: "13.3300"),
         URLQueryItem(name: "neLat", value: "52.5600"),
         URLQueryItem(name: "neLng", value: "13.4700"),
-        URLQueryItem(name: "limit", value: "100")
+        URLQueryItem(name: "zoom", value: "13")
     ]
 
     let (data, response) = try await URLSession.shared.data(from: components.url!)
@@ -240,7 +259,9 @@ Frontend flow:
    neLng
    ```
 
-4. iOS calls `GET /v1/map/places`.
+   and reads the current map `zoom` level.
+
+4. iOS calls `GET /v1/map/places` with the bbox and `zoom`.
 5. iOS renders one pin per item using:
 
    ```text
@@ -306,5 +327,5 @@ Example response:
 Open this in a browser or use curl:
 
 ```text
-http://52.18.13.69/v1/map/places?city=Berlin&swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700&limit=100
+http://52.18.13.69/v1/map/places?city=Berlin&swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700&zoom=13
 ```

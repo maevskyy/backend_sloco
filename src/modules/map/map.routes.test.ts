@@ -83,10 +83,10 @@ describe("map routes", () => {
     expect(response.statusCode).toBe(400);
   });
 
-  it("applies the default limit", async () => {
-    let capturedLimit: number | null = null;
+  it("passes the parsed zoom to the service", async () => {
+    let capturedZoom: number | undefined;
     const mapPlacesService: MapPlacesService = async (query) => {
-      capturedLimit = query.limit;
+      capturedZoom = query.zoom;
       return {
         places: []
       };
@@ -97,13 +97,41 @@ describe("map routes", () => {
 
     const response = await app.inject({
       method: "GET",
+      url: `${validQuery}&zoom=13`
+    });
+
+    await app.close();
+
+    expect(response.statusCode).toBe(200);
+    expect(capturedZoom).toBe(13);
+  });
+
+  it("returns 200 when zoom is omitted", async () => {
+    const app = await buildApp({
+      mapPlacesService: async () => ({ places: [] })
+    });
+
+    const response = await app.inject({
+      method: "GET",
       url: validQuery
     });
 
     await app.close();
 
     expect(response.statusCode).toBe(200);
-    expect(capturedLimit).toBe(100);
+  });
+
+  it("returns 400 when zoom is out of range", async () => {
+    const app = await buildApp();
+
+    const response = await app.inject({
+      method: "GET",
+      url: `${validQuery}&zoom=99`
+    });
+
+    await app.close();
+
+    expect(response.statusCode).toBe(400);
   });
 
   it("returns 400 when limit is over 200", async () => {

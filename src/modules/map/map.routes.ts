@@ -37,6 +37,7 @@ export async function registerMapRoutes(
             event: LogEvent.ResponseSummary,
             path: VersionedAppRoute.mapPlaces,
             city: query.city,
+            zoom: query.zoom,
             limit: query.limit,
             placesCount: result.places.length,
             bbox: {

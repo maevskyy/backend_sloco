@@ -1,4 +1,11 @@
 import { getSupabaseClient } from "../../lib/supabase.js";
+import {
+  getCandidateLimit,
+  getDensityLimit,
+  getEffectiveLimit,
+  rankMapPlaces,
+  type MapRankingContext
+} from "./map.ranking.js";
 import type { MapPlacesQuery } from "./map.schemas.js";
 
 export type PlaceRow = {
@@ -40,13 +47,17 @@ export type MapPlacesService = (
 ) => Promise<MapPlacesResult>;
 
 export const getMapPlaces: MapPlacesService = async (query) => {
+  const densityLimit = getDensityLimit(query, query.zoom);
+  const effectiveLimit = getEffectiveLimit(query.limit, densityLimit);
+  const candidateLimit = getCandidateLimit(effectiveLimit);
+
   const { data, error } = await getSupabaseClient().rpc("places_in_bbox", {
     city_filter: query.city,
     sw_lat: query.swLat,
     sw_lng: query.swLng,
     ne_lat: query.neLat,
     ne_lng: query.neLng,
-    result_limit: query.limit
+    result_limit: candidateLimit
   });
 
   if (error) {
@@ -54,9 +65,11 @@ export const getMapPlaces: MapPlacesService = async (query) => {
   }
 
   const rows = (data ?? []) as unknown as PlaceRow[];
+  const context: MapRankingContext = { zoom: query.zoom, city: query.city };
+  const ranked = rankMapPlaces(rows, context, effectiveLimit);
 
   return {
-    places: rows.map(mapPlaceRowToPin)
+    places: ranked.map(mapPlaceRowToPin)
   };
 };
 
