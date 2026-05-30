@@ -1,25 +1,22 @@
 # Deployment
 
-Production runs on AWS Lightsail with Docker Compose and Nginx.
+Production runs on a single Ubuntu host with Docker Compose and Nginx. The host
+is **stateless**: the database is managed Supabase, so the box holds no
+irreplaceable application data.
+
+For standing up a new host from scratch, see
+`docs/tasks/TASKS_15_SERVER_MIGRATION.md`.
 
 ## Server Directory
 
 ```text
-/opt/backend_sloco
+/opt/backend_sloco/docker-compose.yml   (from deploy/docker-compose.production.yml)
+/opt/backend_sloco/.env                  (secrets, created by hand)
 ```
-
-Expected files:
-
-```text
-/opt/backend_sloco/docker-compose.yml
-/opt/backend_sloco/.env
-```
-
-Use `deploy/docker-compose.production.yml` as the production compose template.
 
 ## Environment
 
-Example `/opt/backend_sloco/.env`:
+Create `/opt/backend_sloco/.env` by hand:
 
 ```bash
 NODE_ENV=production
@@ -30,48 +27,25 @@ SUPABASE_URL=
 SUPABASE_SERVICE_ROLE_KEY=
 ```
 
-Do not commit production secrets.
-
-`SUPABASE_SERVICE_ROLE_KEY` must stay server-side only. Do not expose it to the
-iOS app or any public frontend.
+Do not commit production secrets. `SUPABASE_SERVICE_ROLE_KEY` must stay
+server-side only — never expose it to the iOS app or any public frontend.
 
 ## Nginx
 
-Use `deploy/nginx/backend_sloco.conf` as the initial HTTP-only Nginx template.
-
-It proxies public traffic to:
+`deploy/nginx/backend_sloco.conf` is the HTTP-only template, installed to
+`/etc/nginx/sites-available/backend_sloco`. It proxies public traffic to:
 
 ```text
 http://127.0.0.1:3000
 ```
 
-Add HTTPS with Certbot after a domain is ready.
+Add HTTPS with Certbot once a domain is attached
+(`docs/tasks/TBD_DOMAIN_HTTPS_NGINX_HARDENING.md`).
 
 ## Logs
 
-Production logs are written by the backend container to stdout/stderr.
-
-On the server, Docker log rotation should be enabled in:
-
-```text
-/opt/backend_sloco/docker-compose.yml
-```
-
-Expected logging config:
-
-```yaml
-logging:
-  driver: json-file
-  options:
-    max-size: "10m"
-    max-file: "3"
-```
-
-This keeps local Docker logs bounded to roughly 30 MB for the backend
-container.
-
-Grafana Alloy runs on the Lightsail host and ships Docker logs to Grafana Cloud
-Loki.
+Docker log rotation is set in the compose template (`json-file`, `max-size 10m`,
+`max-file 3`), bounding local logs to ~30 MB per container.
 
 Useful server commands:
 
@@ -79,32 +53,7 @@ Useful server commands:
 cd /opt/backend_sloco
 docker compose logs --tail=100 backend
 docker compose logs -f backend
-sudo systemctl status alloy
-sudo journalctl -u alloy -n 100 --no-pager
 ```
-
-Useful Grafana Loki queries:
-
-```logql
-{service="backend"}
-```
-
-```logql
-{service="backend"} | json | path != ""
-```
-
-```logql
-{service="backend"} | json | path = "/v1/map/places"
-```
-
-```logql
-{service="backend"} | json | level = "error"
-```
-
-Request completion logs include `method`, `url`, `path`, `statusCode`,
-`responseTimeMs`, and `reqId`. In production they stay as structured JSON so
-Grafana can filter them; in local development they are colorized with
-`pino-pretty`.
 
 ## Manual Deploy Workflow
 
@@ -114,15 +63,16 @@ GitHub Actions workflow:
 .github/workflows/deploy-production.yml
 ```
 
-It is manual only and accepts a branch, tag, or commit SHA.
+It is manual only (`workflow_dispatch`) and accepts a branch, tag, or commit SHA.
+It builds + pushes the image to GHCR, SSH-deploys to the host, and healthchecks.
 
 Required GitHub repository secrets:
 
 ```text
-LIGHTSAIL_HOST
-LIGHTSAIL_USER
-LIGHTSAIL_SSH_KEY
-PRODUCTION_API_URL
+DEPLOY_HOST          # server IP / host
+DEPLOY_USER          # ssh user (e.g. ubuntu)
+DEPLOY_SSH_KEY       # ssh private key
+PRODUCTION_API_URL   # http://<host> for the remote healthcheck
 ```
 
 Optional if the server must authenticate to pull from GHCR:

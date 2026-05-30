@@ -75,16 +75,16 @@ jobs:
             ${{ steps.image.outputs.sha_tag }}
             ${{ steps.image.outputs.latest_tag }}
 
-      - name: Deploy on Lightsail
+      - name: Deploy on server
         uses: appleboy/ssh-action@v1.2.2
         env:
           BACKEND_IMAGE: ${{ steps.image.outputs.sha_tag }}
           GHCR_USERNAME: ${{ secrets.GHCR_USERNAME }}
           GHCR_READ_TOKEN: ${{ secrets.GHCR_READ_TOKEN }}
         with:
-          host: ${{ secrets.LIGHTSAIL_HOST }}
-          username: ${{ secrets.LIGHTSAIL_USER }}
-          key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
           envs: BACKEND_IMAGE,GHCR_USERNAME,GHCR_READ_TOKEN
           script: |
             set -euo pipefail
