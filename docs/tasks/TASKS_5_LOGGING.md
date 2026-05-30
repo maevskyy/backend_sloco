@@ -230,7 +230,7 @@ pnpm-lock.yaml
 src/app.ts
 deploy/docker-compose.production.yml
 docs/DEPLOYMENT.md
-docs/TASKS_5_LOGGING.md
+docs/tasks/TASKS_5_LOGGING.md
 ```
 
 Optional later:
@@ -261,4 +261,3 @@ generated Docker integration config.
 - Add uptime checks.
 - Add metrics later through Grafana Alloy.
 - Add traces only after the API surface grows.
-

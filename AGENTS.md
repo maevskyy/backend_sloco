@@ -1,304 +1,211 @@
 # AGENTS.md
 
-## Product Context
+Operational guide for agents and contributors working in this backend repo.
 
-This project is an MVP for a personalized city discovery app.
+## Product One-Liner
 
-The product is not a Google Maps competitor. It is a taste-based city discovery assistant.
+Backend API for a taste-based city discovery MVP.
 
-Core promise:
+The product is not a Google Maps competitor. It is a city discovery assistant
+that recommends places based on taste, lifestyle, and favorite-place patterns.
 
-> Help users discover places in a new city that actually fit their taste, lifestyle, energy level, and favorite-place patterns.
-
-The main product feeling to preserve:
-
-> "This app understands what kind of places I would like."
-
-## MVP Scope
-
-Core MVP features:
-
-- City map with recommended places.
-- Taste onboarding.
-- Favorite places input from user's home city.
-- Personalized recommendation layer.
-- Save / wishlist system.
-- Basic place pages.
-- "Why recommended for you" explanation.
-
-Explicitly out of MVP:
-
-- Social network.
-- Comments and reviews.
-- AI chat.
-- Followers.
-- Creator economy.
-- Events platform.
-- Advanced route optimization.
-- Real-time ML personalization.
-- Worldwide coverage.
-- Large auto-generated city graph.
-
-## MVP Geography
-
-Start with 3-4 cities and only central / nomad / social districts.
-
-Candidate cities:
-
-- Berlin
-- Tbilisi
-- Bucharest
-- Kyiv
-
-For initial development, one seeded city is enough.
-
-## Team Responsibilities
-
-- Backend: Node.js service owned by Dimitriy.
-- iOS frontend: Swift app owned by frontend teammate.
-- Analytics / recommendation model: Python service owned by analytics teammate.
-
-Backend should expose a clean API and keep product logic centralized.
-
-## Preferred Backend Stack
-
-Use:
+## Current Stack
 
 - Node.js
 - TypeScript
 - Fastify
-- Supabase PostgreSQL
-- PostGIS for geo queries
-- Zod for validation
+- Zod
+- Supabase Postgres
+- Docker
+- GitHub Actions
+- AWS Lightsail
+- Grafana Cloud Loki
 
-Likely ORM/query options:
+Do not add Redis, Kafka, microservices, or heavy architecture unless there is a
+real bottleneck.
 
-- Prisma for familiar DX.
-- Drizzle if we want SQL-first control.
-
-Do not add Redis/cache/Kafka/microservices for MVP unless there is a concrete bottleneck.
-
-## Architecture Direction
-
-Recommended shape:
+## Repo Map
 
 ```text
-iOS app
-  -> Node/Fastify backend
-    -> Supabase Postgres
-    -> Python scoring service later
+src/        application code
+docs/       documentation and task plans
+deploy/     production deploy templates
+supabase/   database migrations
+grafana/    dashboard JSON and Grafana notes
+dumps/      small sample/import data files
 ```
 
-Supabase is infrastructure: database, auth, storage, PostGIS.
+Start with:
 
-Node backend owns:
+- `README.md`
+- `docs/README.md`
+- `docs/architecture/REPO_STRUCTURE.md`
 
-- API contracts.
-- Taste profile writes.
-- Map places query.
-- Recommendation v0.
-- Save/unsave.
-- "Why recommended" generation.
-- Future integration with Python scoring service.
+## Source Code Shape
 
-Avoid putting core business logic directly in the iOS app or spreading it across Supabase Edge Functions unless needed.
+Keep feature code inside `src/modules/<feature>/`.
 
-## Main Backend Query
+Current module pattern:
 
-The heart of the product is the map refresh endpoint.
-
-Example:
-
-```http
-GET /map/places?cityId=bucharest&swLat=44.403&swLng=26.049&neLat=44.468&neLng=26.150&zoom=13&category=coffee
+```text
+src/modules/map/
+  map.routes.ts
+  map.schemas.ts
+  map.service.ts
+  map.routes.test.ts
 ```
 
-Meaning:
+Use this pattern for new modules:
 
-> Give me personalized place pins for the current visible map rectangle.
-
-Frontend owns:
-
-- Map SDK.
-- Gestures.
-- Camera / viewport.
-- Zoom.
-- Pin rendering.
-- Debounced requests when the map region changes.
-
-Backend owns:
-
-- Which places exist.
-- Which places are inside the viewport.
-- Which places fit the user.
-- Saved state.
-- Match score.
-- Why recommended.
-
-Map endpoint response must be lightweight. Do not return full place detail payloads from the map endpoint.
-
-## Core API Endpoints
-
-Initial endpoints:
-
-```http
-GET /health
-GET /cities
-GET /map/places
-GET /places/:id
-POST /onboarding/taste-profile
-POST /onboarding/favorite-places
-POST /places/:id/save
-DELETE /places/:id/save
-GET /me/saved-places
-POST /places/:id/feedback
-```
-
-For the very first implementation, start with:
-
-```http
-GET /health
-GET /cities
-GET /map/places
-```
-
-Mock data is acceptable before Supabase is wired.
-
-## Map Places Response Shape
-
-Use a compact pin response:
-
-```json
-{
-  "places": [
-    {
-      "id": "place_123",
-      "name": "Quiet Coffee",
-      "latitude": 44.433,
-      "longitude": 26.096,
-      "primaryCategory": "coffee",
-      "vibeTags": ["calm", "specialty_coffee", "work_friendly"],
-      "matchScore": 92,
-      "matchLabel": "Strong match",
-      "whyRecommended": "Because you like calm specialty coffee and work-friendly places.",
-      "isSaved": false,
-      "thumbnailUrl": null
-    }
-  ]
-}
-```
-
-Place details should be fetched separately:
-
-```http
-GET /places/:id
-```
-
-## Database Design Direction
-
-Use Supabase Postgres with PostGIS.
-
-Important design choice:
-
-- Store place coordinates as `location geography(Point, 4326)`.
-- Add a GiST index on `places.location`.
-
-Core MVP tables:
-
-- `profiles`
 - `cities`
 - `places`
-- `place_photos`
-- `categories`
-- `vibe_tags`
-- `place_categories`
-- `place_vibe_tags`
-- `taste_profiles`
-- `taste_profile_categories`
-- `taste_profile_vibe_tags`
-- `favorite_place_inputs`
-- `saved_places`
-- `place_feedback`
+- `onboarding`
+- `saved-places`
+- `recommendations`
 
-Important indexes:
+Add extra files only when needed:
 
-```sql
-create index places_location_idx on places using gist (location);
-create index places_city_id_idx on places (city_id);
-create index places_primary_category_id_idx on places (primary_category_id);
-create unique index saved_places_user_place_idx on saved_places (user_id, place_id);
+- `*.repository.ts` for complex database queries;
+- `*.mapper.ts` for noisy mapping;
+- `*.types.ts` for shared module types;
+- `src/clients/` for external services like the future Python scoring service.
+
+## Commands
+
+Use pnpm.
+
+```bash
+pnpm dev
+pnpm build
+pnpm test
+pnpm lint
+pnpm typecheck
 ```
 
-For very early MVP, latitude/longitude columns are acceptable, but prefer PostGIS from the start because the product is map-first.
+Before finishing backend code changes, run:
 
-## Recommendation V0
+```bash
+pnpm build
+pnpm test
+pnpm lint
+```
 
-Do not build AI magic first.
+Docs-only changes do not need the full test suite unless they touch generated or
+validated artifacts.
 
-Use simple scoring:
+## Current Runtime
 
-- Category match.
-- Vibe tag match.
-- Lifestyle match.
-- Favorite-place-derived hints.
-- Manual curated score.
-- Penalties for mismatch: too noisy, alcohol-heavy, touristy, wrong budget, wrong energy.
+Production:
 
-Main output:
+```text
+http://52.18.13.69
+```
 
-- `matchScore`
-- `matchLabel`
-- `whyRecommended`
+Useful checks:
 
-The explanation is part of the product magic. Treat it as core, not decoration.
+```bash
+curl http://52.18.13.69/health
+curl http://52.18.13.69/health/supabase
+curl "http://52.18.13.69/map/places?city=Berlin&swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700&limit=100"
+```
 
-## Frontend Core Screens
+## Important API
 
-iOS MVP should prioritize:
+Current frontend-facing map endpoint:
 
-- Taste onboarding.
-- Favorite places input.
-- Map home.
-- Place preview bottom sheet.
-- Place details.
-- Saved places.
-- Taste profile edit.
+```http
+GET /map/places?city=Berlin&swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700&limit=100
+```
 
-Important buttons:
+Contract docs:
 
-- Continue
-- Add favorite place
-- Finish
-- Save / Saved
-- Not for me
-- Filters
-- Current location
-- Open in Maps
-- Edit taste
+```text
+docs/FRONTEND_MAP_API.md
+```
 
-## Development Order
+Map endpoint payloads should stay lightweight. Full place details should be a
+separate endpoint later.
 
-Recommended first backend slice:
+## Database
 
-1. Scaffold Fastify + TypeScript.
-2. Add `GET /health`.
-3. Add mock `GET /cities`.
-4. Add mock `GET /map/places`.
-5. Validate query params with Zod.
-6. Add docs for API contract.
-7. Add Supabase schema.
-8. Replace mock places with database query.
-9. Add onboarding endpoints.
-10. Add save/unsave endpoints.
+Supabase is the managed Postgres provider.
 
-## Engineering Principles
+Current staging table:
 
-- Keep MVP narrow and vertical.
-- Prefer product flow over abstract architecture.
-- Keep map payloads small.
-- Keep place details separate from map pins.
-- Use seeded curated data early.
-- Optimize for recommendation relevance, not raw place count.
-- Add caching only after a real bottleneck appears.
-- Keep Python scoring integration behind an adapter so local scoring can be swapped later.
+```text
+public.raw_tripadvisor_restaurants
+```
 
+Migration files:
+
+```text
+supabase/migrations/
+```
+
+Do not commit Supabase service role keys or other secrets.
+
+## Logging And Grafana
+
+Backend logs are structured JSON in production.
+
+Request and response logs should be easy to distinguish:
+
+- request logs use `eventType: "request"` and `REQUEST ...` messages;
+- response summary logs use `eventType: "response"` and `RESPONSE ...`
+  messages.
+
+Grafana dashboard JSON:
+
+```text
+grafana/dashboards/backend-logs.json
+```
+
+Grafana notes:
+
+```text
+grafana/README.md
+```
+
+Do not log large response bodies. Log compact summaries.
+
+## Git Rules
+
+The user commits and pushes manually.
+
+Agents should:
+
+- edit files when asked;
+- run checks when appropriate;
+- suggest a commit message at the end;
+- never commit automatically;
+- never push automatically.
+
+## Documentation Rules
+
+Use:
+
+- `docs/README.md` as the docs index;
+- `docs/tasks/README.md` as the task index;
+- `docs/architecture/REPO_STRUCTURE.md` for "where does this go?";
+- `dumps/README.md` for sample/import data rules;
+- `grafana/README.md` for dashboard import/update rules.
+
+Update `AGENTS.md` only when:
+
+- repo structure changes;
+- commands change;
+- architecture conventions change;
+- repeated agent confusion shows missing context.
+
+Do not update `AGENTS.md` for every small feature.
+
+## Swagger Direction
+
+Swagger/OpenAPI should be a separate task.
+
+Preferred direction:
+
+- keep schemas near modules;
+- avoid hand-written OpenAPI as a second source of truth;
+- expose generated docs locally first;
+- decide production exposure later.

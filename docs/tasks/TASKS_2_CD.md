@@ -342,7 +342,7 @@ Expected repository changes:
 Dockerfile
 .dockerignore
 .github/workflows/deploy-production.yml
-docs/TASKS_2_CD.md
+docs/tasks/TASKS_2_CD.md
 docs/DEPLOYMENT.md
 ```
 
@@ -357,7 +357,7 @@ Do not commit production secrets.
 
 ## Acceptance Criteria
 
-- `TASKS_2_CD.md` exists and documents the CD plan.
+- `docs/tasks/TASKS_2_CD.md` exists and documents the CD plan.
 - Docker image can be built locally.
 - Docker container starts and serves `GET /health`.
 - GHCR image is built and pushed by GitHub Actions.
@@ -379,4 +379,3 @@ Do not commit production secrets.
 - Add basic server monitoring.
 - Add log shipping.
 - Add automated provisioning with Ansible or Terraform.
-
