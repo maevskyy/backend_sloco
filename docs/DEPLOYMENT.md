@@ -90,12 +90,21 @@ Useful Grafana Loki queries:
 ```
 
 ```logql
-{service="backend"} | json
+{service="backend"} | json | path != ""
 ```
 
 ```logql
-{service="backend"} | json | msg = "request completed"
+{service="backend"} | json | path = "/map/places"
 ```
+
+```logql
+{service="backend"} | json | level = "error"
+```
+
+Request completion logs include `method`, `url`, `path`, `statusCode`,
+`responseTimeMs`, and `reqId`. In production they stay as structured JSON so
+Grafana can filter them; in local development they are colorized with
+`pino-pretty`.
 
 ## Manual Deploy Workflow
 
