@@ -25,6 +25,7 @@ Task files live here as `TASKS_N_NAME.md`.
 ## TBD Backlog
 
 - `TBD_DOMAIN_HTTPS_NGINX_HARDENING.md` - future domain, HTTPS, and Nginx hardening.
+- `TBD_SELF_HOST_OBSERVABILITY.md` - future move from Grafana Cloud to self-hosted Grafana, Loki, and Prometheus.
 
 ## Naming Rule
 
