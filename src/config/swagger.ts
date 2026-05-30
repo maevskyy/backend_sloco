@@ -66,7 +66,7 @@ export async function registerSwaggerDocs(app: FastifyInstance) {
       deepLinking: true,
       docExpansion: "list"
     },
-    staticCSP: true
+    staticCSP: false
   });
 
   app.get(
