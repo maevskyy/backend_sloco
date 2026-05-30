@@ -18,7 +18,7 @@ that recommends places based on taste, lifestyle, and favorite-place patterns.
 - Supabase Postgres
 - Docker
 - GitHub Actions
-- AWS Lightsail
+- Hetzner
 - Grafana Cloud Loki
 
 Do not add Redis, Kafka, microservices, or heavy architecture unless there is a
@@ -38,6 +38,7 @@ scripts/    offline ETL and source integration mappers
 
 Start with:
 
+- `docs/CURRENT_STATE.md`
 - `README.md`
 - `docs/README.md`
 - `docs/architecture/REPO_STRUCTURE.md`
@@ -101,15 +102,15 @@ validated artifacts.
 Production:
 
 ```text
-http://52.18.13.69
+http://65.108.142.55
 ```
 
 Useful checks:
 
 ```bash
-curl http://52.18.13.69/v1/health
-curl http://52.18.13.69/v1/health/supabase
-curl "http://52.18.13.69/v1/map/places?swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700&zoom=13"
+curl http://65.108.142.55/v1/health
+curl http://65.108.142.55/v1/health/supabase
+curl "http://65.108.142.55/v1/map/places?swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700&zoom=13"
 ```
 
 ## Important API
@@ -123,7 +124,7 @@ GET /v1/map/places?swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700&zoom=
 Contract docs:
 
 ```text
-http://52.18.13.69/v1/swagger/openapi.json
+http://65.108.142.55/v1/swagger/openapi.json
 docs/FRONTEND_MAP_API.md
 ```
 
@@ -134,7 +135,7 @@ separate endpoint later.
 
 Supabase is the managed Postgres provider.
 
-Current staging table:
+Current serving table:
 
 ```text
 public.places
@@ -189,6 +190,8 @@ Agents should:
 Use:
 
 - `docs/README.md` as the docs index;
+- `docs/CURRENT_STATE.md` as the current project snapshot;
+- `docs/DECISIONS.md` as the compact decision log;
 - `docs/tasks/README.md` as the task index;
 - `docs/architecture/REPO_STRUCTURE.md` for "where does this go?";
 - `dumps/README.md` for sample/import data rules;

@@ -7,7 +7,7 @@ This document describes how the iOS app should request map places from the backe
 Production:
 
 ```text
-http://52.18.13.69
+http://65.108.142.55
 ```
 
 Local development:
@@ -29,7 +29,7 @@ GET /v1/health
 Example:
 
 ```bash
-curl http://52.18.13.69/v1/health
+curl http://65.108.142.55/v1/health
 ```
 
 Expected response:
@@ -49,7 +49,7 @@ GET /v1/health/supabase
 Example:
 
 ```bash
-curl http://52.18.13.69/v1/health/supabase
+curl http://65.108.142.55/v1/health/supabase
 ```
 
 Expected response:
@@ -66,13 +66,13 @@ Frontend agents should read this contract before generating models or API
 clients:
 
 ```text
-http://52.18.13.69/v1/swagger/openapi.json
+http://65.108.142.55/v1/swagger/openapi.json
 ```
 
 Human Swagger UI:
 
 ```text
-http://52.18.13.69/v1/swagger/docs
+http://65.108.142.55/v1/swagger/docs
 ```
 
 Use OpenAPI as the source of truth if this Markdown doc ever drifts.
@@ -88,7 +88,7 @@ GET /v1/map/places
 Example:
 
 ```bash
-curl "http://52.18.13.69/v1/map/places?swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700&zoom=13"
+curl "http://65.108.142.55/v1/map/places?swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700&zoom=13"
 ```
 
 ## Query Parameters
@@ -220,7 +220,7 @@ struct MapPlace: Decodable, Identifiable {
 
 ```swift
 func fetchMapPlaces() async throws -> [MapPlace] {
-    var components = URLComponents(string: "http://52.18.13.69/v1/map/places")!
+    var components = URLComponents(string: "http://65.108.142.55/v1/map/places")!
     components.queryItems = [
         URLQueryItem(name: "swLat", value: "52.4800"),
         URLQueryItem(name: "swLng", value: "13.3300"),
@@ -324,5 +324,5 @@ Example response:
 Open this in a browser or use curl:
 
 ```text
-http://52.18.13.69/v1/map/places?swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700&zoom=13
+http://65.108.142.55/v1/map/places?swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700&zoom=13
 ```

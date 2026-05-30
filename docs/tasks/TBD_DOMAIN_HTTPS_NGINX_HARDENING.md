@@ -34,7 +34,7 @@ Everything else should be handled by Nginx before it reaches the app.
 ## Goals
 
 - Buy or connect a domain.
-- Point `api.<domain>` to the Lightsail server.
+- Point `api.<domain>` to the current Hetzner server.
 - Enable HTTPS with Certbot.
 - Update production API URL in GitHub Actions.
 - Update OpenAPI production server URL.
@@ -44,7 +44,7 @@ Everything else should be handled by Nginx before it reaches the app.
 
 ## Non-Goals
 
-- Do not migrate hosting away from Lightsail.
+- Do not migrate hosting away from the current Hetzner server.
 - Do not add Cloudflare Tunnel yet.
 - Do not add auth yet.
 - Do not add WAF/rate limiting yet.
@@ -92,7 +92,7 @@ Create:
 ```text
 Type: A
 Name: api
-Value: 52.18.13.69
+Value: 65.108.142.55
 TTL: automatic or 300 seconds
 ```
 
@@ -109,10 +109,10 @@ If using Cloudflare DNS, keep the record as DNS-only first.
 
 ## Server Preparation
 
-SSH into Lightsail:
+SSH into the Hetzner server:
 
 ```bash
-ssh -i ~/.ssh/lightsail_backend_sloco ubuntu@52.18.13.69
+ssh <ssh-user>@65.108.142.55
 ```
 
 Check current Nginx:
@@ -126,7 +126,7 @@ Check app:
 
 ```bash
 curl http://127.0.0.1:3000/v1/health
-curl http://52.18.13.69/v1/health
+curl http://65.108.142.55/v1/health
 ```
 
 ## Install Certbot
@@ -263,7 +263,7 @@ PRODUCTION_API_URL
 Change from:
 
 ```text
-http://52.18.13.69
+http://65.108.142.55
 ```
 
 to:
@@ -291,7 +291,7 @@ src/config/swagger.ts
 Change production server from:
 
 ```text
-http://52.18.13.69
+http://65.108.142.55
 ```
 
 to:
@@ -323,7 +323,7 @@ docs/tasks/TASKS_7_GRAFANA_DASHBOARD_LOGS.md
 Replace public examples:
 
 ```text
-http://52.18.13.69
+http://65.108.142.55
 ```
 
 with:
@@ -457,7 +457,7 @@ Generate traffic:
 
 ```bash
 curl https://api.<domain>/v1/health
-curl "https://api.<domain>/v1/map/places?city=Berlin&swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700&limit=100"
+curl "https://api.<domain>/v1/map/places?swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700&zoom=13"
 curl -I https://api.<domain>/.env
 ```
 
@@ -483,7 +483,7 @@ If HTTPS breaks:
 4. Change `PRODUCTION_API_URL` back to:
 
    ```text
-   http://52.18.13.69
+   http://65.108.142.55
    ```
 
 5. Redeploy if needed.
@@ -493,7 +493,7 @@ Do not delete certificates unless they are actively causing Nginx config issues.
 ## Acceptance Criteria
 
 - Domain exists.
-- `api.<domain>` resolves to `52.18.13.69`.
+- `api.<domain>` resolves to `65.108.142.55`.
 - `https://api.<domain>/v1/health` returns `200`.
 - `https://api.<domain>/v1/swagger/docs` loads in browser.
 - `https://api.<domain>/v1/swagger/openapi.json` returns valid OpenAPI JSON.

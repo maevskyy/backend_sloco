@@ -65,8 +65,8 @@ GET /v1/health/supabase
 Production:
 
 ```bash
-curl http://52.18.13.69/v1/health
-curl http://52.18.13.69/v1/health/supabase
+curl http://65.108.142.55/v1/health
+curl http://65.108.142.55/v1/health/supabase
 ```
 
 ## API Contract
@@ -95,6 +95,7 @@ docs/FRONTEND_MAP_API.md
 Start here:
 
 ```text
+docs/CURRENT_STATE.md
 docs/README.md
 ```
 

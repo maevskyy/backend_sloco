@@ -10,10 +10,15 @@ This folder is the main navigation point for backend documentation.
 - Production URL:
 
   ```text
-  http://52.18.13.69
+  http://65.108.142.55
   ```
 
 ## Start Here
+
+- Current project snapshot:
+  ```text
+  CURRENT_STATE.md
+  ```
 
 - Local development and project overview:
   ```text
@@ -30,16 +35,21 @@ This folder is the main navigation point for backend documentation.
   architecture/REPO_STRUCTURE.md
   ```
 
+- Current decision log:
+  ```text
+  DECISIONS.md
+  ```
+
 ## API Docs
 
 - Swagger UI:
   ```text
-  http://52.18.13.69/v1/swagger/docs
+  http://65.108.142.55/v1/swagger/docs
   ```
 
 - OpenAPI JSON for frontend agents:
   ```text
-  http://52.18.13.69/v1/swagger/openapi.json
+  http://65.108.142.55/v1/swagger/openapi.json
   ```
 
 - Frontend map endpoint contract:
@@ -89,6 +99,8 @@ New task docs should also be created in `docs/tasks/`.
 ## Source Of Truth Rules
 
 - Runtime behavior lives in `src/`.
+- Current project truth lives in `CURRENT_STATE.md`.
+- Current durable decisions live in `DECISIONS.md`.
 - API examples and frontend handoff live in docs.
 - Database DDL lives in `supabase/migrations/`.
 - Deployment runtime files live in `deploy/`.
