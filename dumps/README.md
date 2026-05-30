@@ -10,8 +10,20 @@ manual Supabase imports.
   - Used for quick map testing.
 
 - `raw_tripadvisor_restaurants_import.csv`
-  - Supabase import-ready CSV for `raw_tripadvisor_restaurants`.
-  - Column names match the staging table.
+  - TripAdvisor-shaped raw/staging CSV.
+  - Used as input for the TripAdvisor mapper.
+
+- `bucharest_cafes.csv`
+  - OpenStreetMap cafes dump for Bucharest.
+  - Used as input for the OSM mapper.
+
+- `tripadvisor_places.csv`
+  - Generated canonical `public.places` import CSV.
+  - Source: `pnpm map:tripadvisor dumps/raw_tripadvisor_restaurants_import.csv --out dumps/tripadvisor_places.csv`.
+
+- `osm_bucharest_places.csv`
+  - Generated canonical `public.places` import CSV.
+  - Source: `pnpm map:osm dumps/bucharest_cafes.csv --out dumps/osm_bucharest_places.csv`.
 
 ## Rules
 
@@ -31,6 +43,8 @@ If large data files start appearing here, add a local `.gitignore` such as:
 *.csv
 !sample_with_coordinates.csv
 !raw_tripadvisor_restaurants_import.csv
+!bucharest_cafes.csv
+!*_places.csv
 !README.md
 ```
 

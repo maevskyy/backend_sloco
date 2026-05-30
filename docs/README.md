@@ -94,4 +94,5 @@ New task docs should also be created in `docs/tasks/`.
 - Deployment runtime files live in `deploy/`.
 - Grafana dashboard JSON lives in `grafana/dashboards/`.
 - Data import files live in `dumps/`.
+- Offline ETL and source mappers live in `scripts/`.
 - Product and agent conventions live in `AGENTS.md`.

@@ -33,6 +33,7 @@ deploy/     production deploy templates
 supabase/   database migrations
 grafana/    dashboard JSON and Grafana notes
 dumps/      small sample/import data files
+scripts/    offline ETL and source integration mappers
 ```
 
 Start with:
@@ -80,6 +81,8 @@ pnpm build
 pnpm test
 pnpm lint
 pnpm typecheck
+pnpm map:tripadvisor dumps/raw_tripadvisor_restaurants_import.csv --out dumps/tripadvisor_places.csv
+pnpm map:osm dumps/bucharest_cafes.csv --out dumps/osm_bucharest_places.csv
 ```
 
 Before finishing backend code changes, run:
@@ -134,7 +137,7 @@ Supabase is the managed Postgres provider.
 Current staging table:
 
 ```text
-public.raw_tripadvisor_restaurants
+public.places
 ```
 
 Migration files:

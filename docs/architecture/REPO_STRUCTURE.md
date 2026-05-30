@@ -11,6 +11,7 @@ deploy/     production deploy templates and nginx config
 supabase/   database migrations and Supabase-owned setup
 grafana/    dashboard-as-code files and Grafana notes
 dumps/      small import/sample data files
+scripts/    offline ETL and source integration mappers
 ```
 
 ## `src/`
@@ -119,6 +120,28 @@ Rules:
 - do not commit private user data;
 - do not commit large raw exports by default;
 - document where a generated dump came from.
+
+## `scripts/`
+
+Offline developer/operator scripts live here.
+
+Current shape:
+
+```text
+scripts/
+  integrations/
+    _shared/
+    tripadvisor/
+    osm/
+```
+
+Rules:
+
+- keep runtime API code in `src/`, not in `scripts/`;
+- one provider mapper per `scripts/integrations/<provider>/`;
+- shared mapper contracts/helpers live in `scripts/integrations/_shared/`;
+- mapper output should match the canonical `public.places` import columns;
+- generated import files go into `dumps/` and should be documented.
 
 ## Swagger / OpenAPI
 
