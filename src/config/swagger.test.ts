@@ -33,7 +33,11 @@ describe("swagger docs", () => {
     expect(openApi.info.title).toBe("Sloco Backend API");
     expect(openApi.paths[VersionedAppRoute.health]).toBeDefined();
     expect(openApi.paths[VersionedAppRoute.supabaseHealth]).toBeDefined();
+    expect(openApi.paths[VersionedAppRoute.me]).toBeDefined();
     expect(openApi.paths[VersionedAppRoute.mapPlaces]).toBeDefined();
+    expect(openApi.components.securitySchemes.bearerAuth).toBeDefined();
+    expect(openApi.components.schemas.MeResponse).toBeDefined();
+    expect(openApi.components.schemas.AuthErrorResponse).toBeDefined();
     expect(openApi.components.schemas.MapPlace).toBeDefined();
     expect(openApi.components.schemas.MapPlacesResponse).toBeDefined();
   });

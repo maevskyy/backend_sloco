@@ -11,6 +11,12 @@ import {
   mapPlacesResponseSchema,
   validationErrorResponseSchema
 } from "../modules/map/map.openapi.js";
+import {
+  authErrorResponseSchema,
+  meProfileSchema,
+  meResponseSchema,
+  meUserSchema
+} from "../modules/me/me.openapi.js";
 import { VersionedAppRoute } from "./routes.js";
 
 type AppWithSwagger = FastifyInstance & {
@@ -21,6 +27,10 @@ export async function registerSwaggerDocs(app: FastifyInstance) {
   app.addSchema(healthStatusResponseSchema);
   app.addSchema(errorResponseSchema);
   app.addSchema(validationErrorResponseSchema);
+  app.addSchema(authErrorResponseSchema);
+  app.addSchema(meUserSchema);
+  app.addSchema(meProfileSchema);
+  app.addSchema(meResponseSchema);
   app.addSchema(mapPlacesQuerySchemaOpenApi);
   app.addSchema(mapPlaceSchema);
   app.addSchema(mapPlacesResponseSchema);
@@ -47,10 +57,23 @@ export async function registerSwaggerDocs(app: FastifyInstance) {
           description: "Production"
         }
       ],
+      components: {
+        securitySchemes: {
+          bearerAuth: {
+            type: "http",
+            scheme: "bearer",
+            bearerFormat: "JWT"
+          }
+        }
+      },
       tags: [
         {
           name: "Health",
           description: "Backend and dependency health checks."
+        },
+        {
+          name: "Me",
+          description: "Authenticated user endpoints."
         },
         {
           name: "Map",

@@ -12,6 +12,7 @@ App runtime: Docker Compose + Nginx
 Deploy: GitHub Actions -> GHCR -> SSH -> docker compose
 Database: Supabase managed Postgres
 Observability: Grafana Cloud + Alloy on the server
+Auth direction: iOS Supabase Auth SDK + backend JWT validation
 ```
 
 The old Lightsail server is deprecated and should only be treated as temporary
@@ -47,6 +48,7 @@ curl "http://65.108.142.55/v1/map/places?swLat=52.4800&swLng=13.3300&neLat=52.56
 ```http
 GET /v1/health
 GET /v1/health/supabase
+GET /v1/me
 GET /v1/map/places?swLat=...&swLng=...&neLat=...&neLng=...&zoom=...
 GET /v1/swagger/docs
 GET /v1/swagger/openapi.json
@@ -68,6 +70,7 @@ docs/FRONTEND_MAP_API.md
 
 ```text
 Serving table: public.places
+Auth profile table: public.profiles
 Geo RPC: public.places_in_bbox(sw_lat, sw_lng, ne_lat, ne_lng, result_limit)
 Migrations: supabase/migrations/
 ```
@@ -97,6 +100,8 @@ OpenStreetMap -> scripts/integrations/osm/map.ts
 - Keep backend deploy simple: one Hetzner host, Docker Compose, managed
   Supabase.
 - Keep map API lightweight: bbox query, density/ranking, no heavy place details.
+- Build auth foundation next: Supabase Auth on iOS, JWT validation on backend,
+  then saves/taste/profile.
 - Keep task docs as history/plans; prefer this file for current context.
 - Do not self-host Postgres during MVP unless there is a real business or cost
   reason.

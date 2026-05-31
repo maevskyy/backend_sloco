@@ -23,6 +23,7 @@ Task files live here as `TASKS_N_NAME.md`.
 | Done | `TASKS_13_MAP_DENSITY_RANKING.md` | Zoom-based map density and ranking. |
 | Done | `TASKS_14_MAP_BBOX_ONLY.md` | Drop required `city`, make the map endpoint bbox-only. |
 | Done | `TASKS_15_SERVER_MIGRATION.md` | Minimal Hetzner deploy migration runbook. |
+| Done | `TASKS_16_SUPABASE_AUTH_FOUNDATION.md` | Supabase Auth JWT validation and `/v1/me` backend foundation. |
 
 ## TBD Backlog
 
