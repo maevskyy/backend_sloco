@@ -1,23 +1,11 @@
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import type { FastifyInstance } from "fastify";
-import {
-  errorResponseSchema,
-  healthStatusResponseSchema
-} from "../modules/health/health.openapi.js";
-import {
-  mapPlaceSchema,
-  mapPlacesQuerySchemaOpenApi,
-  mapPlacesResponseSchema,
-  validationErrorResponseSchema
-} from "../modules/map/map.openapi.js";
-import {
-  authErrorResponseSchema,
-  meProfileSchema,
-  meResponseSchema,
-  meUserSchema
-} from "../modules/me/me.openapi.js";
+import { healthComponentSchemas } from "../modules/health/index.js";
+import { mapComponentSchemas } from "../modules/map/index.js";
+import { meComponentSchemas } from "../modules/me/index.js";
 import { savedPlacesComponentSchemas } from "../modules/saved-places/index.js";
+import { httpErrorComponentSchemas } from "./http-schemas.js";
 import { VersionedAppRoute } from "./routes.js";
 
 type AppWithSwagger = FastifyInstance & {
@@ -25,21 +13,25 @@ type AppWithSwagger = FastifyInstance & {
 };
 
 export async function registerSwaggerDocs(app: FastifyInstance) {
-  app.addSchema(healthStatusResponseSchema);
-  app.addSchema(errorResponseSchema);
-  app.addSchema(validationErrorResponseSchema);
-  app.addSchema(authErrorResponseSchema);
-  app.addSchema(meUserSchema);
-  app.addSchema(meProfileSchema);
-  app.addSchema(meResponseSchema);
+  for (const schema of httpErrorComponentSchemas) {
+    app.addSchema(schema);
+  }
+
+  for (const schema of healthComponentSchemas) {
+    app.addSchema(schema);
+  }
+
+  for (const schema of meComponentSchemas) {
+    app.addSchema(schema);
+  }
 
   for (const schema of savedPlacesComponentSchemas) {
     app.addSchema(schema);
   }
 
-  app.addSchema(mapPlacesQuerySchemaOpenApi);
-  app.addSchema(mapPlaceSchema);
-  app.addSchema(mapPlacesResponseSchema);
+  for (const schema of mapComponentSchemas) {
+    app.addSchema(schema);
+  }
 
   await app.register(swagger, {
     refResolver: {

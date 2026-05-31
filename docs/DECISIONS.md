@@ -16,7 +16,9 @@ of the choices that affect future work.
 | Data imports | Offline mappers + manual Supabase import | Good enough for MVP, keeps provider quirks out of API code. |
 | Auth | iOS Supabase Auth SDK + backend JWT validation | Supabase handles sign up/sign in/session; backend owns product APIs and user-owned data. |
 | Saved places | `public.saved_places`, `public.saved_collections`, and `public.saved_collection_places` via backend-only APIs | Keeps user-owned data private, supports the iOS Saved tab, and turns saved/collection intent into future recommendation signal. |
-| Backend module architecture | Lightweight layered OOP modules: `controller -> service -> store`, with `index.ts` and `<feature>.module.ts` | Easier to scale than flat Fastify files while staying simple; `saved-places` is the reference implementation. |
+| Backend module architecture | Lightweight layered OOP modules: `controller -> service -> store`, with `index.ts` and `<feature>.module.ts`. All product modules (`map`, `me`, `health`, `saved-places`) migrated; `auth` stays a shared service with its DB call in a store. | Easier to scale than flat Fastify files while staying simple; `saved-places` is the reference implementation. |
+| Shared backend code | Split by responsibility — `lib/` adapters, `config/` wiring (incl. `openapi.ts` generator + `http-schemas.ts`), `http/` controller glue. No `shared/`/`utils/` bucket. | Avoids a dumping ground; each piece has an obvious home. |
+| OpenAPI source | zod schemas per module, generated to OpenAPI 3.0 components via `config/openapi.ts` | One source of truth; runtime validation and docs cannot drift. |
 | API contract | Swagger/OpenAPI | Frontend agents can consume generated contract. |
 | Observability | Grafana Cloud + Alloy for now | Fast visibility; self-hosting remains a later cost/control decision. |
 | Git flow | User commits and pushes manually | Agents edit and verify, but do not commit/push. |

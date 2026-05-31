@@ -1,9 +1,6 @@
 import { describe, expect, it } from "vitest";
-import {
-  mapPlaceRowToPin,
-  type PlaceRow,
-  type MapPlacePin
-} from "./map.service.js";
+import { mapPlaceRowToPin } from "../common/map.mappers.js";
+import type { MapPlacePin, PlaceRow } from "../common/map.types.js";
 
 describe("map place row mapper", () => {
   it("maps TripAdvisor rows to map pins", () => {

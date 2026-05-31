@@ -1,30 +1,17 @@
-import { getSupabaseClient } from "../../lib/supabase.js";
+import { AuthStore } from "./stores/auth.store.js";
+import type { AuthService } from "./common/auth.types.js";
 
-export type AuthenticatedUser = {
-  id: string;
-  email: string | null;
-};
+export type {
+  AuthService,
+  AuthenticatedUser,
+  AuthStoreContract
+} from "./common/auth.types.js";
 
-export type AuthService = {
-  getUserFromToken: (token: string) => Promise<AuthenticatedUser | null>;
-};
+// Default auth service: the Supabase Auth store adapter. DB access lives in the
+// store; this module is the shared auth contract used across product modules.
+export const supabaseAuthService: AuthService = new AuthStore();
 
-export const supabaseAuthService: AuthService = {
-  async getUserFromToken(token) {
-    const { data, error } = await getSupabaseClient().auth.getUser(token);
-
-    if (error || !data.user) {
-      return null;
-    }
-
-    return {
-      id: data.user.id,
-      email: data.user.email ?? null
-    };
-  }
-};
-
-export function extractBearerToken(authorization: unknown) {
+export function extractBearerToken(authorization: unknown): string | null {
   if (typeof authorization !== "string") {
     return null;
   }

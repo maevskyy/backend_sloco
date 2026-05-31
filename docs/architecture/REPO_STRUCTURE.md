@@ -24,17 +24,25 @@ Current shape:
 src/
   app.ts
   server.ts
-  config/
-  lib/
-  modules/
+  config/      app wiring: env, logger, routes, swagger, openapi generator, shared HTTP schemas
+  http/        Fastify HTTP glue, module-agnostic
+  lib/         infrastructure adapters (external world)
+  modules/     feature modules
 ```
 
 Rules:
 
 - Feature code goes into `src/modules/<feature>/`.
-- Cross-cutting runtime config goes into `src/config/`.
-- Small infrastructure adapters go into `src/lib/`.
-- Do not create generic `utils/` until there is repeated real usage.
+- Cross-cutting runtime config and wiring goes into `src/config/`
+  (e.g. `config/openapi.ts` generates components from a zod registry;
+  `config/http-schemas.ts` owns shared HTTP error schemas).
+- Reusable Fastify glue every controller repeats goes into `src/http/`
+  (`route.ts` docs-route wrapper, `errors.ts` `handleCommonError`,
+  `auth-guard.ts` `createAuthGuard`, `response-log.ts`).
+- Small infrastructure adapters (things that talk to the outside world, e.g. the
+  Supabase client) go into `src/lib/`. Expand `lib/` only with adapter code.
+- Do not create a generic `utils/` or `shared/` dumping ground. Split reusable
+  code by responsibility (`lib/` adapters, `config/` wiring, `http/` glue).
 
 Module pattern:
 

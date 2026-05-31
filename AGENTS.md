@@ -82,9 +82,18 @@ Layer rules:
 - generate OpenAPI components from schemas where practical;
 - do not import another module's internals when its `index.ts` exports what you need.
 
-Existing flat modules like `map` are legacy/simple modules. When they grow or are
-actively touched for architecture work, migrate them toward the layered pattern
-instead of extending the old flat shape.
+Shared code is split by responsibility — there is no `shared/` or `utils/`
+bucket:
+
+- `src/lib/` — infrastructure adapters only (Supabase client, future clients);
+- `src/config/` — app wiring (env, logger, routes, swagger), plus the
+  `openapi.ts` zod→component generator and `http-schemas.ts` shared error schemas;
+- `src/http/` — Fastify glue every controller reuses (`docsRoute`,
+  `handleCommonError`, `createAuthGuard`, `logResponseSummary`).
+
+All product modules (`map`, `me`, `health`, `saved-places`) now use the layered
+pattern; `auth` stays a shared service (no HTTP) with its DB call in a store.
+New modules should follow the layered pattern from the start.
 
 ## Commands
 

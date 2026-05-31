@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { buildApp } from "../../app.js";
-import { AppRoute, VersionedAppRoute } from "../../config/routes.js";
+import { buildApp } from "../../../app.js";
+import { AppRoute, VersionedAppRoute } from "../../../config/routes.js";
 
 describe("health routes", () => {
   it("returns ok status", async () => {

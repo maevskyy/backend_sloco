@@ -1,4 +1,7 @@
-import { getSupabaseClient } from "../../../lib/supabase.js";
+import {
+  getSupabaseClient,
+  hasPostgresErrorCode
+} from "../../../lib/supabase.js";
 import {
   mapCollectionPlaceRow,
   mapSavedPlaceRow
@@ -388,13 +391,4 @@ function buildCollectionUpdate(input: {
   if (input.sortOrder !== undefined) update.sort_order = input.sortOrder;
 
   return update;
-}
-
-function hasPostgresErrorCode(error: unknown, code: string) {
-  return (
-    typeof error === "object" &&
-    error !== null &&
-    "code" in error &&
-    (error as { code?: unknown }).code === code
-  );
 }

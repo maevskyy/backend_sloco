@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { buildApp } from "../../app.js";
-import { AppRoute, VersionedAppRoute } from "../../config/routes.js";
-import type { AuthService, AuthenticatedUser } from "../auth/auth.service.js";
-import type { SavedPlacesService } from "../saved-places/index.js";
-import type { MapPlacesService } from "./map.service.js";
+import { buildApp } from "../../../app.js";
+import { AppRoute, VersionedAppRoute } from "../../../config/routes.js";
+import type { AuthService, AuthenticatedUser } from "../../auth/auth.service.js";
+import type { SavedPlacesService } from "../../saved-places/index.js";
+import type { MapPlacesService } from "../index.js";
 
 const validQuery =
   `${VersionedAppRoute.mapPlaces}?swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700`;

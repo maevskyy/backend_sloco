@@ -1,21 +1,17 @@
 import type {
   FastifyInstance,
   FastifyReply,
-  FastifyRequest,
-  FastifySchema
+  FastifyRequest
 } from "fastify";
-import { ZodError } from "zod";
-import {
-  LogEvent,
-  LogEventType,
-  LogMessagePrefix
-} from "../../../config/log-events.js";
 import { AppRoute, VersionedAppRoute } from "../../../config/routes.js";
+import type { AuthService, AuthenticatedUser } from "../../auth/auth.service.js";
+import { createAuthGuard, type AuthGuard } from "../../../http/auth-guard.js";
+import { docsRoute } from "../../../http/route.js";
+import { handleCommonError } from "../../../http/errors.js";
 import {
-  extractBearerToken,
-  type AuthService,
-  type AuthenticatedUser
-} from "../../auth/auth.service.js";
+  logResponseSummary,
+  LogMessagePrefix
+} from "../../../http/response-log.js";
 import {
   CollectionPlacesOrderError,
   DefaultSavedCollectionDeleteError,
@@ -25,11 +21,6 @@ import {
 import * as openApi from "../common/saved-places.openapi.js";
 import * as schemas from "../common/saved-places.schemas.js";
 import type { SavedPlacesServiceContract } from "../common/saved-places.types.js";
-
-const unauthorizedResponse = {
-  status: "error",
-  message: "Unauthorized"
-} as const;
 
 const placeNotFoundResponse = {
   status: "error",
@@ -42,57 +33,53 @@ const collectionNotFoundResponse = {
 } as const;
 
 export class SavedPlacesController {
+  private readonly authGuard: AuthGuard;
+
   constructor(
     private readonly service: SavedPlacesServiceContract,
-    private readonly authService: AuthService
-  ) {}
-
-  register(app: FastifyInstance) {
-    app.get(AppRoute.MeSaved, this.route(openApi.getSavedDashboardRouteSchema),
-      this.getSavedDashboard.bind(this));
-    app.get(AppRoute.MeSavedCollection,
-      this.route(openApi.getSavedCollectionRouteSchema),
-      this.getCollectionDetail.bind(this));
-    app.post(AppRoute.MeSavedPlaces, this.route(openApi.savePlaceRouteSchema),
-      this.savePlace.bind(this));
-    app.delete(AppRoute.MeSavedPlace, this.route(openApi.unsavePlaceRouteSchema),
-      this.unsavePlace.bind(this));
-    app.post(AppRoute.MeSavedCollections,
-      this.route(openApi.createCollectionRouteSchema),
-      this.createCollection.bind(this));
-    app.patch(AppRoute.MeSavedCollection,
-      this.route(openApi.updateCollectionRouteSchema),
-      this.updateCollection.bind(this));
-    app.delete(AppRoute.MeSavedCollection,
-      this.route(openApi.deleteCollectionRouteSchema),
-      this.deleteCollection.bind(this));
-    app.post(AppRoute.MeSavedCollectionPlaces,
-      this.route(openApi.addPlaceToCollectionRouteSchema),
-      this.addPlaceToCollection.bind(this));
-    app.delete(AppRoute.MeSavedCollectionPlace,
-      this.route(openApi.removePlaceFromCollectionRouteSchema),
-      this.removePlaceFromCollection.bind(this));
-    app.patch(AppRoute.MeSavedCollectionPlacesOrder,
-      this.route(openApi.reorderCollectionPlacesRouteSchema),
-      this.reorderCollectionPlaces.bind(this));
+    authService: AuthService
+  ) {
+    this.authGuard = createAuthGuard(authService);
   }
 
-  private route(schema: FastifySchema) {
-    return {
-      schema,
-      validatorCompiler: () => () => true
-    };
+  register(app: FastifyInstance) {
+    app.get(AppRoute.MeSaved, docsRoute(openApi.getSavedDashboardRouteSchema),
+      this.getSavedDashboard.bind(this));
+    app.get(AppRoute.MeSavedCollection,
+      docsRoute(openApi.getSavedCollectionRouteSchema),
+      this.getCollectionDetail.bind(this));
+    app.post(AppRoute.MeSavedPlaces, docsRoute(openApi.savePlaceRouteSchema),
+      this.savePlace.bind(this));
+    app.delete(AppRoute.MeSavedPlace, docsRoute(openApi.unsavePlaceRouteSchema),
+      this.unsavePlace.bind(this));
+    app.post(AppRoute.MeSavedCollections,
+      docsRoute(openApi.createCollectionRouteSchema),
+      this.createCollection.bind(this));
+    app.patch(AppRoute.MeSavedCollection,
+      docsRoute(openApi.updateCollectionRouteSchema),
+      this.updateCollection.bind(this));
+    app.delete(AppRoute.MeSavedCollection,
+      docsRoute(openApi.deleteCollectionRouteSchema),
+      this.deleteCollection.bind(this));
+    app.post(AppRoute.MeSavedCollectionPlaces,
+      docsRoute(openApi.addPlaceToCollectionRouteSchema),
+      this.addPlaceToCollection.bind(this));
+    app.delete(AppRoute.MeSavedCollectionPlace,
+      docsRoute(openApi.removePlaceFromCollectionRouteSchema),
+      this.removePlaceFromCollection.bind(this));
+    app.patch(AppRoute.MeSavedCollectionPlacesOrder,
+      docsRoute(openApi.reorderCollectionPlacesRouteSchema),
+      this.reorderCollectionPlaces.bind(this));
   }
 
   private async getSavedDashboard(request: FastifyRequest, reply: FastifyReply) {
     return this.withUser(request, reply, async (user) => {
       const result = await this.service.getSavedDashboard(user.id);
 
-      request.log.info(
+      logResponseSummary(
+        request,
+        VersionedAppRoute.meSaved,
         {
-          eventType: LogEventType.Response,
-          event: LogEvent.ResponseSummary,
-          path: VersionedAppRoute.meSaved,
           savedPlaceCount: result.summary.savedPlaceCount,
           collectionCount: result.summary.collectionCount
         },
@@ -221,7 +208,7 @@ export class SavedPlacesController {
     reply: FastifyReply,
     handler: (user: AuthenticatedUser) => Promise<T>
   ) {
-    const user = await this.requireAuthenticatedUser(request, reply);
+    const user = await this.authGuard.requireUser(request, reply);
 
     if (!user) {
       return reply;
@@ -234,40 +221,11 @@ export class SavedPlacesController {
     }
   }
 
-  private async requireAuthenticatedUser(
-    request: FastifyRequest,
-    reply: FastifyReply
-  ) {
-    const token = extractBearerToken(request.headers.authorization);
-
-    if (!token) {
-      reply.code(401).send(unauthorizedResponse);
-      return null;
-    }
-
-    const user = await this.authService.getUserFromToken(token);
-
-    if (!user) {
-      reply.code(401).send(unauthorizedResponse);
-      return null;
-    }
-
-    return user;
-  }
-
   private handleError(
     request: FastifyRequest,
     reply: FastifyReply,
     error: unknown
   ) {
-    if (error instanceof ZodError) {
-      return reply.code(400).send({
-        status: "error",
-        message: "Invalid saved places request",
-        issues: error.issues
-      });
-    }
-
     if (error instanceof PlaceNotFoundError) {
       return reply.code(404).send(placeNotFoundResponse);
     }
@@ -290,9 +248,12 @@ export class SavedPlacesController {
       });
     }
 
-    request.log.error(error);
-
-    return reply.code(500).send({ status: "error" });
+    return handleCommonError(
+      request,
+      reply,
+      error,
+      "Invalid saved places request"
+    );
   }
 
   private logSavedPlaceResponse(
@@ -300,11 +261,10 @@ export class SavedPlacesController {
     path: string,
     details: { placeId: number; isSaved: boolean; collectionCount: number }
   ) {
-    request.log.info(
+    logResponseSummary(
+      request,
+      path,
       {
-        eventType: LogEventType.Response,
-        event: LogEvent.ResponseSummary,
-        path,
         placeId: details.placeId,
         isSaved: details.isSaved,
         collectionCount: details.collectionCount

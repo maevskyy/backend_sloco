@@ -1,55 +1,19 @@
-import { z } from "zod";
+import { buildComponentSchemas, makeDefineRoute } from "../../../config/openapi.js";
+import { sharedErrorResponses } from "../../../config/http-schemas.js";
 import { savedPlacesSchemaRegistry } from "./saved-places.schemas.js";
 
-// ---------------------------------------------------------------------------
-// OpenAPI components, generated from the zod registry in saved-places.schemas.
-// zod is the single source of truth; nothing here is hand-written JSON Schema.
-// ---------------------------------------------------------------------------
-
-const generated = z.toJSONSchema(savedPlacesSchemaRegistry, {
-  uri: (id) => `${id}#`,
-  unrepresentable: "any", // `.refine()` on update body is not representable
-  target: "openapi-3.0" // matches the 3.0.3 doc emitted by @fastify/swagger
-});
-
-// Normalize for Fastify: `$id` is the bare component name (refs stay `Name#`).
-export const savedPlacesComponentSchemas = Object.entries(generated.schemas).map(
-  ([id, schema]) => ({ ...(schema as Record<string, unknown>), $id: id })
+// OpenAPI components generated from the zod registry. zod is the single source of
+// truth; nothing here is hand-written JSON Schema.
+export const savedPlacesComponentSchemas = buildComponentSchemas(
+  savedPlacesSchemaRegistry
 );
 
-// ---------------------------------------------------------------------------
-// Route schemas. Shared `tags`/`security`/error responses live in one helper
-// so each route is a single readable line.
-// ---------------------------------------------------------------------------
-
-const errorResponses = {
-  400: { $ref: "ValidationErrorResponse#" },
-  401: { $ref: "AuthErrorResponse#" },
-  404: { $ref: "NotFoundResponse#" },
-  409: { $ref: "ErrorResponse#" },
-  500: { $ref: "ErrorResponse#" }
-} as const;
-
-function defineRoute(opts: {
-  summary: string;
-  description?: string;
-  params?: string;
-  body?: string;
-  ok: string;
-}) {
-  return {
-    tags: ["SavedPlaces"],
-    summary: opts.summary,
-    ...(opts.description ? { description: opts.description } : {}),
-    security: [{ bearerAuth: [] }],
-    ...(opts.params ? { params: { $ref: `${opts.params}#` } } : {}),
-    ...(opts.body ? { body: { $ref: `${opts.body}#` } } : {}),
-    response: {
-      200: { $ref: `${opts.ok}#` },
-      ...errorResponses
-    }
-  } as const;
-}
+// Route schemas. The shared `defineRoute` injects tags/security/error responses
+// so each route is a single readable declaration.
+const defineRoute = makeDefineRoute({
+  tag: "SavedPlaces",
+  errorResponses: sharedErrorResponses
+});
 
 export const getSavedDashboardRouteSchema = defineRoute({
   summary: "Get saved dashboard.",

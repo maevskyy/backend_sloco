@@ -129,8 +129,16 @@ Dependency direction:
 controller -> service -> store
 ```
 
-`src/modules/saved-places/` is the reference implementation. Existing flat
-modules like `map` are legacy/simple modules and can be migrated when touched.
+`src/modules/saved-places/` is the reference implementation. All product modules
+(`map`, `me`, `health`, `saved-places`) now use this shape; `auth` stays a shared
+service (no HTTP) with its Supabase call isolated in a store.
+
+Shared code is split by responsibility: `src/lib/` (infrastructure adapters),
+`src/config/` (wiring, plus the `openapi.ts` zod→component generator and
+`http-schemas.ts` shared error schemas), and `src/http/` (controller glue:
+`docsRoute`, `handleCommonError`, `createAuthGuard`, `logResponseSummary`). There
+is no `shared/`/`utils/` bucket. OpenAPI components are generated from zod per
+module, so request validation and docs cannot drift.
 
 ## Current Priorities
 

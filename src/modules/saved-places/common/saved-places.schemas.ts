@@ -162,11 +162,6 @@ export const reorderCollectionPlacesResponseSchema = z.object({
   placeIds: z.array(z.number().int())
 });
 
-export const notFoundResponseSchema = z.object({
-  status: z.literal("error"),
-  message: z.string()
-});
-
 // ---------------------------------------------------------------------------
 // OpenAPI component registry. The `id` becomes the OpenAPI component name and
 // the `$id`/`$ref` used by Fastify. Keep ids stable — they are part of the
@@ -229,7 +224,6 @@ savedPlacesSchemaRegistry.add(removePlaceFromCollectionResponseSchema, {
 savedPlacesSchemaRegistry.add(reorderCollectionPlacesResponseSchema, {
   id: "ReorderCollectionPlacesResponse"
 });
-savedPlacesSchemaRegistry.add(notFoundResponseSchema, { id: "NotFoundResponse" });
 
 export type SavedPlaceParams = z.infer<typeof savedPlaceParamsSchema>;
 export type SavedCollectionParams = z.infer<

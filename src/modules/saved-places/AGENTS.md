@@ -45,8 +45,10 @@ never import outer ones.
 
 - **controllers/** — Fastify only. Auth, `zod.parse()` of request input, mapping
   domain errors → HTTP status codes, response logging. No business logic, no SQL.
-  Each handler runs through `withUser` (auth + try/catch) and `handleError` is the
-  single place errors become HTTP responses.
+  Each handler runs through `withUser` (built on the shared `createAuthGuard` from
+  `src/http/`) and `handleError` is the single place errors become HTTP responses.
+  Shared glue lives in `src/http/` (`docsRoute`, `handleCommonError`,
+  `createAuthGuard`, `logResponseSummary`).
 - **services/** — business logic and orchestration. Pure of HTTP (`Fastify*`) and
   of SQL/Supabase. Talks to the store through the `SavedPlacesStoreContract`
   interface, never the concrete class.
@@ -71,8 +73,10 @@ never import outer ones.
   (`PlaceNotFoundError`, `SavedCollectionNotFoundError`,
   `DefaultSavedCollectionDeleteError`, `CollectionPlacesOrderError`).
 - Services throw them; they carry no HTTP meaning.
-- The **only** place they map to status codes is `controller.handleError`
-  (`ZodError` → 400, not-found → 404, default-delete → 409, …, else 500).
+- The **only** place they map to status codes is `controller.handleError`: it
+  checks the saved-places domain errors (not-found → 404, default-delete → 409,
+  bad order → 400), then delegates the rest to the shared `handleCommonError`
+  from `src/http/` (`ZodError` → 400, else 500).
 
 ## Validation & OpenAPI — zod is the single source of truth
 
@@ -84,13 +88,14 @@ never import outer ones.
   response/request schemas when practical. DB-row types and the `*Contract`
   interfaces stay hand-written because they are not the HTTP contract.
 - `common/saved-places.openapi.ts` **generates** the JSON-Schema components from the
-  registry via `z.toJSONSchema(..., { target: "openapi-3.0" })` and builds route
-  schemas with the `defineRoute` helper (shared `tags`/`security`/error responses).
+  registry via the shared `buildComponentSchemas` (`config/openapi.ts`) and builds
+  route schemas with `makeDefineRoute` (shared `tags`/`security`/error responses,
+  reusing `sharedErrorResponses` from `config/http-schemas.ts`).
   **Never hand-write JSON Schema here.**
 - `config/swagger.ts` registers the components by looping over
   `savedPlacesComponentSchemas`.
-- Gotcha: with `target: "openapi-3.0"`, use `.min(1)` (not `.positive()`) for
-  positive integers — `.positive()` emits a boolean `exclusiveMinimum` that
+- Gotcha: the generator targets `openapi-3.0`, so use `.min(1)` (not `.positive()`)
+  for positive integers — `.positive()` emits a boolean `exclusiveMinimum` that
   Fastify's serializer rejects.
 
 ## Tests

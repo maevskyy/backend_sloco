@@ -22,16 +22,11 @@ export function getSupabaseClient() {
   return supabaseClient;
 }
 
-export async function checkSupabaseConnection() {
-  const { error } = await getSupabaseClient()
-    .from("places")
-    .select("id", {
-      count: "exact",
-      head: true
-    })
-    .limit(1);
-
-  if (error) {
-    throw error;
-  }
+export function hasPostgresErrorCode(error: unknown, code: string) {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    (error as { code?: unknown }).code === code
+  );
 }

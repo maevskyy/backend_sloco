@@ -9,7 +9,7 @@ import {
   scoreMapPlace,
   type MapRankingContext,
   type ScorablePlace
-} from "./map.ranking.js";
+} from "../common/map.ranking.js";
 
 const context: MapRankingContext = {};
 

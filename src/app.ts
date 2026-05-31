@@ -7,16 +7,17 @@ import {
 } from "./config/logger.js";
 import { API_PREFIX } from "./config/routes.js";
 import { registerSwaggerDocs } from "./config/swagger.js";
-import { registerHealthRoutes } from "./modules/health/health.routes.js";
-import { registerMapRoutes } from "./modules/map/map.routes.js";
-import { registerMeRoutes } from "./modules/me/me.routes.js";
+import { registerHealthModule } from "./modules/health/index.js";
+import {
+  registerMapModule,
+  type MapPlacesService
+} from "./modules/map/index.js";
+import { registerMeModule, type MeService } from "./modules/me/index.js";
 import {
   registerSavedPlacesModule,
   type SavedPlacesService
 } from "./modules/saved-places/index.js";
 import type { AuthService } from "./modules/auth/auth.service.js";
-import type { MapPlacesService } from "./modules/map/map.service.js";
-import type { MeService } from "./modules/me/me.service.js";
 
 type AppOptions = {
   supabaseHealthCheck?: () => Promise<void>;
@@ -42,12 +43,12 @@ export async function buildApp(options: AppOptions = {}) {
 
   await registerSwaggerDocs(app);
 
-  await app.register(registerHealthRoutes, {
+  await app.register(registerHealthModule, {
     prefix: API_PREFIX,
     supabaseHealthCheck: options.supabaseHealthCheck
   });
 
-  await app.register(registerMeRoutes, {
+  await app.register(registerMeModule, {
     prefix: API_PREFIX,
     authService: options.authService,
     meService: options.meService
@@ -59,7 +60,7 @@ export async function buildApp(options: AppOptions = {}) {
     savedPlacesService: options.savedPlacesService
   });
 
-  await app.register(registerMapRoutes, {
+  await app.register(registerMapModule, {
     prefix: API_PREFIX,
     mapPlacesService: options.mapPlacesService,
     authService: options.authService,
