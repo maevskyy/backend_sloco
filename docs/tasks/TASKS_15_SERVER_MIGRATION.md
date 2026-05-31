@@ -15,7 +15,7 @@ the container.
 - Self-hosted Grafana, Loki, Prometheus.
 - Grafana Alloy migration.
 - Terraform, Ansible, Kubernetes, k3s, or a provisioning framework.
-- Domain/HTTPS. This remains in `TBD_DOMAIN_HTTPS_NGINX_HARDENING.md`.
+- Domain/HTTPS. This was handled later in `TASKS_20_DOMAIN_HTTPS_NGINX_HARDENING.md`.
 - Multiple servers or load balancing.
 
 ## Current CD Shape

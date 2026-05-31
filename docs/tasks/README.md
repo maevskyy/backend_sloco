@@ -25,12 +25,14 @@ Task files live here as `TASKS_N_NAME.md`.
 | Done | `TASKS_15_SERVER_MIGRATION.md` | Minimal Hetzner deploy migration runbook. |
 | Done | `TASKS_16_SUPABASE_AUTH_FOUNDATION.md` | Supabase Auth JWT validation and `/v1/me` backend foundation. |
 | Done | `TASKS_17_SAVED_PLACES.md` | Saved places + collections frontend contract rework. |
-| Planned | `TASKS_19_MAP_DOT_DENSITY.md` | Increase map density with `featured` and `dot` display tiers. |
 | Done | `TASKS_18_LAYERED_MODULE_MIGRATION.md` | Extracted shared infra (`config/openapi.ts`, `src/http/`, error schemas) and migrated `map`/`me`/`health`/`auth` onto the layered OOP + zod-OpenAPI standard. |
+| Planned | `TASKS_19_MAP_DOT_DENSITY.md` | Increase map density with `featured` and `dot` display tiers. |
+| Done | `TASKS_20_DOMAIN_HTTPS_NGINX_HARDENING.md` | Production domain, HTTPS, and Nginx hardening for `sloco.pp.ua`. |
+| Planned | `TASKS_21_PLACE_PHOTOS_INTEGRATION.md` | Supabase Storage upload and metadata import for place photos. |
+| Planned | `TASKS_22_PLACES_SCHEMA_V2_IMPORT.md` | Replace MVP `places` with enriched `locations.csv` schema and import flow. |
 
 ## TBD Backlog
 
-- `TBD_DOMAIN_HTTPS_NGINX_HARDENING.md` - future domain, HTTPS, and Nginx hardening.
 - `TBD_SELF_HOST_OBSERVABILITY.md` - future move from Grafana Cloud to self-hosted Grafana, Loki, and Prometheus.
 - `TBD_TRACING_LATENCY_BREAKDOWN.md` - future OpenTelemetry tracing for backend, database, and response latency breakdown.
 

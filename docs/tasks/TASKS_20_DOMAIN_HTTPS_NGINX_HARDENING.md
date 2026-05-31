@@ -1,8 +1,8 @@
-# TBD: Domain, HTTPS, and Nginx Hardening
+# TASKS 20: Domain, HTTPS, and Nginx Hardening
 
 ## Summary
 
-Move production API from raw IP + HTTP to a real domain + HTTPS.
+Moved production API from raw IP + HTTP to a real domain + HTTPS.
 
 Also harden Nginx so random internet scans like `/.env`, `/login`, `/wp-admin`,
 and other garbage paths do not reach Fastify and do not pollute backend Grafana
@@ -11,26 +11,27 @@ logs.
 Status:
 
 ```text
-Ready / DNS verified for sloco.pp.ua
+Done / HTTPS enabled for sloco.pp.ua
 ```
 
-The domain is already selected:
+Production domain:
 
 ```text
 sloco.pp.ua
 ```
 
-Before enabling HTTPS, verify that the domain reaches the Hetzner backend:
+Verified production checks:
 
 ```bash
+curl -I https://sloco.pp.ua/v1/health
 curl -I http://sloco.pp.ua/v1/health
 ```
 
 Expected:
 
 ```text
-HTTP/1.1 200 OK
-Server: nginx/1.24.0 (Ubuntu)
+HTTPS: 200 OK
+HTTP: 301 redirect to HTTPS
 ```
 
 Target production shape:
@@ -49,8 +50,7 @@ Everything else should be handled by Nginx before it reaches the app.
 
 ## Goals
 
-- Buy or connect a domain.
-- Point `sloco.pp.ua` to the current Hetzner server.
+- Connect `sloco.pp.ua` to the current Hetzner server.
 - Enable HTTPS with Certbot.
 - Update production API URL in GitHub Actions.
 - Update OpenAPI production server URL.

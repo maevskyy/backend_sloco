@@ -69,3 +69,42 @@ dumps/osm_bucharest_places.csv
 5. Map CSV columns by exact name.
 6. Keep `id`, `geom`, and `created_at` unmapped because the database generates
    them.
+
+## Place Photo Upload
+
+Uploads the exported place photo dataset into Supabase Storage and upserts photo
+metadata into `public.place_photos`.
+
+Source dataset:
+
+```text
+/Users/dimitriymaevskiy/Downloads/backend_dataset_20260531_214446
+```
+
+Before a real upload:
+
+1. Apply `supabase/migrations/008_create_place_photos.sql`.
+2. Make sure `.env` has:
+
+   ```text
+   SUPABASE_URL
+   SUPABASE_SERVICE_ROLE_KEY
+   ```
+
+3. Run a dry run:
+
+   ```bash
+   pnpm photos:upload /Users/dimitriymaevskiy/Downloads/backend_dataset_20260531_214446 --dry-run --limit 100
+   ```
+
+4. Run the first sample upload:
+
+   ```bash
+   pnpm photos:upload /Users/dimitriymaevskiy/Downloads/backend_dataset_20260531_214446 --ensure-bucket --limit 100
+   ```
+
+Full upload, after sample validation:
+
+```bash
+pnpm photos:upload /Users/dimitriymaevskiy/Downloads/backend_dataset_20260531_214446 --ensure-bucket --concurrency 5
+```
