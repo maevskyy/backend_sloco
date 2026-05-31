@@ -17,29 +17,7 @@ import {
   meResponseSchema,
   meUserSchema
 } from "../modules/me/me.openapi.js";
-import {
-  addPlaceToCollectionBodySchemaOpenApi,
-  deleteCollectionResponseSchema,
-  removePlaceFromCollectionResponseSchema,
-  reorderCollectionPlacesBodySchemaOpenApi,
-  reorderCollectionPlacesResponseSchema,
-  savePlaceBodySchemaOpenApi,
-  notFoundResponseSchema,
-  savePlaceResponseSchema,
-  savedCollectionBodySchemaOpenApi,
-  savedCollectionCompactSchema,
-  savedCollectionDetailResponseSchema,
-  savedCollectionDetailSchema,
-  savedCollectionParamsSchemaOpenApi,
-  savedCollectionPlaceParamsSchemaOpenApi,
-  savedCollectionResponseSchema,
-  savedCollectionSchema,
-  savedDashboardResponseSchema,
-  savedPlaceParamsSchemaOpenApi,
-  savedPlaceSummarySchema,
-  unsavePlaceResponseSchema,
-  updateSavedCollectionBodySchemaOpenApi
-} from "../modules/saved-places/saved-places.openapi.js";
+import { savedPlacesComponentSchemas } from "../modules/saved-places/index.js";
 import { VersionedAppRoute } from "./routes.js";
 
 type AppWithSwagger = FastifyInstance & {
@@ -54,27 +32,11 @@ export async function registerSwaggerDocs(app: FastifyInstance) {
   app.addSchema(meUserSchema);
   app.addSchema(meProfileSchema);
   app.addSchema(meResponseSchema);
-  app.addSchema(notFoundResponseSchema);
-  app.addSchema(savedPlaceParamsSchemaOpenApi);
-  app.addSchema(savedCollectionParamsSchemaOpenApi);
-  app.addSchema(savedCollectionPlaceParamsSchemaOpenApi);
-  app.addSchema(savePlaceBodySchemaOpenApi);
-  app.addSchema(savedCollectionBodySchemaOpenApi);
-  app.addSchema(updateSavedCollectionBodySchemaOpenApi);
-  app.addSchema(addPlaceToCollectionBodySchemaOpenApi);
-  app.addSchema(reorderCollectionPlacesBodySchemaOpenApi);
-  app.addSchema(savePlaceResponseSchema);
-  app.addSchema(unsavePlaceResponseSchema);
-  app.addSchema(savedPlaceSummarySchema);
-  app.addSchema(savedCollectionSchema);
-  app.addSchema(savedCollectionDetailSchema);
-  app.addSchema(savedCollectionCompactSchema);
-  app.addSchema(savedDashboardResponseSchema);
-  app.addSchema(savedCollectionDetailResponseSchema);
-  app.addSchema(savedCollectionResponseSchema);
-  app.addSchema(deleteCollectionResponseSchema);
-  app.addSchema(removePlaceFromCollectionResponseSchema);
-  app.addSchema(reorderCollectionPlacesResponseSchema);
+
+  for (const schema of savedPlacesComponentSchemas) {
+    app.addSchema(schema);
+  }
+
   app.addSchema(mapPlacesQuerySchemaOpenApi);
   app.addSchema(mapPlaceSchema);
   app.addSchema(mapPlacesResponseSchema);

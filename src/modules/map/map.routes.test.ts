@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { buildApp } from "../../app.js";
 import { AppRoute, VersionedAppRoute } from "../../config/routes.js";
 import type { AuthService, AuthenticatedUser } from "../auth/auth.service.js";
-import type { SavedPlacesService } from "../saved-places/saved-places.service.js";
+import type { SavedPlacesService } from "../saved-places/index.js";
 import type { MapPlacesService } from "./map.service.js";
 
 const validQuery =

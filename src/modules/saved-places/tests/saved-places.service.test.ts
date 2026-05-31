@@ -7,8 +7,8 @@ import {
   SavedCollectionNotFoundError,
   type SavedCollection,
   type SavedPlaceSummary,
-  type SavedPlacesRepository
-} from "./saved-places.service.js";
+  type SavedPlacesStoreContract
+} from "../index.js";
 
 const userId = "0f70a78a-05f8-45da-81b5-a435fdadf16c";
 const collectionId = "4b572b66-d74d-49bb-b9b5-9780c266c6f7";
@@ -46,8 +46,8 @@ const placeSummary: SavedPlaceSummary = {
 };
 
 function createRepository(
-  overrides: Partial<SavedPlacesRepository> = {}
-): SavedPlacesRepository {
+  overrides: Partial<SavedPlacesStoreContract> = {}
+): SavedPlacesStoreContract {
   return {
     async placeExists() {
       return true;

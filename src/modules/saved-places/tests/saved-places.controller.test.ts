@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { buildApp } from "../../app.js";
-import { VersionedAppRoute } from "../../config/routes.js";
-import type { AuthService, AuthenticatedUser } from "../auth/auth.service.js";
+import { buildApp } from "../../../app.js";
+import { VersionedAppRoute } from "../../../config/routes.js";
+import type { AuthService, AuthenticatedUser } from "../../auth/auth.service.js";
 import {
   DefaultSavedCollectionDeleteError,
   PlaceNotFoundError,
@@ -9,7 +9,7 @@ import {
   type SavedCollection,
   type SavedPlaceSummary,
   type SavedPlacesService
-} from "./saved-places.service.js";
+} from "../index.js";
 
 const authenticatedUser: AuthenticatedUser = {
   id: "0f70a78a-05f8-45da-81b5-a435fdadf16c",

@@ -15,7 +15,7 @@ import {
 import {
   savedPlacesService,
   type SavedPlacesService
-} from "../saved-places/saved-places.service.js";
+} from "../saved-places/index.js";
 import { mapPlacesRouteSchema } from "./map.openapi.js";
 import { mapPlacesQuerySchema } from "./map.schemas.js";
 import {

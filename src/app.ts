@@ -10,11 +10,13 @@ import { registerSwaggerDocs } from "./config/swagger.js";
 import { registerHealthRoutes } from "./modules/health/health.routes.js";
 import { registerMapRoutes } from "./modules/map/map.routes.js";
 import { registerMeRoutes } from "./modules/me/me.routes.js";
-import { registerSavedPlacesRoutes } from "./modules/saved-places/saved-places.routes.js";
+import {
+  registerSavedPlacesModule,
+  type SavedPlacesService
+} from "./modules/saved-places/index.js";
 import type { AuthService } from "./modules/auth/auth.service.js";
 import type { MapPlacesService } from "./modules/map/map.service.js";
 import type { MeService } from "./modules/me/me.service.js";
-import type { SavedPlacesService } from "./modules/saved-places/saved-places.service.js";
 
 type AppOptions = {
   supabaseHealthCheck?: () => Promise<void>;
@@ -51,7 +53,7 @@ export async function buildApp(options: AppOptions = {}) {
     meService: options.meService
   });
 
-  await app.register(registerSavedPlacesRoutes, {
+  await app.register(registerSavedPlacesModule, {
     prefix: API_PREFIX,
     authService: options.authService,
     savedPlacesService: options.savedPlacesService
