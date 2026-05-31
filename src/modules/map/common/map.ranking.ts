@@ -8,6 +8,12 @@ export type ScorablePlace = {
   source_id: string;
   rating: number | null;
   reviews_count: number | null;
+  google_rating?: number | null;
+  google_user_rating_count?: number | null;
+  rating_score_0_100?: number | null;
+  popularity_score_0_100?: number | null;
+  map_visibility_score?: number | null;
+  map_visibility_rank?: number | null;
 };
 
 export type MapViewportBbox = {
@@ -121,14 +127,26 @@ export function scoreMapPlace(
   place: ScorablePlace,
   context: MapRankingContext
 ): number {
-  const ratingScore = place.rating !== null ? place.rating * 10 : 0;
-  const reviews = place.reviews_count ?? 0;
+  const mapVisibilityScore = place.map_visibility_score ?? 0;
+  const ratingScore =
+    place.rating_score_0_100 ??
+    (place.google_rating ?? place.rating ?? 0) * 10;
+  const popularityScore = place.popularity_score_0_100 ?? 0;
+  const reviews = place.google_user_rating_count ?? place.reviews_count ?? 0;
   const reviewsScore =
     reviews > 0 ? Math.min(Math.log10(reviews + 1) * 5, 20) : 0;
-  const sourceScore = place.source === "tripadvisor" ? 5 : 0;
+  const sourceScore = place.source === "google" ? 5 : 0;
   const jitter = stableJitter(place.source_id);
 
-  return ratingScore + reviewsScore + sourceScore + jitter + tasteScore(context);
+  return (
+    mapVisibilityScore * 2 +
+    ratingScore +
+    popularityScore * 0.4 +
+    reviewsScore +
+    sourceScore +
+    jitter +
+    tasteScore(context)
+  );
 }
 
 export function rankMapPlaces<T extends ScorablePlace>(

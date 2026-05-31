@@ -3,7 +3,7 @@ import { buildApp } from "../../../app.js";
 import { AppRoute, VersionedAppRoute } from "../../../config/routes.js";
 import type { AuthService, AuthenticatedUser } from "../../auth/auth.service.js";
 import type { SavedPlacesService } from "../../saved-places/index.js";
-import type { MapPlacesService } from "../index.js";
+import type { MapPlacePin, MapPlacesService } from "../index.js";
 
 const validQuery =
   `${VersionedAppRoute.mapPlaces}?swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700`;
@@ -43,29 +43,99 @@ function createSavedPlacesService(
   } as SavedPlacesService;
 }
 
+function mapPlace(overrides: Partial<MapPlacePin>): MapPlacePin {
+  return {
+    id: 1,
+    source: "google",
+    sourceId: "ChIJ123",
+    name: "Seneca Anticafe",
+    country: "romania",
+    city: "bucharest",
+    category: "cafe",
+    primaryType: "cafe",
+    types: ["cafe", "food"],
+    latitude: 44.43,
+    longitude: 26.1,
+    formattedAddress: "Bucharest",
+    shortFormattedAddress: "Bucharest",
+    businessStatus: "OPERATIONAL",
+    googleMapsUri: "https://maps.google.com/example",
+    phone: "+40 123",
+    internationalPhone: "+40 123",
+    websiteUrl: "https://example.com",
+    rating: 4.8,
+    priceLevel: null,
+    numberOfReviews: 1411,
+    googleRating: 4.8,
+    googleUserRatingCount: 1411,
+    apifyReviewCount: null,
+    apifyRatingAvg: null,
+    ratingCountForScore: 1411,
+    bayesianRating: 4.7,
+    ratingScore: 92,
+    popularityScore: 80,
+    ratingConfidenceScore: 95,
+    priceMinRon: null,
+    priceMaxRon: null,
+    mapVisibilityScore: 89,
+    mapVisibilityRank: 1,
+    mapMinZoomGlobal: 12,
+    aiCardSummary: "Calm coffee and work spot.",
+    aiPlaceTypeSummary: "Cafe",
+    aiVibe: "calm",
+    aiWhatToExpect: "Quiet tables.",
+    aiFoodAndDrinks: "Coffee.",
+    aiPrice: "mid",
+    aiService: "friendly",
+    aiTheMove: "Go daytime.",
+    aiWatchOut: null,
+    aiTags: ["calm", "coffee"],
+    aiTagsJson: [],
+    aiConfidence: 0.8,
+    axisQuietLively: 20,
+    axisWorkSocial: 40,
+    axisDayNight: 30,
+    axisCasualPremium: 40,
+    axisDrinksFood: 70,
+    axisLocalTourist: 30,
+    axisCheapExpensive: 50,
+    axisTraditionalExperimental: 45,
+    reviewPhotoCount: 1,
+    vibePhotoCount: 2,
+    primaryPhoto: null,
+    totalPhotoCount: 0,
+    openingHours: { openNow: true },
+    serves: ["coffee"],
+    features: { dineIn: true },
+    googleDetails: {},
+    apifyDetails: {},
+    aiDetails: {},
+    photoDetails: {},
+    rawCuisineStyle: null,
+    isSaved: false,
+    savedCollectionIds: [],
+    displayKind: "featured",
+    displayPriority: 1,
+    ...overrides
+  };
+}
+
 describe("map routes", () => {
   it("returns map places for a valid bbox query", async () => {
     const app = await buildApp({
       mapPlacesService: async () => ({
         places: [
-          {
-            id: 1,
-            source: "tripadvisor",
-            sourceId: "d5529357",
+          mapPlace({
             name: "Pane e Vino",
             country: "Germany",
             city: "Berlin",
             latitude: 52.552578,
             longitude: 13.352883,
             rating: 4,
-            priceLevel: null,
             numberOfReviews: 17,
-            rawCuisineStyle: null,
-            isSaved: false,
-            savedCollectionIds: [],
-            displayKind: "featured",
-            displayPriority: 1
-          }
+            googleRating: 4,
+            googleUserRatingCount: 17
+          })
         ]
       })
     });
@@ -80,24 +150,17 @@ describe("map routes", () => {
     expect(response.statusCode).toBe(200);
     expect(response.json()).toEqual({
       places: [
-        {
-          id: 1,
-          source: "tripadvisor",
-          sourceId: "d5529357",
+        mapPlace({
           name: "Pane e Vino",
           country: "Germany",
           city: "Berlin",
           latitude: 52.552578,
           longitude: 13.352883,
           rating: 4,
-          priceLevel: null,
           numberOfReviews: 17,
-          rawCuisineStyle: null,
-          isSaved: false,
-          savedCollectionIds: [],
-          displayKind: "featured",
-          displayPriority: 1
-        }
+          googleRating: 4,
+          googleUserRatingCount: 17
+        })
       ]
     });
   });
@@ -122,7 +185,7 @@ describe("map routes", () => {
       }),
       mapPlacesService: async () => ({
         places: [
-          {
+          mapPlace({
             id: 1,
             source: "osm",
             sourceId: "osm:node/1",
@@ -132,15 +195,11 @@ describe("map routes", () => {
             latitude: 44.43,
             longitude: 26.09,
             rating: null,
-            priceLevel: null,
             numberOfReviews: null,
-            rawCuisineStyle: null,
-            isSaved: false,
-            savedCollectionIds: [],
-            displayKind: "featured",
-            displayPriority: 1
-          },
-          {
+            googleRating: null,
+            googleUserRatingCount: null
+          }),
+          mapPlace({
             id: 2,
             source: "osm",
             sourceId: "osm:node/2",
@@ -150,14 +209,10 @@ describe("map routes", () => {
             latitude: 44.44,
             longitude: 26.1,
             rating: null,
-            priceLevel: null,
             numberOfReviews: null,
-            rawCuisineStyle: null,
-            isSaved: false,
-            savedCollectionIds: [],
             displayKind: "dot",
             displayPriority: 2
-          }
+          })
         ]
       })
     });

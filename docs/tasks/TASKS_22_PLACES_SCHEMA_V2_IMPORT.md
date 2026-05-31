@@ -37,7 +37,7 @@ the old generic integration mapper.
 ## Current Status
 
 ```text
-Planned
+In progress
 ```
 
 `TASKS_21_PLACE_PHOTOS_INTEGRATION.md` already creates `place_photos` and uploads
@@ -364,17 +364,17 @@ Important:
 Recommended migration order:
 
 1. Drop/replace `places_in_bbox`.
-2. Drop old `public.places`.
-3. Create new `public.places`.
-4. Recreate indexes.
+2. Clear saved-place links and old test `places` rows.
+3. Extend `public.places` to the V2 domain shape.
+4. Recreate constraints and indexes.
 5. Recreate `places_in_bbox`.
-6. Import new locations.
+6. Import `places_v2_import.csv`.
 7. Verify photo join through `source/source_id`.
 
 Migration file:
 
 ```text
-supabase/migrations/009_recreate_places_v2.sql
+supabase/migrations/009_places_v2.sql
 ```
 
 ## `places_in_bbox` V2
@@ -445,52 +445,58 @@ contract. Current backend filtering/density already works without it.
 
 Do not use old generic integration mappers as the primary path.
 
-Add a dedicated script:
+Do not add a permanent backend import module for this dataset. The import path
+is intentionally simple:
 
 ```text
-scripts/places/import-locations-v2.ts
+locations.csv -> generated places_v2_import.csv -> Supabase UI import
 ```
 
-Recommended behavior:
-
-- read `locations.csv`;
-- validate required fields:
-  - `place_id`;
-  - `name`;
-  - `latitude`;
-  - `longitude`;
-- normalize Python-list-like columns into arrays:
-  - `types`;
-  - `serves`;
-  - `ai_tags`;
-- parse JSON columns:
-  - `details_regularOpeningHours`;
-  - `details_googleMapsLinks`;
-  - `details_addressComponents`;
-  - `details_paymentOptions`;
-  - `details_accessibilityOptions`;
-  - `ai_tags_json`;
-  - `ai_summary_json`;
-- emit normalized CSV for Supabase Table Editor or upsert directly.
-
-Preferred for MVP:
+Generated import file:
 
 ```text
-direct Supabase upsert in batches
+backend/dumps/places_v2_import.csv
 ```
 
-Why:
+The generated CSV has headers matching `public.places`, not the raw provider
+headers. It maps:
 
-- easier to rerun;
-- no manual CSV mapping for 70+ columns;
-- can validate parse errors before writing.
+```text
+place_id -> source_id
+source -> google
+country -> romania
+city -> bucharest
+primary_photo_file -> primary_photo_path
+Python-list/JSON-ish fields -> Postgres array or JSON values
+```
 
-CLI:
+The generated file is intentionally ignored by git:
 
-```bash
-pnpm places:import /Users/dimitriymaevskiy/Downloads/backend_dataset_20260531_214446/locations.csv --dry-run --limit 50
-pnpm places:import /Users/dimitriymaevskiy/Downloads/backend_dataset_20260531_214446/locations.csv --limit 50
-pnpm places:import /Users/dimitriymaevskiy/Downloads/backend_dataset_20260531_214446/locations.csv
+```text
+dumps/places_v2_import.csv
+```
+
+This keeps the repo small while still giving us a ready-to-import local file.
+
+Supabase import flow:
+
+1. Apply `supabase/migrations/009_places_v2.sql`.
+2. Open Supabase Table Editor.
+3. Open `public.places`.
+4. Import `backend/dumps/places_v2_import.csv`.
+5. Ensure headers map to same-name columns.
+6. Do not import `id`, `geom`, `created_at`, or `updated_at`; the database
+   owns those.
+
+Local generated CSV validation:
+
+```text
+rows: 2508
+columns: 69
+missingGeo: 0
+missingSourceId: 0
+primaryPhotoPath: 1820
+badJson: 0
 ```
 
 ## Backend Changes
@@ -628,10 +634,10 @@ pnpm test
 pnpm lint
 ```
 
-Import dry-run:
+Generated import CSV:
 
-```bash
-pnpm places:import /Users/dimitriymaevskiy/Downloads/backend_dataset_20260531_214446/locations.csv --dry-run --limit 50
+```text
+backend/dumps/places_v2_import.csv
 ```
 
 Local/API smoke after deploy:
@@ -659,4 +665,3 @@ curl https://sloco.pp.ua/v1/swagger/openapi.json
   - saved state fields.
 - Photo metadata can join to places by `source/source_id`.
 - CI is green.
-

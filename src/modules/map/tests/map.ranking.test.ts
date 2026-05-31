@@ -151,6 +151,19 @@ describe("scoreMapPlace", () => {
     expect(high).toBeGreaterThan(low);
   });
 
+  it("prefers the imported map visibility score when available", () => {
+    const visible = scoreMapPlace(
+      place({ source_id: "a", map_visibility_score: 90, rating: 1 }),
+      context
+    );
+    const hidden = scoreMapPlace(
+      place({ source_id: "a", map_visibility_score: 10, rating: 5 }),
+      context
+    );
+
+    expect(visible).toBeGreaterThan(hidden);
+  });
+
   it("handles null rating and reviews", () => {
     expect(() => scoreMapPlace(place({}), context)).not.toThrow();
   });
@@ -180,7 +193,7 @@ describe("rankMapPlaces", () => {
   it("orders by score descending", () => {
     const strong = place({
       source_id: "strong",
-      source: "tripadvisor",
+      source: "google",
       rating: 5,
       reviews_count: 100
     });
