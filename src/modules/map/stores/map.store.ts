@@ -1,4 +1,5 @@
 import { getSupabaseClient } from "../../../lib/supabase.js";
+import { measureDependencyMetric } from "../../../observability/metrics.js";
 import type {
   MapPlacesQuery,
   MapStoreContract,
@@ -10,13 +11,22 @@ export class MapStore implements MapStoreContract {
     query: MapPlacesQuery,
     candidateLimit: number
   ): Promise<PlaceRow[]> {
-    const { data, error } = await getSupabaseClient().rpc("places_in_bbox", {
-      sw_lat: query.swLat,
-      sw_lng: query.swLng,
-      ne_lat: query.neLat,
-      ne_lng: query.neLng,
-      result_limit: candidateLimit
-    });
+    const { data, error } = await measureDependencyMetric(
+      {
+        dependency: "supabase",
+        operation: "rpc",
+        name: "places_in_bbox"
+      },
+      async () =>
+        getSupabaseClient().rpc("places_in_bbox", {
+          sw_lat: query.swLat,
+          sw_lng: query.swLng,
+          ne_lat: query.neLat,
+          ne_lng: query.neLng,
+          result_limit: candidateLimit
+        }),
+      (result) => result.data?.length
+    );
 
     if (error) {
       throw error;

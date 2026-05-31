@@ -190,6 +190,29 @@ supabase/migrations/
 
 Do not commit Supabase service role keys or other secrets.
 
+### Destructive SQL Warning Rule
+
+When asking the user to run any SQL/migration that contains destructive or
+high-risk operations, warn in CAPS before the command/instructions.
+
+High-risk operations include:
+
+- `DROP TABLE`;
+- `DROP FUNCTION`;
+- `TRUNCATE TABLE`;
+- mass `DELETE`;
+- `ALTER TABLE` that can rewrite/drop/change existing data or constraints.
+
+Example warning:
+
+```text
+ВАЖНО: ЭТА МИГРАЦИЯ DESTRUCTIVE. ОНА ДЕЛАЕТ TRUNCATE/DROP/ALTER И МОЖЕТ
+УДАЛИТЬ ИЛИ ИЗМЕНИТЬ ДАННЫЕ.
+```
+
+Explain exactly which tables/functions/data are affected before telling the
+user to run it.
+
 ## Logging And Grafana
 
 Backend logs are structured JSON in production.

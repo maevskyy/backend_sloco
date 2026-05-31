@@ -2,6 +2,7 @@ import {
   getSupabaseClient,
   hasPostgresErrorCode
 } from "../../../lib/supabase.js";
+import { measureDependencyMetric } from "../../../observability/metrics.js";
 import {
   mapCollectionPlaceRow,
   mapSavedPlaceRow
@@ -46,13 +47,35 @@ const COLLECTION_PLACE_COLUMNS = [
   `places!inner(${PLACE_COLUMNS})`
 ].join(",");
 
+function measureSavedPlacesDependency<T>(
+  operation: string,
+  name: string,
+  callback: () => Promise<T>,
+  getRowsCount?: (result: T) => number | undefined
+) {
+  return measureDependencyMetric(
+    {
+      dependency: "supabase",
+      operation,
+      name
+    },
+    callback,
+    getRowsCount
+  );
+}
+
 export class SavedPlacesStore implements SavedPlacesStoreContract {
   async placeExists(placeId: number) {
-    const { data, error } = await getSupabaseClient()
-      .from("places")
-      .select("id")
-      .eq("id", placeId)
-      .maybeSingle();
+    const { data, error } = await measureSavedPlacesDependency(
+      "select",
+      "places_exists",
+      async () =>
+        getSupabaseClient()
+          .from("places")
+          .select("id")
+          .eq("id", placeId)
+          .maybeSingle()
+    );
 
     if (error) throw error;
 
@@ -60,38 +83,54 @@ export class SavedPlacesStore implements SavedPlacesStoreContract {
   }
 
   async ensureDefaultCollection(userId: string) {
-    const { data: existing, error: existingError } = await getSupabaseClient()
-      .from("saved_collections")
-      .select("*")
-      .eq("user_id", userId)
-      .eq("is_default", true)
-      .maybeSingle();
+    const { data: existing, error: existingError } =
+      await measureSavedPlacesDependency(
+        "select",
+        "saved_collections_default",
+        async () =>
+          getSupabaseClient()
+            .from("saved_collections")
+            .select("*")
+            .eq("user_id", userId)
+            .eq("is_default", true)
+            .maybeSingle()
+      );
 
     if (existingError) throw existingError;
     if (existing) return existing as SavedCollectionRow;
 
-    const { data, error } = await getSupabaseClient()
-      .from("saved_collections")
-      .insert({
-        user_id: userId,
-        name: DEFAULT_COLLECTION_NAME,
-        color_hex: DEFAULT_COLLECTION_COLOR,
-        is_default: true,
-        sort_order: 0
-      })
-      .select("*")
-      .single();
+    const { data, error } = await measureSavedPlacesDependency(
+      "insert",
+      "saved_collections_default",
+      async () =>
+        getSupabaseClient()
+          .from("saved_collections")
+          .insert({
+            user_id: userId,
+            name: DEFAULT_COLLECTION_NAME,
+            color_hex: DEFAULT_COLLECTION_COLOR,
+            is_default: true,
+            sort_order: 0
+          })
+          .select("*")
+          .single()
+    );
 
     if (!error) return data as SavedCollectionRow;
     if (!hasPostgresErrorCode(error, "23505")) throw error;
 
     const { data: defaultCollection, error: refetchError } =
-      await getSupabaseClient()
-        .from("saved_collections")
-        .select("*")
-        .eq("user_id", userId)
-        .eq("is_default", true)
-        .single();
+      await measureSavedPlacesDependency(
+        "select",
+        "saved_collections_default_refetch",
+        async () =>
+          getSupabaseClient()
+            .from("saved_collections")
+            .select("*")
+            .eq("user_id", userId)
+            .eq("is_default", true)
+            .single()
+      );
 
     if (refetchError) throw refetchError;
 
@@ -99,12 +138,18 @@ export class SavedPlacesStore implements SavedPlacesStoreContract {
   }
 
   async listCollections(userId: string) {
-    const { data, error } = await getSupabaseClient()
-      .from("saved_collections")
-      .select("*")
-      .eq("user_id", userId)
-      .order("sort_order", { ascending: true })
-      .order("created_at", { ascending: true });
+    const { data, error } = await measureSavedPlacesDependency(
+      "select",
+      "saved_collections_list",
+      async () =>
+        getSupabaseClient()
+          .from("saved_collections")
+          .select("*")
+          .eq("user_id", userId)
+          .order("sort_order", { ascending: true })
+          .order("created_at", { ascending: true }),
+      (result) => result.data?.length
+    );
 
     if (error) throw error;
 
@@ -114,11 +159,17 @@ export class SavedPlacesStore implements SavedPlacesStoreContract {
   async getCollectionsByIds(userId: string, collectionIds: string[]) {
     if (collectionIds.length === 0) return [];
 
-    const { data, error } = await getSupabaseClient()
-      .from("saved_collections")
-      .select("*")
-      .eq("user_id", userId)
-      .in("id", collectionIds);
+    const { data, error } = await measureSavedPlacesDependency(
+      "select",
+      "saved_collections_by_ids",
+      async () =>
+        getSupabaseClient()
+          .from("saved_collections")
+          .select("*")
+          .eq("user_id", userId)
+          .in("id", collectionIds),
+      (result) => result.data?.length
+    );
 
     if (error) throw error;
 
@@ -126,12 +177,17 @@ export class SavedPlacesStore implements SavedPlacesStoreContract {
   }
 
   async getCollection(userId: string, collectionId: string) {
-    const { data, error } = await getSupabaseClient()
-      .from("saved_collections")
-      .select("*")
-      .eq("user_id", userId)
-      .eq("id", collectionId)
-      .maybeSingle();
+    const { data, error } = await measureSavedPlacesDependency(
+      "select",
+      "saved_collections_get",
+      async () =>
+        getSupabaseClient()
+          .from("saved_collections")
+          .select("*")
+          .eq("user_id", userId)
+          .eq("id", collectionId)
+          .maybeSingle()
+    );
 
     if (error) throw error;
 
@@ -142,16 +198,21 @@ export class SavedPlacesStore implements SavedPlacesStoreContract {
     userId: string,
     input: { name: string; colorHex?: string }
   ) {
-    const { data, error } = await getSupabaseClient()
-      .from("saved_collections")
-      .insert({
-        user_id: userId,
-        name: input.name,
-        color_hex: input.colorHex ?? null,
-        is_default: false
-      })
-      .select("*")
-      .single();
+    const { data, error } = await measureSavedPlacesDependency(
+      "insert",
+      "saved_collections_create",
+      async () =>
+        getSupabaseClient()
+          .from("saved_collections")
+          .insert({
+            user_id: userId,
+            name: input.name,
+            color_hex: input.colorHex ?? null,
+            is_default: false
+          })
+          .select("*")
+          .single()
+    );
 
     if (error) throw error;
 
@@ -164,13 +225,18 @@ export class SavedPlacesStore implements SavedPlacesStoreContract {
     input: { name?: string; colorHex?: string | null; sortOrder?: number }
   ) {
     const update = buildCollectionUpdate(input);
-    const { data, error } = await getSupabaseClient()
-      .from("saved_collections")
-      .update(update)
-      .eq("user_id", userId)
-      .eq("id", collectionId)
-      .select("*")
-      .maybeSingle();
+    const { data, error } = await measureSavedPlacesDependency(
+      "update",
+      "saved_collections_update",
+      async () =>
+        getSupabaseClient()
+          .from("saved_collections")
+          .update(update)
+          .eq("user_id", userId)
+          .eq("id", collectionId)
+          .select("*")
+          .maybeSingle()
+    );
 
     if (error) throw error;
 
@@ -178,24 +244,34 @@ export class SavedPlacesStore implements SavedPlacesStoreContract {
   }
 
   async deleteCollection(userId: string, collectionId: string) {
-    const { error } = await getSupabaseClient()
-      .from("saved_collections")
-      .delete()
-      .eq("user_id", userId)
-      .eq("id", collectionId);
+    const { error } = await measureSavedPlacesDependency(
+      "delete",
+      "saved_collections_delete",
+      async () =>
+        getSupabaseClient()
+          .from("saved_collections")
+          .delete()
+          .eq("user_id", userId)
+          .eq("id", collectionId)
+    );
 
     if (error) throw error;
   }
 
   async savePlace(userId: string, placeId: number) {
-    const { data, error } = await getSupabaseClient()
-      .from("saved_places")
-      .upsert(
-        { user_id: userId, place_id: placeId },
-        { onConflict: "user_id,place_id", ignoreDuplicates: true }
-      )
-      .select("created_at")
-      .maybeSingle();
+    const { data, error } = await measureSavedPlacesDependency(
+      "upsert",
+      "saved_places_save",
+      async () =>
+        getSupabaseClient()
+          .from("saved_places")
+          .upsert(
+            { user_id: userId, place_id: placeId },
+            { onConflict: "user_id,place_id", ignoreDuplicates: true }
+          )
+          .select("created_at")
+          .maybeSingle()
+    );
 
     if (error) throw error;
     if (data?.created_at) return data.created_at as string;
@@ -205,19 +281,29 @@ export class SavedPlacesStore implements SavedPlacesStoreContract {
 
   async unsavePlace(userId: string, placeId: number) {
     const client = getSupabaseClient();
-    const { error: membershipsError } = await client
-      .from("saved_collection_places")
-      .delete()
-      .eq("user_id", userId)
-      .eq("place_id", placeId);
+    const { error: membershipsError } = await measureSavedPlacesDependency(
+      "delete",
+      "saved_collection_places_unsave_memberships",
+      async () =>
+        client
+          .from("saved_collection_places")
+          .delete()
+          .eq("user_id", userId)
+          .eq("place_id", placeId)
+    );
 
     if (membershipsError) throw membershipsError;
 
-    const { error } = await client
-      .from("saved_places")
-      .delete()
-      .eq("user_id", userId)
-      .eq("place_id", placeId);
+    const { error } = await measureSavedPlacesDependency(
+      "delete",
+      "saved_places_unsave",
+      async () =>
+        client
+          .from("saved_places")
+          .delete()
+          .eq("user_id", userId)
+          .eq("place_id", placeId)
+    );
 
     if (error) throw error;
   }
@@ -229,16 +315,22 @@ export class SavedPlacesStore implements SavedPlacesStoreContract {
   ) {
     if (collectionIds.length === 0) return;
 
-    const { error } = await getSupabaseClient()
-      .from("saved_collection_places")
-      .upsert(
-        collectionIds.map((collectionId) => ({
-          collection_id: collectionId,
-          user_id: userId,
-          place_id: placeId
-        })),
-        { onConflict: "collection_id,place_id", ignoreDuplicates: true }
-      );
+    const { error } = await measureSavedPlacesDependency(
+      "upsert",
+      "saved_collection_places_add",
+      async () =>
+        getSupabaseClient()
+          .from("saved_collection_places")
+          .upsert(
+            collectionIds.map((collectionId) => ({
+              collection_id: collectionId,
+              user_id: userId,
+              place_id: placeId
+            })),
+            { onConflict: "collection_id,place_id", ignoreDuplicates: true }
+          ),
+      () => collectionIds.length
+    );
 
     if (error) throw error;
   }
@@ -248,23 +340,34 @@ export class SavedPlacesStore implements SavedPlacesStoreContract {
     collectionId: string,
     placeId: number
   ) {
-    const { error } = await getSupabaseClient()
-      .from("saved_collection_places")
-      .delete()
-      .eq("user_id", userId)
-      .eq("collection_id", collectionId)
-      .eq("place_id", placeId);
+    const { error } = await measureSavedPlacesDependency(
+      "delete",
+      "saved_collection_places_remove",
+      async () =>
+        getSupabaseClient()
+          .from("saved_collection_places")
+          .delete()
+          .eq("user_id", userId)
+          .eq("collection_id", collectionId)
+          .eq("place_id", placeId)
+    );
 
     if (error) throw error;
   }
 
   async listSavedPlaces(userId: string, limit: number) {
-    const { data, error } = await getSupabaseClient()
-      .from("saved_places")
-      .select(SAVED_PLACE_COLUMNS)
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false })
-      .limit(limit);
+    const { data, error } = await measureSavedPlacesDependency(
+      "select",
+      "saved_places_list",
+      async () =>
+        getSupabaseClient()
+          .from("saved_places")
+          .select(SAVED_PLACE_COLUMNS)
+          .eq("user_id", userId)
+          .order("created_at", { ascending: false })
+          .limit(limit),
+      (result) => result.data?.length
+    );
 
     if (error) throw error;
 
@@ -272,10 +375,16 @@ export class SavedPlacesStore implements SavedPlacesStoreContract {
   }
 
   async countSavedPlaces(userId: string) {
-    const { count, error } = await getSupabaseClient()
-      .from("saved_places")
-      .select("*", { count: "exact", head: true })
-      .eq("user_id", userId);
+    const { count, error } = await measureSavedPlacesDependency(
+      "select",
+      "saved_places_count",
+      async () =>
+        getSupabaseClient()
+          .from("saved_places")
+          .select("*", { count: "exact", head: true })
+          .eq("user_id", userId),
+      (result) => result.count ?? undefined
+    );
 
     if (error) throw error;
 
@@ -283,13 +392,19 @@ export class SavedPlacesStore implements SavedPlacesStoreContract {
   }
 
   async listCollectionPlaces(userId: string, collectionId: string) {
-    const { data, error } = await getSupabaseClient()
-      .from("saved_collection_places")
-      .select(COLLECTION_PLACE_COLUMNS)
-      .eq("user_id", userId)
-      .eq("collection_id", collectionId)
-      .order("sort_order", { ascending: true })
-      .order("created_at", { ascending: true });
+    const { data, error } = await measureSavedPlacesDependency(
+      "select",
+      "saved_collection_places_list",
+      async () =>
+        getSupabaseClient()
+          .from("saved_collection_places")
+          .select(COLLECTION_PLACE_COLUMNS)
+          .eq("user_id", userId)
+          .eq("collection_id", collectionId)
+          .order("sort_order", { ascending: true })
+          .order("created_at", { ascending: true }),
+      (result) => result.data?.length
+    );
 
     if (error) throw error;
 
@@ -305,12 +420,17 @@ export class SavedPlacesStore implements SavedPlacesStoreContract {
   ) {
     await Promise.all(
       placeIds.map(async (placeId, sortOrder) => {
-        const { error } = await getSupabaseClient()
-          .from("saved_collection_places")
-          .update({ sort_order: sortOrder })
-          .eq("user_id", userId)
-          .eq("collection_id", collectionId)
-          .eq("place_id", placeId);
+        const { error } = await measureSavedPlacesDependency(
+          "update",
+          "saved_collection_places_reorder",
+          async () =>
+            getSupabaseClient()
+              .from("saved_collection_places")
+              .update({ sort_order: sortOrder })
+              .eq("user_id", userId)
+              .eq("collection_id", collectionId)
+              .eq("place_id", placeId)
+        );
 
         if (error) throw error;
       })
@@ -322,11 +442,17 @@ export class SavedPlacesStore implements SavedPlacesStoreContract {
 
     const states = await this.getSavedPlaceRows(userId, placeIds);
     const client = getSupabaseClient();
-    const { data, error } = await client
-      .from("saved_collection_places")
-      .select("place_id, collection_id")
-      .eq("user_id", userId)
-      .in("place_id", placeIds);
+    const { data, error } = await measureSavedPlacesDependency(
+      "select",
+      "saved_collection_places_states",
+      async () =>
+        client
+          .from("saved_collection_places")
+          .select("place_id, collection_id")
+          .eq("user_id", userId)
+          .in("place_id", placeIds),
+      (result) => result.data?.length
+    );
 
     if (error) throw error;
 
@@ -342,12 +468,17 @@ export class SavedPlacesStore implements SavedPlacesStoreContract {
   }
 
   private async getSavedAt(userId: string, placeId: number) {
-    const { data, error } = await getSupabaseClient()
-      .from("saved_places")
-      .select("created_at")
-      .eq("user_id", userId)
-      .eq("place_id", placeId)
-      .single();
+    const { data, error } = await measureSavedPlacesDependency(
+      "select",
+      "saved_places_created_at",
+      async () =>
+        getSupabaseClient()
+          .from("saved_places")
+          .select("created_at")
+          .eq("user_id", userId)
+          .eq("place_id", placeId)
+          .single()
+    );
 
     if (error) throw error;
 
@@ -355,11 +486,17 @@ export class SavedPlacesStore implements SavedPlacesStoreContract {
   }
 
   private async getSavedPlaceRows(userId: string, placeIds: number[]) {
-    const { data, error } = await getSupabaseClient()
-      .from("saved_places")
-      .select("place_id")
-      .eq("user_id", userId)
-      .in("place_id", placeIds);
+    const { data, error } = await measureSavedPlacesDependency(
+      "select",
+      "saved_places_states",
+      async () =>
+        getSupabaseClient()
+          .from("saved_places")
+          .select("place_id")
+          .eq("user_id", userId)
+          .in("place_id", placeIds),
+      (result) => result.data?.length
+    );
 
     if (error) throw error;
 

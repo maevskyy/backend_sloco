@@ -7,6 +7,10 @@ import {
 } from "./config/logger.js";
 import { API_PREFIX } from "./config/routes.js";
 import { registerSwaggerDocs } from "./config/swagger.js";
+import {
+  enterRequestMetricContext,
+  logHttpRequestMetric
+} from "./observability/metrics.js";
 import { registerHealthModule } from "./modules/health/index.js";
 import {
   registerMapModule,
@@ -33,7 +37,12 @@ export async function buildApp(options: AppOptions = {}) {
     ...loggerConfig
   });
 
+  app.addHook("onRequest", async (request) => {
+    enterRequestMetricContext(request);
+  });
+
   app.addHook("onResponse", async (request, reply) => {
+    logHttpRequestMetric(request, reply);
     logRequestCompletion(request, reply);
   });
 

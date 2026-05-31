@@ -1,4 +1,5 @@
 import { getSupabaseClient } from "../../../lib/supabase.js";
+import { measureDependencyMetric } from "../../../observability/metrics.js";
 import type { MeStoreContract, UserProfile } from "../common/me.types.js";
 
 const PROFILE_COLUMNS = "user_id, display_name, onboarding_status";
@@ -11,18 +12,26 @@ type ProfileRow = {
 
 export class MeStore implements MeStoreContract {
   async upsertDefaultProfile(userId: string): Promise<UserProfile> {
-    const { data, error } = await getSupabaseClient()
-      .from("profiles")
-      .upsert(
-        {
-          user_id: userId
-        },
-        {
-          onConflict: "user_id"
-        }
-      )
-      .select(PROFILE_COLUMNS)
-      .single();
+    const { data, error } = await measureDependencyMetric(
+      {
+        dependency: "supabase",
+        operation: "upsert",
+        name: "profiles_default"
+      },
+      async () =>
+        getSupabaseClient()
+          .from("profiles")
+          .upsert(
+            {
+              user_id: userId
+            },
+            {
+              onConflict: "user_id"
+            }
+          )
+          .select(PROFILE_COLUMNS)
+          .single()
+    );
 
     if (error) {
       throw error;
