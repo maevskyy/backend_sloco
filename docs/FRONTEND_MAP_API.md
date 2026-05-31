@@ -91,10 +91,8 @@ The endpoint is public, but can also accept auth:
 Authorization: Bearer <supabase_access_token>
 ```
 
-If auth is omitted, every place returns `isSaved: false` and
-`savedCollectionIds: []`.
-If auth is valid, `isSaved` and `savedCollectionIds` reflect the current user's
-saved state.
+If auth is omitted, every place returns `isSaved: false`.
+If auth is valid, `isSaved` reflects the current user's saved state.
 If auth is invalid, the backend returns `401`.
 
 Example:
@@ -174,19 +172,16 @@ Successful response:
   "places": [
     {
       "id": 1,
-      "source": "tripadvisor",
-      "sourceId": "d5529357",
       "name": "Pane e Vino",
-      "country": "Germany",
-      "city": "Berlin",
+      "category": "restaurant",
+      "primaryType": "restaurant",
       "latitude": 52.552578,
       "longitude": 13.352883,
       "rating": 4,
       "priceLevel": 2,
-      "numberOfReviews": 17,
-      "rawCuisineStyle": null,
+      "mapVisibilityScore": 91,
+      "primaryPhoto": null,
       "isSaved": false,
-      "savedCollectionIds": [],
       "displayKind": "featured",
       "displayPriority": 1
     }
@@ -199,23 +194,24 @@ Fields:
 | Field | Type | Description |
 | --- | --- | --- |
 | `id` | number | Backend row id. |
-| `source` | string | Data source, e.g. `tripadvisor` or `osm`. |
-| `sourceId` | string | Source-specific id, e.g. TripAdvisor id or OSM id. |
 | `name` | string | Place name. |
-| `country` | string | Country name or code from the normalized place record. |
-| `city` | string | City name. |
+| `category` | string | Normalized category, e.g. `cafe`, `restaurant`, `bar`. |
+| `primaryType` | string or null | Provider/domain primary type. |
 | `latitude` | number | Pin latitude. |
 | `longitude` | number | Pin longitude. |
-| `rating` | number or null | TripAdvisor rating. |
-| `priceLevel` | number or null | Normalized price level from `1` to `4`. |
-| `numberOfReviews` | number or null | Number of source reviews. |
-| `rawCuisineStyle` | string or null | Raw cuisine/tags string from source data. |
+| `rating` | number or null | Display rating. |
+| `priceLevel` | number or null | Normalized price level from `0` to `4`. |
+| `mapVisibilityScore` | number | Backend ranking/visibility signal. |
+| `primaryPhoto` | object or null | Small primary photo metadata for marker/card display. |
 | `isSaved` | boolean | Whether the authenticated user saved this place. Public map requests return `false`. |
-| `savedCollectionIds` | string[] | Collection ids containing the place for the authenticated user. Public map requests return `[]`. |
 | `displayKind` | `"featured"` or `"dot"` | Rendering hint. Use `featured` for normal markers and `dot` for small lightweight points. |
 | `displayPriority` | number | 1-based ranking position in the current bbox. Lower number means higher priority. |
 
-The response does not include heavy fields like reviews or embedding text.
+The map response is intentionally a lightweight pin feed. It does not include
+address, phone, website, AI summaries, opening hours, provider details, full
+photo metadata, saved collection ids, or raw provider blobs. When a user taps a
+place, call `GET /v1/places/:placeId` for the full detail payload.
+
 Missing numeric signals are returned as `null`.
 
 ## Swift Model Example
@@ -227,21 +223,26 @@ struct MapPlacesResponse: Decodable {
 
 struct MapPlace: Decodable, Identifiable {
     let id: Int
-    let source: String
-    let sourceId: String
     let name: String
-    let country: String
-    let city: String
+    let category: String
+    let primaryType: String?
     let latitude: Double
     let longitude: Double
     let rating: Double?
     let priceLevel: Int?
-    let numberOfReviews: Int?
-    let rawCuisineStyle: String?
+    let mapVisibilityScore: Double
+    let primaryPhoto: PrimaryPhoto?
     let isSaved: Bool
-    let savedCollectionIds: [String]
     let displayKind: DisplayKind
     let displayPriority: Int
+}
+
+struct PrimaryPhoto: Decodable {
+    let path: String
+    let url: String?
+    let width: Int?
+    let height: Int?
+    let source: String?
 }
 
 enum DisplayKind: String, Decodable {
@@ -275,6 +276,35 @@ func fetchMapPlaces() async throws -> [MapPlace] {
 }
 ```
 
+## Place Details Endpoint
+
+Use this endpoint after the user taps a map pin or opens a place card.
+
+```http
+GET /v1/places/:placeId
+```
+
+Auth is optional and works like the map endpoint:
+
+- no token: returns public details with `isSaved: false`;
+- valid token: enriches `isSaved` and `savedCollectionIds`;
+- invalid token: returns `401`.
+
+Example:
+
+```bash
+curl "https://sloco.pp.ua/v1/places/123"
+```
+
+The detail response is intentionally richer than the map response. It can
+include address/contact fields, rating internals, AI summaries, taste axes,
+opening hours, feature JSON, photo counts, and saved collection ids. The exact
+shape is defined by Swagger:
+
+```text
+https://sloco.pp.ua/v1/swagger/openapi.json
+```
+
 ## Map Usage
 
 Frontend flow:
@@ -304,7 +334,8 @@ Frontend flow:
    for small lightweight points.
 
 6. Use `displayPriority` for z-index / tap priority if markers overlap.
-7. When the map region changes, iOS should debounce requests.
+7. When the user taps a marker/card, call `GET /v1/places/:placeId`.
+8. When the map region changes, iOS should debounce requests.
 
 Recommended debounce:
 

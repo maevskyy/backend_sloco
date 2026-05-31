@@ -2,162 +2,56 @@ import { describe, expect, it } from "vitest";
 import { mapPlaceRowToPin } from "../common/map.mappers.js";
 import type { MapPlacePin, PlaceRow } from "../common/map.types.js";
 
-function placeRow(overrides: Partial<PlaceRow>): PlaceRow {
+function placeRow(overrides: Partial<PlaceRow> = {}): PlaceRow {
   return {
     id: 1,
     source: "google",
-    source_id: "google-place-1",
-    name: "Place",
-    country: "romania",
-    city: "bucharest",
+    source_id: "ChIJ123",
+    name: "Seneca Anticafe",
     category: "cafe",
     primary_type: "cafe",
-    types: ["cafe", "food"],
     latitude: 44.43,
     longitude: 26.1,
-    formatted_address: "Bucharest",
-    short_formatted_address: "Bucharest",
-    business_status: "OPERATIONAL",
-    google_maps_uri: "https://maps.google.com/example",
-    phone: "+40 123",
-    international_phone: "+40 123",
-    website_url: "https://example.com",
-    rating: 4.5,
-    price_level: null,
-    reviews_count: 10,
-    google_rating: 4.5,
-    google_user_rating_count: 10,
-    apify_review_count: null,
-    apify_rating_avg: null,
-    rating_count_for_score: 10,
-    bayesian_rating: 4.4,
-    rating_score_0_100: 90,
-    popularity_score_0_100: 40,
-    rating_confidence_0_100: 70,
-    price_min_ron: null,
-    price_max_ron: null,
-    map_visibility_score: 88,
-    map_visibility_rank: 12,
-    map_min_zoom_global: 12,
-    ai_card_summary: "Cozy coffee spot.",
-    ai_place_type_summary: "Cafe",
-    ai_vibe: "calm",
-    ai_what_to_expect: "Quiet tables.",
-    ai_food_and_drinks: "Coffee.",
-    ai_price: "cheap",
-    ai_service: "fast",
-    ai_the_move: "Go daytime.",
-    ai_watch_out: null,
-    ai_tags: ["cozy", "coffee"],
-    ai_tags_json: [],
-    ai_confidence: 0.8,
-    axis_quiet_lively: 20,
-    axis_work_social: 40,
-    axis_day_night: 30,
-    axis_casual_premium: 20,
-    axis_drinks_food: 70,
-    axis_local_tourist: 30,
-    axis_cheap_expensive: 20,
-    axis_traditional_experimental: 50,
-    review_photo_count: 1,
-    vibe_photo_count: 2,
+    rating: 4.8,
+    price_level: 2,
+    reviews_count: 1411,
+    google_rating: 4.8,
+    google_user_rating_count: 1411,
+    rating_score_0_100: 92,
+    popularity_score_0_100: 80,
+    map_visibility_score: 89,
+    map_visibility_rank: 1,
     primary_photo_path: null,
     primary_photo_url: null,
     primary_photo_width: null,
     primary_photo_height: null,
     primary_photo_source: null,
-    total_photo_count: 0,
-    opening_hours: { openNow: true },
-    serves: ["coffee"],
-    features: { dineIn: true },
-    google_details: { paymentOptions: {} },
-    apify_details: { languageCounts: {} },
-    ai_details: { model: "gpt" },
-    photo_details: { primaryPhotoFile: null },
-    attributes: null,
     ...overrides
   };
 }
 
 describe("map place row mapper", () => {
-  it("maps Google place rows to map pins", () => {
-    const row = placeRow({
-      source_id: "ChIJ123",
-      name: "Seneca Anticafe",
-      rating: 4.8,
-      price_level: 2,
-      reviews_count: 1411,
-      google_rating: 4.8,
-      google_user_rating_count: 1411,
-      primary_photo_path: "google/ChIJ123/vibe/photo.jpg",
-      primary_photo_url: "https://example.com/photo.jpg",
-      primary_photo_width: 1200,
-      primary_photo_height: 900,
-      primary_photo_source: "vibe",
-      total_photo_count: 12,
-      attributes: {
-        raw_cuisine_style: "Italian, Pizza, Mediterranean"
-      }
-    });
-
-    expect(mapPlaceRowToPin(row)).toEqual<MapPlacePin>({
+  it("maps a place row to a lightweight map pin", () => {
+    expect(
+      mapPlaceRowToPin(
+        placeRow({
+          primary_photo_path: "google/ChIJ123/vibe/photo.jpg",
+          primary_photo_url: "https://example.com/photo.jpg",
+          primary_photo_width: 1200,
+          primary_photo_height: 900,
+          primary_photo_source: "vibe"
+        })
+      )
+    ).toEqual<MapPlacePin>({
       id: 1,
-      source: "google",
-      sourceId: "ChIJ123",
       name: "Seneca Anticafe",
-      country: "romania",
-      city: "bucharest",
       category: "cafe",
       primaryType: "cafe",
-      types: ["cafe", "food"],
       latitude: 44.43,
       longitude: 26.1,
-      formattedAddress: "Bucharest",
-      shortFormattedAddress: "Bucharest",
-      businessStatus: "OPERATIONAL",
-      googleMapsUri: "https://maps.google.com/example",
-      phone: "+40 123",
-      internationalPhone: "+40 123",
-      websiteUrl: "https://example.com",
       rating: 4.8,
       priceLevel: 2,
-      numberOfReviews: 1411,
-      googleRating: 4.8,
-      googleUserRatingCount: 1411,
-      apifyReviewCount: null,
-      apifyRatingAvg: null,
-      ratingCountForScore: 10,
-      bayesianRating: 4.4,
-      ratingScore: 90,
-      popularityScore: 40,
-      ratingConfidenceScore: 70,
-      priceMinRon: null,
-      priceMaxRon: null,
-      mapVisibilityScore: 88,
-      mapVisibilityRank: 12,
-      mapMinZoomGlobal: 12,
-      aiCardSummary: "Cozy coffee spot.",
-      aiPlaceTypeSummary: "Cafe",
-      aiVibe: "calm",
-      aiWhatToExpect: "Quiet tables.",
-      aiFoodAndDrinks: "Coffee.",
-      aiPrice: "cheap",
-      aiService: "fast",
-      aiTheMove: "Go daytime.",
-      aiWatchOut: null,
-      aiTags: ["cozy", "coffee"],
-      aiTagsJson: [],
-      aiConfidence: 0.8,
-      axisQuietLively: 20,
-      axisWorkSocial: 40,
-      axisDayNight: 30,
-      axisCasualPremium: 20,
-      axisDrinksFood: 70,
-      axisLocalTourist: 30,
-      axisCheapExpensive: 20,
-      axisTraditionalExperimental: 50,
-      reviewPhotoCount: 1,
-      vibePhotoCount: 2,
+      mapVisibilityScore: 89,
       primaryPhoto: {
         path: "google/ChIJ123/vibe/photo.jpg",
         url: "https://example.com/photo.jpg",
@@ -165,121 +59,37 @@ describe("map place row mapper", () => {
         height: 900,
         source: "vibe"
       },
-      totalPhotoCount: 12,
-      openingHours: { openNow: true },
-      serves: ["coffee"],
-      features: { dineIn: true },
-      googleDetails: { paymentOptions: {} },
-      apifyDetails: { languageCounts: {} },
-      aiDetails: { model: "gpt" },
-      photoDetails: { primaryPhotoFile: null },
-      rawCuisineStyle: "Italian, Pizza, Mediterranean",
       isSaved: false,
-      savedCollectionIds: [],
       displayKind: "dot",
       displayPriority: 1
     });
   });
 
-  it("maps OSM rows with missing review signals as null", () => {
-    const row = placeRow({
-      id: 2,
-      source: "osm",
-      source_id: "osm:node/4712948976",
-      name: "Coffee Shop",
-      country: "RO",
-      city: "Bucharest",
-      latitude: 44.43,
-      longitude: 26.1,
-      rating: null,
-      price_level: null,
-      reviews_count: null,
-      google_rating: null,
-      google_user_rating_count: null,
-      rating_score_0_100: null,
-      popularity_score_0_100: null,
-      map_visibility_score: null,
-      map_visibility_rank: null,
-      map_min_zoom_global: null,
-      ai_card_summary: null,
-      ai_tags: null,
-      attributes: {
-        cuisine: "coffee_shop"
-      }
-    });
+  it("does not expose detail-only fields in map pins", () => {
+    const pin = mapPlaceRowToPin(placeRow());
 
-    expect(mapPlaceRowToPin(row)).toEqual<MapPlacePin>({
-      id: 2,
-      source: "osm",
-      sourceId: "osm:node/4712948976",
-      name: "Coffee Shop",
-      country: "RO",
-      city: "Bucharest",
-      category: "cafe",
-      primaryType: "cafe",
-      types: ["cafe", "food"],
-      latitude: 44.43,
-      longitude: 26.1,
-      formattedAddress: "Bucharest",
-      shortFormattedAddress: "Bucharest",
-      businessStatus: "OPERATIONAL",
-      googleMapsUri: "https://maps.google.com/example",
-      phone: "+40 123",
-      internationalPhone: "+40 123",
-      websiteUrl: "https://example.com",
-      rating: null,
-      priceLevel: null,
-      numberOfReviews: null,
-      googleRating: null,
-      googleUserRatingCount: null,
-      apifyReviewCount: null,
-      apifyRatingAvg: null,
-      ratingCountForScore: 10,
-      bayesianRating: 4.4,
-      ratingScore: null,
-      popularityScore: null,
-      ratingConfidenceScore: 70,
-      priceMinRon: null,
-      priceMaxRon: null,
+    expect(pin).not.toHaveProperty("source");
+    expect(pin).not.toHaveProperty("sourceId");
+    expect(pin).not.toHaveProperty("country");
+    expect(pin).not.toHaveProperty("city");
+    expect(pin).not.toHaveProperty("formattedAddress");
+    expect(pin).not.toHaveProperty("googleDetails");
+    expect(pin).not.toHaveProperty("aiDetails");
+    expect(pin).not.toHaveProperty("openingHours");
+    expect(pin).not.toHaveProperty("savedCollectionIds");
+  });
+
+  it("uses null for missing primary photo and defaults visibility score", () => {
+    expect(
+      mapPlaceRowToPin(
+        placeRow({
+          map_visibility_score: null,
+          primary_photo_path: null
+        })
+      )
+    ).toMatchObject({
       mapVisibilityScore: 0,
-      mapVisibilityRank: null,
-      mapMinZoomGlobal: null,
-      aiCardSummary: null,
-      aiPlaceTypeSummary: "Cafe",
-      aiVibe: "calm",
-      aiWhatToExpect: "Quiet tables.",
-      aiFoodAndDrinks: "Coffee.",
-      aiPrice: "cheap",
-      aiService: "fast",
-      aiTheMove: "Go daytime.",
-      aiWatchOut: null,
-      aiTags: [],
-      aiTagsJson: [],
-      aiConfidence: 0.8,
-      axisQuietLively: 20,
-      axisWorkSocial: 40,
-      axisDayNight: 30,
-      axisCasualPremium: 20,
-      axisDrinksFood: 70,
-      axisLocalTourist: 30,
-      axisCheapExpensive: 20,
-      axisTraditionalExperimental: 50,
-      reviewPhotoCount: 1,
-      vibePhotoCount: 2,
-      primaryPhoto: null,
-      totalPhotoCount: 0,
-      openingHours: { openNow: true },
-      serves: ["coffee"],
-      features: { dineIn: true },
-      googleDetails: { paymentOptions: {} },
-      apifyDetails: { languageCounts: {} },
-      aiDetails: { model: "gpt" },
-      photoDetails: { primaryPhotoFile: null },
-      rawCuisineStyle: "coffee_shop",
-      isSaved: false,
-      savedCollectionIds: [],
-      displayKind: "dot",
-      displayPriority: 1
+      primaryPhoto: null
     });
   });
 });

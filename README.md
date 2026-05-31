@@ -82,6 +82,7 @@ Frontend agents should use `/v1/swagger/openapi.json` as the source of truth.
 
 ```http
 GET /v1/map/places?swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700&zoom=13
+GET /v1/places/:placeId
 ```
 
 ## Current Saved Places API

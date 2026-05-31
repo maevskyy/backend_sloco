@@ -15,10 +15,10 @@ export class MapStore implements MapStoreContract {
       {
         dependency: "supabase",
         operation: "rpc",
-        name: "places_in_bbox"
+        name: "map_places_in_bbox"
       },
       async () =>
-        getSupabaseClient().rpc("places_in_bbox", {
+        getSupabaseClient().rpc("map_places_in_bbox", {
           sw_lat: query.swLat,
           sw_lng: query.swLng,
           ne_lat: query.neLat,

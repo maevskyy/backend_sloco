@@ -63,7 +63,7 @@ export async function enrichSavedState(
     };
   }
 
-  const savedPlaceStates = await savedPlacesService.getSavedPlaceStates(
+  const savedPlaceIds = await savedPlacesService.getSavedPlaceIds(
     userId,
     result.places.map((place) => place.id)
   );
@@ -71,8 +71,7 @@ export async function enrichSavedState(
   return {
     places: result.places.map((place) => ({
       ...place,
-      isSaved: savedPlaceStates.get(place.id)?.isSaved ?? false,
-      savedCollectionIds: savedPlaceStates.get(place.id)?.collectionIds ?? []
+      isSaved: savedPlaceIds.has(place.id)
     }))
   };
 }
@@ -80,7 +79,6 @@ export async function enrichSavedState(
 function markPlaceAsUnsaved(place: MapPlacePin): MapPlacePin {
   return {
     ...place,
-    isSaved: false,
-    savedCollectionIds: []
+    isSaved: false
   };
 }

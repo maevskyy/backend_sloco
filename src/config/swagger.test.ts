@@ -50,11 +50,16 @@ describe("swagger docs", () => {
       ]
     ).toBeDefined();
     expect(openApi.paths[VersionedAppRoute.mapPlaces]).toBeDefined();
+    expect(
+      openApi.paths[VersionedAppRoute.place.replace(":placeId", "{placeId}")]
+    ).toBeDefined();
     expect(openApi.components.securitySchemes.bearerAuth).toBeDefined();
     expect(openApi.components.schemas.MeResponse).toBeDefined();
     expect(openApi.components.schemas.AuthErrorResponse).toBeDefined();
-    expect(openApi.components.schemas.MapPlace).toBeDefined();
+    expect(openApi.components.schemas.MapPlacePin).toBeDefined();
     expect(openApi.components.schemas.MapPlacesResponse).toBeDefined();
+    expect(openApi.components.schemas.PlaceDetails).toBeDefined();
+    expect(openApi.components.schemas.PlaceDetailsResponse).toBeDefined();
     expect(openApi.components.schemas.SavePlaceResponse).toBeDefined();
     expect(openApi.components.schemas.UnsavePlaceResponse).toBeDefined();
     expect(openApi.components.schemas.SavedDashboardResponse).toBeDefined();

@@ -60,6 +60,7 @@ POST /v1/me/saved/collections/:collectionId/places
 DELETE /v1/me/saved/collections/:collectionId/places/:placeId
 PATCH /v1/me/saved/collections/:collectionId/places/order
 GET /v1/map/places?swLat=...&swLng=...&neLat=...&neLng=...&zoom=...
+GET /v1/places/:placeId
 GET /v1/swagger/docs
 GET /v1/swagger/openapi.json
 ```
@@ -84,12 +85,13 @@ Auth profile table: public.profiles
 Saved places table: public.saved_places
 Saved collections table: public.saved_collections
 Saved collection membership table: public.saved_collection_places
-Geo RPC: public.places_in_bbox(sw_lat, sw_lng, ne_lat, ne_lng, result_limit)
+Map pin RPC: public.map_places_in_bbox(sw_lat, sw_lng, ne_lat, ne_lng, result_limit)
+Place detail RPC: public.place_details_by_id(place_id)
 Migrations: supabase/migrations/
 ```
 
-Map reads are bbox-only. The frontend does not send `city`; `city` is returned
-as a place attribute only.
+Map reads are bbox-only and return lightweight pins. Rich place data is fetched
+only after a user selects a place via `GET /v1/places/:placeId`.
 
 ## Active Data Flow
 

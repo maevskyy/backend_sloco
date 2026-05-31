@@ -46,74 +46,16 @@ function createSavedPlacesService(
 function mapPlace(overrides: Partial<MapPlacePin>): MapPlacePin {
   return {
     id: 1,
-    source: "google",
-    sourceId: "ChIJ123",
     name: "Seneca Anticafe",
-    country: "romania",
-    city: "bucharest",
     category: "cafe",
     primaryType: "cafe",
-    types: ["cafe", "food"],
     latitude: 44.43,
     longitude: 26.1,
-    formattedAddress: "Bucharest",
-    shortFormattedAddress: "Bucharest",
-    businessStatus: "OPERATIONAL",
-    googleMapsUri: "https://maps.google.com/example",
-    phone: "+40 123",
-    internationalPhone: "+40 123",
-    websiteUrl: "https://example.com",
     rating: 4.8,
     priceLevel: null,
-    numberOfReviews: 1411,
-    googleRating: 4.8,
-    googleUserRatingCount: 1411,
-    apifyReviewCount: null,
-    apifyRatingAvg: null,
-    ratingCountForScore: 1411,
-    bayesianRating: 4.7,
-    ratingScore: 92,
-    popularityScore: 80,
-    ratingConfidenceScore: 95,
-    priceMinRon: null,
-    priceMaxRon: null,
     mapVisibilityScore: 89,
-    mapVisibilityRank: 1,
-    mapMinZoomGlobal: 12,
-    aiCardSummary: "Calm coffee and work spot.",
-    aiPlaceTypeSummary: "Cafe",
-    aiVibe: "calm",
-    aiWhatToExpect: "Quiet tables.",
-    aiFoodAndDrinks: "Coffee.",
-    aiPrice: "mid",
-    aiService: "friendly",
-    aiTheMove: "Go daytime.",
-    aiWatchOut: null,
-    aiTags: ["calm", "coffee"],
-    aiTagsJson: [],
-    aiConfidence: 0.8,
-    axisQuietLively: 20,
-    axisWorkSocial: 40,
-    axisDayNight: 30,
-    axisCasualPremium: 40,
-    axisDrinksFood: 70,
-    axisLocalTourist: 30,
-    axisCheapExpensive: 50,
-    axisTraditionalExperimental: 45,
-    reviewPhotoCount: 1,
-    vibePhotoCount: 2,
     primaryPhoto: null,
-    totalPhotoCount: 0,
-    openingHours: { openNow: true },
-    serves: ["coffee"],
-    features: { dineIn: true },
-    googleDetails: {},
-    apifyDetails: {},
-    aiDetails: {},
-    photoDetails: {},
-    rawCuisineStyle: null,
     isSaved: false,
-    savedCollectionIds: [],
     displayKind: "featured",
     displayPriority: 1,
     ...overrides
@@ -127,14 +69,9 @@ describe("map routes", () => {
         places: [
           mapPlace({
             name: "Pane e Vino",
-            country: "Germany",
-            city: "Berlin",
             latitude: 52.552578,
             longitude: 13.352883,
-            rating: 4,
-            numberOfReviews: 17,
-            googleRating: 4,
-            googleUserRatingCount: 17
+            rating: 4
           })
         ]
       })
@@ -152,14 +89,9 @@ describe("map routes", () => {
       places: [
         mapPlace({
           name: "Pane e Vino",
-          country: "Germany",
-          city: "Berlin",
           latitude: 52.552578,
           longitude: 13.352883,
-          rating: 4,
-          numberOfReviews: 17,
-          googleRating: 4,
-          googleUserRatingCount: 17
+          rating: 4
         })
       ]
     });
@@ -169,47 +101,27 @@ describe("map routes", () => {
     const app = await buildApp({
       authService,
       savedPlacesService: createSavedPlacesService({
-        async getSavedPlaceStates(userId: string, placeIds: number[]) {
+        async getSavedPlaceIds(userId: string, placeIds: number[]) {
           expect(userId).toBe(authenticatedUser.id);
           expect(placeIds).toEqual([1, 2]);
-          return new Map([
-            [
-              2,
-              {
-                isSaved: true,
-                collectionIds: ["4b572b66-d74d-49bb-b9b5-9780c266c6f7"]
-              }
-            ]
-          ]);
+          return new Set([2]);
         }
       }),
       mapPlacesService: async () => ({
         places: [
           mapPlace({
             id: 1,
-            source: "osm",
-            sourceId: "osm:node/1",
             name: "First Coffee",
-            country: "Romania",
-            city: "Bucharest",
             latitude: 44.43,
             longitude: 26.09,
-            rating: null,
-            numberOfReviews: null,
-            googleRating: null,
-            googleUserRatingCount: null
+            rating: null
           }),
           mapPlace({
             id: 2,
-            source: "osm",
-            sourceId: "osm:node/2",
             name: "Second Coffee",
-            country: "Romania",
-            city: "Bucharest",
             latitude: 44.44,
             longitude: 26.1,
             rating: null,
-            numberOfReviews: null,
             displayKind: "dot",
             displayPriority: 2
           })
@@ -232,14 +144,12 @@ describe("map routes", () => {
       {
         id: 1,
         isSaved: false,
-        savedCollectionIds: [],
         displayKind: "featured",
         displayPriority: 1
       },
       {
         id: 2,
         isSaved: true,
-        savedCollectionIds: ["4b572b66-d74d-49bb-b9b5-9780c266c6f7"],
         displayKind: "dot",
         displayPriority: 2
       }
