@@ -1,8 +1,8 @@
 import { mapPlaceRowToPin } from "../common/map.mappers.js";
 import {
   getCandidateLimit,
-  getDensityLimit,
-  getEffectiveLimit,
+  getDisplayLimits,
+  getEffectiveDisplayLimits,
   rankMapPlaces,
   type MapRankingContext
 } from "../common/map.ranking.js";
@@ -26,15 +26,23 @@ export function createMapPlacesService(
   store: MapStoreContract = new MapStore()
 ): MapPlacesService {
   return async (query) => {
-    const densityLimit = getDensityLimit(query, query.zoom);
-    const effectiveLimit = getEffectiveLimit(query.limit, densityLimit);
-    const candidateLimit = getCandidateLimit(effectiveLimit);
+    const displayLimits = getEffectiveDisplayLimits(
+      query.limit,
+      getDisplayLimits(query, query.zoom)
+    );
+    const candidateLimit = getCandidateLimit(displayLimits.totalLimit);
 
     const rows = await store.placesInBbox(query, candidateLimit);
     const context: MapRankingContext = { zoom: query.zoom };
-    const ranked = rankMapPlaces(rows, context, effectiveLimit);
+    const ranked = rankMapPlaces(rows, context, displayLimits.totalLimit);
 
-    return { places: ranked.map(mapPlaceRowToPin) };
+    return {
+      places: ranked.map((place, index) => ({
+        ...mapPlaceRowToPin(place),
+        displayKind: index < displayLimits.featuredLimit ? "featured" : "dot",
+        displayPriority: index + 1
+      }))
+    };
   };
 }
 

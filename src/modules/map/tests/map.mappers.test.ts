@@ -35,7 +35,9 @@ describe("map place row mapper", () => {
       numberOfReviews: 17,
       rawCuisineStyle: "Italian, Pizza, Mediterranean",
       isSaved: false,
-      savedCollectionIds: []
+      savedCollectionIds: [],
+      displayKind: "dot",
+      displayPriority: 1
     });
   });
 
@@ -71,7 +73,9 @@ describe("map place row mapper", () => {
       numberOfReviews: null,
       rawCuisineStyle: "coffee_shop",
       isSaved: false,
-      savedCollectionIds: []
+      savedCollectionIds: [],
+      displayKind: "dot",
+      displayPriority: 1
     });
   });
 });

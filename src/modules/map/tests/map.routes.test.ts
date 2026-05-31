@@ -62,7 +62,9 @@ describe("map routes", () => {
             numberOfReviews: 17,
             rawCuisineStyle: null,
             isSaved: false,
-            savedCollectionIds: []
+            savedCollectionIds: [],
+            displayKind: "featured",
+            displayPriority: 1
           }
         ]
       })
@@ -92,7 +94,9 @@ describe("map routes", () => {
           numberOfReviews: 17,
           rawCuisineStyle: null,
           isSaved: false,
-          savedCollectionIds: []
+          savedCollectionIds: [],
+          displayKind: "featured",
+          displayPriority: 1
         }
       ]
     });
@@ -132,7 +136,9 @@ describe("map routes", () => {
             numberOfReviews: null,
             rawCuisineStyle: null,
             isSaved: false,
-            savedCollectionIds: []
+            savedCollectionIds: [],
+            displayKind: "featured",
+            displayPriority: 1
           },
           {
             id: 2,
@@ -148,7 +154,9 @@ describe("map routes", () => {
             numberOfReviews: null,
             rawCuisineStyle: null,
             isSaved: false,
-            savedCollectionIds: []
+            savedCollectionIds: [],
+            displayKind: "dot",
+            displayPriority: 2
           }
         ]
       })
@@ -169,12 +177,16 @@ describe("map routes", () => {
       {
         id: 1,
         isSaved: false,
-        savedCollectionIds: []
+        savedCollectionIds: [],
+        displayKind: "featured",
+        displayPriority: 1
       },
       {
         id: 2,
         isSaved: true,
-        savedCollectionIds: ["4b572b66-d74d-49bb-b9b5-9780c266c6f7"]
+        savedCollectionIds: ["4b572b66-d74d-49bb-b9b5-9780c266c6f7"],
+        displayKind: "dot",
+        displayPriority: 2
       }
     ]);
   });
@@ -281,12 +293,12 @@ describe("map routes", () => {
     expect(response.statusCode).toBe(400);
   });
 
-  it("returns 400 when limit is over 200", async () => {
+  it("returns 400 when limit is over 250", async () => {
     const app = await buildApp();
 
     const response = await app.inject({
       method: "GET",
-      url: `${validQuery}&limit=201`
+      url: `${validQuery}&limit=251`
     });
 
     await app.close();

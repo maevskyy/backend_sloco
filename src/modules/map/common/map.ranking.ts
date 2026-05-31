@@ -21,28 +21,51 @@ export const MIN_ZOOM = 1;
 export const MAX_ZOOM = 22;
 
 const CANDIDATE_OVERFETCH = 4;
-const MAX_CANDIDATES = 400;
+const MAX_CANDIDATES = 1000;
 const PERSONALIZATION_WEIGHT = 100;
 
+export type MapDisplayLimits = {
+  featuredLimit: number;
+  totalLimit: number;
+};
+
 /**
- * Max individual places to show for a given zoom level. Intentionally
- * conservative: there is no clustering yet, so this density cap is the only
- * declutter mechanism. See docs/tasks/TASKS_13_MAP_DENSITY_RANKING.md.
+ * Number of places to show for a given zoom level. Featured places render as
+ * normal markers; the remaining places render as lightweight dots.
  */
-export function getMapDensityLimit(zoom: number): number {
-  if (zoom < 11) {
-    return 8;
+export function getMapDisplayLimits(zoom: number): MapDisplayLimits {
+  if (zoom <= 10) {
+    return {
+      featuredLimit: 8,
+      totalLimit: 80
+    };
   }
 
   if (zoom <= 12) {
-    return 15;
+    return {
+      featuredLimit: 12,
+      totalLimit: 120
+    };
   }
 
   if (zoom <= 14) {
-    return 25;
+    return {
+      featuredLimit: 20,
+      totalLimit: 180
+    };
   }
 
-  return 40;
+  if (zoom <= 16) {
+    return {
+      featuredLimit: 30,
+      totalLimit: 220
+    };
+  }
+
+  return {
+    featuredLimit: 40,
+    totalLimit: 250
+  };
 }
 
 /**
@@ -56,23 +79,31 @@ export function deriveZoomFromBbox(bbox: MapViewportBbox): number {
   return clampZoom(Math.floor(zoom));
 }
 
-export function getDensityLimit(
+export function getDisplayLimits(
   bbox: MapViewportBbox,
   zoom?: number
-): number {
+): MapDisplayLimits {
   const effectiveZoom = zoom ?? deriveZoomFromBbox(bbox);
 
-  return getMapDensityLimit(effectiveZoom);
+  return getMapDisplayLimits(effectiveZoom);
 }
 
 /**
- * The user/debug `limit` can only narrow the density cap, never widen it.
+ * The user/debug `limit` can only narrow the total cap, never widen it.
  */
-export function getEffectiveLimit(
+export function getEffectiveDisplayLimits(
   userLimit: number | undefined,
-  densityLimit: number
-): number {
-  return Math.min(userLimit ?? densityLimit, densityLimit);
+  displayLimits: MapDisplayLimits
+): MapDisplayLimits {
+  const totalLimit = Math.min(
+    userLimit ?? displayLimits.totalLimit,
+    displayLimits.totalLimit
+  );
+
+  return {
+    totalLimit,
+    featuredLimit: Math.min(displayLimits.featuredLimit, totalLimit)
+  };
 }
 
 /**

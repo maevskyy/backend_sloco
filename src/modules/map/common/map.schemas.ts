@@ -10,7 +10,7 @@ export const mapPlacesQuerySchema = z
     swLng: coordinateSchema,
     neLat: coordinateSchema,
     neLng: coordinateSchema,
-    limit: z.coerce.number().int().min(1).max(200).optional(),
+    limit: z.coerce.number().int().min(1).max(250).optional(),
     zoom: z.coerce.number().int().min(1).max(22).optional()
   })
   .refine((query) => query.swLat <= query.neLat, {
@@ -34,9 +34,11 @@ export const mapPlaceSchema = z.object({
   rating: z.number().nullable(),
   priceLevel: z.number().int().min(1).max(4).nullable(),
   numberOfReviews: z.number().int().nullable(),
-  rawCuisineStyle: z.string().nullable(),
-  isSaved: z.boolean(),
-  savedCollectionIds: z.array(z.string().uuid())
+    rawCuisineStyle: z.string().nullable(),
+    isSaved: z.boolean(),
+  savedCollectionIds: z.array(z.string().uuid()),
+  displayKind: z.enum(["featured", "dot"]),
+  displayPriority: z.number().int().min(1)
 });
 
 export const mapPlacesResponseSchema = z.object({

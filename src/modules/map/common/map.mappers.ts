@@ -17,7 +17,9 @@ export function mapPlaceRowToPin(row: PlaceRow): MapPlacePin {
       getStringAttribute(row.attributes, "raw_cuisine_style") ??
       getStringAttribute(row.attributes, "cuisine"),
     isSaved: false,
-    savedCollectionIds: []
+    savedCollectionIds: [],
+    displayKind: "dot",
+    displayPriority: 1
   };
 }
 

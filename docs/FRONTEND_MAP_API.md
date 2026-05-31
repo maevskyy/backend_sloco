@@ -130,7 +130,7 @@ Parameters:
 | `neLat` | number | yes | North-east map corner latitude. |
 | `neLng` | number | yes | North-east map corner longitude. |
 | `zoom` | number | no | Map zoom level (`1`-`22`). Controls how many places the backend returns. If omitted, density is derived from the bbox span. |
-| `limit` | number | no | Optional cap, max `200`. Backend still clamps it against zoom-based density. |
+| `limit` | number | no | Optional cap, max `250`. Backend still clamps it against zoom-based density. |
 
 The frontend gets these values from the current visible map rectangle.
 
@@ -143,22 +143,27 @@ neLat=52.5600
 neLng=13.4700
 ```
 
-## Density And Zoom
+## Density, Zoom, And Marker Display
 
 The backend, not the frontend, decides how many places to show. Send the current
-map `zoom` and the backend returns a readable number of the best-ranked places
-for that zoom:
+map `zoom` and the backend returns ranked places with display metadata.
 
-| Zoom | Level | Approx. max places |
-| --- | --- | --- |
-| `< 11` | city | 8 |
-| `11-12` | district | 15 |
-| `13-14` | neighborhood | 25 |
-| `>= 15` | street | 40 |
+The response has two marker tiers:
 
-`limit` can only lower this, never raise it: requesting `limit=200` at zoom `13`
-still returns about `25`. If `zoom` is omitted, the backend derives density from
-the bbox span.
+- `featured`: normal/icon marker;
+- `dot`: small lightweight point.
+
+| Zoom | Level | Featured places | Total places |
+| --- | --- | ---: | ---: |
+| `<= 10` | whole city | 8 | 80 |
+| `11-12` | large area | 12 | 120 |
+| `13-14` | district / blocks | 20 | 180 |
+| `15-16` | streets / blocks | 30 | 220 |
+| `>= 17` | close view | 40 | 250 |
+
+`limit` can only lower total places, never raise it. For example, requesting
+`limit=20` at zoom `13` returns at most `20` total places. If `zoom` is omitted,
+the backend derives display limits from the bbox span.
 
 ## Response
 
@@ -181,7 +186,9 @@ Successful response:
       "numberOfReviews": 17,
       "rawCuisineStyle": null,
       "isSaved": false,
-      "savedCollectionIds": []
+      "savedCollectionIds": [],
+      "displayKind": "featured",
+      "displayPriority": 1
     }
   ]
 }
@@ -205,6 +212,8 @@ Fields:
 | `rawCuisineStyle` | string or null | Raw cuisine/tags string from source data. |
 | `isSaved` | boolean | Whether the authenticated user saved this place. Public map requests return `false`. |
 | `savedCollectionIds` | string[] | Collection ids containing the place for the authenticated user. Public map requests return `[]`. |
+| `displayKind` | `"featured"` or `"dot"` | Rendering hint. Use `featured` for normal markers and `dot` for small lightweight points. |
+| `displayPriority` | number | 1-based ranking position in the current bbox. Lower number means higher priority. |
 
 The response does not include heavy fields like reviews or embedding text.
 Missing numeric signals are returned as `null`.
@@ -231,6 +240,13 @@ struct MapPlace: Decodable, Identifiable {
     let rawCuisineStyle: String?
     let isSaved: Bool
     let savedCollectionIds: [String]
+    let displayKind: DisplayKind
+    let displayPriority: Int
+}
+
+enum DisplayKind: String, Decodable {
+    case featured
+    case dot
 }
 ```
 
@@ -277,14 +293,18 @@ Frontend flow:
    and reads the current map `zoom` level.
 
 4. iOS calls `GET /v1/map/places` with the bbox and `zoom`.
-5. iOS renders one pin per item using:
+5. iOS renders one marker per item using:
 
    ```text
    latitude
    longitude
    ```
 
-6. When the map region changes, iOS should debounce requests.
+   Use `displayKind == .featured` for normal markers and `displayKind == .dot`
+   for small lightweight points.
+
+6. Use `displayPriority` for z-index / tap priority if markers overlap.
+7. When the map region changes, iOS should debounce requests.
 
 Recommended debounce:
 

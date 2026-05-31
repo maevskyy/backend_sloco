@@ -2,9 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
   deriveZoomFromBbox,
   getCandidateLimit,
-  getDensityLimit,
-  getEffectiveLimit,
-  getMapDensityLimit,
+  getDisplayLimits,
+  getEffectiveDisplayLimits,
+  getMapDisplayLimits,
   rankMapPlaces,
   scoreMapPlace,
   type MapRankingContext,
@@ -23,38 +23,76 @@ function place(overrides: Partial<ScorablePlace>): ScorablePlace {
   };
 }
 
-describe("getMapDensityLimit", () => {
+describe("getMapDisplayLimits", () => {
   it("returns expected limits per zoom bucket", () => {
-    expect(getMapDensityLimit(5)).toBe(8);
-    expect(getMapDensityLimit(10)).toBe(8);
-    expect(getMapDensityLimit(11)).toBe(15);
-    expect(getMapDensityLimit(12)).toBe(15);
-    expect(getMapDensityLimit(13)).toBe(25);
-    expect(getMapDensityLimit(14)).toBe(25);
-    expect(getMapDensityLimit(15)).toBe(40);
-    expect(getMapDensityLimit(20)).toBe(40);
+    expect(getMapDisplayLimits(5)).toEqual({
+      featuredLimit: 8,
+      totalLimit: 80
+    });
+    expect(getMapDisplayLimits(10)).toEqual({
+      featuredLimit: 8,
+      totalLimit: 80
+    });
+    expect(getMapDisplayLimits(11)).toEqual({
+      featuredLimit: 12,
+      totalLimit: 120
+    });
+    expect(getMapDisplayLimits(12)).toEqual({
+      featuredLimit: 12,
+      totalLimit: 120
+    });
+    expect(getMapDisplayLimits(13)).toEqual({
+      featuredLimit: 20,
+      totalLimit: 180
+    });
+    expect(getMapDisplayLimits(14)).toEqual({
+      featuredLimit: 20,
+      totalLimit: 180
+    });
+    expect(getMapDisplayLimits(16)).toEqual({
+      featuredLimit: 30,
+      totalLimit: 220
+    });
+    expect(getMapDisplayLimits(17)).toEqual({
+      featuredLimit: 40,
+      totalLimit: 250
+    });
+    expect(getMapDisplayLimits(20)).toEqual({
+      featuredLimit: 40,
+      totalLimit: 250
+    });
   });
 });
 
 describe("getCandidateLimit", () => {
-  it("overfetches 4x and caps at 400", () => {
-    expect(getCandidateLimit(8)).toBe(32);
-    expect(getCandidateLimit(25)).toBe(100);
-    expect(getCandidateLimit(200)).toBe(400);
+  it("overfetches 4x and caps at 1000", () => {
+    expect(getCandidateLimit(80)).toBe(320);
+    expect(getCandidateLimit(250)).toBe(1000);
+    expect(getCandidateLimit(400)).toBe(1000);
   });
 });
 
-describe("getEffectiveLimit", () => {
-  it("uses density when the user limit is absent", () => {
-    expect(getEffectiveLimit(undefined, 25)).toBe(25);
+describe("getEffectiveDisplayLimits", () => {
+  const displayLimits = {
+    featuredLimit: 20,
+    totalLimit: 180
+  };
+
+  it("uses display limits when the user limit is absent", () => {
+    expect(getEffectiveDisplayLimits(undefined, displayLimits)).toEqual(
+      displayLimits
+    );
   });
 
-  it("never exceeds density", () => {
-    expect(getEffectiveLimit(200, 25)).toBe(25);
+  it("never exceeds the total limit", () => {
+    expect(getEffectiveDisplayLimits(200, displayLimits)).toEqual(displayLimits);
   });
 
   it("honors a smaller user limit", () => {
-    expect(getEffectiveLimit(10, 25)).toBe(10);
+    expect(getEffectiveDisplayLimits(10, displayLimits)).toEqual({
+      featuredLimit: 10,
+      totalLimit: 10
+    });
   });
 });
 
@@ -85,17 +123,23 @@ describe("deriveZoomFromBbox", () => {
   });
 });
 
-describe("getDensityLimit", () => {
+describe("getDisplayLimits", () => {
   it("uses the zoom bucket when zoom is provided", () => {
     const bbox = { swLat: 0, swLng: 0, neLat: 1, neLng: 1 };
 
-    expect(getDensityLimit(bbox, 13)).toBe(25);
+    expect(getDisplayLimits(bbox, 13)).toEqual({
+      featuredLimit: 20,
+      totalLimit: 180
+    });
   });
 
-  it("falls back to bbox-derived density when zoom is absent", () => {
+  it("falls back to bbox-derived display limits when zoom is absent", () => {
     const bbox = { swLat: 0, swLng: 0, neLat: 0.01, neLng: 0.01 };
 
-    expect(getDensityLimit(bbox)).toBe(40);
+    expect(getDisplayLimits(bbox)).toEqual({
+      featuredLimit: 30,
+      totalLimit: 220
+    });
   });
 });
 
