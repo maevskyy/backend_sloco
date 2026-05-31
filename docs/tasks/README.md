@@ -15,7 +15,7 @@ Task files live here as `TASKS_N_NAME.md`.
 | Done | `TASKS_5_LOGGING.md` | Grafana Cloud logging setup. Historical Lightsail setup. |
 | Done | `TASKS_6_POLISHED_LOGS.md` | Structured backend logging. |
 | Done | `TASKS_7_GRAFANA_DASHBOARD_LOGS.md` | Grafana logs dashboard. |
-| Done | `TASKS_8_REPO_REFACTORING.md` | Repo structure cleanup plan. |
+| Done | `TASKS_8_REPO_REFACTORING.md` | Current lightweight layered OOP module architecture. |
 | Done | `TASKS_9_SWAGGER.md` | Swagger/OpenAPI contract for frontend. |
 | Done | `TASKS_10_SERVER_METRICS.md` | Server and backend container metrics dashboard. Historical host setup. |
 | Done | `TASKS_11_DB_PLACES.md` | Unified source-agnostic `places` table. |

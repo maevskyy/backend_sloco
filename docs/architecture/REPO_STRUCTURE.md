@@ -39,19 +39,31 @@ Rules:
 Module pattern:
 
 ```text
-src/modules/map/
-  map.routes.ts
-  map.schemas.ts
-  map.service.ts
-  map.routes.test.ts
+src/modules/<feature>/
+  AGENTS.md                 optional local module guide
+  index.ts                  public entrypoint for other modules
+  <feature>.module.ts       composition root / dependency wiring
+  controllers/              Fastify HTTP layer
+  services/                 business logic / orchestration
+  stores/                   Supabase/data access
+  common/                   types, errors, mappers, schemas, openapi
+  tests/                    controller/service/store tests
 ```
 
-Add more files only when useful:
+Rules:
 
-- `*.repository.ts` for complex database access;
-- `*.mapper.ts` for noisy response/domain mapping;
-- `*.types.ts` for types shared across multiple files;
-- `src/clients/` for external HTTP/service clients.
+- `src/modules/saved-places/` is the reference implementation.
+- Dependencies point inward: `controllers -> services -> stores`.
+- Controllers own HTTP concerns only: auth, request parsing, response logging,
+  and mapping domain errors to status codes.
+- Services own business logic and depend on store contracts/interfaces.
+- Stores are the only layer that talks to Supabase/database APIs.
+- `common/` contains module-local shared building blocks: schemas, OpenAPI,
+  types, errors, and mappers.
+- Other modules should import through `src/modules/<feature>/index.ts`, not from
+  a module's internal folders.
+- Existing flat modules can stay flat until touched for meaningful work; new or
+  rewritten product modules should use the layered pattern.
 
 ## `docs/`
 
@@ -145,14 +157,22 @@ Rules:
 
 ## Swagger / OpenAPI
 
-Future Swagger setup should not become a second source of truth.
+Swagger/OpenAPI should not become a second source of truth.
 
 Recommended shape:
 
 ```text
 src/config/swagger.ts
-src/modules/*/*.schemas.ts
+src/modules/<feature>/common/<feature>.schemas.ts
+src/modules/<feature>/common/<feature>.openapi.ts
 docs/api/
 ```
 
-The route schema should drive validation and OpenAPI output as much as possible.
+Rules:
+
+- Zod request/response schemas are the preferred source of truth.
+- Module OpenAPI files should generate JSON Schema components from those schemas
+  where practical.
+- Route schemas should reference generated components with stable ids.
+- `src/config/swagger.ts` registers cross-module components and exposes the
+  generated OpenAPI document.

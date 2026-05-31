@@ -587,13 +587,26 @@ Keep module path:
 src/modules/saved-places/
 ```
 
-Update:
+Current architecture target:
 
-- `saved-places.schemas.ts`
-- `saved-places.service.ts`
-- `saved-places.routes.ts`
-- `saved-places.openapi.ts`
-- tests.
+```text
+src/modules/saved-places/
+  index.ts
+  saved-places.module.ts
+  controllers/
+  services/
+  stores/
+  common/
+  tests/
+```
+
+Update the relevant layer:
+
+- request/response schemas and OpenAPI in `common/`;
+- HTTP route handling in `controllers/`;
+- business logic in `services/`;
+- Supabase/database access in `stores/`;
+- controller/service tests in `tests/`.
 
 Service responsibilities:
 

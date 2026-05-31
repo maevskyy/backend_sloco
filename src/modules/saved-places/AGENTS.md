@@ -1,9 +1,9 @@
 # AGENTS.md — saved-places module
 
-Local guide for the `saved-places` module. This module intentionally uses a
-**layered OOP** shape, which differs from the flat module pattern described in
-the repo-root `backend/AGENTS.md`. It is kept as a reference / comparison point.
-When the two disagree, this file wins **for this module only**.
+Local guide for the `saved-places` module. This module is the current reference
+implementation of the repo's **lightweight layered OOP** architecture. Use this
+shape when migrating other product modules away from the old flat Fastify
+module style.
 
 ## Purpose
 
@@ -80,9 +80,9 @@ never import outer ones.
   `common/saved-places.schemas.ts`, and registered in `savedPlacesSchemaRegistry`
   with a stable `id`. That `id` is the OpenAPI component name / Fastify `$id` and
   is part of the published contract — **do not rename ids casually.**
-- TS DTO types in `common/saved-places.types.ts` are `z.infer<>` of those schemas.
-  (DB-row types and the `*Contract` interfaces stay hand-written — they are not the
-  HTTP contract.)
+- Prefer TS DTO types in `common/saved-places.types.ts` to be `z.infer<>` of
+  response/request schemas when practical. DB-row types and the `*Contract`
+  interfaces stay hand-written because they are not the HTTP contract.
 - `common/saved-places.openapi.ts` **generates** the JSON-Schema components from the
   registry via `z.toJSONSchema(..., { target: "openapi-3.0" })` and builds route
   schemas with the `defineRoute` helper (shared `tags`/`security`/error responses).

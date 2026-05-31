@@ -108,6 +108,30 @@ TripAdvisor -> scripts/integrations/tripadvisor/map.ts
 OpenStreetMap -> scripts/integrations/osm/map.ts
 ```
 
+## Active Module Architecture
+
+New or rewritten product modules use a lightweight layered OOP shape:
+
+```text
+src/modules/<feature>/
+  index.ts
+  <feature>.module.ts
+  controllers/
+  services/
+  stores/
+  common/
+  tests/
+```
+
+Dependency direction:
+
+```text
+controller -> service -> store
+```
+
+`src/modules/saved-places/` is the reference implementation. Existing flat
+modules like `map` are legacy/simple modules and can be migrated when touched.
+
 ## Current Priorities
 
 - Keep backend deploy simple: one Hetzner host, Docker Compose, managed

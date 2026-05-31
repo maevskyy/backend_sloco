@@ -60,8 +60,13 @@ This folder is the main navigation point for backend documentation.
 Current note:
 
 - Markdown API docs are usage docs.
-- Swagger/OpenAPI is generated from route schemas, not maintained as a separate
-  hand-written source of truth.
+- Swagger/OpenAPI is generated from module schemas/route schemas, not maintained
+  as a separate hand-written source of truth.
+- New product modules should follow the layered OOP shape documented in:
+  ```text
+  architecture/REPO_STRUCTURE.md
+  ../src/modules/saved-places/AGENTS.md
+  ```
 
 ## Operations Docs
 
@@ -108,3 +113,6 @@ New task docs should also be created in `docs/tasks/`.
 - Data import files live in `dumps/`.
 - Offline ETL and source mappers live in `scripts/`.
 - Product and agent conventions live in `AGENTS.md`.
+- Module architecture conventions live in `../AGENTS.md`,
+  `architecture/REPO_STRUCTURE.md`, and module-local `AGENTS.md` files when
+  present.

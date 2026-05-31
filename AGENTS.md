@@ -47,17 +47,22 @@ Start with:
 
 Keep feature code inside `src/modules/<feature>/`.
 
-Current module pattern:
+New feature modules should use the lightweight layered OOP module pattern.
+`src/modules/saved-places/AGENTS.md` is the current reference implementation.
 
 ```text
-src/modules/map/
-  map.routes.ts
-  map.schemas.ts
-  map.service.ts
-  map.routes.test.ts
+src/modules/<feature>/
+  AGENTS.md                 optional for complex modules
+  index.ts                  public module entrypoint
+  <feature>.module.ts       composition root / dependency wiring
+  controllers/              Fastify HTTP layer
+  services/                 business logic / orchestration
+  stores/                   Supabase/data access
+  common/                   types, errors, mappers, schemas, openapi
+  tests/                    controller/service/store tests
 ```
 
-Use this pattern for new modules:
+Use this pattern for new or rewritten product modules:
 
 - `cities`
 - `places`
@@ -65,12 +70,21 @@ Use this pattern for new modules:
 - `saved-places`
 - `recommendations`
 
-Add extra files only when needed:
+Layer rules:
 
-- `*.repository.ts` for complex database queries;
-- `*.mapper.ts` for noisy mapping;
-- `*.types.ts` for shared module types;
-- `src/clients/` for external services like the future Python scoring service.
+- dependencies point inward: `controller -> service -> store`;
+- controllers parse HTTP input, call services, map domain errors to HTTP;
+- services contain business logic and depend on store contracts, not Supabase;
+- stores are the only layer that talks to Supabase/database APIs;
+- `index.ts` is the public import surface for other modules;
+- prefer constructor injection for collaborators;
+- keep request/response schemas in `common/<feature>.schemas.ts`;
+- generate OpenAPI components from schemas where practical;
+- do not import another module's internals when its `index.ts` exports what you need.
+
+Existing flat modules like `map` are legacy/simple modules. When they grow or are
+actively touched for architecture work, migrate them toward the layered pattern
+instead of extending the old flat shape.
 
 ## Commands
 
@@ -226,11 +240,12 @@ Do not update `AGENTS.md` for every small feature.
 
 ## Swagger Direction
 
-Swagger/OpenAPI should be a separate task.
-
-Preferred direction:
+Swagger/OpenAPI direction:
 
 - keep schemas near modules;
-- avoid hand-written OpenAPI as a second source of truth;
-- expose generated docs locally first;
-- decide production exposure later.
+- use Zod as the request/response source of truth where practical;
+- generate JSON Schema/OpenAPI components from module schemas instead of
+  maintaining hand-written duplicates;
+- keep route OpenAPI helpers in `common/<feature>.openapi.ts`;
+- register module component schemas in `src/config/swagger.ts`;
+- expose generated docs at `/v1/swagger/docs` and `/v1/swagger/openapi.json`.
