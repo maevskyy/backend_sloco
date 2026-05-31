@@ -84,6 +84,27 @@ Frontend agents should use `/v1/swagger/openapi.json` as the source of truth.
 GET /v1/map/places?swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700&zoom=13
 ```
 
+## Current Saved Places API
+
+```http
+GET /v1/me/saved
+GET /v1/me/saved/collections/:collectionId
+POST /v1/me/saved/places
+DELETE /v1/me/saved/places/:placeId
+POST /v1/me/saved/collections
+PATCH /v1/me/saved/collections/:collectionId
+DELETE /v1/me/saved/collections/:collectionId
+POST /v1/me/saved/collections/:collectionId/places
+DELETE /v1/me/saved/collections/:collectionId/places/:placeId
+PATCH /v1/me/saved/collections/:collectionId/places/order
+```
+
+These endpoints require:
+
+```http
+Authorization: Bearer <supabase_access_token>
+```
+
 Frontend handoff docs:
 
 ```text

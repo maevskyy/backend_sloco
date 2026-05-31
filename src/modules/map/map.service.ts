@@ -36,6 +36,8 @@ export type MapPlacePin = {
   priceLevel: number | null;
   numberOfReviews: number | null;
   rawCuisineStyle: string | null;
+  isSaved: boolean;
+  savedCollectionIds: string[];
 };
 
 export type MapPlacesResult = {
@@ -87,7 +89,9 @@ export function mapPlaceRowToPin(row: PlaceRow): MapPlacePin {
     numberOfReviews: row.reviews_count,
     rawCuisineStyle:
       getStringAttribute(row.attributes, "raw_cuisine_style") ??
-      getStringAttribute(row.attributes, "cuisine")
+      getStringAttribute(row.attributes, "cuisine"),
+    isSaved: false,
+    savedCollectionIds: []
   };
 }
 

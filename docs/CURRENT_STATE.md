@@ -49,6 +49,16 @@ curl "http://65.108.142.55/v1/map/places?swLat=52.4800&swLng=13.3300&neLat=52.56
 GET /v1/health
 GET /v1/health/supabase
 GET /v1/me
+GET /v1/me/saved
+GET /v1/me/saved/collections/:collectionId
+POST /v1/me/saved/places
+DELETE /v1/me/saved/places/:placeId
+POST /v1/me/saved/collections
+PATCH /v1/me/saved/collections/:collectionId
+DELETE /v1/me/saved/collections/:collectionId
+POST /v1/me/saved/collections/:collectionId/places
+DELETE /v1/me/saved/collections/:collectionId/places/:placeId
+PATCH /v1/me/saved/collections/:collectionId/places/order
 GET /v1/map/places?swLat=...&swLng=...&neLat=...&neLng=...&zoom=...
 GET /v1/swagger/docs
 GET /v1/swagger/openapi.json
@@ -71,6 +81,9 @@ docs/FRONTEND_MAP_API.md
 ```text
 Serving table: public.places
 Auth profile table: public.profiles
+Saved places table: public.saved_places
+Saved collections table: public.saved_collections
+Saved collection membership table: public.saved_collection_places
 Geo RPC: public.places_in_bbox(sw_lat, sw_lng, ne_lat, ne_lng, result_limit)
 Migrations: supabase/migrations/
 ```
@@ -100,8 +113,8 @@ OpenStreetMap -> scripts/integrations/osm/map.ts
 - Keep backend deploy simple: one Hetzner host, Docker Compose, managed
   Supabase.
 - Keep map API lightweight: bbox query, density/ranking, no heavy place details.
-- Build auth foundation next: Supabase Auth on iOS, JWT validation on backend,
-  then saves/taste/profile.
+- Build the next user-owned product layers: taste profile, favorite place input,
+  and personalization on top of saved places.
 - Keep task docs as history/plans; prefer this file for current context.
 - Do not self-host Postgres during MVP unless there is a real business or cost
   reason.

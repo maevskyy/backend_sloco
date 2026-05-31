@@ -34,11 +34,30 @@ describe("swagger docs", () => {
     expect(openApi.paths[VersionedAppRoute.health]).toBeDefined();
     expect(openApi.paths[VersionedAppRoute.supabaseHealth]).toBeDefined();
     expect(openApi.paths[VersionedAppRoute.me]).toBeDefined();
+    expect(openApi.paths[VersionedAppRoute.meSaved]).toBeDefined();
+    expect(openApi.paths[VersionedAppRoute.meSavedPlaces]).toBeDefined();
+    expect(
+      openApi.paths[
+        VersionedAppRoute.meSavedCollection.replace(
+          ":collectionId",
+          "{collectionId}"
+        )
+      ]
+    ).toBeDefined();
+    expect(
+      openApi.paths[
+        VersionedAppRoute.meSavedPlace.replace(":placeId", "{placeId}")
+      ]
+    ).toBeDefined();
     expect(openApi.paths[VersionedAppRoute.mapPlaces]).toBeDefined();
     expect(openApi.components.securitySchemes.bearerAuth).toBeDefined();
     expect(openApi.components.schemas.MeResponse).toBeDefined();
     expect(openApi.components.schemas.AuthErrorResponse).toBeDefined();
     expect(openApi.components.schemas.MapPlace).toBeDefined();
     expect(openApi.components.schemas.MapPlacesResponse).toBeDefined();
+    expect(openApi.components.schemas.SavePlaceResponse).toBeDefined();
+    expect(openApi.components.schemas.UnsavePlaceResponse).toBeDefined();
+    expect(openApi.components.schemas.SavedDashboardResponse).toBeDefined();
+    expect(openApi.components.schemas.SavedCollectionDetailResponse).toBeDefined();
   });
 });

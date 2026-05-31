@@ -121,6 +121,21 @@ Current frontend-facing map endpoint:
 GET /v1/map/places?swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700&zoom=13
 ```
 
+Current saved places endpoints:
+
+```http
+GET /v1/me/saved
+GET /v1/me/saved/collections/:collectionId
+POST /v1/me/saved/places
+DELETE /v1/me/saved/places/:placeId
+POST /v1/me/saved/collections
+PATCH /v1/me/saved/collections/:collectionId
+DELETE /v1/me/saved/collections/:collectionId
+POST /v1/me/saved/collections/:collectionId/places
+DELETE /v1/me/saved/collections/:collectionId/places/:placeId
+PATCH /v1/me/saved/collections/:collectionId/places/order
+```
+
 Contract docs:
 
 ```text
@@ -139,6 +154,9 @@ Current serving table:
 
 ```text
 public.places
+public.saved_places
+public.saved_collections
+public.saved_collection_places
 ```
 
 Migration files:

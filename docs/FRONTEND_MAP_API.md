@@ -85,6 +85,18 @@ Use this endpoint when the map opens or when the visible map region changes.
 GET /v1/map/places
 ```
 
+The endpoint is public, but can also accept auth:
+
+```http
+Authorization: Bearer <supabase_access_token>
+```
+
+If auth is omitted, every place returns `isSaved: false` and
+`savedCollectionIds: []`.
+If auth is valid, `isSaved` and `savedCollectionIds` reflect the current user's
+saved state.
+If auth is invalid, the backend returns `401`.
+
 Example:
 
 ```bash
@@ -167,7 +179,9 @@ Successful response:
       "rating": 4,
       "priceLevel": 2,
       "numberOfReviews": 17,
-      "rawCuisineStyle": null
+      "rawCuisineStyle": null,
+      "isSaved": false,
+      "savedCollectionIds": []
     }
   ]
 }
@@ -189,6 +203,8 @@ Fields:
 | `priceLevel` | number or null | Normalized price level from `1` to `4`. |
 | `numberOfReviews` | number or null | Number of source reviews. |
 | `rawCuisineStyle` | string or null | Raw cuisine/tags string from source data. |
+| `isSaved` | boolean | Whether the authenticated user saved this place. Public map requests return `false`. |
+| `savedCollectionIds` | string[] | Collection ids containing the place for the authenticated user. Public map requests return `[]`. |
 
 The response does not include heavy fields like reviews or embedding text.
 Missing numeric signals are returned as `null`.
@@ -213,6 +229,8 @@ struct MapPlace: Decodable, Identifiable {
     let priceLevel: Int?
     let numberOfReviews: Int?
     let rawCuisineStyle: String?
+    let isSaved: Bool
+    let savedCollectionIds: [String]
 }
 ```
 
@@ -308,13 +326,119 @@ Example response:
 }
 ```
 
+## Saved Places API
+
+Use these endpoints after Supabase Auth login.
+
+Auth header:
+
+```http
+Authorization: Bearer <session.access_token>
+```
+
+Get Saved dashboard:
+
+```http
+GET /v1/me/saved
+```
+
+Response:
+
+```json
+{
+  "summary": {
+    "savedPlaceCount": 6,
+    "collectionCount": 3,
+    "recommendationsUseSavedPlaces": true
+  },
+  "collections": [],
+  "recentlySaved": []
+}
+```
+
+Get collection detail:
+
+```http
+GET /v1/me/saved/collections/:collectionId
+```
+
+Response:
+
+```json
+{
+  "collection": {},
+  "places": [],
+  "availableCollections": []
+}
+```
+
+Save place:
+
+```http
+POST /v1/me/saved/places
+Content-Type: application/json
+```
+
+Body:
+
+```json
+{
+  "placeId": 123,
+  "collectionIds": ["4b572b66-d74d-49bb-b9b5-9780c266c6f7"]
+}
+```
+
+If `collectionIds` is omitted, backend adds the place to the user's default
+`Want to go` collection.
+
+Response:
+
+```json
+{
+  "placeId": 123,
+  "isSaved": true,
+  "collectionIds": ["4b572b66-d74d-49bb-b9b5-9780c266c6f7"],
+  "savedAt": "2026-05-31T10:00:00.000Z"
+}
+```
+
+Unsave place:
+
+```http
+DELETE /v1/me/saved/places/:placeId
+```
+
+Response:
+
+```json
+{
+  "placeId": 123,
+  "isSaved": false,
+  "collectionIds": []
+}
+```
+
+Collection mutations:
+
+```http
+POST /v1/me/saved/collections
+PATCH /v1/me/saved/collections/:collectionId
+DELETE /v1/me/saved/collections/:collectionId
+POST /v1/me/saved/collections/:collectionId/places
+DELETE /v1/me/saved/collections/:collectionId/places/:placeId
+PATCH /v1/me/saved/collections/:collectionId/places/order
+```
+
+Use Swagger as source of truth for exact body and response schemas.
+
+Frontend can optimistically flip the saved heart and revert if the backend
+returns an error.
+
 ## Current Limitations
 
 - Only Berlin test data is available.
 - Coordinates are randomly distributed inside central Berlin.
 - This is not accurate geocoding yet.
-- No auth yet.
-- No saved state yet.
 - No personalization score yet.
 - No `whyRecommended` yet.
 - No category filtering yet.

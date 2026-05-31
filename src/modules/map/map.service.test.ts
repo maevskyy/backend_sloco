@@ -36,7 +36,9 @@ describe("map place row mapper", () => {
       rating: 4,
       priceLevel: 2,
       numberOfReviews: 17,
-      rawCuisineStyle: "Italian, Pizza, Mediterranean"
+      rawCuisineStyle: "Italian, Pizza, Mediterranean",
+      isSaved: false,
+      savedCollectionIds: []
     });
   });
 
@@ -70,7 +72,9 @@ describe("map place row mapper", () => {
       rating: null,
       priceLevel: null,
       numberOfReviews: null,
-      rawCuisineStyle: "coffee_shop"
+      rawCuisineStyle: "coffee_shop",
+      isSaved: false,
+      savedCollectionIds: []
     });
   });
 });

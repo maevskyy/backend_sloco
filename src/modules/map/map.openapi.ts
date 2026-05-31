@@ -107,7 +107,9 @@ export const mapPlaceSchema = {
     "rating",
     "priceLevel",
     "numberOfReviews",
-    "rawCuisineStyle"
+    "rawCuisineStyle",
+    "isSaved",
+    "savedCollectionIds"
   ],
   properties: {
     id: {
@@ -163,6 +165,22 @@ export const mapPlaceSchema = {
       type: "string",
       nullable: true,
       example: "Italian, Pizza, Mediterranean"
+    },
+    isSaved: {
+      type: "boolean",
+      description:
+        "Whether the authenticated user saved this place. Public requests return false.",
+      example: false
+    },
+    savedCollectionIds: {
+      type: "array",
+      description:
+        "Saved collection ids containing this place. Public requests return an empty array.",
+      items: {
+        type: "string",
+        format: "uuid"
+      },
+      example: []
     }
   }
 } as const;
@@ -195,7 +213,9 @@ export const mapPlacesResponseSchema = {
         rating: 4,
         priceLevel: 2,
         numberOfReviews: 17,
-        rawCuisineStyle: null
+        rawCuisineStyle: null,
+        isSaved: false,
+        savedCollectionIds: []
       }
     ]
   }
@@ -215,6 +235,9 @@ export const mapPlacesRouteSchema = {
     },
     400: {
       $ref: "ValidationErrorResponse#"
+    },
+    401: {
+      $ref: "AuthErrorResponse#"
     },
     500: {
       $ref: "ErrorResponse#"

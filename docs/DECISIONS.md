@@ -15,6 +15,7 @@ of the choices that affect future work.
 | Map density | Backend ranks and limits results | Frontend renders; backend decides what is worth showing. |
 | Data imports | Offline mappers + manual Supabase import | Good enough for MVP, keeps provider quirks out of API code. |
 | Auth | iOS Supabase Auth SDK + backend JWT validation | Supabase handles sign up/sign in/session; backend owns product APIs and user-owned data. |
+| Saved places | `public.saved_places`, `public.saved_collections`, and `public.saved_collection_places` via backend-only APIs | Keeps user-owned data private, supports the iOS Saved tab, and turns saved/collection intent into future recommendation signal. |
 | API contract | Swagger/OpenAPI | Frontend agents can consume generated contract. |
 | Observability | Grafana Cloud + Alloy for now | Fast visibility; self-hosting remains a later cost/control decision. |
 | Git flow | User commits and pushes manually | Agents edit and verify, but do not commit/push. |
