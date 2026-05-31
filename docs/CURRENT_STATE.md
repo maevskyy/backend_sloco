@@ -6,7 +6,7 @@ backend without the historical task-plan noise.
 ## Runtime
 
 ```text
-Production API: http://65.108.142.55
+Production API: https://sloco.pp.ua
 Runtime host: Hetzner Ubuntu server
 App runtime: Docker Compose + Nginx
 Deploy: GitHub Actions -> GHCR -> SSH -> docker compose
@@ -38,9 +38,9 @@ pnpm map:osm dumps/bucharest_cafes.csv --out dumps/osm_bucharest_places.csv
 Production smoke checks:
 
 ```bash
-curl http://65.108.142.55/v1/health
-curl http://65.108.142.55/v1/health/supabase
-curl "http://65.108.142.55/v1/map/places?swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700&zoom=13"
+curl https://sloco.pp.ua/v1/health
+curl https://sloco.pp.ua/v1/health/supabase
+curl "https://sloco.pp.ua/v1/map/places?swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700&zoom=13"
 ```
 
 ## Active API
@@ -67,7 +67,7 @@ GET /v1/swagger/openapi.json
 OpenAPI is the contract source of truth for frontend agents:
 
 ```text
-http://65.108.142.55/v1/swagger/openapi.json
+https://sloco.pp.ua/v1/swagger/openapi.json
 ```
 
 Human docs for the map endpoint:

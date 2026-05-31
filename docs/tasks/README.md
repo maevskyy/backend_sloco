@@ -32,6 +32,7 @@ Task files live here as `TASKS_N_NAME.md`.
 
 - `TBD_DOMAIN_HTTPS_NGINX_HARDENING.md` - future domain, HTTPS, and Nginx hardening.
 - `TBD_SELF_HOST_OBSERVABILITY.md` - future move from Grafana Cloud to self-hosted Grafana, Loki, and Prometheus.
+- `TBD_TRACING_LATENCY_BREAKDOWN.md` - future OpenTelemetry tracing for backend, database, and response latency breakdown.
 
 ## Naming Rule
 

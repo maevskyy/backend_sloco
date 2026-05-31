@@ -65,8 +65,8 @@ GET /v1/health/supabase
 Production:
 
 ```bash
-curl http://65.108.142.55/v1/health
-curl http://65.108.142.55/v1/health/supabase
+curl https://sloco.pp.ua/v1/health
+curl https://sloco.pp.ua/v1/health/supabase
 ```
 
 ## API Contract

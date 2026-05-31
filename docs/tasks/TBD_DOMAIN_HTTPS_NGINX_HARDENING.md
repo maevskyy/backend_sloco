@@ -11,16 +11,32 @@ logs.
 Status:
 
 ```text
-TBD / backlog
+Ready / DNS verified for sloco.pp.ua
 ```
 
-This is intentionally not the next numbered task. Keep it as a ready-to-run
-plan for when we decide to buy a domain and move production to HTTPS.
+The domain is already selected:
+
+```text
+sloco.pp.ua
+```
+
+Before enabling HTTPS, verify that the domain reaches the Hetzner backend:
+
+```bash
+curl -I http://sloco.pp.ua/v1/health
+```
+
+Expected:
+
+```text
+HTTP/1.1 200 OK
+Server: nginx/1.24.0 (Ubuntu)
+```
 
 Target production shape:
 
 ```text
-https://api.<domain>
+https://sloco.pp.ua
 ```
 
 Public backend routes should stay under:
@@ -34,7 +50,7 @@ Everything else should be handled by Nginx before it reaches the app.
 ## Goals
 
 - Buy or connect a domain.
-- Point `api.<domain>` to the current Hetzner server.
+- Point `sloco.pp.ua` to the current Hetzner server.
 - Enable HTTPS with Certbot.
 - Update production API URL in GitHub Actions.
 - Update OpenAPI production server URL.
@@ -50,39 +66,12 @@ Everything else should be handled by Nginx before it reaches the app.
 - Do not add WAF/rate limiting yet.
 - Do not make the frontend app production-ready in this task.
 
-## Recommended Domain Setup
+## Domain Setup
 
-Buy a domain from one of:
-
-- Porkbun;
-- Cloudflare Registrar;
-- Namecheap.
-
-Recommendation for MVP:
+Production domain:
 
 ```text
-Porkbun or Cloudflare Registrar
-```
-
-Reason:
-
-- cheap enough;
-- fast DNS setup;
-- simple renewal story;
-- no need for hosting bundle.
-
-Recommended DNS name:
-
-```text
-api.<domain>
-```
-
-Examples:
-
-```text
-api.sloco.app
-api.getsloco.com
-api.sloco.city
+sloco.pp.ua
 ```
 
 ## DNS Records
@@ -91,7 +80,7 @@ Create:
 
 ```text
 Type: A
-Name: api
+Name: @ / root / sloco.pp.ua
 Value: 65.108.142.55
 TTL: automatic or 300 seconds
 ```
@@ -100,7 +89,7 @@ Optional later:
 
 ```text
 Type: CAA
-Name: api
+Name: @ / root / sloco.pp.ua
 Value: letsencrypt.org
 ```
 
@@ -126,7 +115,7 @@ Check app:
 
 ```bash
 curl http://127.0.0.1:3000/v1/health
-curl http://65.108.142.55/v1/health
+curl http://sloco.pp.ua/v1/health
 ```
 
 ## Install Certbot
@@ -152,12 +141,25 @@ Update:
 /etc/nginx/sites-available/backend_sloco
 ```
 
+The source template lives in the repo:
+
+```text
+deploy/nginx/backend_sloco.conf
+```
+
+The production server does not automatically sync this file from the repo.
+Apply it manually through SSH before running Certbot:
+
+```bash
+sudo nano /etc/nginx/sites-available/backend_sloco
+```
+
 Initial domain config:
 
 ```nginx
 server {
     listen 80;
-    server_name api.<domain>;
+    server_name sloco.pp.ua;
 
     location ^~ /v1/ {
         proxy_pass http://127.0.0.1:3000;
@@ -198,9 +200,9 @@ sudo systemctl reload nginx
 Check:
 
 ```bash
-curl -I http://api.<domain>/
-curl -I http://api.<domain>/v1/health
-curl -I http://api.<domain>/.env
+curl -I http://sloco.pp.ua/
+curl -I http://sloco.pp.ua/v1/health
+curl -I http://sloco.pp.ua/.env
 ```
 
 Expected:
@@ -214,7 +216,7 @@ Expected:
 Run:
 
 ```bash
-sudo certbot --nginx -d api.<domain>
+sudo certbot --nginx -d sloco.pp.ua
 ```
 
 Choose redirect HTTP to HTTPS when Certbot asks.
@@ -229,10 +231,10 @@ sudo systemctl reload nginx
 Check:
 
 ```bash
-curl -I https://api.<domain>/v1/health
-curl -I https://api.<domain>/v1/swagger/docs
-curl -I https://api.<domain>/v1/swagger/docs/static/index.css
-curl -I https://api.<domain>/v1/swagger/openapi.json
+curl -I https://sloco.pp.ua/v1/health
+curl -I https://sloco.pp.ua/v1/swagger/docs
+curl -I https://sloco.pp.ua/v1/swagger/docs/static/index.css
+curl -I https://sloco.pp.ua/v1/swagger/openapi.json
 ```
 
 Expected:
@@ -260,16 +262,10 @@ Repository secret:
 PRODUCTION_API_URL
 ```
 
-Change from:
+Set to:
 
 ```text
-http://65.108.142.55
-```
-
-to:
-
-```text
-https://api.<domain>
+https://sloco.pp.ua
 ```
 
 The deploy workflow already checks:
@@ -288,16 +284,10 @@ Update OpenAPI server URL in:
 src/config/swagger.ts
 ```
 
-Change production server from:
+Production server should be:
 
 ```text
-http://65.108.142.55
-```
-
-to:
-
-```text
-https://api.<domain>
+https://sloco.pp.ua
 ```
 
 Keep local server:
@@ -320,16 +310,10 @@ grafana/README.md
 docs/tasks/TASKS_7_GRAFANA_DASHBOARD_LOGS.md
 ```
 
-Replace public examples:
+Use this public base URL:
 
 ```text
-http://65.108.142.55
-```
-
-with:
-
-```text
-https://api.<domain>
+https://sloco.pp.ua
 ```
 
 Do not update old historical task docs unless they are actively used as
@@ -345,25 +329,11 @@ deploy/nginx/backend_sloco.conf
 
 Make it match the hardened production intent:
 
-- domain placeholder;
+- real domain `sloco.pp.ua`;
 - `/v1/` proxy;
 - `/` ok response;
 - everything else `444`;
 - comment that Certbot will manage HTTPS blocks on the server.
-
-Do not commit real domain if we want the template reusable. Use:
-
-```text
-api.example.com
-```
-
-or:
-
-```text
-api.<domain>
-```
-
-until the real domain is chosen.
 
 ## Grafana Impact
 
@@ -424,19 +394,19 @@ pnpm lint
 Server checks before HTTPS:
 
 ```bash
-curl -I http://api.<domain>/
-curl -I http://api.<domain>/v1/health
-curl -I http://api.<domain>/.env
+curl -I http://sloco.pp.ua/
+curl -I http://sloco.pp.ua/v1/health
+curl -I http://sloco.pp.ua/.env
 ```
 
 Server checks after HTTPS:
 
 ```bash
-curl -I https://api.<domain>/
-curl -I https://api.<domain>/v1/health
-curl -I https://api.<domain>/v1/swagger/docs
-curl -I https://api.<domain>/v1/swagger/docs/static/index.css
-curl -I https://api.<domain>/v1/swagger/openapi.json
+curl -I https://sloco.pp.ua/
+curl -I https://sloco.pp.ua/v1/health
+curl -I https://sloco.pp.ua/v1/swagger/docs
+curl -I https://sloco.pp.ua/v1/swagger/docs/static/index.css
+curl -I https://sloco.pp.ua/v1/swagger/openapi.json
 ```
 
 Deploy check:
@@ -448,7 +418,7 @@ Run GitHub Actions Deploy Production
 Browser check:
 
 ```text
-https://api.<domain>/v1/swagger/docs
+https://sloco.pp.ua/v1/swagger/docs
 ```
 
 Grafana check:
@@ -456,9 +426,9 @@ Grafana check:
 Generate traffic:
 
 ```bash
-curl https://api.<domain>/v1/health
-curl "https://api.<domain>/v1/map/places?swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700&zoom=13"
-curl -I https://api.<domain>/.env
+curl https://sloco.pp.ua/v1/health
+curl "https://sloco.pp.ua/v1/map/places?swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700&zoom=13"
+curl -I https://sloco.pp.ua/.env
 ```
 
 Expected:
@@ -480,7 +450,7 @@ If HTTPS breaks:
    sudo systemctl reload nginx
    ```
 
-4. Change `PRODUCTION_API_URL` back to:
+4. Change `PRODUCTION_API_URL` back temporarily to:
 
    ```text
    http://65.108.142.55
@@ -493,10 +463,10 @@ Do not delete certificates unless they are actively causing Nginx config issues.
 ## Acceptance Criteria
 
 - Domain exists.
-- `api.<domain>` resolves to `65.108.142.55`.
-- `https://api.<domain>/v1/health` returns `200`.
-- `https://api.<domain>/v1/swagger/docs` loads in browser.
-- `https://api.<domain>/v1/swagger/openapi.json` returns valid OpenAPI JSON.
+- `sloco.pp.ua` resolves to `65.108.142.55`.
+- `https://sloco.pp.ua/v1/health` returns `200`.
+- `https://sloco.pp.ua/v1/swagger/docs` loads in browser.
+- `https://sloco.pp.ua/v1/swagger/openapi.json` returns valid OpenAPI JSON.
 - GitHub deploy healthcheck uses HTTPS domain through `PRODUCTION_API_URL`.
 - Nginx blocks random non-`/v1` paths before Fastify.
 - Grafana backend logs are cleaner.

@@ -125,15 +125,15 @@ validated artifacts.
 Production:
 
 ```text
-http://65.108.142.55
+https://sloco.pp.ua
 ```
 
 Useful checks:
 
 ```bash
-curl http://65.108.142.55/v1/health
-curl http://65.108.142.55/v1/health/supabase
-curl "http://65.108.142.55/v1/map/places?swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700&zoom=13"
+curl https://sloco.pp.ua/v1/health
+curl https://sloco.pp.ua/v1/health/supabase
+curl "https://sloco.pp.ua/v1/map/places?swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700&zoom=13"
 ```
 
 ## Important API
@@ -162,7 +162,7 @@ PATCH /v1/me/saved/collections/:collectionId/places/order
 Contract docs:
 
 ```text
-http://65.108.142.55/v1/swagger/openapi.json
+https://sloco.pp.ua/v1/swagger/openapi.json
 docs/FRONTEND_MAP_API.md
 ```
 

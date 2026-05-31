@@ -51,7 +51,7 @@ export async function registerSwaggerDocs(app: FastifyInstance) {
           description: "Local development"
         },
         {
-          url: "http://65.108.142.55",
+          url: "https://sloco.pp.ua",
           description: "Production"
         }
       ],

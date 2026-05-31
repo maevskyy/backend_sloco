@@ -32,15 +32,30 @@ server-side only — never expose it to the iOS app or any public frontend.
 
 ## Nginx
 
-`deploy/nginx/backend_sloco.conf` is the HTTP-only template, installed to
-`/etc/nginx/sites-available/backend_sloco`. It proxies public traffic to:
+`deploy/nginx/backend_sloco.conf` is the domain HTTP template, installed to
+`/etc/nginx/sites-available/backend_sloco`. It proxies public `/v1/*` traffic to:
 
 ```text
 http://127.0.0.1:3000
 ```
 
-Add HTTPS with Certbot once a domain is attached
-(`docs/tasks/TBD_DOMAIN_HTTPS_NGINX_HARDENING.md`).
+Production domain:
+
+```text
+https://sloco.pp.ua
+```
+
+HTTPS is managed on the server by Certbot + Let's Encrypt. Certbot owns the
+server-side `listen 443 ssl` blocks and certificate paths under
+`/etc/letsencrypt`.
+
+Nginx should block random non-API paths before they reach Fastify:
+
+```text
+/v1/* -> backend container
+/     -> simple ok response
+/*    -> 444 closed connection
+```
 
 ## Logs
 
@@ -72,7 +87,7 @@ Required GitHub repository secrets:
 DEPLOY_HOST          # server IP / host
 DEPLOY_USER          # ssh user (e.g. ubuntu)
 DEPLOY_SSH_KEY       # ssh private key
-PRODUCTION_API_URL   # http://<host> for the remote healthcheck
+PRODUCTION_API_URL   # https://sloco.pp.ua for the remote healthcheck
 ```
 
 Optional if the server must authenticate to pull from GHCR:

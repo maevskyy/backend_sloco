@@ -10,7 +10,7 @@ This folder is the main navigation point for backend documentation.
 - Production URL:
 
   ```text
-  http://65.108.142.55
+  https://sloco.pp.ua
   ```
 
 ## Start Here
@@ -44,12 +44,12 @@ This folder is the main navigation point for backend documentation.
 
 - Swagger UI:
   ```text
-  http://65.108.142.55/v1/swagger/docs
+  https://sloco.pp.ua/v1/swagger/docs
   ```
 
 - OpenAPI JSON for frontend agents:
   ```text
-  http://65.108.142.55/v1/swagger/openapi.json
+  https://sloco.pp.ua/v1/swagger/openapi.json
   ```
 
 - Frontend map endpoint contract:
