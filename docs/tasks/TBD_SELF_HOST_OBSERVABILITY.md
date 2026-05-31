@@ -26,6 +26,7 @@ Alertmanager
 Tempo
 Grafana backups
 S3-compatible object storage
+Supabase Metrics API scrape
 ```
 
 ## Key Decisions To Make Later
@@ -43,6 +44,12 @@ S3-compatible object storage
 - Collection:
   - keep Alloy as the one collector;
   - or use Promtail for Loki + node exporter/cAdvisor for Prometheus.
+- Supabase metrics:
+  - scrape Supabase Metrics API into the same metrics store;
+  - prefer one Grafana dashboard space for backend, server, and managed DB;
+  - if Supabase metrics fit Prometheus better than Alloy-only collection,
+    consider moving the metrics path to Prometheus and keeping Alloy only where
+    it is still useful.
 - Deployment:
   - Docker Compose first;
   - no Kubernetes until multiple servers exist.
@@ -73,9 +80,15 @@ in the existing Grafana Cloud workspace.
   - host CPU/RAM/disk;
   - container CPU/RAM;
   - backend health.
+- Add Supabase Metrics API scrape after core self-host stack is stable:
+  - DB CPU/RAM/disk;
+  - connections and pooler/Supavisor signals;
+  - API/Auth/Storage metrics if exposed for the current project;
+  - alerts for DB pressure and connection exhaustion.
 
 ## Assumptions
 
 - Hetzner server has enough RAM and NVMe storage for MVP observability.
-- Supabase remains managed and is not part of this migration.
+- Supabase remains managed, but its metrics can still be pulled into the
+  self-hosted observability stack.
 - Self-hosting is a cost/control decision, not required for backend uptime.
