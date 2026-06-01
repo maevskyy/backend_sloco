@@ -1,4 +1,5 @@
 import { env } from "../config/env.js";
+import { measureDependencyMetric } from "../observability/metrics.js";
 
 export type RecommendationHealthResponse = {
   status: "ok";
@@ -6,11 +7,43 @@ export type RecommendationHealthResponse = {
   environment: "development" | "test" | "production";
 };
 
+export type PersonalizedRecommendationRequest = {
+  user_id: string;
+  favourites_place_ids: string[];
+  want_to_go_place_ids: string[];
+  limit: number;
+  exclude_input_places: boolean;
+  debug: boolean;
+};
+
+export type PersonalizedRecommendationResponse = {
+  user_id: string | null;
+  algorithm_version: string;
+  embedding_run_id: string;
+  input_summary: {
+    favourites_count: number;
+    want_to_go_count: number;
+    valid_input_count: number;
+    invalid_place_ids: string[];
+    candidate_count?: number;
+  };
+  recommendations: Array<{
+    rank: number;
+    place_id: string;
+    score: number;
+    similarity?: number | null;
+  }>;
+};
+
 export type RecommendationClient = {
   health: () => Promise<RecommendationHealthResponse>;
+  personalizedPlaces: (
+    request: PersonalizedRecommendationRequest
+  ) => Promise<PersonalizedRecommendationResponse>;
 };
 
 const DEFAULT_TIMEOUT_MS = 1500;
+const PERSONALIZED_TIMEOUT_MS = 5000;
 
 export class RecommendationServiceNotConfiguredError extends Error {
   constructor() {
@@ -35,10 +68,37 @@ export function createRecommendationClient(
 ): RecommendationClient {
   return {
     health: () =>
-      requestRecommendationService<RecommendationHealthResponse>(
-        baseUrl,
-        "/v1/health/ready",
-        timeoutMs
+      measureDependencyMetric(
+        {
+          dependency: "ml-service",
+          operation: "http",
+          name: "recommendation_health"
+        },
+        () =>
+          requestRecommendationService<RecommendationHealthResponse>(
+            baseUrl,
+            "/v1/health/ready",
+            { timeoutMs }
+          )
+      ),
+    personalizedPlaces: (request) =>
+      measureDependencyMetric(
+        {
+          dependency: "ml-service",
+          operation: "http",
+          name: "personalized_recommendations"
+        },
+        () =>
+          requestRecommendationService<PersonalizedRecommendationResponse>(
+            baseUrl,
+            "/v1/recommendations/personalized",
+            {
+              method: "POST",
+              body: request,
+              timeoutMs: Math.max(timeoutMs, PERSONALIZED_TIMEOUT_MS)
+            }
+          ),
+        (result) => result.recommendations.length
       )
   };
 }
@@ -48,7 +108,11 @@ export const recommendationClient = createRecommendationClient();
 async function requestRecommendationService<TResponse>(
   baseUrl: string | undefined,
   path: string,
-  timeoutMs: number
+  options: {
+    method?: "GET" | "POST";
+    body?: unknown;
+    timeoutMs: number;
+  }
 ): Promise<TResponse> {
   if (!baseUrl) {
     throw new RecommendationServiceNotConfiguredError();
@@ -56,10 +120,20 @@ async function requestRecommendationService<TResponse>(
 
   const url = new URL(path, baseUrl);
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  const timeout = setTimeout(() => controller.abort(), options.timeoutMs);
 
   try {
-    const response = await fetch(url, { signal: controller.signal });
+    const response = await fetch(url, {
+      method: options.method ?? "GET",
+      headers:
+        options.body === undefined
+          ? undefined
+          : {
+              "content-type": "application/json"
+            },
+      body: options.body === undefined ? undefined : JSON.stringify(options.body),
+      signal: controller.signal
+    });
 
     if (!response.ok) {
       throw new RecommendationServiceError(

@@ -63,6 +63,7 @@ PATCH /v1/me/saved/collections/:collectionId/places/order
 GET /v1/map/places?swLat=...&swLng=...&neLat=...&neLng=...&zoom=...
 GET /v1/places/:placeId
 GET /v1/search/places?q=...&lat=...&lng=...
+GET /v1/feed/places?limit=...&lat=...&lng=...
 GET /v1/swagger/docs
 GET /v1/swagger/openapi.json
 ```
@@ -85,6 +86,12 @@ Human docs for the search endpoint:
 docs/FRONTEND_SEARCH_API.md
 ```
 
+Human docs for the Decide feed endpoint:
+
+```text
+docs/FRONTEND_FEED_API.md
+```
+
 ## Active Database
 
 ```text
@@ -96,12 +103,17 @@ Saved collection membership table: public.saved_collection_places
 Map pin RPC: public.map_places_in_bbox(sw_lat, sw_lng, ne_lat, ne_lng, result_limit)
 Place detail RPC: public.place_details_by_id(place_id)
 Search RPC: public.search_places(q, user_lat, user_lng, user_city, user_country, result_limit)
+Feed hydration RPC: public.feed_places_by_source_ids(source_ids, user_lat, user_lng, result_limit)
+Feed fallback RPC: public.feed_fallback_places(user_lat, user_lng, user_city, user_country, result_limit)
 Migrations: supabase/migrations/
 ```
 
 Map reads are bbox-only and return lightweight pins. Rich place data is fetched
 only after a user selects a place via `GET /v1/places/:placeId`.
 Place search is global, fuzzy, and independent from the current map bbox.
+Decide feed reads are card-oriented, recommendation-service backed for
+authenticated users, and fall back to quality/visibility picks for anonymous or
+cold-start users.
 
 ## Active Data Flow
 

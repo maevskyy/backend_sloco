@@ -1,6 +1,7 @@
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import type { FastifyInstance } from "fastify";
+import { feedComponentSchemas } from "../modules/feed/index.js";
 import { healthComponentSchemas } from "../modules/health/index.js";
 import { mapComponentSchemas } from "../modules/map/index.js";
 import { meComponentSchemas } from "../modules/me/index.js";
@@ -40,6 +41,10 @@ export async function registerSwaggerDocs(app: FastifyInstance) {
   }
 
   for (const schema of searchComponentSchemas) {
+    app.addSchema(schema);
+  }
+
+  for (const schema of feedComponentSchemas) {
     app.addSchema(schema);
   }
 
@@ -98,6 +103,11 @@ export async function registerSwaggerDocs(app: FastifyInstance) {
         {
           name: "Search",
           description: "Global place search endpoints."
+        },
+        {
+          name: "Feed",
+          description:
+            "Ranked place feed endpoints for Decide for me experiences."
         }
       ]
     }

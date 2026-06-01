@@ -62,6 +62,11 @@ This folder is the main navigation point for backend documentation.
   FRONTEND_SEARCH_API.md
   ```
 
+- Frontend Decide feed endpoint contract:
+  ```text
+  FRONTEND_FEED_API.md
+  ```
+
 Current note:
 
 - Markdown API docs are usage docs.

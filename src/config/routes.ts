@@ -15,6 +15,7 @@ export enum AppRoute {
   MapPlaces = "/map/places",
   Place = "/places/:placeId",
   SearchPlaces = "/search/places",
+  FeedPlaces = "/feed/places",
   SwaggerDocs = "/swagger/docs",
   SwaggerOpenApiJson = "/swagger/openapi.json"
 }
@@ -34,6 +35,7 @@ export const VersionedAppRoute = {
   mapPlaces: `${API_PREFIX}${AppRoute.MapPlaces}`,
   place: `${API_PREFIX}${AppRoute.Place}`,
   searchPlaces: `${API_PREFIX}${AppRoute.SearchPlaces}`,
+  feedPlaces: `${API_PREFIX}${AppRoute.FeedPlaces}`,
   swaggerDocs: `${API_PREFIX}${AppRoute.SwaggerDocs}`,
   swaggerOpenApiJson: `${API_PREFIX}${AppRoute.SwaggerOpenApiJson}`
 } as const;

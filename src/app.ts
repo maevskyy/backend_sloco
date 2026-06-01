@@ -29,6 +29,10 @@ import {
   registerSearchModule,
   type SearchPlacesService
 } from "./modules/search/index.js";
+import {
+  registerFeedModule,
+  type FeedPlacesService
+} from "./modules/feed/index.js";
 import type { AuthService } from "./modules/auth/auth.service.js";
 
 type AppOptions = {
@@ -39,6 +43,7 @@ type AppOptions = {
   savedPlacesService?: SavedPlacesService;
   placeDetailsService?: PlaceDetailsService;
   searchPlacesService?: SearchPlacesService;
+  feedPlacesService?: FeedPlacesService;
 };
 
 export async function buildApp(options: AppOptions = {}) {
@@ -91,6 +96,12 @@ export async function buildApp(options: AppOptions = {}) {
     searchPlacesService: options.searchPlacesService,
     authService: options.authService,
     savedPlacesService: options.savedPlacesService
+  });
+
+  await app.register(registerFeedModule, {
+    prefix: API_PREFIX,
+    feedPlacesService: options.feedPlacesService,
+    authService: options.authService
   });
 
   await app.register(registerMapModule, {
