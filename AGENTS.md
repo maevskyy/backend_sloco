@@ -21,8 +21,10 @@ that recommends places based on taste, lifestyle, and favorite-place patterns.
 - Hetzner
 - Grafana Cloud Loki
 
-Do not add Redis, Kafka, microservices, or heavy architecture unless there is a
-real bottleneck.
+The public API boundary is this Gateway service. Recommendation runtime work
+lives in `../recommendation_service` and is called over the private Docker
+network by HTTP. Do not add Kafka, RabbitMQ, or heavier service infrastructure
+unless it is explicitly planned.
 
 ## Repo Map
 
