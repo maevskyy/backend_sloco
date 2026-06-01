@@ -3,9 +3,9 @@ import {
   getCandidateLimit,
   getDisplayLimits,
   getEffectiveDisplayLimits,
-  rankMapPlaces,
   type MapRankingContext
 } from "../common/map.ranking.js";
+import { rankSpatiallyBalancedMapPlaces } from "../common/map.spatial-ranking.js";
 import type {
   MapPlacePin,
   MapPlacesResult,
@@ -34,14 +34,34 @@ export function createMapPlacesService(
 
     const rows = await store.placesInBbox(query, candidateLimit);
     const context: MapRankingContext = { zoom: query.zoom };
-    const ranked = rankMapPlaces(rows, context, displayLimits.totalLimit);
+    const ranked = rankSpatiallyBalancedMapPlaces(
+      rows,
+      context,
+      query,
+      displayLimits.totalLimit
+    );
 
     return {
       places: ranked.map((place, index) => ({
         ...mapPlaceRowToPin(place),
         displayKind: index < displayLimits.featuredLimit ? "featured" : "dot",
         displayPriority: index + 1
-      }))
+      })),
+      meta: {
+        returnedCount: ranked.length,
+        limit: displayLimits.totalLimit,
+        requestedLimit: query.limit ?? null,
+        candidateLimit,
+        capped:
+          rows.length >= candidateLimit ||
+          ranked.length >= displayLimits.totalLimit,
+        queryBounds: {
+          swLat: query.swLat,
+          swLng: query.swLng,
+          neLat: query.neLat,
+          neLng: query.neLng
+        }
+      }
     };
   };
 }
@@ -59,6 +79,7 @@ export async function enrichSavedState(
 ): Promise<MapPlacesResult> {
   if (!userId || result.places.length === 0) {
     return {
+      ...result,
       places: result.places.map(markPlaceAsUnsaved)
     };
   }
@@ -69,6 +90,7 @@ export async function enrichSavedState(
   );
 
   return {
+    ...result,
     places: result.places.map((place) => ({
       ...place,
       isSaved: savedPlaceIds.has(place.id)

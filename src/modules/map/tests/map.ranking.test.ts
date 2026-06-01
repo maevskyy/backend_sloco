@@ -10,6 +10,10 @@ import {
   type MapRankingContext,
   type ScorablePlace
 } from "../common/map.ranking.js";
+import {
+  getMapGridSize,
+  rankSpatiallyBalancedMapPlaces
+} from "../common/map.spatial-ranking.js";
 
 const context: MapRankingContext = {};
 
@@ -17,6 +21,8 @@ function place(overrides: Partial<ScorablePlace>): ScorablePlace {
   return {
     source: "osm",
     source_id: "x",
+    latitude: 0.5,
+    longitude: 0.5,
     rating: null,
     reviews_count: null,
     ...overrides
@@ -143,6 +149,16 @@ describe("getDisplayLimits", () => {
   });
 });
 
+describe("getMapGridSize", () => {
+  it("returns expected grid sizes per zoom bucket", () => {
+    expect(getMapGridSize(10)).toBe(4);
+    expect(getMapGridSize(12)).toBe(4);
+    expect(getMapGridSize(14)).toBe(5);
+    expect(getMapGridSize(16)).toBe(5);
+    expect(getMapGridSize(17)).toBe(6);
+  });
+});
+
 describe("scoreMapPlace", () => {
   it("prefers a higher rating", () => {
     const high = scoreMapPlace(place({ source_id: "a", rating: 5 }), context);
@@ -214,5 +230,67 @@ describe("rankMapPlaces", () => {
     expect(rankMapPlaces(rows, context, 3)).toEqual(
       rankMapPlaces(rows, context, 3)
     );
+  });
+});
+
+describe("rankSpatiallyBalancedMapPlaces", () => {
+  const bbox = {
+    swLat: 0,
+    swLng: 0,
+    neLat: 10,
+    neLng: 10
+  };
+
+  it("does not let one dense cell starve other populated cells", () => {
+    const denseCluster = Array.from({ length: 20 }, (_, index) =>
+      place({
+        source_id: `dense-${index}`,
+        latitude: 1,
+        longitude: 1,
+        map_visibility_score: 100,
+        rating: 5
+      })
+    );
+    const sparseSouthEast = place({
+      source_id: "south-east",
+      latitude: 9,
+      longitude: 9,
+      map_visibility_score: 10,
+      rating: 3
+    });
+    const sparseNorthEast = place({
+      source_id: "north-east",
+      latitude: 1,
+      longitude: 9,
+      map_visibility_score: 10,
+      rating: 3
+    });
+
+    const ranked = rankSpatiallyBalancedMapPlaces(
+      [...denseCluster, sparseSouthEast, sparseNorthEast],
+      { zoom: 14 },
+      bbox,
+      3
+    );
+
+    expect(ranked).toContain(sparseSouthEast);
+    expect(ranked).toContain(sparseNorthEast);
+  });
+
+  it("returns at most the limit and stays deterministic", () => {
+    const rows = Array.from({ length: 20 }, (_, index) =>
+      place({
+        source_id: `place-${index}`,
+        latitude: index % 10,
+        longitude: index % 5,
+        rating: 4
+      })
+    );
+
+    const first = rankSpatiallyBalancedMapPlaces(rows, { zoom: 14 }, bbox, 7);
+    const second = rankSpatiallyBalancedMapPlaces(rows, { zoom: 14 }, bbox, 7);
+
+    expect(first).toHaveLength(7);
+    expect(first).toEqual(second);
   });
 });

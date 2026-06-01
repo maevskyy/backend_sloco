@@ -46,8 +46,23 @@ export const mapPlacePinSchema = z.object({
   displayPriority: z.number().int().min(1)
 });
 
+export const mapPlacesMetaSchema = z.object({
+  returnedCount: z.number().int().min(0),
+  limit: z.number().int().min(0),
+  requestedLimit: z.number().int().min(1).nullable(),
+  candidateLimit: z.number().int().min(0),
+  capped: z.boolean(),
+  queryBounds: z.object({
+    swLat: z.number(),
+    swLng: z.number(),
+    neLat: z.number(),
+    neLng: z.number()
+  })
+});
+
 export const mapPlacesResponseSchema = z.object({
-  places: z.array(mapPlacePinSchema)
+  places: z.array(mapPlacePinSchema),
+  meta: mapPlacesMetaSchema
 });
 
 export const mapSchemaRegistry = z.registry<{ id: string }>();
@@ -55,6 +70,7 @@ export const mapSchemaRegistry = z.registry<{ id: string }>();
 mapSchemaRegistry.add(mapPlacesQuerySchema, { id: "MapPlacesQuery" });
 mapSchemaRegistry.add(mapPrimaryPhotoSchema, { id: "MapPrimaryPhoto" });
 mapSchemaRegistry.add(mapPlacePinSchema, { id: "MapPlacePin" });
+mapSchemaRegistry.add(mapPlacesMetaSchema, { id: "MapPlacesMeta" });
 mapSchemaRegistry.add(mapPlacesResponseSchema, { id: "MapPlacesResponse" });
 
 export type MapPlacesQuery = z.infer<typeof mapPlacesQuerySchema>;

@@ -34,6 +34,7 @@ Task files live here as `TASKS_N_NAME.md`.
 | Done | `TASKS_24_LIGHTWEIGHT_MAP_PINS_PLACE_DETAILS.md` | Slim map pin feed and separate place details endpoint. |
 | Done | `TASKS_25_PLACE_SEARCH.md` | Global fuzzy place search through Postgres trigram indexes and Supabase RPC. |
 | Done | `TASKS_26_DECIDE_FEED_API.md` | Gateway feed endpoint for the iOS `Decide for me` screen backed by recommendation-service, hydration, fallback, and MVP in-memory cache. |
+| Done | `TASKS_27_MAP_SPATIAL_COVERAGE.md` | Spatially fair map pin selection and capped-result metadata for `/v1/map/places`. |
 
 ## TBD Backlog
 

@@ -59,6 +59,8 @@ export class MapController {
           zoom: query.zoom,
           limit: query.limit,
           placesCount: result.places.length,
+          capped: result.meta.capped,
+          candidateLimit: result.meta.candidateLimit,
           bbox: {
             swLat: query.swLat,
             swLng: query.swLng,

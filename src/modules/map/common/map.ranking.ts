@@ -6,6 +6,8 @@ export type MapRankingContext = {
 export type ScorablePlace = {
   source: string;
   source_id: string;
+  latitude: number;
+  longitude: number;
   rating: number | null;
   reviews_count: number | null;
   google_rating?: number | null;

@@ -18,7 +18,7 @@ const defineRoute = makeDefineRoute({
 export const mapPlacesRouteSchema = defineRoute({
   summary: "Get places visible in a map bounding box.",
   description:
-    "Used by the iOS map screen when the user opens the map or changes the visible region. The frontend sends the current map viewport as south-west and north-east coordinates. Backend returns lightweight place markers.",
+    "Used by the iOS map screen when the user opens the map or changes the visible region. The frontend sends the current map viewport as south-west and north-east coordinates. Coordinates are a bbox, not center/radius. The zoom determines the default density budget; limit can narrow that budget but cannot widen it. Results are lightweight place markers selected with best-effort spatial coverage, not an exhaustive list. Use meta.capped to detect likely clipping.",
   query: "MapPlacesQuery",
   ok: "MapPlacesResponse"
 });

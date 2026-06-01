@@ -3,7 +3,11 @@ import { buildApp } from "../../../app.js";
 import { AppRoute, VersionedAppRoute } from "../../../config/routes.js";
 import type { AuthService, AuthenticatedUser } from "../../auth/auth.service.js";
 import type { SavedPlacesService } from "../../saved-places/index.js";
-import type { MapPlacePin, MapPlacesService } from "../index.js";
+import type {
+  MapPlacePin,
+  MapPlacesResult,
+  MapPlacesService
+} from "../index.js";
 
 const validQuery =
   `${VersionedAppRoute.mapPlaces}?swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700`;
@@ -62,19 +66,41 @@ function mapPlace(overrides: Partial<MapPlacePin>): MapPlacePin {
   };
 }
 
+function mapResult(
+  places: MapPlacePin[],
+  overrides: Partial<MapPlacesResult["meta"]> = {}
+): MapPlacesResult {
+  return {
+    places,
+    meta: {
+      returnedCount: places.length,
+      limit: 180,
+      requestedLimit: null,
+      candidateLimit: 720,
+      capped: false,
+      queryBounds: {
+        swLat: 52.48,
+        swLng: 13.33,
+        neLat: 52.56,
+        neLng: 13.47
+      },
+      ...overrides
+    }
+  };
+}
+
 describe("map routes", () => {
   it("returns map places for a valid bbox query", async () => {
     const app = await buildApp({
-      mapPlacesService: async () => ({
-        places: [
+      mapPlacesService: async () =>
+        mapResult([
           mapPlace({
             name: "Pane e Vino",
             latitude: 52.552578,
             longitude: 13.352883,
             rating: 4
           })
-        ]
-      })
+        ])
     });
 
     const response = await app.inject({
@@ -93,7 +119,20 @@ describe("map routes", () => {
           longitude: 13.352883,
           rating: 4
         })
-      ]
+      ],
+      meta: {
+        returnedCount: 1,
+        limit: 180,
+        requestedLimit: null,
+        candidateLimit: 720,
+        capped: false,
+        queryBounds: {
+          swLat: 52.48,
+          swLng: 13.33,
+          neLat: 52.56,
+          neLng: 13.47
+        }
+      }
     });
   });
 
@@ -107,26 +146,28 @@ describe("map routes", () => {
           return new Set([2]);
         }
       }),
-      mapPlacesService: async () => ({
-        places: [
-          mapPlace({
-            id: 1,
-            name: "First Coffee",
-            latitude: 44.43,
-            longitude: 26.09,
-            rating: null
-          }),
-          mapPlace({
-            id: 2,
-            name: "Second Coffee",
-            latitude: 44.44,
-            longitude: 26.1,
-            rating: null,
-            displayKind: "dot",
-            displayPriority: 2
-          })
-        ]
-      })
+      mapPlacesService: async () =>
+        mapResult(
+          [
+            mapPlace({
+              id: 1,
+              name: "First Coffee",
+              latitude: 44.43,
+              longitude: 26.09,
+              rating: null
+            }),
+            mapPlace({
+              id: 2,
+              name: "Second Coffee",
+              latitude: 44.44,
+              longitude: 26.1,
+              rating: null,
+              displayKind: "dot",
+              displayPriority: 2
+            })
+          ],
+          { capped: true }
+        )
     });
 
     const response = await app.inject({
@@ -154,14 +195,16 @@ describe("map routes", () => {
         displayPriority: 2
       }
     ]);
+    expect(response.json().meta).toMatchObject({
+      returnedCount: 2,
+      capped: true
+    });
   });
 
   it("returns 401 when an invalid token is sent to the map endpoint", async () => {
     const app = await buildApp({
       authService,
-      mapPlacesService: async () => ({
-        places: []
-      })
+      mapPlacesService: async () => mapResult([])
     });
 
     const response = await app.inject({
@@ -211,9 +254,7 @@ describe("map routes", () => {
     let capturedZoom: number | undefined;
     const mapPlacesService: MapPlacesService = async (query) => {
       capturedZoom = query.zoom;
-      return {
-        places: []
-      };
+      return mapResult([]);
     };
     const app = await buildApp({
       mapPlacesService
@@ -232,7 +273,7 @@ describe("map routes", () => {
 
   it("returns 200 when zoom is omitted", async () => {
     const app = await buildApp({
-      mapPlacesService: async () => ({ places: [] })
+      mapPlacesService: async () => mapResult([])
     });
 
     const response = await app.inject({
