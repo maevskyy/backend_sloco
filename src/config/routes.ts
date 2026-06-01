@@ -14,6 +14,7 @@ export enum AppRoute {
   MeSavedCollectionPlacesOrder = "/me/saved/collections/:collectionId/places/order",
   MapPlaces = "/map/places",
   Place = "/places/:placeId",
+  SearchPlaces = "/search/places",
   SwaggerDocs = "/swagger/docs",
   SwaggerOpenApiJson = "/swagger/openapi.json"
 }
@@ -32,6 +33,7 @@ export const VersionedAppRoute = {
   meSavedCollectionPlacesOrder: `${API_PREFIX}${AppRoute.MeSavedCollectionPlacesOrder}`,
   mapPlaces: `${API_PREFIX}${AppRoute.MapPlaces}`,
   place: `${API_PREFIX}${AppRoute.Place}`,
+  searchPlaces: `${API_PREFIX}${AppRoute.SearchPlaces}`,
   swaggerDocs: `${API_PREFIX}${AppRoute.SwaggerDocs}`,
   swaggerOpenApiJson: `${API_PREFIX}${AppRoute.SwaggerOpenApiJson}`
 } as const;

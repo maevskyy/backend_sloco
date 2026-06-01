@@ -85,6 +85,12 @@ GET /v1/map/places?swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700&zoom=
 GET /v1/places/:placeId
 ```
 
+## Current Search API
+
+```http
+GET /v1/search/places?q=coffee&lat=44.43&lng=26.10&city=Bucharest&country=RO
+```
+
 ## Current Saved Places API
 
 ```http
@@ -110,6 +116,7 @@ Frontend handoff docs:
 
 ```text
 docs/FRONTEND_MAP_API.md
+docs/FRONTEND_SEARCH_API.md
 ```
 
 ## Docs

@@ -41,6 +41,7 @@ Production smoke checks:
 curl https://sloco.pp.ua/v1/health
 curl https://sloco.pp.ua/v1/health/supabase
 curl "https://sloco.pp.ua/v1/map/places?swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700&zoom=13"
+curl "https://sloco.pp.ua/v1/search/places?q=coffee&lat=44.43&lng=26.10&city=Bucharest&country=RO"
 ```
 
 ## Active API
@@ -61,6 +62,7 @@ DELETE /v1/me/saved/collections/:collectionId/places/:placeId
 PATCH /v1/me/saved/collections/:collectionId/places/order
 GET /v1/map/places?swLat=...&swLng=...&neLat=...&neLng=...&zoom=...
 GET /v1/places/:placeId
+GET /v1/search/places?q=...&lat=...&lng=...
 GET /v1/swagger/docs
 GET /v1/swagger/openapi.json
 ```
@@ -77,6 +79,12 @@ Human docs for the map endpoint:
 docs/FRONTEND_MAP_API.md
 ```
 
+Human docs for the search endpoint:
+
+```text
+docs/FRONTEND_SEARCH_API.md
+```
+
 ## Active Database
 
 ```text
@@ -87,11 +95,13 @@ Saved collections table: public.saved_collections
 Saved collection membership table: public.saved_collection_places
 Map pin RPC: public.map_places_in_bbox(sw_lat, sw_lng, ne_lat, ne_lng, result_limit)
 Place detail RPC: public.place_details_by_id(place_id)
+Search RPC: public.search_places(q, user_lat, user_lng, user_city, user_country, result_limit)
 Migrations: supabase/migrations/
 ```
 
 Map reads are bbox-only and return lightweight pins. Rich place data is fetched
 only after a user selects a place via `GET /v1/places/:placeId`.
+Place search is global, fuzzy, and independent from the current map bbox.
 
 ## Active Data Flow
 

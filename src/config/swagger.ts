@@ -6,6 +6,7 @@ import { mapComponentSchemas } from "../modules/map/index.js";
 import { meComponentSchemas } from "../modules/me/index.js";
 import { placesComponentSchemas } from "../modules/places/index.js";
 import { savedPlacesComponentSchemas } from "../modules/saved-places/index.js";
+import { searchComponentSchemas } from "../modules/search/index.js";
 import { httpErrorComponentSchemas } from "./http-schemas.js";
 import { VersionedAppRoute } from "./routes.js";
 
@@ -35,6 +36,10 @@ export async function registerSwaggerDocs(app: FastifyInstance) {
   }
 
   for (const schema of mapComponentSchemas) {
+    app.addSchema(schema);
+  }
+
+  for (const schema of searchComponentSchemas) {
     app.addSchema(schema);
   }
 
@@ -89,6 +94,10 @@ export async function registerSwaggerDocs(app: FastifyInstance) {
         {
           name: "SavedPlaces",
           description: "Authenticated saved places endpoints."
+        },
+        {
+          name: "Search",
+          description: "Global place search endpoints."
         }
       ]
     }

@@ -57,6 +57,11 @@ This folder is the main navigation point for backend documentation.
   FRONTEND_MAP_API.md
   ```
 
+- Frontend search endpoint contract:
+  ```text
+  FRONTEND_SEARCH_API.md
+  ```
+
 Current note:
 
 - Markdown API docs are usage docs.

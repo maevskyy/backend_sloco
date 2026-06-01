@@ -25,6 +25,10 @@ import {
   registerSavedPlacesModule,
   type SavedPlacesService
 } from "./modules/saved-places/index.js";
+import {
+  registerSearchModule,
+  type SearchPlacesService
+} from "./modules/search/index.js";
 import type { AuthService } from "./modules/auth/auth.service.js";
 
 type AppOptions = {
@@ -34,6 +38,7 @@ type AppOptions = {
   meService?: MeService;
   savedPlacesService?: SavedPlacesService;
   placeDetailsService?: PlaceDetailsService;
+  searchPlacesService?: SearchPlacesService;
 };
 
 export async function buildApp(options: AppOptions = {}) {
@@ -79,6 +84,13 @@ export async function buildApp(options: AppOptions = {}) {
     authService: options.authService,
     savedPlacesService: options.savedPlacesService,
     placeDetailsService: options.placeDetailsService
+  });
+
+  await app.register(registerSearchModule, {
+    prefix: API_PREFIX,
+    searchPlacesService: options.searchPlacesService,
+    authService: options.authService,
+    savedPlacesService: options.savedPlacesService
   });
 
   await app.register(registerMapModule, {

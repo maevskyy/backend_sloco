@@ -32,6 +32,7 @@ Task files live here as `TASKS_N_NAME.md`.
 | Planned | `TASKS_22_PLACES_SCHEMA_V2_IMPORT.md` | Replace MVP `places` with enriched `locations.csv` schema and import flow. |
 | Done | `TASKS_23_OBSERVABILITY_LATENCY_BREAKDOWN.md` | Standard backend HTTP/dependency metric logs through Loki for latency breakdown. |
 | Done | `TASKS_24_LIGHTWEIGHT_MAP_PINS_PLACE_DETAILS.md` | Slim map pin feed and separate place details endpoint. |
+| Done | `TASKS_25_PLACE_SEARCH.md` | Global fuzzy place search through Postgres trigram indexes and Supabase RPC. |
 
 ## TBD Backlog
 
