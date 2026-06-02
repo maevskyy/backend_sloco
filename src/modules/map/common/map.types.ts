@@ -40,7 +40,11 @@ export type MapPlacePin = z.infer<typeof mapPlacePinSchema>;
 export type MapPlacesResult = z.infer<typeof mapPlacesResponseSchema>;
 
 export type MapStoreContract = {
-  placesInBbox(query: MapPlacesQuery, candidateLimit: number): Promise<PlaceRow[]>;
+  placesInBbox(
+    query: MapPlacesQuery,
+    minScore: number,
+    resultLimit: number
+  ): Promise<PlaceRow[]>;
 };
 
 export type MapPlacesService = (

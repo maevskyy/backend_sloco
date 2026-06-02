@@ -60,7 +60,10 @@ export class MapController {
           limit: query.limit,
           placesCount: result.places.length,
           capped: result.meta.capped,
+          capHit: result.meta.capHit,
           candidateLimit: result.meta.candidateLimit,
+          minScore: result.meta.minScore,
+          featuredMinScore: result.meta.featuredMinScore,
           bbox: {
             swLat: query.swLat,
             swLng: query.swLng,

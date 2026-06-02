@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { MAP_PINS_SAFETY_CAP } from "./map.ranking.js";
 
 // Single source of truth for map request/response shapes.
 
@@ -10,7 +11,7 @@ export const mapPlacesQuerySchema = z
     swLng: coordinateSchema,
     neLat: coordinateSchema,
     neLng: coordinateSchema,
-    limit: z.coerce.number().int().min(1).max(250).optional(),
+    limit: z.coerce.number().int().min(1).max(MAP_PINS_SAFETY_CAP).optional(),
     zoom: z.coerce.number().int().min(1).max(22).optional()
   })
   .refine((query) => query.swLat <= query.neLat, {
@@ -52,6 +53,11 @@ export const mapPlacesMetaSchema = z.object({
   requestedLimit: z.number().int().min(1).nullable(),
   candidateLimit: z.number().int().min(0),
   capped: z.boolean(),
+  effectiveZoom: z.number().int().min(1).max(22),
+  minScore: z.number(),
+  featuredMinScore: z.number(),
+  safetyCap: z.number().int().min(0),
+  capHit: z.boolean(),
   queryBounds: z.object({
     swLat: z.number(),
     swLng: z.number(),

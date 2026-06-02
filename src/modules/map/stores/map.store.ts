@@ -9,7 +9,8 @@ import type {
 export class MapStore implements MapStoreContract {
   async placesInBbox(
     query: MapPlacesQuery,
-    candidateLimit: number
+    minScore: number,
+    resultLimit: number
   ): Promise<PlaceRow[]> {
     const { data, error } = await measureDependencyMetric(
       {
@@ -23,7 +24,8 @@ export class MapStore implements MapStoreContract {
           sw_lng: query.swLng,
           ne_lat: query.neLat,
           ne_lng: query.neLng,
-          result_limit: candidateLimit
+          min_score: minScore,
+          result_limit: resultLimit
         }),
       (result) => result.data?.length
     );

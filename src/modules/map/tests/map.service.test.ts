@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
+import { MAP_PINS_SAFETY_CAP } from "../common/map.ranking.js";
 import { createMapPlacesService } from "../services/map.service.js";
-import type { MapStoreContract, PlaceRow } from "../common/map.types.js";
+import type {
+  MapPlacesQuery,
+  MapStoreContract,
+  PlaceRow
+} from "../common/map.types.js";
 
 function place(overrides: Partial<PlaceRow>): PlaceRow {
   return {
@@ -19,7 +24,7 @@ function place(overrides: Partial<PlaceRow>): PlaceRow {
     google_user_rating_count: 10,
     rating_score_0_100: null,
     popularity_score_0_100: null,
-    map_visibility_score: null,
+    map_visibility_score: 80,
     map_visibility_rank: null,
     primary_photo_path: null,
     primary_photo_url: null,
@@ -31,18 +36,20 @@ function place(overrides: Partial<PlaceRow>): PlaceRow {
 }
 
 describe("map places service", () => {
-  it("marks top ranked places as featured and remaining places as dots", async () => {
-    const rows = Array.from({ length: 14 }, (_, index) =>
+  it("uses zoom thresholds and returns all rows from the thresholded store result", async () => {
+    const rows = Array.from({ length: 20 }, (_, index) =>
       place({
         id: index + 1,
         source_id: `source-${index + 1}`,
-        rating: 5 - index * 0.01,
-        reviews_count: 100 - index
+        map_visibility_score: index === 0 ? 93 : 80,
+        latitude: 52.48 + index * 0.001,
+        longitude: 13.33 + index * 0.001
       })
     );
     const store: MapStoreContract = {
-      async placesInBbox(_query, candidateLimit) {
-        expect(candidateLimit).toBe(480);
+      async placesInBbox(_query, minScore, resultLimit) {
+        expect(minScore).toBe(76);
+        expect(resultLimit).toBe(MAP_PINS_SAFETY_CAP);
         return rows;
       }
     };
@@ -53,28 +60,26 @@ describe("map places service", () => {
       swLng: 13.33,
       neLat: 52.56,
       neLng: 13.47,
-      zoom: 12
+      zoom: 14
     });
 
-    expect(result.places).toHaveLength(14);
-    expect(result.places.slice(0, 12)).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          displayKind: "featured"
-        })
-      ])
-    );
-    expect(result.places.slice(0, 12).every((place) => place.displayKind === "featured")).toBe(true);
-    expect(result.places.slice(12).every((place) => place.displayKind === "dot")).toBe(true);
+    expect(result.places).toHaveLength(20);
+    expect(result.places.filter((item) => item.displayKind === "featured")).toHaveLength(1);
+    expect(result.places.filter((item) => item.displayKind === "dot")).toHaveLength(19);
     expect(result.places.map((item) => item.displayPriority)).toEqual(
-      Array.from({ length: 14 }, (_, index) => index + 1)
+      Array.from({ length: 20 }, (_, index) => index + 1)
     );
     expect(result.meta).toEqual({
-      returnedCount: 14,
-      limit: 120,
+      returnedCount: 20,
+      limit: MAP_PINS_SAFETY_CAP,
       requestedLimit: null,
-      candidateLimit: 480,
+      candidateLimit: MAP_PINS_SAFETY_CAP,
       capped: false,
+      effectiveZoom: 14,
+      minScore: 76,
+      featuredMinScore: 92,
+      safetyCap: MAP_PINS_SAFETY_CAP,
+      capHit: false,
       queryBounds: {
         swLat: 52.48,
         swLng: 13.33,
@@ -84,16 +89,18 @@ describe("map places service", () => {
     });
   });
 
-  it("uses the query limit as a lower total cap", async () => {
-    const rows = Array.from({ length: 20 }, (_, index) =>
+  it("uses query limit as a safety cap", async () => {
+    const rows = Array.from({ length: 10 }, (_, index) =>
       place({
         id: index + 1,
-        source_id: `limited-${index + 1}`
+        source_id: `limited-${index + 1}`,
+        map_visibility_score: 90
       })
     );
     const store: MapStoreContract = {
-      async placesInBbox(_query, candidateLimit) {
-        expect(candidateLimit).toBe(40);
+      async placesInBbox(_query, minScore, resultLimit) {
+        expect(minScore).toBe(76);
+        expect(resultLimit).toBe(10);
         return rows;
       }
     };
@@ -109,19 +116,66 @@ describe("map places service", () => {
     });
 
     expect(result.places).toHaveLength(10);
-    expect(result.places.every((place) => place.displayKind === "featured")).toBe(true);
-    expect(result.meta).toEqual({
+    expect(result.meta).toMatchObject({
       returnedCount: 10,
       limit: 10,
       requestedLimit: 10,
-      candidateLimit: 40,
+      candidateLimit: 10,
       capped: true,
-      queryBounds: {
-        swLat: 52.48,
-        swLng: 13.33,
-        neLat: 52.56,
-        neLng: 13.47
-      }
+      capHit: true
     });
+  });
+
+  it("keeps the same place stable across overlapping bboxes at the same zoom", async () => {
+    const stablePlace = place({
+      id: 42,
+      source_id: "stable",
+      map_visibility_score: 80
+    });
+    const firstRows = [
+      stablePlace,
+      ...Array.from({ length: 40 }, (_, index) =>
+        place({
+          id: index + 100,
+          source_id: `first-${index}`,
+          map_visibility_score: 77
+        })
+      )
+    ];
+    const secondRows = [
+      stablePlace,
+      ...Array.from({ length: 200 }, (_, index) =>
+        place({
+          id: index + 200,
+          source_id: `second-${index}`,
+          map_visibility_score: 77
+        })
+      )
+    ];
+    const rowsByCall = [firstRows, secondRows];
+    const store: MapStoreContract = {
+      async placesInBbox(_query, minScore) {
+        expect(minScore).toBe(76);
+        return rowsByCall.shift() ?? [];
+      }
+    };
+    const service = createMapPlacesService(store);
+    const query: MapPlacesQuery = {
+      swLat: 52.48,
+      swLng: 13.33,
+      neLat: 52.56,
+      neLng: 13.47,
+      zoom: 14
+    };
+
+    const first = await service(query);
+    const second = await service({
+      ...query,
+      swLng: 13.34,
+      neLng: 13.48
+    });
+
+    expect(first.places.some((item) => item.id === stablePlace.id)).toBe(true);
+    expect(second.places.some((item) => item.id === stablePlace.id)).toBe(true);
   });
 });

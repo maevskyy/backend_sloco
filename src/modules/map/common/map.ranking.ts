@@ -27,52 +27,54 @@ export type MapViewportBbox = {
 
 export const MIN_ZOOM = 1;
 export const MAX_ZOOM = 22;
+export const MAP_PINS_SAFETY_CAP = 400;
 
-const CANDIDATE_OVERFETCH = 4;
-const MAX_CANDIDATES = 1000;
 const PERSONALIZATION_WEIGHT = 100;
 
-export type MapDisplayLimits = {
-  featuredLimit: number;
-  totalLimit: number;
+export type MapVisibilityThresholds = {
+  minScore: number;
+  featuredMinScore: number;
 };
 
 /**
- * Number of places to show for a given zoom level. Featured places render as
- * normal markers; the remaining places render as lightweight dots.
+ * Calibrated from the first Bucharest serving dataset on 2026-06-02.
+ * Recalibrate when city density grows, new cities are added, or capHit becomes
+ * common in Grafana/logs.
  */
-export function getMapDisplayLimits(zoom: number): MapDisplayLimits {
+export function getMapVisibilityThresholds(
+  zoom: number
+): MapVisibilityThresholds {
   if (zoom <= 10) {
     return {
-      featuredLimit: 8,
-      totalLimit: 80
+      minScore: 92,
+      featuredMinScore: 98
     };
   }
 
   if (zoom <= 12) {
     return {
-      featuredLimit: 12,
-      totalLimit: 120
+      minScore: 86,
+      featuredMinScore: 95
     };
   }
 
   if (zoom <= 14) {
     return {
-      featuredLimit: 20,
-      totalLimit: 180
+      minScore: 76,
+      featuredMinScore: 92
     };
   }
 
   if (zoom <= 16) {
     return {
-      featuredLimit: 30,
-      totalLimit: 220
+      minScore: 66,
+      featuredMinScore: 88
     };
   }
 
   return {
-    featuredLimit: 40,
-    totalLimit: 250
+    minScore: 56,
+    featuredMinScore: 84
   };
 }
 
@@ -87,38 +89,12 @@ export function deriveZoomFromBbox(bbox: MapViewportBbox): number {
   return clampZoom(Math.floor(zoom));
 }
 
-export function getDisplayLimits(
-  bbox: MapViewportBbox,
-  zoom?: number
-): MapDisplayLimits {
-  const effectiveZoom = zoom ?? deriveZoomFromBbox(bbox);
-
-  return getMapDisplayLimits(effectiveZoom);
+export function getEffectiveMapZoom(bbox: MapViewportBbox, zoom?: number) {
+  return zoom ?? deriveZoomFromBbox(bbox);
 }
 
-/**
- * The user/debug `limit` can only narrow the total cap, never widen it.
- */
-export function getEffectiveDisplayLimits(
-  userLimit: number | undefined,
-  displayLimits: MapDisplayLimits
-): MapDisplayLimits {
-  const totalLimit = Math.min(
-    userLimit ?? displayLimits.totalLimit,
-    displayLimits.totalLimit
-  );
-
-  return {
-    totalLimit,
-    featuredLimit: Math.min(displayLimits.featuredLimit, totalLimit)
-  };
-}
-
-/**
- * Overfetch from the database so the scorer has room to choose the best rows.
- */
-export function getCandidateLimit(effectiveLimit: number): number {
-  return Math.min(effectiveLimit * CANDIDATE_OVERFETCH, MAX_CANDIDATES);
+export function getMapPinsSafetyCap(requestedLimit: number | undefined) {
+  return Math.min(requestedLimit ?? MAP_PINS_SAFETY_CAP, MAP_PINS_SAFETY_CAP);
 }
 
 /**

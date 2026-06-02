@@ -1,8 +1,8 @@
 import { mapPlaceRowToPin } from "../common/map.mappers.js";
 import {
-  getCandidateLimit,
-  getDisplayLimits,
-  getEffectiveDisplayLimits,
+  getEffectiveMapZoom,
+  getMapPinsSafetyCap,
+  getMapVisibilityThresholds,
   type MapRankingContext
 } from "../common/map.ranking.js";
 import { rankSpatiallyBalancedMapPlaces } from "../common/map.spatial-ranking.js";
@@ -18,43 +18,48 @@ import type { SavedPlacesService } from "../../saved-places/index.js";
 export type { MapPlacesService } from "../common/map.types.js";
 
 /**
- * Build the map places provider: fetch candidate rows from the store, rank them
- * by zoom-based density, and map to lightweight pins. Saved state is added
+ * Build the map places provider: fetch rows above the zoom visibility threshold,
+ * rank them spatially, and map to lightweight pins. Saved state is added
  * separately by `enrichSavedState` so this stays free of cross-module concerns.
  */
 export function createMapPlacesService(
   store: MapStoreContract = new MapStore()
 ): MapPlacesService {
   return async (query) => {
-    const displayLimits = getEffectiveDisplayLimits(
-      query.limit,
-      getDisplayLimits(query, query.zoom)
-    );
-    const candidateLimit = getCandidateLimit(displayLimits.totalLimit);
-
-    const rows = await store.placesInBbox(query, candidateLimit);
-    const context: MapRankingContext = { zoom: query.zoom };
+    const effectiveZoom = getEffectiveMapZoom(query, query.zoom);
+    const { minScore, featuredMinScore } =
+      getMapVisibilityThresholds(effectiveZoom);
+    const safetyCap = getMapPinsSafetyCap(query.limit);
+    const rows = await store.placesInBbox(query, minScore, safetyCap);
+    const context: MapRankingContext = { zoom: effectiveZoom };
     const ranked = rankSpatiallyBalancedMapPlaces(
       rows,
       context,
       query,
-      displayLimits.totalLimit
+      safetyCap
     );
+    const capHit = rows.length >= safetyCap;
 
     return {
       places: ranked.map((place, index) => ({
         ...mapPlaceRowToPin(place),
-        displayKind: index < displayLimits.featuredLimit ? "featured" : "dot",
+        displayKind:
+          (place.map_visibility_score ?? 0) >= featuredMinScore
+            ? "featured"
+            : "dot",
         displayPriority: index + 1
       })),
       meta: {
         returnedCount: ranked.length,
-        limit: displayLimits.totalLimit,
+        limit: safetyCap,
         requestedLimit: query.limit ?? null,
-        candidateLimit,
-        capped:
-          rows.length >= candidateLimit ||
-          ranked.length >= displayLimits.totalLimit,
+        candidateLimit: safetyCap,
+        capped: capHit,
+        effectiveZoom,
+        minScore,
+        featuredMinScore,
+        safetyCap,
+        capHit,
         queryBounds: {
           swLat: query.swLat,
           swLng: query.swLng,

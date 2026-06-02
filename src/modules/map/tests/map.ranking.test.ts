@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
   deriveZoomFromBbox,
-  getCandidateLimit,
-  getDisplayLimits,
-  getEffectiveDisplayLimits,
-  getMapDisplayLimits,
+  getEffectiveMapZoom,
+  getMapPinsSafetyCap,
+  getMapVisibilityThresholds,
+  MAP_PINS_SAFETY_CAP,
   rankMapPlaces,
   scoreMapPlace,
   type MapRankingContext,
@@ -29,76 +29,61 @@ function place(overrides: Partial<ScorablePlace>): ScorablePlace {
   };
 }
 
-describe("getMapDisplayLimits", () => {
-  it("returns expected limits per zoom bucket", () => {
-    expect(getMapDisplayLimits(5)).toEqual({
-      featuredLimit: 8,
-      totalLimit: 80
+describe("getMapVisibilityThresholds", () => {
+  it("returns expected score thresholds per zoom bucket", () => {
+    expect(getMapVisibilityThresholds(5)).toEqual({
+      minScore: 92,
+      featuredMinScore: 98
     });
-    expect(getMapDisplayLimits(10)).toEqual({
-      featuredLimit: 8,
-      totalLimit: 80
+    expect(getMapVisibilityThresholds(10)).toEqual({
+      minScore: 92,
+      featuredMinScore: 98
     });
-    expect(getMapDisplayLimits(11)).toEqual({
-      featuredLimit: 12,
-      totalLimit: 120
+    expect(getMapVisibilityThresholds(11)).toEqual({
+      minScore: 86,
+      featuredMinScore: 95
     });
-    expect(getMapDisplayLimits(12)).toEqual({
-      featuredLimit: 12,
-      totalLimit: 120
+    expect(getMapVisibilityThresholds(12)).toEqual({
+      minScore: 86,
+      featuredMinScore: 95
     });
-    expect(getMapDisplayLimits(13)).toEqual({
-      featuredLimit: 20,
-      totalLimit: 180
+    expect(getMapVisibilityThresholds(13)).toEqual({
+      minScore: 76,
+      featuredMinScore: 92
     });
-    expect(getMapDisplayLimits(14)).toEqual({
-      featuredLimit: 20,
-      totalLimit: 180
+    expect(getMapVisibilityThresholds(14)).toEqual({
+      minScore: 76,
+      featuredMinScore: 92
     });
-    expect(getMapDisplayLimits(16)).toEqual({
-      featuredLimit: 30,
-      totalLimit: 220
+    expect(getMapVisibilityThresholds(16)).toEqual({
+      minScore: 66,
+      featuredMinScore: 88
     });
-    expect(getMapDisplayLimits(17)).toEqual({
-      featuredLimit: 40,
-      totalLimit: 250
-    });
-    expect(getMapDisplayLimits(20)).toEqual({
-      featuredLimit: 40,
-      totalLimit: 250
+    expect(getMapVisibilityThresholds(17)).toEqual({
+      minScore: 56,
+      featuredMinScore: 84
     });
   });
-});
 
-describe("getCandidateLimit", () => {
-  it("overfetches 4x and caps at 1000", () => {
-    expect(getCandidateLimit(80)).toBe(320);
-    expect(getCandidateLimit(250)).toBe(1000);
-    expect(getCandidateLimit(400)).toBe(1000);
-  });
-});
-
-describe("getEffectiveDisplayLimits", () => {
-  const displayLimits = {
-    featuredLimit: 20,
-    totalLimit: 180
-  };
-
-  it("uses display limits when the user limit is absent", () => {
-    expect(getEffectiveDisplayLimits(undefined, displayLimits)).toEqual(
-      displayLimits
+  it("lowers the membership threshold as zoom increases", () => {
+    const thresholds = [10, 12, 14, 16, 17].map(
+      (zoom) => getMapVisibilityThresholds(zoom).minScore
     );
+
+    expect(thresholds).toEqual([92, 86, 76, 66, 56]);
+  });
+});
+
+describe("getMapPinsSafetyCap", () => {
+  it("uses the default safety cap when limit is absent", () => {
+    expect(getMapPinsSafetyCap(undefined)).toBe(MAP_PINS_SAFETY_CAP);
   });
 
-  it("never exceeds the total limit", () => {
-    expect(getEffectiveDisplayLimits(200, displayLimits)).toEqual(displayLimits);
-  });
-
-  it("honors a smaller user limit", () => {
-    expect(getEffectiveDisplayLimits(10, displayLimits)).toEqual({
-      featuredLimit: 10,
-      totalLimit: 10
-    });
+  it("allows limit to lower but not raise the safety cap", () => {
+    expect(getMapPinsSafetyCap(20)).toBe(20);
+    expect(getMapPinsSafetyCap(MAP_PINS_SAFETY_CAP + 1)).toBe(
+      MAP_PINS_SAFETY_CAP
+    );
   });
 });
 
@@ -129,23 +114,17 @@ describe("deriveZoomFromBbox", () => {
   });
 });
 
-describe("getDisplayLimits", () => {
-  it("uses the zoom bucket when zoom is provided", () => {
+describe("getEffectiveMapZoom", () => {
+  it("uses the zoom when zoom is provided", () => {
     const bbox = { swLat: 0, swLng: 0, neLat: 1, neLng: 1 };
 
-    expect(getDisplayLimits(bbox, 13)).toEqual({
-      featuredLimit: 20,
-      totalLimit: 180
-    });
+    expect(getEffectiveMapZoom(bbox, 13)).toBe(13);
   });
 
-  it("falls back to bbox-derived display limits when zoom is absent", () => {
+  it("falls back to bbox-derived zoom when zoom is absent", () => {
     const bbox = { swLat: 0, swLng: 0, neLat: 0.01, neLng: 0.01 };
 
-    expect(getDisplayLimits(bbox)).toEqual({
-      featuredLimit: 30,
-      totalLimit: 220
-    });
+    expect(getEffectiveMapZoom(bbox)).toBe(15);
   });
 });
 

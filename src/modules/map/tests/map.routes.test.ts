@@ -74,10 +74,15 @@ function mapResult(
     places,
     meta: {
       returnedCount: places.length,
-      limit: 180,
+      limit: 400,
       requestedLimit: null,
-      candidateLimit: 720,
+      candidateLimit: 400,
       capped: false,
+      effectiveZoom: 13,
+      minScore: 76,
+      featuredMinScore: 92,
+      safetyCap: 400,
+      capHit: false,
       queryBounds: {
         swLat: 52.48,
         swLng: 13.33,
@@ -122,10 +127,15 @@ describe("map routes", () => {
       ],
       meta: {
         returnedCount: 1,
-        limit: 180,
+        limit: 400,
         requestedLimit: null,
-        candidateLimit: 720,
+        candidateLimit: 400,
         capped: false,
+        effectiveZoom: 13,
+        minScore: 76,
+        featuredMinScore: 92,
+        safetyCap: 400,
+        capHit: false,
         queryBounds: {
           swLat: 52.48,
           swLng: 13.33,
@@ -299,12 +309,12 @@ describe("map routes", () => {
     expect(response.statusCode).toBe(400);
   });
 
-  it("returns 400 when limit is over 250", async () => {
+  it("returns 400 when limit is over 400", async () => {
     const app = await buildApp();
 
     const response = await app.inject({
       method: "GET",
-      url: `${validQuery}&limit=251`
+      url: `${validQuery}&limit=401`
     });
 
     await app.close();

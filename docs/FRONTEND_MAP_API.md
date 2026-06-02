@@ -127,8 +127,8 @@ Parameters:
 | `swLng` | number | yes | South-west map corner longitude. |
 | `neLat` | number | yes | North-east map corner latitude. |
 | `neLng` | number | yes | North-east map corner longitude. |
-| `zoom` | number | no | Map zoom level (`1`-`22`). Controls how many places the backend returns. If omitted, density is derived from the bbox span. |
-| `limit` | number | no | Optional cap, max `250`. Backend still clamps it against zoom-based density. |
+| `zoom` | number | no | Map zoom level (`1`-`22`). Controls the backend visibility-score threshold. If omitted, zoom is derived from the bbox span. |
+| `limit` | number | no | Optional safety cap, max `400`. Normal map usage should omit it. It is not the density control. |
 
 The frontend gets these values from the current visible map rectangle.
 
@@ -144,24 +144,28 @@ neLng=13.4700
 ## Density, Zoom, And Marker Display
 
 The backend, not the frontend, decides how many places to show. Send the current
-map `zoom` and the backend returns ranked places with display metadata.
+map `zoom` and the backend returns places whose own `mapVisibilityScore` passes
+the zoom threshold. This makes pin membership stable while panning at the same
+zoom: a place that remains inside the bbox does not disappear merely because
+other places entered the new bbox.
 
 The response has two marker tiers:
 
 - `featured`: normal/icon marker;
 - `dot`: small lightweight point.
 
-| Zoom | Level | Featured places | Total places |
+| Zoom | Level | Min score | Featured min score |
 | --- | --- | ---: | ---: |
-| `<= 10` | whole city | 8 | 80 |
-| `11-12` | large area | 12 | 120 |
-| `13-14` | district / blocks | 20 | 180 |
-| `15-16` | streets / blocks | 30 | 220 |
-| `>= 17` | close view | 40 | 250 |
+| `<= 10` | whole city | 92 | 98 |
+| `11-12` | large area | 86 | 95 |
+| `13-14` | district / blocks | 76 | 92 |
+| `15-16` | streets / blocks | 66 | 88 |
+| `>= 17` | close view | 56 | 84 |
 
-`limit` can only lower total places, never raise it. For example, requesting
-`limit=20` at zoom `13` returns at most `20` total places. If `zoom` is omitted,
-the backend derives display limits from the bbox span.
+`limit` is only a safety cap. Sending a small `limit` intentionally opts back
+into count clipping and can reintroduce pin churn for that client. Normal map
+requests should omit `limit` and let the backend score threshold decide density.
+If `zoom` is omitted, the backend derives an effective zoom from the bbox span.
 
 ## Response
 
@@ -185,7 +189,25 @@ Successful response:
       "displayKind": "featured",
       "displayPriority": 1
     }
-  ]
+  ],
+  "meta": {
+    "returnedCount": 1,
+    "limit": 400,
+    "requestedLimit": null,
+    "candidateLimit": 400,
+    "capped": false,
+    "effectiveZoom": 13,
+    "minScore": 76,
+    "featuredMinScore": 92,
+    "safetyCap": 400,
+    "capHit": false,
+    "queryBounds": {
+      "swLat": 52.48,
+      "swLng": 13.33,
+      "neLat": 52.56,
+      "neLng": 13.47
+    }
+  }
 }
 ```
 
@@ -207,6 +229,10 @@ Fields:
 | `displayKind` | `"featured"` or `"dot"` | Rendering hint. Use `featured` for normal markers and `dot` for small lightweight points. |
 | `displayPriority` | number | 1-based ranking position in the current bbox. Lower number means higher priority. |
 
+`meta.capHit=true` means the backend hit the safety cap and the response may
+again be clipped by count. If this happens often for normal map views, backend
+thresholds need recalibration or clustering/tiles.
+
 The map response is intentionally a lightweight pin feed. It does not include
 address, phone, website, AI summaries, opening hours, provider details, full
 photo metadata, saved collection ids, or raw provider blobs. When a user taps a
@@ -219,6 +245,28 @@ Missing numeric signals are returned as `null`.
 ```swift
 struct MapPlacesResponse: Decodable {
     let places: [MapPlace]
+    let meta: MapPlacesMeta
+}
+
+struct MapPlacesMeta: Decodable {
+    let returnedCount: Int
+    let limit: Int
+    let requestedLimit: Int?
+    let candidateLimit: Int
+    let capped: Bool
+    let effectiveZoom: Int
+    let minScore: Double
+    let featuredMinScore: Double
+    let safetyCap: Int
+    let capHit: Bool
+    let queryBounds: QueryBounds
+}
+
+struct QueryBounds: Decodable {
+    let swLat: Double
+    let swLng: Double
+    let neLat: Double
+    let neLng: Double
 }
 
 struct MapPlace: Decodable, Identifiable {
