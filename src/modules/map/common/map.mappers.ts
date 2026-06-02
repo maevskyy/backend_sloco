@@ -13,7 +13,6 @@ export function mapPlaceRowToPin(row: PlaceRow): MapPlacePin {
     mapVisibilityScore: row.map_visibility_score ?? 0,
     primaryPhoto: mapPrimaryPhoto(row),
     isSaved: false,
-    displayKind: "dot",
     displayPriority: 1
   };
 }

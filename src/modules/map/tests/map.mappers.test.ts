@@ -60,7 +60,6 @@ describe("map place row mapper", () => {
         source: "vibe"
       },
       isSaved: false,
-      displayKind: "dot",
       displayPriority: 1
     });
   });

@@ -32,36 +32,28 @@ function place(overrides: Partial<ScorablePlace>): ScorablePlace {
 describe("getMapVisibilityThresholds", () => {
   it("returns expected score thresholds per zoom bucket", () => {
     expect(getMapVisibilityThresholds(5)).toEqual({
-      minScore: 92,
-      featuredMinScore: 98
+      minScore: 92
     });
     expect(getMapVisibilityThresholds(10)).toEqual({
-      minScore: 92,
-      featuredMinScore: 98
+      minScore: 92
     });
     expect(getMapVisibilityThresholds(11)).toEqual({
-      minScore: 86,
-      featuredMinScore: 95
+      minScore: 86
     });
     expect(getMapVisibilityThresholds(12)).toEqual({
-      minScore: 86,
-      featuredMinScore: 95
+      minScore: 86
     });
     expect(getMapVisibilityThresholds(13)).toEqual({
-      minScore: 76,
-      featuredMinScore: 92
+      minScore: 76
     });
     expect(getMapVisibilityThresholds(14)).toEqual({
-      minScore: 76,
-      featuredMinScore: 92
+      minScore: 76
     });
     expect(getMapVisibilityThresholds(16)).toEqual({
-      minScore: 66,
-      featuredMinScore: 88
+      minScore: 66
     });
     expect(getMapVisibilityThresholds(17)).toEqual({
-      minScore: 56,
-      featuredMinScore: 84
+      minScore: 56
     });
   });
 

@@ -141,7 +141,7 @@ neLat=52.5600
 neLng=13.4700
 ```
 
-## Density, Zoom, And Marker Display
+## Density, Zoom, And Pin Priority
 
 The backend, not the frontend, decides how many places to show. Send the current
 map `zoom` and the backend returns places whose own `mapVisibilityScore` passes
@@ -149,18 +149,18 @@ the zoom threshold. This makes pin membership stable while panning at the same
 zoom: a place that remains inside the bbox does not disappear merely because
 other places entered the new bbox.
 
-The response has two marker tiers:
+The backend no longer returns `featured` / `dot` marker tiers. The frontend owns
+that UI decision. Use `mapVisibilityScore`, `displayPriority`, current zoom, and
+local rendering constraints to decide which pins are large markers and which are
+small points.
 
-- `featured`: normal/icon marker;
-- `dot`: small lightweight point.
-
-| Zoom | Level | Min score | Featured min score |
-| --- | --- | ---: | ---: |
-| `<= 10` | whole city | 92 | 98 |
-| `11-12` | large area | 86 | 95 |
-| `13-14` | district / blocks | 76 | 92 |
-| `15-16` | streets / blocks | 66 | 88 |
-| `>= 17` | close view | 56 | 84 |
+| Zoom | Level | Min score |
+| --- | --- | ---: |
+| `<= 10` | whole city | 92 |
+| `11-12` | large area | 86 |
+| `13-14` | district / blocks | 76 |
+| `15-16` | streets / blocks | 66 |
+| `>= 17` | close view | 56 |
 
 `limit` is only a safety cap. Sending a small `limit` intentionally opts back
 into count clipping and can reintroduce pin churn for that client. Normal map
@@ -186,7 +186,6 @@ Successful response:
       "mapVisibilityScore": 91,
       "primaryPhoto": null,
       "isSaved": false,
-      "displayKind": "featured",
       "displayPriority": 1
     }
   ],
@@ -198,7 +197,6 @@ Successful response:
     "capped": false,
     "effectiveZoom": 13,
     "minScore": 76,
-    "featuredMinScore": 92,
     "safetyCap": 400,
     "capHit": false,
     "queryBounds": {
@@ -226,7 +224,6 @@ Fields:
 | `mapVisibilityScore` | number | Backend ranking/visibility signal. |
 | `primaryPhoto` | object or null | Small primary photo metadata for marker/card display. |
 | `isSaved` | boolean | Whether the authenticated user saved this place. Public map requests return `false`. |
-| `displayKind` | `"featured"` or `"dot"` | Rendering hint. Use `featured` for normal markers and `dot` for small lightweight points. |
 | `displayPriority` | number | 1-based ranking position in the current bbox. Lower number means higher priority. |
 
 `meta.capHit=true` means the backend hit the safety cap and the response may
@@ -256,7 +253,6 @@ struct MapPlacesMeta: Decodable {
     let capped: Bool
     let effectiveZoom: Int
     let minScore: Double
-    let featuredMinScore: Double
     let safetyCap: Int
     let capHit: Bool
     let queryBounds: QueryBounds
@@ -281,7 +277,6 @@ struct MapPlace: Decodable, Identifiable {
     let mapVisibilityScore: Double
     let primaryPhoto: PrimaryPhoto?
     let isSaved: Bool
-    let displayKind: DisplayKind
     let displayPriority: Int
 }
 
@@ -293,10 +288,6 @@ struct PrimaryPhoto: Decodable {
     let source: String?
 }
 
-enum DisplayKind: String, Decodable {
-    case featured
-    case dot
-}
 ```
 
 ## Swift Request Example
@@ -378,10 +369,10 @@ Frontend flow:
    longitude
    ```
 
-   Use `displayKind == .featured` for normal markers and `displayKind == .dot`
-   for small lightweight points.
+   Frontend decides marker style locally. A common MVP rule is to render the
+   first few `displayPriority` values as larger markers and the rest as points.
 
-6. Use `displayPriority` for z-index / tap priority if markers overlap.
+6. Use `displayPriority` for marker style, z-index, and tap priority if markers overlap.
 7. When the user taps a marker/card, call `GET /v1/places/:placeId`.
 8. When the map region changes, iOS should debounce requests.
 

@@ -27,8 +27,7 @@ export function createMapPlacesService(
 ): MapPlacesService {
   return async (query) => {
     const effectiveZoom = getEffectiveMapZoom(query, query.zoom);
-    const { minScore, featuredMinScore } =
-      getMapVisibilityThresholds(effectiveZoom);
+    const { minScore } = getMapVisibilityThresholds(effectiveZoom);
     const safetyCap = getMapPinsSafetyCap(query.limit);
     const rows = await store.placesInBbox(query, minScore, safetyCap);
     const context: MapRankingContext = { zoom: effectiveZoom };
@@ -43,10 +42,6 @@ export function createMapPlacesService(
     return {
       places: ranked.map((place, index) => ({
         ...mapPlaceRowToPin(place),
-        displayKind:
-          (place.map_visibility_score ?? 0) >= featuredMinScore
-            ? "featured"
-            : "dot",
         displayPriority: index + 1
       })),
       meta: {
@@ -57,7 +52,6 @@ export function createMapPlacesService(
         capped: capHit,
         effectiveZoom,
         minScore,
-        featuredMinScore,
         safetyCap,
         capHit,
         queryBounds: {

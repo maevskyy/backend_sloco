@@ -33,7 +33,6 @@ const PERSONALIZATION_WEIGHT = 100;
 
 export type MapVisibilityThresholds = {
   minScore: number;
-  featuredMinScore: number;
 };
 
 /**
@@ -46,35 +45,30 @@ export function getMapVisibilityThresholds(
 ): MapVisibilityThresholds {
   if (zoom <= 10) {
     return {
-      minScore: 92,
-      featuredMinScore: 98
+      minScore: 92
     };
   }
 
   if (zoom <= 12) {
     return {
-      minScore: 86,
-      featuredMinScore: 95
+      minScore: 86
     };
   }
 
   if (zoom <= 14) {
     return {
-      minScore: 76,
-      featuredMinScore: 92
+      minScore: 76
     };
   }
 
   if (zoom <= 16) {
     return {
-      minScore: 66,
-      featuredMinScore: 88
+      minScore: 66
     };
   }
 
   return {
-    minScore: 56,
-    featuredMinScore: 84
+    minScore: 56
   };
 }
 

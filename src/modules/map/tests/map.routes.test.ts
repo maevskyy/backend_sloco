@@ -60,7 +60,6 @@ function mapPlace(overrides: Partial<MapPlacePin>): MapPlacePin {
     mapVisibilityScore: 89,
     primaryPhoto: null,
     isSaved: false,
-    displayKind: "featured",
     displayPriority: 1,
     ...overrides
   };
@@ -80,7 +79,6 @@ function mapResult(
       capped: false,
       effectiveZoom: 13,
       minScore: 76,
-      featuredMinScore: 92,
       safetyCap: 400,
       capHit: false,
       queryBounds: {
@@ -133,7 +131,6 @@ describe("map routes", () => {
         capped: false,
         effectiveZoom: 13,
         minScore: 76,
-        featuredMinScore: 92,
         safetyCap: 400,
         capHit: false,
         queryBounds: {
@@ -172,7 +169,6 @@ describe("map routes", () => {
               latitude: 44.44,
               longitude: 26.1,
               rating: null,
-              displayKind: "dot",
               displayPriority: 2
             })
           ],
@@ -195,13 +191,11 @@ describe("map routes", () => {
       {
         id: 1,
         isSaved: false,
-        displayKind: "featured",
         displayPriority: 1
       },
       {
         id: 2,
         isSaved: true,
-        displayKind: "dot",
         displayPriority: 2
       }
     ]);

@@ -64,8 +64,7 @@ describe("map places service", () => {
     });
 
     expect(result.places).toHaveLength(20);
-    expect(result.places.filter((item) => item.displayKind === "featured")).toHaveLength(1);
-    expect(result.places.filter((item) => item.displayKind === "dot")).toHaveLength(19);
+    expect(result.places[0]).not.toHaveProperty("displayKind");
     expect(result.places.map((item) => item.displayPriority)).toEqual(
       Array.from({ length: 20 }, (_, index) => index + 1)
     );
@@ -77,7 +76,6 @@ describe("map places service", () => {
       capped: false,
       effectiveZoom: 14,
       minScore: 76,
-      featuredMinScore: 92,
       safetyCap: MAP_PINS_SAFETY_CAP,
       capHit: false,
       queryBounds: {

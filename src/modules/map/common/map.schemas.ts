@@ -43,7 +43,6 @@ export const mapPlacePinSchema = z.object({
   mapVisibilityScore: z.number(),
   primaryPhoto: mapPrimaryPhotoSchema.nullable(),
   isSaved: z.boolean(),
-  displayKind: z.enum(["featured", "dot"]),
   displayPriority: z.number().int().min(1)
 });
 
@@ -55,7 +54,6 @@ export const mapPlacesMetaSchema = z.object({
   capped: z.boolean(),
   effectiveZoom: z.number().int().min(1).max(22),
   minScore: z.number(),
-  featuredMinScore: z.number(),
   safetyCap: z.number().int().min(0),
   capHit: z.boolean(),
   queryBounds: z.object({
