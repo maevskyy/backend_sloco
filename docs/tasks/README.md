@@ -37,6 +37,7 @@ Task files live here as `TASKS_N_NAME.md`.
 | Done | `TASKS_27_MAP_SPATIAL_COVERAGE.md` | Spatially fair map pin selection and capped-result metadata for `/v1/map/places`. |
 | Done | `TASKS_28_MAP_STABLE_PINS.md` | Stable map pin membership through zoom-based visibility-score thresholds and safety-cap metadata. |
 | Done | `TASKS_29_FRONTEND_OWNED_MAP_PIN_TIERS.md` | Remove backend-owned `featured`/`dot` tiers from the map pin contract; frontend owns marker styling. |
+| Done | `TASKS_30_PLACE_DETAILS_REDIS_CACHE.md` | Stage 1 Redis cache for public `GET /v1/places/:id` details with TTL and manual import flush. |
 
 ## TBD Backlog
 

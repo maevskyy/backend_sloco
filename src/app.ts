@@ -34,6 +34,7 @@ import {
   type FeedPlacesService
 } from "./modules/feed/index.js";
 import type { AuthService } from "./modules/auth/auth.service.js";
+import type { CacheStore } from "./lib/cache/cache-store.js";
 
 type AppOptions = {
   supabaseHealthCheck?: () => Promise<void>;
@@ -42,6 +43,7 @@ type AppOptions = {
   meService?: MeService;
   savedPlacesService?: SavedPlacesService;
   placeDetailsService?: PlaceDetailsService;
+  cacheStore?: CacheStore;
   searchPlacesService?: SearchPlacesService;
   feedPlacesService?: FeedPlacesService;
 };
@@ -88,7 +90,8 @@ export async function buildApp(options: AppOptions = {}) {
     prefix: API_PREFIX,
     authService: options.authService,
     savedPlacesService: options.savedPlacesService,
-    placeDetailsService: options.placeDetailsService
+    placeDetailsService: options.placeDetailsService,
+    cacheStore: options.cacheStore
   });
 
   await app.register(registerSearchModule, {

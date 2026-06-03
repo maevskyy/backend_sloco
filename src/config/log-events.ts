@@ -5,6 +5,7 @@ export enum LogEventType {
 }
 
 export enum LogEvent {
+  CacheMetric = "cache metric",
   DependencyMetric = "dependency metric",
   HttpRequestMetric = "http request metric",
   RequestCompleted = "request completed",

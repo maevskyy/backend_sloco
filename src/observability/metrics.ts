@@ -6,6 +6,7 @@ import type {
   FastifyRequest
 } from "fastify";
 import { LogEvent, LogEventType } from "../config/log-events.js";
+import type { CacheMetricInput } from "../lib/cache/cache-store.js";
 
 type RequestMetricContext = {
   log: FastifyBaseLogger;
@@ -71,6 +72,31 @@ export async function measureDependencyMetric<T>(
     logDependencyMetric(input, Math.round(performance.now() - startedAt), false);
     throw error;
   }
+}
+
+export function logCacheMetric(input: CacheMetricInput) {
+  const context = requestMetricContext.getStore();
+
+  if (!context) {
+    return;
+  }
+
+  context.log.info(
+    {
+      eventType: LogEventType.Metric,
+      event: LogEvent.CacheMetric,
+      metricType: "cache",
+      cacheName: input.cacheName,
+      cacheStatus: input.cacheStatus,
+      keyPrefix: input.keyPrefix,
+      path: context.path,
+      route: context.path,
+      method: context.method,
+      durationMs: input.durationMs,
+      requestId: context.requestId
+    },
+    `METRIC cache ${input.cacheName} ${input.cacheStatus} ${input.durationMs}ms`
+  );
 }
 
 function logDependencyMetric(

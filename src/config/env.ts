@@ -12,7 +12,9 @@ const envSchema = z.object({
   PORT: z.coerce.number().int().positive().default(3000),
   SUPABASE_URL: optionalNonEmptyString(z.string().url()),
   SUPABASE_SERVICE_ROLE_KEY: optionalNonEmptyString(z.string().min(1)),
-  RECOMMENDATION_SERVICE_URL: optionalNonEmptyString(z.string().url())
+  RECOMMENDATION_SERVICE_URL: optionalNonEmptyString(z.string().url()),
+  REDIS_URL: optionalNonEmptyString(z.string().url()),
+  PLACE_CACHE_TTL_SECONDS: z.coerce.number().int().min(0).default(3600)
 });
 
 export const env = envSchema.parse(process.env);
