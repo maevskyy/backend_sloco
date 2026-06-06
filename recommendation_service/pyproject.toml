@@ -1,0 +1,48 @@
+[project]
+name = "recommendation-service"
+version = "0.1.0"
+description = "Python algorithm service for Sloco recommendations."
+authors = [{ name = "Sloco", email = "dev@sloco.local" }]
+readme = "README.md"
+requires-python = ">=3.12,<4.0"
+dependencies = [
+    "fastapi (>=0.115.6,<0.116.0)",
+    "numpy (>=2.2.0,<3.0.0)",
+    "pydantic (>=2.10.4,<3.0.0)",
+    "pydantic-settings (>=2.7.0,<3.0.0)",
+    "uvicorn[standard] (>=0.34.0,<0.35.0)",
+]
+
+[project.scripts]
+recommendation-service = "recommendation_service.main:run"
+
+[tool.poetry]
+packages = [{ include = "recommendation_service", from = "src" }]
+
+[tool.poetry.group.dev.dependencies]
+httpx = "^0.28.1"
+mypy = "^1.14.1"
+pytest = "^8.3.4"
+ruff = "^0.8.4"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+mypy_path = "src"
+packages = ["recommendation_service"]

@@ -1,0 +1,15 @@
+.env
+.venv
+.mypy_cache
+.pytest_cache
+.ruff_cache
+__pycache__
+*.py[cod]
+.coverage
+coverage
+htmlcov
+*.log
+.DS_Store
+.poetry-cache
+.poetry-config
+poetry.toml

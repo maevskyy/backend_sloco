@@ -1,0 +1,11 @@
+{
+  "name": "sloco-load",
+  "private": true,
+  "description": "Artillery load/stress scenarios for the backend hot paths.",
+  "scripts": {
+    "map": "artillery run map-places.yml"
+  },
+  "devDependencies": {
+    "artillery": "^2.0.0"
+  }
+}

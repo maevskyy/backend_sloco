@@ -1,8 +1,21 @@
 name: Deploy Production
 
+# One deploy for the whole stack. Builds the selected service image(s), ships the
+# compose + deploy configs to the server, renders /opt/backend_sloco/.env from
+# secrets, and converges the stack. No manual scp, no hand-edited .env.
+
 on:
   workflow_dispatch:
     inputs:
+      service:
+        description: "Which service(s) to build & deploy"
+        required: true
+        default: "all"
+        type: choice
+        options:
+          - all
+          - gateway
+          - recommender
       ref:
         description: "Branch, tag, or commit SHA to deploy"
         required: true
@@ -13,51 +26,24 @@ permissions:
   packages: write
 
 env:
-  IMAGE_NAME: ghcr.io/maevskyy/backend_sloco
+  GATEWAY_IMAGE: ghcr.io/maevskyy/backend_sloco
+  RECOMMENDER_IMAGE: ghcr.io/maevskyy/recommender_sloco
 
 jobs:
-  deploy-production:
-    name: Deploy production
+  build:
+    name: Build & push images
     runs-on: ubuntu-latest
-
+    outputs:
+      short_sha: ${{ steps.sha.outputs.short_sha }}
     steps:
       - name: Checkout selected ref
         uses: actions/checkout@v4
         with:
           ref: ${{ inputs.ref }}
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.11.0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Typecheck
-        run: pnpm typecheck
-
-      - name: Build
-        run: pnpm build
-
-      - name: Test
-        run: pnpm test
-
-      - name: Lint
-        run: pnpm lint
-
-      - name: Resolve image tags
-        id: image
-        run: |
-          SHORT_SHA="$(git rev-parse --short=12 HEAD)"
-          echo "sha_tag=${IMAGE_NAME}:${SHORT_SHA}" >> "$GITHUB_OUTPUT"
-          echo "latest_tag=${IMAGE_NAME}:prod-latest" >> "$GITHUB_OUTPUT"
+      - name: Resolve short SHA
+        id: sha
+        run: echo "short_sha=$(git rev-parse --short=12 HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: Login to GHCR
         uses: docker/login-action@v3
@@ -66,51 +52,122 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push Docker image
+      - name: Build & push gateway
+        if: ${{ inputs.service == 'gateway' || inputs.service == 'all' }}
         uses: docker/build-push-action@v6
         with:
-          context: .
+          context: ./gateway_service
           push: true
           tags: |
-            ${{ steps.image.outputs.sha_tag }}
-            ${{ steps.image.outputs.latest_tag }}
+            ${{ env.GATEWAY_IMAGE }}:${{ steps.sha.outputs.short_sha }}
+            ${{ env.GATEWAY_IMAGE }}:prod-latest
 
-      - name: Deploy on server
-        uses: appleboy/ssh-action@v1.2.2
-        env:
-          BACKEND_IMAGE: ${{ steps.image.outputs.sha_tag }}
-          GHCR_USERNAME: ${{ secrets.GHCR_USERNAME }}
-          GHCR_READ_TOKEN: ${{ secrets.GHCR_READ_TOKEN }}
+      - name: Build & push recommender
+        if: ${{ inputs.service == 'recommender' || inputs.service == 'all' }}
+        uses: docker/build-push-action@v6
+        with:
+          context: ./recommendation_service
+          push: true
+          tags: |
+            ${{ env.RECOMMENDER_IMAGE }}:${{ steps.sha.outputs.short_sha }}
+            ${{ env.RECOMMENDER_IMAGE }}:prod-latest
+
+  deploy:
+    name: Ship stack & converge
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout selected ref
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+
+      # 1. Ship compose + deploy configs + grafana provisioning to the server.
+      - name: Sync stack files to server
+        uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
-          envs: BACKEND_IMAGE,GHCR_USERNAME,GHCR_READ_TOKEN
+          source: "docker-compose.yml,deploy/**,gateway_service/grafana/provisioning/**,gateway_service/grafana/dashboards/**"
+          target: "/opt/backend_sloco"
+          overwrite: true
+
+      # 2. Render .env from secrets, then converge the whole stack.
+      - name: Deploy on server
+        uses: appleboy/ssh-action@v1.2.2
+        env:
+          SERVICE: ${{ inputs.service }}
+          SHORT_SHA: ${{ needs.build.outputs.short_sha }}
+          GATEWAY_IMAGE: ${{ env.GATEWAY_IMAGE }}
+          RECOMMENDER_IMAGE: ${{ env.RECOMMENDER_IMAGE }}
+          GHCR_USERNAME: ${{ secrets.GHCR_USERNAME }}
+          GHCR_READ_TOKEN: ${{ secrets.GHCR_READ_TOKEN }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          GF_SECURITY_ADMIN_USER: ${{ secrets.GF_SECURITY_ADMIN_USER }}
+          GF_SECURITY_ADMIN_PASSWORD: ${{ secrets.GF_SECURITY_ADMIN_PASSWORD }}
+          GF_SERVER_ROOT_URL: ${{ secrets.GF_SERVER_ROOT_URL }}
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          envs: SERVICE,SHORT_SHA,GATEWAY_IMAGE,RECOMMENDER_IMAGE,GHCR_USERNAME,GHCR_READ_TOKEN,SUPABASE_URL,SUPABASE_SERVICE_ROLE_KEY,GF_SECURITY_ADMIN_USER,GF_SECURITY_ADMIN_PASSWORD,GF_SERVER_ROOT_URL
           script: |
             set -euo pipefail
-
             cd /opt/backend_sloco
 
+            # Preserve current image tags for services we are NOT deploying.
+            CUR_BACKEND="$(grep -E '^BACKEND_IMAGE=' .env 2>/dev/null | cut -d= -f2- || true)"
+            CUR_REC="$(grep -E '^RECOMMENDATION_SERVICE_IMAGE=' .env 2>/dev/null | cut -d= -f2- || true)"
+            BACKEND_IMAGE_TAG="${CUR_BACKEND:-${GATEWAY_IMAGE}:prod-latest}"
+            REC_IMAGE_TAG="${CUR_REC:-${RECOMMENDER_IMAGE}:prod-latest}"
+
+            if [ "$SERVICE" = "gateway" ] || [ "$SERVICE" = "all" ]; then
+              BACKEND_IMAGE_TAG="${GATEWAY_IMAGE}:${SHORT_SHA}"
+            fi
+            if [ "$SERVICE" = "recommender" ] || [ "$SERVICE" = "all" ]; then
+              REC_IMAGE_TAG="${RECOMMENDER_IMAGE}:${SHORT_SHA}"
+            fi
+
+            # Render .env from secrets (single source of truth, idempotent).
+            umask 077
+            cat > .env <<EOF
+            BACKEND_IMAGE=${BACKEND_IMAGE_TAG}
+            RECOMMENDATION_SERVICE_IMAGE=${REC_IMAGE_TAG}
+
+            NODE_ENV=production
+            SUPABASE_URL=${SUPABASE_URL}
+            SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+            RECOMMENDATION_SERVICE_URL=http://recommendation-service:8000
+            PLACE_CACHE_TTL_SECONDS=3600
+
+            RECOMMENDATION_APP_ENV=production
+            RECOMMENDATION_LOG_LEVEL=info
+
+            REDIS_URL=redis://redis:6379/0
+
+            GF_SECURITY_ADMIN_USER=${GF_SECURITY_ADMIN_USER}
+            GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD}
+            GF_SERVER_ROOT_URL=${GF_SERVER_ROOT_URL}
+            EOF
+
+            # Authenticate to GHCR for image pulls.
             if [ -n "${GHCR_USERNAME:-}" ] && [ -n "${GHCR_READ_TOKEN:-}" ]; then
               echo "$GHCR_READ_TOKEN" | docker login ghcr.io -u "$GHCR_USERNAME" --password-stdin
             fi
 
-            if grep -q '^BACKEND_IMAGE=' .env; then
-              sed -i "s|^BACKEND_IMAGE=.*|BACKEND_IMAGE=${BACKEND_IMAGE}|" .env
-            else
-              printf '\nBACKEND_IMAGE=%s\n' "$BACKEND_IMAGE" >> .env
-            fi
-
-            docker compose pull backend
-            docker compose up -d backend
+            # Converge the full stack (incl. observability). Idempotent.
+            docker compose --profile observability pull
+            docker compose --profile observability up -d
             docker image prune -f
 
+            # Health gate on the gateway.
             for attempt in $(seq 1 12); do
               if curl --fail --silent --show-error http://127.0.0.1:3000/v1/health; then
                 exit 0
               fi
-
-              echo "Backend is not healthy yet. Attempt ${attempt}/12"
+              echo "Backend not healthy yet. Attempt ${attempt}/12"
               sleep 5
             done
 
@@ -118,16 +175,14 @@ jobs:
             docker compose logs --tail=100 backend
             exit 1
 
-      - name: Healthcheck
+      - name: Public healthcheck
         run: |
           for attempt in $(seq 1 12); do
             if curl --fail --silent --show-error "${{ secrets.PRODUCTION_API_URL }}/v1/health"; then
               exit 0
             fi
-
-            echo "Production API is not healthy yet. Attempt ${attempt}/12"
+            echo "Production API not healthy yet. Attempt ${attempt}/12"
             sleep 5
           done
-
           curl --verbose "${{ secrets.PRODUCTION_API_URL }}/v1/health"
           exit 1

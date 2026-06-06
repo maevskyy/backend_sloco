@@ -1,0 +1,158 @@
+services:
+  backend:
+    image: ${BACKEND_IMAGE:-sloco-backend:local}
+    restart: unless-stopped
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      HOST: 0.0.0.0
+      PORT: 3000
+      SUPABASE_URL: ${SUPABASE_URL:-}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:-}
+      RECOMMENDATION_SERVICE_URL: ${RECOMMENDATION_SERVICE_URL:-http://recommendation-service:8000}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+      PLACE_CACHE_TTL_SECONDS: ${PLACE_CACHE_TTL_SECONDS:-3600}
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      - redis
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "node -e \"fetch('http://127.0.0.1:3000/v1/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    networks:
+      - sloco_net
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  recommendation-service:
+    image: ${RECOMMENDATION_SERVICE_IMAGE:-sloco-recommendation-service:local}
+    restart: unless-stopped
+    environment:
+      APP_ENV: ${RECOMMENDATION_APP_ENV:-production}
+      HOST: 0.0.0.0
+      PORT: 8000
+      LOG_LEVEL: ${RECOMMENDATION_LOG_LEVEL:-info}
+      SERVICE_NAME: recommendation-service
+    expose:
+      - "8000"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "python -c \"import sys, urllib.request; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/v1/health/ready', timeout=3).status == 200 else 1)\""
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    networks:
+      - sloco_net
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    expose:
+      - "6379"
+    networks:
+      - sloco_net
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  grafana:
+    image: grafana/grafana:latest
+    profiles:
+      - observability
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GF_SECURITY_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GF_SECURITY_ADMIN_PASSWORD:-change-me}
+      GF_SERVER_ROOT_URL: ${GF_SERVER_ROOT_URL:-http://localhost:3001}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    ports:
+      - "127.0.0.1:3001:3000"
+    depends_on:
+      - loki
+      - prometheus
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./gateway_service/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - ./gateway_service/grafana/provisioning:/etc/grafana/provisioning:ro
+    networks:
+      - sloco_net
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  loki:
+    image: grafana/loki:3.1.1
+    profiles:
+      - observability
+    restart: unless-stopped
+    command: ["-config.file=/etc/loki/config.yml"]
+    volumes:
+      - ./deploy/observability/loki-config.yml:/etc/loki/config.yml:ro
+      - loki_data:/loki
+    ports:
+      - "127.0.0.1:3100:3100"
+    networks:
+      - sloco_net
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    profiles:
+      - observability
+    restart: unless-stopped
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=30d"
+      - "--web.enable-remote-write-receiver"
+    volumes:
+      - ./deploy/observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    ports:
+      - "127.0.0.1:9090:9090"
+    networks:
+      - sloco_net
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  sloco_net:
+    driver: bridge
+
+volumes:
+  redis_data:
+  grafana_data:
+  loki_data:
+  prometheus_data:

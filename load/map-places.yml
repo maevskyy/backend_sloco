@@ -1,0 +1,50 @@
+# Artillery load test for the hot read path: GET /v1/map/places.
+# Run:  artillery run -t http://127.0.0.1:3000 load/map-places.yml
+#       (or `make load BASE_URL=https://sloco.pp.ua`)
+#
+# Viewports + zoom are drawn from viewports.csv so each virtual user hits a
+# different bbox, mimicking real map panning rather than one cached query.
+config:
+  target: "http://127.0.0.1:3000"
+  payload:
+    path: "viewports.csv"
+    fields:
+      - swLat
+      - swLng
+      - neLat
+      - neLng
+      - zoom
+    order: random
+  phases:
+    - name: warmup
+      duration: 30
+      arrivalRate: 2
+    - name: ramp
+      duration: 60
+      arrivalRate: 5
+      rampTo: 30
+    - name: sustained
+      duration: 120
+      arrivalRate: 30
+  ensure:
+    # SLO gate — see load/README.md. Fails the run if breached.
+    thresholds:
+      - http.response_time.p95: 150
+      - http.response_time.p99: 400
+
+scenarios:
+  - name: map-pins
+    weight: 8
+    flow:
+      - get:
+          url: "/v1/map/places?swLat={{ swLat }}&swLng={{ swLng }}&neLat={{ neLat }}&neLng={{ neLng }}&zoom={{ zoom }}"
+          expect:
+            - statusCode: 200
+
+  - name: feed
+    weight: 2
+    flow:
+      - get:
+          url: "/v1/feed/places?lat={{ swLat }}&lng={{ swLng }}&limit=20"
+          expect:
+            - statusCode: 200
