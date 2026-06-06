@@ -94,7 +94,9 @@ is host-level, not containerized.
 2. build and push selected service images;
 3. sync `docker-compose.yml`, `deploy/**`, and Grafana provisioning;
 4. render `/opt/backend_sloco/.env` from GitHub secrets;
-5. run `docker compose --profile observability up -d`.
+5. run `docker compose up -d` (app only). The self-hosted observability stack
+   (Loki/Prometheus/Grafana) is opt-in via the `with_observability` input — only
+   then does it render `GF_*` and run `--profile observability`.
 
 No production compose/config file should be copied by hand during normal deploys.
 
