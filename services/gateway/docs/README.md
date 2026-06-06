@@ -1,6 +1,16 @@
-# Backend Docs
+# Gateway Docs
 
-This folder is the main navigation point for backend documentation.
+This folder documents the Gateway service: API behavior, Gateway decisions,
+Gateway task history, and frontend-facing contracts.
+
+For backend-wide architecture, deploy, observability, and service boundaries,
+start at the monorepo root:
+
+```text
+../../docs/README.md
+../../docs/ARCHITECTURE.md
+../../docs/DEPLOYMENT.md
+```
 
 ## Current Service
 
@@ -82,7 +92,7 @@ Current note:
 
 - Production deployment:
   ```text
-  DEPLOYMENT.md
+  ../../docs/DEPLOYMENT.md
   ```
 
 - Grafana dashboard files:
@@ -113,12 +123,13 @@ New task docs should also be created in `docs/tasks/`.
 
 ## Source Of Truth Rules
 
-- Runtime behavior lives in `src/`.
+- Gateway runtime behavior lives in `src/`.
+- Backend-wide runtime/deploy behavior lives in root `../../docs/`.
 - Current project truth lives in `CURRENT_STATE.md`.
 - Current durable decisions live in `DECISIONS.md`.
 - API examples and frontend handoff live in docs.
 - Database DDL lives in `supabase/migrations/`.
-- Deployment runtime files live in `deploy/`.
+- Deployment runtime files live in root `../../deploy/`.
 - Grafana dashboard JSON lives in `grafana/dashboards/`.
 - Data import files live in `dumps/`.
 - Offline ETL and source mappers live in `scripts/`.

@@ -1,4 +1,4 @@
-# recommendation_service
+# Recommendation Service
 
 Python HTTP service for recommendation and algorithm runtime workloads.
 

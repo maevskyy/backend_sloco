@@ -1,8 +1,8 @@
 # TASKS 31: Self-Hosted Observability On Hetzner
 
-Status: In Progress. Local compose/config/provisioning files are implemented;
-server file copy, Nginx/certbot setup, Alloy dual-write, and Cloud cutover are
-still pending.
+Status: In Progress. Local compose/config/provisioning files are implemented
+and the backend monorepo deploy workflow now ships stack files. Nginx/certbot
+setup, Alloy dual-write, and Cloud cutover are still pending.
 
 ## Goal
 
@@ -68,10 +68,10 @@ backend/docker-compose.yml                                      (edit: add loki,
 backend/deploy/observability/loki-config.yml                    (new)
 backend/deploy/observability/prometheus.yml                     (new)
 backend/deploy/nginx/grafana_sloco.conf                         (new)
-backend/gateway_service/grafana/provisioning/datasources/datasources.yml  (new)
-backend/gateway_service/grafana/provisioning/dashboards/dashboards.yml     (new)
-backend/gateway_service/grafana/dashboards/*.json               (edit: fix datasource refs for provisioning)
-backend/gateway_service/grafana/README.md                       (edit: provisioning replaces manual import)
+backend/services/gateway/grafana/provisioning/datasources/datasources.yml  (new)
+backend/services/gateway/grafana/provisioning/dashboards/dashboards.yml     (new)
+backend/services/gateway/grafana/dashboards/*.json               (edit: fix datasource refs for provisioning)
+backend/services/gateway/grafana/README.md                       (edit: provisioning replaces manual import)
 backend/.env.example                                            (edit: GF_SERVER_ROOT_URL, keep admin creds)
 ```
 
@@ -138,8 +138,8 @@ a root URL so links behind Nginx are correct:
       - prometheus
     volumes:
       - grafana_data:/var/lib/grafana
-      - ./gateway_service/grafana/dashboards:/var/lib/grafana/dashboards:ro
-      - ./gateway_service/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./services/gateway/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - ./services/gateway/grafana/provisioning:/etc/grafana/provisioning:ro
     networks: [sloco_net]
     logging:
       driver: json-file
@@ -223,7 +223,7 @@ scrape_configs:
 
 ## Step 4 — Grafana Provisioning (datasources + dashboards as code)
 
-`backend/gateway_service/grafana/provisioning/datasources/datasources.yml`:
+`backend/services/gateway/grafana/provisioning/datasources/datasources.yml`:
 
 ```yaml
 apiVersion: 1
@@ -243,7 +243,7 @@ datasources:
       maxLines: 1000
 ```
 
-`backend/gateway_service/grafana/provisioning/dashboards/dashboards.yml`:
+`backend/services/gateway/grafana/provisioning/dashboards/dashboards.yml`:
 
 ```yaml
 apiVersion: 1
@@ -333,21 +333,19 @@ Live is needed:
 
 All commands run on the Hetzner host in `/opt/backend_sloco` unless noted.
 
-### 7.1 Ship the new files to the host
+### 7.1 Ship the new files through CI/CD
 
-The CD workflows do not copy compose/config files (see `docs/DEPLOYMENT.md`), so copy
-them manually for this infra change:
+The backend monorepo deploy workflow now copies compose/config/dashboard files to
+the host and renders `/opt/backend_sloco/.env` from GitHub secrets. Run:
 
-```bash
-# from a workstation checkout of backend/
-scp docker-compose.yml                              <user>@<host>:/opt/backend_sloco/docker-compose.yml
-scp -r deploy/observability                         <user>@<host>:/opt/backend_sloco/deploy/
-scp deploy/nginx/grafana_sloco.conf                 <user>@<host>:/tmp/grafana_sloco.conf
-scp -r gateway_service/grafana/provisioning         <user>@<host>:/opt/backend_sloco/gateway_service/grafana/
-scp gateway_service/grafana/dashboards/*.json       <user>@<host>:/opt/backend_sloco/gateway_service/grafana/dashboards/
+```text
+.github/workflows/deploy-production.yml
 ```
 
-Set env on the host `/opt/backend_sloco/.env`:
+Use `service=all` for the first observability deploy so both app services and
+the full stack converge together.
+
+Set these GitHub production secrets before the run:
 
 ```bash
 GF_SECURITY_ADMIN_USER=admin
@@ -359,9 +357,7 @@ GF_SERVER_ROOT_URL=https://grafana.sloco.pp.ua
 
 ```bash
 cd /opt/backend_sloco
-docker compose --profile observability config        # YAML + mounts valid
-docker compose --profile observability pull
-docker compose --profile observability up -d loki prometheus grafana
+docker compose --profile observability config
 docker compose ps
 ```
 
@@ -418,7 +414,7 @@ cd backend
 docker compose --profile observability config
 docker compose --profile observability up -d
 # dashboards parse:
-for f in gateway_service/grafana/dashboards/*.json; do \
+for f in services/gateway/grafana/dashboards/*.json; do \
   node -e "JSON.parse(require('fs').readFileSync('$f','utf8')); console.log('ok $f')"; done
 ```
 

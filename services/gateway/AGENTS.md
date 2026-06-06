@@ -16,22 +16,26 @@ that recommends places based on taste, lifestyle, and favorite-place patterns.
 - Fastify
 - Zod
 - Supabase Postgres
+- Redis
 - Docker
 - GitHub Actions
 - Hetzner
-- Grafana Cloud Loki
+- Self-hosted Grafana / Loki / Prometheus through the backend monorepo
 
 The public API boundary is this Gateway service. Recommendation runtime work
-lives in `../recommendation_service` and is called over the private Docker
-network by HTTP. Do not add Kafka, RabbitMQ, or heavier service infrastructure
-unless it is explicitly planned.
+lives in `../recommendation` and is called over the private Docker network by
+HTTP. Do not add Kafka, RabbitMQ, or heavier service infrastructure unless it is
+explicitly planned.
+
+The backend-wide repository root is two levels up from here. Cross-service
+deployment, compose, Nginx, observability, and load-test docs live in root
+`docs/`, `deploy/`, and `load/`.
 
 ## Repo Map
 
 ```text
 src/        application code
 docs/       documentation and task plans
-deploy/     production deploy templates
 supabase/   database migrations
 grafana/    dashboard JSON and Grafana notes
 dumps/      small sample/import data files
@@ -40,6 +44,8 @@ scripts/    offline ETL and source integration mappers
 
 Start with:
 
+- `../../docs/ARCHITECTURE.md`
+- `../../docs/DEPLOYMENT.md`
 - `docs/CURRENT_STATE.md`
 - `README.md`
 - `docs/README.md`
@@ -262,6 +268,7 @@ Use:
 - `docs/architecture/REPO_STRUCTURE.md` for "where does this go?";
 - `dumps/README.md` for sample/import data rules;
 - `grafana/README.md` for dashboard import/update rules.
+- root `../../docs/` for backend-platform architecture/deploy/runbook docs.
 
 Update `AGENTS.md` only when:
 

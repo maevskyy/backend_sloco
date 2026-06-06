@@ -1,50 +1,59 @@
-# Repo Structure
+# Gateway Repo Structure
 
-This file answers: where should new things go?
+This file answers: where should new Gateway things go?
 
-## Top-Level Folders
+For backend-wide repository layout, deployment, observability, and service
+boundaries, use the root docs:
 
 ```text
-src/        application code
-docs/       human docs, task plans, API notes, runbooks
-deploy/     production deploy templates and nginx config
-supabase/   database migrations and Supabase-owned setup
-grafana/    dashboard-as-code files and Grafana notes
-dumps/      small import/sample data files
-scripts/    offline ETL and source integration mappers
+../../../docs/ARCHITECTURE.md
+../../../docs/DEPLOYMENT.md
+```
+
+## Service Folders
+
+```text
+src/        Gateway application code
+docs/       Gateway API docs, decisions, and historical task plans
+supabase/   database migrations owned by the Gateway
+grafana/    dashboard JSON and provisioning files
+dumps/      small Gateway import/sample files
+scripts/    offline Gateway ETL and import scripts
+```
+
+Infrastructure that belongs to the whole backend stack lives at repo root:
+
+```text
+deploy/
+docker-compose.yml
+load/
+.github/workflows/
 ```
 
 ## `src/`
 
 Application code lives here.
 
-Current shape:
-
 ```text
 src/
   app.ts
   server.ts
-  config/      app wiring: env, logger, routes, swagger, openapi generator, shared HTTP schemas
+  config/      app wiring: env, logger, routes, swagger, shared HTTP schemas
   http/        Fastify HTTP glue, module-agnostic
-  lib/         infrastructure adapters (external world)
+  lib/         infrastructure adapters
   modules/     feature modules
+  observability/
 ```
 
 Rules:
 
 - Feature code goes into `src/modules/<feature>/`.
-- Cross-cutting runtime config and wiring goes into `src/config/`
-  (e.g. `config/openapi.ts` generates components from a zod registry;
-  `config/http-schemas.ts` owns shared HTTP error schemas).
-- Reusable Fastify glue every controller repeats goes into `src/http/`
-  (`route.ts` docs-route wrapper, `errors.ts` `handleCommonError`,
-  `auth-guard.ts` `createAuthGuard`, `response-log.ts`).
-- Small infrastructure adapters (things that talk to the outside world, e.g. the
-  Supabase client) go into `src/lib/`. Expand `lib/` only with adapter code.
-- Do not create a generic `utils/` or `shared/` dumping ground. Split reusable
-  code by responsibility (`lib/` adapters, `config/` wiring, `http/` glue).
+- Cross-cutting runtime config and wiring goes into `src/config/`.
+- Reusable Fastify glue goes into `src/http/`.
+- Infrastructure adapters go into `src/lib/`.
+- Do not create a generic `utils/` or `shared/` dumping ground.
 
-Module pattern:
+## Module Pattern
 
 ```text
 src/modules/<feature>/
@@ -62,106 +71,44 @@ Rules:
 
 - `src/modules/saved-places/` is the reference implementation.
 - Dependencies point inward: `controllers -> services -> stores`.
-- Controllers own HTTP concerns only: auth, request parsing, response logging,
-  and mapping domain errors to status codes.
+- Controllers own HTTP concerns only.
 - Services own business logic and depend on store contracts/interfaces.
 - Stores are the only layer that talks to Supabase/database APIs.
-- `common/` contains module-local shared building blocks: schemas, OpenAPI,
-  types, errors, and mappers.
-- Other modules should import through `src/modules/<feature>/index.ts`, not from
-  a module's internal folders.
-- Existing flat modules can stay flat until touched for meaningful work; new or
-  rewritten product modules should use the layered pattern.
+- Other modules import through `src/modules/<feature>/index.ts`, not internals.
 
-## `docs/`
+## Docs
 
-Docs are split by purpose, not by random topic.
-
-Current state:
-
-- task files live in `docs/tasks/`;
-- `docs/README.md` is the navigation index;
-- `docs/tasks/README.md` indexes task plans;
-- `docs/architecture/` is for stable engineering docs.
-
-Future target:
+Gateway docs are split by purpose:
 
 ```text
 docs/
-  api/
-  runbooks/
-  tasks/
   architecture/
+  tasks/
+  FRONTEND_*.md
+  CURRENT_STATE.md
+  DECISIONS.md
 ```
 
-Do not move many docs at once unless the commit is docs-only.
+Root `docs/` is for backend-platform docs. Gateway `docs/` is for Gateway
+runtime/API behavior.
 
-## `deploy/`
+## Grafana
 
-Deployment templates live here.
-
-Current files:
-
-- Docker Compose production template.
-- Nginx production config.
-
-Runtime secrets do not live here.
-
-## `supabase/`
-
-Supabase-owned database changes live here.
-
-Rules:
-
-- migration files go into `supabase/migrations/`;
-- do not commit Supabase service role keys;
-- manual SQL changes should eventually become migration files;
-- raw staging tables are allowed during MVP, but final domain tables should be
-  planned separately.
-
-## `grafana/`
-
-Grafana dashboard-as-code lives here.
-
-Rules:
-
-- dashboard JSON files go into `grafana/dashboards/`;
-- dashboard files must not contain tokens, passwords, or Grafana Cloud URLs;
-- import dashboards manually for MVP;
-- document dashboard import/update flow in `grafana/README.md`.
-
-## `dumps/`
-
-Small local import/sample data lives here.
-
-Rules:
-
-- keep useful MVP import files only;
-- do not commit private user data;
-- do not commit large raw exports by default;
-- document where a generated dump came from.
-
-## `scripts/`
-
-Offline developer/operator scripts live here.
-
-Current shape:
+Grafana files live here because current dashboards are Gateway/application
+dashboards:
 
 ```text
-scripts/
-  integrations/
-    _shared/
-    tripadvisor/
-    osm/
+grafana/dashboards/
+grafana/provisioning/
 ```
 
-Rules:
+They are mounted by root `docker-compose.yml`.
 
-- keep runtime API code in `src/`, not in `scripts/`;
-- one provider mapper per `scripts/integrations/<provider>/`;
-- shared mapper contracts/helpers live in `scripts/integrations/_shared/`;
-- mapper output should match the canonical `public.places` import columns;
-- generated import files go into `dumps/` and should be documented.
+## Scripts And Dumps
+
+Offline import and ETL scripts stay in `scripts/`. Generated/small import files
+can live in `dumps/` when documented. Large private/raw datasets should not be
+committed.
 
 ## Swagger / OpenAPI
 
@@ -179,8 +126,7 @@ docs/api/
 Rules:
 
 - Zod request/response schemas are the preferred source of truth.
-- Module OpenAPI files should generate JSON Schema components from those schemas
-  where practical.
-- Route schemas should reference generated components with stable ids.
+- Module OpenAPI files generate JSON Schema components where practical.
+- Route schemas reference generated components with stable ids.
 - `src/config/swagger.ts` registers cross-module components and exposes the
   generated OpenAPI document.

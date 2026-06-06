@@ -40,8 +40,8 @@ The metrics dashboard needs the Alloy metrics pipeline running on the host. See
 The self-hosted Grafana service mounts this folder:
 
 ```yaml
-./gateway_service/grafana/dashboards:/var/lib/grafana/dashboards:ro
-./gateway_service/grafana/provisioning:/etc/grafana/provisioning:ro
+./services/gateway/grafana/dashboards:/var/lib/grafana/dashboards:ro
+./services/gateway/grafana/provisioning:/etc/grafana/provisioning:ro
 ```
 
 On Grafana start, datasources and the `Sloco` dashboard folder are created
