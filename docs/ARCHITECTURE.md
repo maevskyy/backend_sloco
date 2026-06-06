@@ -17,8 +17,8 @@ Supabase managed Postgres stays outside the host and is accessed by the Gateway.
 
 | Compose service | Code folder | Runtime | Port | Public |
 | --- | --- | --- | --- | --- |
-| `backend` | `gateway_service/` | Node 24, Fastify | `3000` | Yes, through Nginx |
-| `recommendation-service` | `recommendation_service/` | Python 3.12, FastAPI | `8000` | No |
+| `backend` | `services/gateway/` | Node 24, Fastify | `3000` | Yes, through Nginx |
+| `recommendation-service` | `services/recommendation/` | Python 3.12, FastAPI | `8000` | No |
 | `redis` | Docker image | Redis | `6379` | No, profile only |
 | `grafana` | Docker image | Grafana | `3001 -> 3000` | Localhost only, profile only |
 

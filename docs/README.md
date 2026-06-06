@@ -19,9 +19,9 @@ This folder documents the backend as a multi-service system.
 
 ## Service Docs
 
-- `../gateway_service/README.md` - API Gateway local development and API notes.
-- `../gateway_service/AGENTS.md` - Gateway coding conventions.
-- `../recommendation_service/README.md` - Recommendation service local
+- `../services/gateway/README.md` - API Gateway local development and API notes.
+- `../services/gateway/AGENTS.md` - Gateway coding conventions.
+- `../services/recommendation/README.md` - Recommendation service local
   development and health endpoints.
 
 ## Source Of Truth

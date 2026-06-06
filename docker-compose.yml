@@ -95,8 +95,8 @@ services:
       - prometheus
     volumes:
       - grafana_data:/var/lib/grafana
-      - ./gateway_service/grafana/dashboards:/var/lib/grafana/dashboards:ro
-      - ./gateway_service/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./services/gateway/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - ./services/gateway/grafana/provisioning:/etc/grafana/provisioning:ro
     networks:
       - sloco_net
     logging:

@@ -43,24 +43,29 @@ topology, delivery, and automation change.
 ## Target Layout
 
 ```text
-sloco_backend/
+backend_sloco/
   docker-compose.yml            root, owns the whole stack
   docker-compose.override.yml
   Makefile                      adds `load` target
   .env.example
-  deploy/
+  deploy/                       ALL infra lives here (single source)
     nginx/                      backend_sloco.conf + grafana_sloco.conf
     observability/              loki/prometheus configs (TASKS_31)
-  gateway_service/              Node/Fastify (unchanged code; nested .git removed)
-  recommendation_service/       Python/FastAPI (unchanged code; nested .git removed)
-  algorithms/                   former algorythms/ — now versioned
+  services/                     ALL application code
+    gateway/                    Node/Fastify (was gateway_service/; blame preserved)
+    recommendation/             Python/FastAPI (was recommendation_service/)
   load/                         Artillery scenarios + README (SLOs)
   docs/                         merged docs, DECISIONS, tasks
   .github/workflows/            ci.yml (path-filtered) + deploy-production.yml
 ```
 
-New services (`stats_service`, future algo services) = a new subfolder. Zero new
-repos, zero new secret setup.
+New services (`stats`, future algo services) = a new subfolder under `services/`.
+Zero new repos, zero new secret setup.
+
+Code (`services/`) is kept strictly separate from infra (`deploy/`): there are no
+per-service `deploy/` folders. The transient `algorithms/` research import (Ilya's
+recommender prototype) was removed once ported into `services/recommendation/` — it
+stays recoverable from git history and the archived repos.
 
 ## Step 1 — Repo Consolidation (DONE)
 
@@ -105,13 +110,13 @@ One `.github/workflows/ci.yml`. A filter job decides which service changed; Node
 Python jobs run only when their folder changed (and always on workflow file change).
 Each job sets `working-directory` to its subfolder.
 
-- Node job (`gateway_service/**`): pnpm install/typecheck/build/test/lint.
-- Python job (`recommendation_service/**`): poetry install/check-lock/ruff/mypy/pytest.
-- Dashboards job (`gateway_service/grafana/**`): `node -e "JSON.parse(...)"` on each
+- Node job (`services/gateway/**`): pnpm install/typecheck/build/test/lint.
+- Python job (`services/recommendation/**`): poetry install/check-lock/ruff/mypy/pytest.
+- Dashboards job (`services/gateway/grafana/**`): `node -e "JSON.parse(...)"` on each
   dashboard JSON.
 
 Key change from today's per-repo CI: add `working-directory` + pnpm
-`cache-dependency-path: gateway_service/pnpm-lock.yaml`, since the project is no
+`cache-dependency-path: services/gateway/pnpm-lock.yaml`, since the project is no
 longer at repo root. See the committed `ci.yml` for the exact matrix.
 
 ## Step 3 — Deploy Owns The Whole Stack
@@ -121,10 +126,14 @@ One `deploy-production.yml` (`workflow_dispatch` with a `service` choice:
 
 1. build + push the selected service image(s) to GHCR;
 2. `rsync` the root `docker-compose.yml`, `deploy/`, and
-   `gateway_service/grafana/provisioning` to `/opt/backend_sloco`;
+   `services/gateway/grafana/provisioning` to `/opt/backend_sloco`;
 3. **render `/opt/backend_sloco/.env` from GitHub secrets** (heredoc over SSH), not
    hand-edited `sed`;
 4. `docker compose --profile observability up -d` + health-check loop.
+
+A `verify` job runs the full CI checks (build/test/lint/typecheck) on the deployed
+`ref` first, and `build` `needs: verify` — so a manual deploy can never ship a ref
+that failed checks.
 
 Result: adding Grafana/Loki/Prometheus (TASKS_31) becomes a normal push — no manual
 server step. Re-running is idempotent.
@@ -157,7 +166,7 @@ bbox + zoom, then `/v1/feed/places` and `/v1/places/:id`.
 - `docker compose up -d` brings up gateway + recommender; `curl
   127.0.0.1:3000/v1/health` ok; gateway reaches recommender at
   `http://recommendation-service:8000/v1/health/ready`.
-- CI: a change only under `gateway_service/**` triggers the Node job and skips the
+- CI: a change only under `services/gateway/**` triggers the Node job and skips the
   Python job (and vice versa); a `grafana/**` change triggers dashboard validation.
 - Deploy: `workflow_dispatch` against a server with only `.env` secrets set brings up
   the full stack with no manual `scp`; second run is idempotent.
@@ -177,7 +186,10 @@ bbox + zoom, then `/v1/feed/places` and `/v1/places/:id`.
 
 - Map "done right": city-parametric visibility thresholds (currently Bucharest-hard
   coded), Redis hot-viewport cache, hard load run.
-- Recommender drift: prod `embedding_recommender.py` is a simplified port of
-  `algorithms/.../backend_recommender.py` — decide to complete or freeze.
-- Embedding pipeline: `.npy` artifacts have no reproducible generation flow.
+- Recommender drift: prod `services/recommendation/.../embedding_recommender.py` is a
+  simplified port of Ilya's fuller `backend_recommender.py` (now only in git history /
+  archived repos, after the `algorithms/` import was removed) — decide to complete or
+  freeze the simplification.
+- Embedding pipeline: `.npy` artifacts in `services/recommendation/artifacts/` have no
+  reproducible generation flow.
 - TASKS_31 self-host observability becomes trivial once Step 3 lands.

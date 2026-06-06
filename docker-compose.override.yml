@@ -1,13 +1,13 @@
 services:
   backend:
     build:
-      context: ./gateway_service
+      context: ./services/gateway
       dockerfile: Dockerfile
     image: sloco-backend:local
 
   recommendation-service:
     build:
-      context: ./recommendation_service
+      context: ./services/recommendation
       dockerfile: Dockerfile
     image: sloco-recommendation-service:local
     ports:
