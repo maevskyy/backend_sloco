@@ -7,8 +7,8 @@ Status: Done.
 Фронт ходит в Supabase на каждый запрос. Вводим кэш-слой: горячие чтения из
 кэша, БД дёргается редко. Решения:
 
-- **Store:** Redis (`ioredis`), уже заскаффолен в `backend/docker-compose.yml`
-  (профиль `cache`).
+- **Store:** Redis (`ioredis`), живёт в `backend/docker-compose.yml` как обычный
+  сервис стека.
 - **Scope Stage 1:** только `GET /v1/places/:id` — статичные данные, простой
   ключ, высокий hit-rate. Карта (произвольный bbox, нужен tile-snapping) и
   search — отдельные этапы.
@@ -90,8 +90,8 @@ controller — HTTP/auth/enrichment, service оркестрирует cache-asid
   `CacheStore` в фабрику (дефолт `getCacheStore()`).
 - `src/modules/places/places.module.ts` — прокинуть `CacheStore`.
 - `package.json` — `ioredis`.
-- `backend/docker-compose.yml` — Redis остаётся за профилем `cache`; прокинуть
-  `REDIS_URL` в сервис `backend`.
+- `backend/docker-compose.yml` — Redis поднимается вместе со стеком; прокинуть
+  `REDIS_URL` в сервис `backend`; `backend` зависит от `redis`.
 
 ---
 
@@ -114,10 +114,10 @@ controller — HTTP/auth/enrichment, service оркестрирует cache-asid
 
 ## Деплой / окружения
 
-- **local/e2e:** `docker compose --profile cache up` + `REDIS_URL` задан.
-- **prod (Stage 1):** `REDIS_URL` пока можно НЕ задавать → backend на
-  `NoopCacheStore`, поведение == текущему. Включаем Redis на проде после
-  локальной проверки.
+- **local/e2e:** `docker compose up` + `REDIS_URL` задан.
+- **prod (Stage 1):** Redis поднимается обычным `docker compose up -d` вместе
+  со стеком. Если `REDIS_URL` не задан, backend всё равно работает на
+  `NoopCacheStore`, но штатный deploy должен задавать `REDIS_URL=redis://redis:6379/0`.
 
 ---
 
@@ -140,7 +140,7 @@ controller — HTTP/auth/enrichment, service оркестрирует cache-asid
 ## Проверка (e2e, вручную)
 
 ```bash
-cd backend && docker compose --profile cache up -d
+cd backend && docker compose up -d
 curl -s localhost:3000/v1/places/1   # miss (лог), идёт в БД
 curl -s localhost:3000/v1/places/1   # hit (лог), не идёт в БД
 docker compose exec redis redis-cli --scan --pattern 'place:v1:*'

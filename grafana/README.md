@@ -1,71 +1,66 @@
 # Grafana
 
-This folder stores Grafana dashboard-as-code files for the backend.
+This folder stores provisioned Grafana dashboard-as-code files for the backend.
 
 ## Current Dashboards
 
 ```text
 dashboards/backend-logs.json
+dashboards/backend-metrics.json
 dashboards/server-metrics.json
+provisioning/datasources/datasources.yml
+provisioning/dashboards/dashboards.yml
 ```
 
 Purpose:
 
-- `backend-logs.json` (Loki): view backend logs from Grafana Cloud Loki — live
+- `backend-logs.json` (Loki): view backend logs — live
   logs, request/response logs, map endpoint logs, healthchecks, errors, bad
   requests, and slow requests.
+- `backend-metrics.json` (Loki): backend metric logs — HTTP latency, dependency
+  latency, cache events, slow calls, and large responses.
 - `server-metrics.json` (Prometheus): host and backend container metrics — CPU
   per core, load, RAM/swap, disk, network, and container CPU/memory/restarts.
 
 ## Datasource Per Dashboard
 
-Each dashboard prompts for a datasource at import time:
+Datasources are provisioned by `provisioning/datasources/datasources.yml`:
 
-- `backend-logs.json` -> Loki (`grafanacloud-maevskyy-logs`).
-- `server-metrics.json` -> Prometheus (`grafanacloud-maevskyy-prom`).
+- `Loki` with UID `loki`.
+- `Prometheus` with UID `prometheus`.
+
+Dashboard JSON files use those fixed UIDs and no longer prompt for datasource
+selection at import time.
 
 The metrics dashboard needs the Alloy metrics pipeline running on the host. See
 `docs/tasks/TASKS_10_SERVER_METRICS.md` for the server-side Alloy setup.
 
-## Import Flow
+## Provisioning Flow
 
-1. Open Grafana Cloud.
-2. Go to:
+The self-hosted Grafana service mounts this folder:
 
-   ```text
-   Dashboards -> New -> Import
-   ```
+```yaml
+./gateway_service/grafana/dashboards:/var/lib/grafana/dashboards:ro
+./gateway_service/grafana/provisioning:/etc/grafana/provisioning:ro
+```
 
-3. Upload or paste:
-
-   ```text
-   grafana/dashboards/backend-logs.json
-   ```
-
-4. Select Loki datasource:
-
-   ```text
-   grafanacloud-maevskyy-logs
-   ```
-
-5. Save the dashboard.
+On Grafana start, datasources and the `Sloco` dashboard folder are created
+automatically. No manual import is needed.
 
 ## Update Flow
 
 When dashboard JSON changes:
 
-1. Copy the full updated JSON.
-2. Open the dashboard in Grafana.
-3. Paste JSON through import/editor flow.
-4. Apply changes.
-5. Save dashboard.
-6. Generate traffic and verify panels.
+1. Edit the dashboard JSON in `dashboards/`.
+2. Validate it with `node -e "JSON.parse(require('fs').readFileSync(...))"`.
+3. Restart Grafana or wait for the provider refresh interval.
+4. Generate traffic and verify panels.
 
 Example traffic:
 
 ```bash
-curl http://65.108.142.55/v1/health
-curl "http://65.108.142.55/v1/map/places?swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700&zoom=13"
+curl https://sloco.pp.ua/v1/health
+curl "https://sloco.pp.ua/v1/map/places?swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700&zoom=13"
 ```
 
 ## Safety Rules
@@ -73,8 +68,8 @@ curl "http://65.108.142.55/v1/map/places?swLat=52.4800&swLng=13.3300&neLat=52.56
 - Do not commit Grafana Cloud API tokens.
 - Do not commit Loki push URLs.
 - Do not commit datasource passwords.
-- Dashboard JSON should use datasource import variables or non-secret datasource
-  names only.
+- Dashboard JSON should use provisioned datasource UIDs only: `loki` and
+  `prometheus`.
 
 ## Current Labels
 
