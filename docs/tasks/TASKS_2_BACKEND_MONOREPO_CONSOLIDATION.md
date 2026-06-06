@@ -31,9 +31,12 @@ topology, delivery, and automation change.
 
 ## Decisions
 
-- **Target**: one repo `sloco_backend`; iOS (`frontend_sloco`) stays separate.
-- **git history**: start fresh (one import commit); old repos archived read-only for
-  blame/reference.
+- **Target**: reuse the existing gateway repo **`backend_sloco`** as the monorepo
+  (name kept, not renamed); iOS (`frontend_sloco`) stays separate.
+- **git history**: keep the gateway repo's history — its files move into the
+  `gateway_service/` subfolder with rename detection, so gateway blame is preserved.
+  `recommendation_service` and the old infra repo histories are NOT carried over; they
+  remain in their archived repos.
 - **No submodules** — plain subfolders, one history.
 - **No** Kafka/RabbitMQ, Kubernetes, service mesh, Kong/Tyk, or Terraform now.
 
@@ -59,49 +62,42 @@ sloco_backend/
 New services (`stats_service`, future algo services) = a new subfolder. Zero new
 repos, zero new secret setup.
 
-## Step 1 — Repo Consolidation (git surgery; run with explicit go-ahead)
+## Step 1 — Repo Consolidation (DONE)
 
-Irreversible and outward-facing. The on-disk `backend/` directory already has the
-right shape, so consolidation is mostly removing nested `.git` dirs and bringing in
-`algorythms/`.
+The gateway repo `backend_sloco` became the monorepo by promoting its `.git` to the
+`backend/` root, so the gateway tree moved into `gateway_service/` with full rename
+detection (191 renames at R100 → blame preserved). Executed:
 
 ```bash
-# from the project root: /Users/.../tripadviser_zenly_nomadtable
-# 0. SAFETY: back up first
-cp -R backend backend.bak && cp -R algorythms algorythms.bak
+# from the project root
+rm -rf backend/recommendation_service/.git   # drop nested service git
+rm -rf backend/.git                          # drop infra git (sloco_backend_infra)
+mv backend/gateway_service/.git backend/.git # gateway git becomes the monorepo git
+mv algorythms backend/algorithms             # bring algorithms under version control
 
-# 1. drop the nested service repos' git history (they become plain folders)
-rm -rf backend/gateway_service/.git
-rm -rf backend/recommendation_service/.git
+# fix root .gitignore: it ignored gateway_service/ and recommendation_service/ —
+# removed those, added node/python junk ignores (node_modules, __pycache__, .venv, ...)
 
-# 2. bring algorithms under the monorepo
-git -C backend rm -r --cached --ignore-unmatch . >/dev/null 2>&1 || true
-mv algorythms backend/algorithms
-
-# 3. the backend/ repo (was sloco_backend_infra) becomes the monorepo.
-#    Option A (keep infra history): just commit the now-merged tree.
-#    Option B (start fresh, chosen): re-init for a clean single root.
 cd backend
-rm -rf .git
-git init -b main
 git add -A
-git commit -m "chore: consolidate backend services into monorepo"
-
-# 4. point origin at a fresh GitHub repo `sloco_backend` (create it on GitHub first)
-git remote add origin https://github.com/maevskyy/sloco_backend.git
-git push -u origin main
+git commit   # "chore: consolidate backend into monorepo"
+git rm -r gateway_service/.github recommendation_service/.github
+git commit   # "chore: remove superseded per-service workflows"
+git push origin main           # remote stays backend_sloco.git
 ```
 
-Then on GitHub, **archive** the old repos (read-only) for reference/blame:
-`sloco_backend_infra`, `backend_sloco`, `backend_sloco_recommendation_service`.
-Leave `frontend_sloco` alone.
+Then on GitHub (via `gh repo archive`):
+`sloco_backend_infra` and `backend_sloco_recommendation_service` → **archived**
+(read-only). `backend_sloco` kept as the monorepo; `frontend_sloco` untouched.
 
 Notes:
-- GHCR image names can stay (`ghcr.io/maevskyy/backend_sloco`,
-  `.../recommender_sloco`) — packages are account-scoped, not repo-bound, so existing
-  prod `.env` tags keep working.
-- Verify `.gitignore` covers `node_modules/`, `__pycache__/`, `dumps/` large files,
-  and the embedding `.npy` artifacts if they should not be committed.
+- GHCR image names stay (`ghcr.io/maevskyy/backend_sloco`, `.../recommender_sloco`)
+  so prod `.env` tags keep working.
+- **GHCR package permissions to verify on first deploy**: the `recommender_sloco`
+  package was linked to the now-archived recommendation repo. The monorepo's
+  `GITHUB_TOKEN` may lack write access to it. If the deploy push fails, either grant
+  the `backend_sloco` repo write access in the package settings, or repoint the
+  recommender image under the monorepo's package namespace.
 
 ## Step 2 — Path-Filtered CI
 
