@@ -29,7 +29,7 @@ jobs:
               - 'services/recommendation/**'
               - '.github/workflows/ci.yml'
             dashboards:
-              - 'services/gateway/grafana/dashboards/**'
+              - 'observability/grafana/dashboards/**'
               - '.github/workflows/ci.yml'
 
   gateway:
@@ -116,6 +116,6 @@ jobs:
         uses: actions/checkout@v4
       - name: Validate dashboard JSON
         run: |
-          for f in services/gateway/grafana/dashboards/*.json; do
+          find observability/grafana/dashboards -name '*.json' -print0 | while IFS= read -r -d '' f; do
             node -e "JSON.parse(require('fs').readFileSync('$f','utf8')); console.log('ok $f')"
           done

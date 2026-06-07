@@ -37,7 +37,6 @@ deployment, compose, Nginx, observability, and load-test docs live in root
 src/        application code
 docs/       documentation and task plans
 supabase/   database migrations
-grafana/    dashboard JSON and Grafana notes
 dumps/      small sample/import data files
 scripts/    offline ETL and source integration mappers
 ```
@@ -231,16 +230,12 @@ Request and response logs should be easy to distinguish:
 - response summary logs use `eventType: "response"` and `RESPONSE ...`
   messages.
 
-Grafana dashboard JSON:
+Grafana dashboards and observability config live at the monorepo root (not in this
+service):
 
 ```text
-grafana/dashboards/backend-logs.json
-```
-
-Grafana notes:
-
-```text
-grafana/README.md
+../../observability/grafana/dashboards/app/backend-logs.json
+../../observability/README.md
 ```
 
 Do not log large response bodies. Log compact summaries.
@@ -267,7 +262,7 @@ Use:
 - `docs/tasks/README.md` as the task index;
 - `docs/architecture/REPO_STRUCTURE.md` for "where does this go?";
 - `dumps/README.md` for sample/import data rules;
-- `grafana/README.md` for dashboard import/update rules.
+- root `../../observability/README.md` for Grafana dashboard/provisioning rules;
 - root `../../docs/` for backend-platform architecture/deploy/runbook docs.
 
 Update `AGENTS.md` only when:

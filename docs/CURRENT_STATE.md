@@ -25,7 +25,8 @@ Database/Auth/Storage: managed Supabase
 - Production `.env` is rendered from GitHub secrets by CI/CD.
 - Redis is part of the runtime stack and is used for place-details cache.
 - Self-hosted Grafana/Loki/Prometheus are deployed and provisioned from repo files.
-- Grafana dashboards load from `services/gateway/grafana/`.
+- Observability config (Grafana/Prometheus/Loki) lives in top-level `observability/`;
+  dashboards load from `observability/grafana/dashboards/{app,infra}/`.
 - Load-test harness exists in `load/`.
 - Root docs now own platform architecture/deployment/hardening state.
 

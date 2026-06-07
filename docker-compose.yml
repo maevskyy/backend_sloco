@@ -95,8 +95,8 @@ services:
       - prometheus
     volumes:
       - grafana_data:/var/lib/grafana
-      - ./services/gateway/grafana/dashboards:/var/lib/grafana/dashboards:ro
-      - ./services/gateway/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./observability/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
     networks:
       - sloco_net
     logging:
@@ -112,7 +112,7 @@ services:
     restart: unless-stopped
     command: ["-config.file=/etc/loki/config.yml"]
     volumes:
-      - ./deploy/observability/loki-config.yml:/etc/loki/config.yml:ro
+      - ./observability/loki/loki-config.yml:/etc/loki/config.yml:ro
       - loki_data:/loki
     ports:
       - "127.0.0.1:3100:3100"
@@ -135,7 +135,7 @@ services:
       - "--storage.tsdb.retention.time=30d"
       - "--web.enable-remote-write-receiver"
     volumes:
-      - ./deploy/observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus_data:/prometheus
     ports:
       - "127.0.0.1:9090:9090"

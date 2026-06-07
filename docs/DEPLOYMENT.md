@@ -17,7 +17,7 @@ secrets. Normal deploys should not require manual `scp` or hand-editing `.env`.
 ```text
 /opt/backend_sloco/docker-compose.yml
 /opt/backend_sloco/deploy/
-/opt/backend_sloco/services/gateway/grafana/
+/opt/backend_sloco/observability/
 /opt/backend_sloco/.env
 ```
 

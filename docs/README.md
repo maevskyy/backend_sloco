@@ -14,6 +14,8 @@ This folder documents the backend monorepo as a multi-service system.
 - `tasks/TASKS_2_BACKEND_MONOREPO_CONSOLIDATION.md` - consolidate the three backend
   repos into one monorepo, with path-filtered CI, stack-owning deploy, one secret
   contour, and a load-testing harness.
+- `tasks/TASKS_3_OBSERVABILITY_TOPLEVEL.md` - move Grafana/Prometheus/Loki config to a
+  top-level `observability/` directory with dashboards grouped by `app/`/`infra/`.
 
 ## TBD Thinking Docs
 

@@ -33,9 +33,13 @@ services/
   gateway/          public API Gateway, Fastify, Supabase stores, OpenAPI
   recommendation/   private recommendation runtime, FastAPI
 
+observability/      monitoring stack config (own concern)
+  grafana/          provisioning + dashboards (dashboards/{app,infra})
+  prometheus/       prometheus.yml + rules/ (alerts later)
+  loki/             loki config
+
 deploy/
-  nginx/            host Nginx templates
-  observability/    Loki and Prometheus configs
+  nginx/            host Nginx templates (public edge)
 
 load/               Artillery scenarios
 docs/               backend-platform docs and task plans
@@ -52,9 +56,9 @@ deployment, observability, and operations docs live in root `docs/`.
 | `backend` | `services/gateway/` | Node 24, Fastify | `127.0.0.1:3000` | Yes, through Nginx |
 | `recommendation-service` | `services/recommendation/` | Python 3.12, FastAPI | `8000` on Docker network | No |
 | `redis` | Docker image | Redis | `6379` on Docker network | No |
-| `loki` | `deploy/observability/` | Loki | `127.0.0.1:3100` | No |
-| `prometheus` | `deploy/observability/` | Prometheus | `127.0.0.1:9090` | No |
-| `grafana` | `services/gateway/grafana/` | Grafana | `127.0.0.1:3001` | Via `grafana.sloco.pp.ua` |
+| `loki` | `observability/loki/` | Loki | `127.0.0.1:3100` | No |
+| `prometheus` | `observability/prometheus/` | Prometheus | `127.0.0.1:9090` | No |
+| `grafana` | `observability/grafana/` | Grafana | `127.0.0.1:3001` | Via `grafana.sloco.pp.ua` |
 
 ## Network Boundary
 
@@ -92,7 +96,7 @@ is host-level, not containerized.
 
 1. verify selected service checks;
 2. build and push selected service images;
-3. sync `docker-compose.yml`, `deploy/**`, and Grafana provisioning;
+3. sync `docker-compose.yml`, `deploy/**`, and `observability/**`;
 4. render `/opt/backend_sloco/.env` from GitHub secrets;
 5. run `docker compose up -d` (app only). The self-hosted observability stack
    (Loki/Prometheus/Grafana) is opt-in via the `with_observability` input — only
@@ -106,7 +110,8 @@ No production compose/config file should be copied by hand during normal deploys
 - New private algorithm runtime: `services/<new-service>/`.
 - Runtime stack wiring: root `docker-compose.yml`.
 - Host Nginx templates: `deploy/nginx/`.
-- Loki/Prometheus configs: `deploy/observability/`.
-- Dashboard JSON/provisioning: `services/gateway/grafana/`.
+- Monitoring stack config (Loki/Prometheus/Grafana, provisioning, alert rules):
+  `observability/`.
+- Dashboard JSON: `observability/grafana/dashboards/{app,infra}/`.
 - Load scenarios: `load/`.
 - Cross-service docs: root `docs/`.

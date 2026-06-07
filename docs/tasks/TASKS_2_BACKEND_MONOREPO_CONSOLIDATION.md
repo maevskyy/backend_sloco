@@ -2,6 +2,10 @@
 
 **Status: Done.**
 
+> Note: the observability layout described below (`services/gateway/grafana/`,
+> `deploy/observability/`) was later refined — Grafana/Prometheus/Loki config moved to
+> a top-level `observability/` directory. See `TASKS_3_OBSERVABILITY_TOPLEVEL.md`.
+
 ## Context
 
 The backend code architecture is healthy, but the **operational topology** is not.

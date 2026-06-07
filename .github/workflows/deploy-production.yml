@@ -148,7 +148,7 @@ jobs:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
-          source: "docker-compose.yml,deploy/**,services/gateway/grafana/provisioning/**,services/gateway/grafana/dashboards/**"
+          source: "docker-compose.yml,deploy/**,observability/**"
           target: "/opt/backend_sloco"
           overwrite: true
 

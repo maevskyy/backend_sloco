@@ -1,15 +1,21 @@
-# Grafana
+# Observability
 
-This folder stores provisioned Grafana dashboard-as-code files for the backend.
-
-## Current Dashboards
+Self-hosted monitoring stack config for the backend monorepo: Grafana (provisioning
++ dashboards), Prometheus, Loki, and (later) Alertmanager. This is a top-level
+concern, not owned by any single service.
 
 ```text
-dashboards/backend-logs.json
-dashboards/backend-metrics.json
-dashboards/server-metrics.json
-provisioning/datasources/datasources.yml
-provisioning/dashboards/dashboards.yml
+grafana/
+  provisioning/datasources/datasources.yml   Loki + Prometheus (UIDs loki/prometheus)
+  provisioning/dashboards/dashboards.yml       file provider (foldersFromFilesStructure)
+  dashboards/
+    app/    backend-logs.json, backend-metrics.json   (application telemetry, Loki)
+    infra/  server-metrics.json                        (host/container metrics, Prometheus)
+prometheus/
+  prometheus.yml
+  rules/                                         (alert/recording rules — later)
+loki/
+  loki-config.yml
 ```
 
 Purpose:
@@ -37,15 +43,15 @@ The metrics dashboard needs the Alloy metrics pipeline running on the host. See
 
 ## Provisioning Flow
 
-The self-hosted Grafana service mounts this folder:
+The self-hosted Grafana service mounts the `grafana/` subfolder:
 
 ```yaml
-./services/gateway/grafana/dashboards:/var/lib/grafana/dashboards:ro
-./services/gateway/grafana/provisioning:/etc/grafana/provisioning:ro
+./observability/grafana/dashboards:/var/lib/grafana/dashboards:ro
+./observability/grafana/provisioning:/etc/grafana/provisioning:ro
 ```
 
-On Grafana start, datasources and the `Sloco` dashboard folder are created
-automatically. No manual import is needed.
+On Grafana start, datasources are created and the on-disk subfolders (`app`, `infra`)
+become Grafana dashboard folders automatically. No manual import is needed.
 
 ## Update Flow
 
