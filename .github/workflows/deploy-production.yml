@@ -20,8 +20,10 @@ on:
         description: "Branch, tag, or commit SHA to deploy"
         required: true
         default: "main"
+      # On = also bring up Grafana/Loki/Prometheus (needs GF_* secrets +
+      # grafana.sloco.pp.ua). Off = normal app-only deploy.
       with_observability:
-        description: "Also bring up the self-hosted Loki/Prometheus/Grafana stack (TASKS_31). Needs GF_* secrets + grafana.sloco.pp.ua. Leave off for normal app deploys."
+        description: "Redeploy metrics stack (Grafana/Loki/Prometheus)"
         required: false
         default: false
         type: boolean
