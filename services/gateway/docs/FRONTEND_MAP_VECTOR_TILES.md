@@ -38,6 +38,11 @@ https://sloco.pp.ua/v1/map/tiles/{z}/{x}/{y}.mvt?v={DATA_VERSION}
 - The MVT layer name inside each tile is **`places`** → that's your `sourceLayer`.
 - Each feature's **`id` is the backend place id** (set via `ST_AsMVT` feature id)
   → `setFeatureState` works directly, no `promoteId` needed.
+- Fetch current config first:
+  ```
+  GET /v1/map/config
+  → { "tileVersion": 1, "tileUrlTemplate": "/v1/map/tiles/{z}/{x}/{y}.mvt?v=1", "sourceLayer": "places" }
+  ```
 
 iOS (Mapbox Maps SDK v11):
 
@@ -141,8 +146,8 @@ mapView.mapboxMap.queryRenderedFeatures(
     for: "places-src", property: "tiles",
     value: ["https://sloco.pp.ua/v1/map/tiles/{z}/{x}/{y}.mvt?v=\(newVersion)"])
   ```
-- Get the current version from the tile response headers (`ETag: "v{N}"`) or a
-  small config endpoint (backend will expose it).
+- Get the current version from `GET /v1/map/config` (`tileVersion`). Tile responses
+  also include an ETag for HTTP caching.
 
 ## 7. Clustering note
 

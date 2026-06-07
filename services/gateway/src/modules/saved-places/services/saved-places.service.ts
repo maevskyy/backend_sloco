@@ -183,6 +183,10 @@ export class SavedPlacesServiceImpl implements SavedPlacesServiceContract {
     );
   }
 
+  async listSavedPlaceIds(userId: string) {
+    return this.store.listSavedPlaceIds(userId);
+  }
+
   async getSavedPlaceStates(userId: string, placeIds: number[]) {
     return this.store.getSavedPlaceStates(userId, placeIds);
   }

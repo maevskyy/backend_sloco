@@ -391,6 +391,26 @@ export class SavedPlacesStore implements SavedPlacesStoreContract {
     return count ?? 0;
   }
 
+  async listSavedPlaceIds(userId: string) {
+    const { data, error } = await measureSavedPlacesDependency(
+      "select",
+      "saved_places_ids",
+      async () =>
+        getSupabaseClient()
+          .from("saved_places")
+          .select("place_id")
+          .eq("user_id", userId)
+          .order("created_at", { ascending: false }),
+      (result) => result.data?.length
+    );
+
+    if (error) throw error;
+
+    return ((data ?? []) as unknown as { place_id: number }[]).map(
+      (row) => row.place_id
+    );
+  }
+
   async listCollectionPlaces(userId: string, collectionId: string) {
     const { data, error } = await measureSavedPlacesDependency(
       "select",

@@ -1,6 +1,10 @@
 # TASKS 32: Продакшн-карта на vector tiles (MVT из PostGIS)
 
-Status: Planned.
+Status: Implementation Ready.
+
+Local implementation is complete and verified (`pnpm typecheck`, `pnpm test`,
+`pnpm lint`, `pnpm build`). Production rollout is still pending because migration
+`014_map_vector_tiles.sql` has not been applied to Supabase yet.
 
 ## Summary
 
@@ -121,6 +125,11 @@ $$;
   или `pg` через Supabase pooler 6543) → `bytea` приходит как `Buffer`. Это
   заодно закрывает дыру «нет пулинга» из плана масштабирования.
 - Пустой тайл (`''::bytea`) → отдавать 204/пустое тело, не ошибку.
+
+`GET /v1/map/config`
+- Public config endpoint for the iOS client:
+  `{ tileVersion, tileUrlTemplate, sourceLayer: "places" }`.
+  `tileVersion` is the cache-busting `DATA_VERSION`.
 
 ## Версионирование и инвалидция
 

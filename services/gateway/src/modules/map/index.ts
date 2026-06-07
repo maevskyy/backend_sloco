@@ -4,6 +4,10 @@ export {
   enrichSavedState,
   getMapPlaces
 } from "./services/map.service.js";
+export {
+  createMapTileService,
+  getMapTile
+} from "./services/map-tile.service.js";
 export { MapStore } from "./stores/map.store.js";
 export { mapComponentSchemas } from "./common/map.openapi.js";
 export type {
@@ -13,4 +17,5 @@ export type {
   MapStoreContract,
   PlaceRow
 } from "./common/map.types.js";
+export type { MapTileService } from "./common/map.tiles.js";
 export type { MapPlacesQuery } from "./common/map.schemas.js";

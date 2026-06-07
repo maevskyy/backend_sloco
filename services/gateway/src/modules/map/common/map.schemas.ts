@@ -69,6 +69,12 @@ export const mapPlacesResponseSchema = z.object({
   meta: mapPlacesMetaSchema
 });
 
+export const mapConfigResponseSchema = z.object({
+  tileVersion: z.number().int().min(1),
+  tileUrlTemplate: z.string(),
+  sourceLayer: z.literal("places")
+});
+
 export const mapSchemaRegistry = z.registry<{ id: string }>();
 
 mapSchemaRegistry.add(mapPlacesQuerySchema, { id: "MapPlacesQuery" });
@@ -76,5 +82,6 @@ mapSchemaRegistry.add(mapPrimaryPhotoSchema, { id: "MapPrimaryPhoto" });
 mapSchemaRegistry.add(mapPlacePinSchema, { id: "MapPlacePin" });
 mapSchemaRegistry.add(mapPlacesMetaSchema, { id: "MapPlacesMeta" });
 mapSchemaRegistry.add(mapPlacesResponseSchema, { id: "MapPlacesResponse" });
+mapSchemaRegistry.add(mapConfigResponseSchema, { id: "MapConfigResponse" });
 
 export type MapPlacesQuery = z.infer<typeof mapPlacesQuerySchema>;

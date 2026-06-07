@@ -118,6 +118,7 @@ export type SavedPlacesStoreContract = {
     placeId: number
   ): Promise<void>;
   listSavedPlaces(userId: string, limit: number): Promise<SavedPlaceSummary[]>;
+  listSavedPlaceIds(userId: string): Promise<number[]>;
   countSavedPlaces(userId: string): Promise<number>;
   listCollectionPlaces(
     userId: string,
@@ -174,6 +175,7 @@ export type SavedPlacesServiceContract = {
     placeIds: number[]
   ): Promise<{ collectionId: string; placeIds: number[] }>;
   getSavedPlaceIds(userId: string, placeIds: number[]): Promise<Set<number>>;
+  listSavedPlaceIds(userId: string): Promise<number[]>;
   getSavedPlaceStates(
     userId: string,
     placeIds: number[]

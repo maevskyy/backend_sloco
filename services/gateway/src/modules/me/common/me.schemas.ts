@@ -18,8 +18,13 @@ export const meResponseSchema = z.object({
   profile: meProfileSchema
 });
 
+export const meSavedIdsResponseSchema = z.object({
+  placeIds: z.array(z.number().int())
+});
+
 export const meSchemaRegistry = z.registry<{ id: string }>();
 
 meSchemaRegistry.add(meUserSchema, { id: "MeUser" });
 meSchemaRegistry.add(meProfileSchema, { id: "MeProfile" });
 meSchemaRegistry.add(meResponseSchema, { id: "MeResponse" });
+meSchemaRegistry.add(meSavedIdsResponseSchema, { id: "MeSavedIdsResponse" });

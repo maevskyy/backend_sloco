@@ -80,6 +80,9 @@ function createRepository(
     async listSavedPlaces() {
       return [placeSummary];
     },
+    async listSavedPlaceIds() {
+      return [placeSummary.id];
+    },
     async countSavedPlaces() {
       return 1;
     },

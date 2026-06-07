@@ -18,3 +18,10 @@ export const meRouteSchema = defineRoute({
     "Verifies a Supabase Auth access token and returns the current user with their backend profile.",
   ok: "MeResponse"
 });
+
+export const meSavedIdsRouteSchema = defineRoute({
+  summary: "Get ids of places saved by the authenticated user.",
+  description:
+    "Used by vector-tile map clients to apply saved state with Mapbox feature-state. Tiles stay public and cacheable; user-specific state is fetched separately.",
+  ok: "MeSavedIdsResponse"
+});

@@ -153,6 +153,9 @@ function createSavedPlacesService(
     async getSavedPlaceIds() {
       return new Set<number>();
     },
+    async listSavedPlaceIds() {
+      return [];
+    },
     async getSavedPlaceStates() {
       return new Map();
     },

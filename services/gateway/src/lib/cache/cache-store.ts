@@ -12,7 +12,9 @@ export type CacheMetricInput = {
 export interface CacheStore {
   readonly kind: CacheStoreKind;
   get<T>(key: string): Promise<T | null>;
+  getBuffer(key: string): Promise<Buffer | null>;
   set<T>(key: string, value: T, ttlSeconds: number): Promise<void>;
+  setBuffer(key: string, value: Buffer, ttlSeconds: number): Promise<void>;
   del(key: string): Promise<void>;
   delByPrefix(prefix: string): Promise<void>;
 }

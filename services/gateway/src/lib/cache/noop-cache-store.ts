@@ -7,7 +7,15 @@ export class NoopCacheStore implements CacheStore {
     return null;
   }
 
+  async getBuffer(): Promise<Buffer | null> {
+    return null;
+  }
+
   async set(): Promise<void> {
+    return undefined;
+  }
+
+  async setBuffer(): Promise<void> {
     return undefined;
   }
 

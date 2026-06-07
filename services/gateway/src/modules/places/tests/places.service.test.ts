@@ -26,11 +26,19 @@ class MemoryCacheStore implements CacheStore {
     return entry.value as T;
   }
 
+  async getBuffer(): Promise<Buffer | null> {
+    return null;
+  }
+
   async set<T>(key: string, value: T, ttlSeconds: number): Promise<void> {
     this.entries.set(key, {
       expiresAt: this.now + ttlSeconds * 1000,
       value
     });
+  }
+
+  async setBuffer(): Promise<void> {
+    return undefined;
   }
 
   async del(key: string): Promise<void> {
@@ -57,7 +65,15 @@ class ThrowingCacheStore implements CacheStore {
     throw new Error("redis down");
   }
 
+  async getBuffer(): Promise<Buffer | null> {
+    throw new Error("redis down");
+  }
+
   async set(): Promise<void> {
+    throw new Error("redis down");
+  }
+
+  async setBuffer(): Promise<void> {
     throw new Error("redis down");
   }
 

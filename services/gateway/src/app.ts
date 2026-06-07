@@ -14,7 +14,8 @@ import {
 import { registerHealthModule } from "./modules/health/index.js";
 import {
   registerMapModule,
-  type MapPlacesService
+  type MapPlacesService,
+  type MapTileService
 } from "./modules/map/index.js";
 import { registerMeModule, type MeService } from "./modules/me/index.js";
 import {
@@ -39,6 +40,7 @@ import type { CacheStore } from "./lib/cache/cache-store.js";
 type AppOptions = {
   supabaseHealthCheck?: () => Promise<void>;
   mapPlacesService?: MapPlacesService;
+  mapTileService?: MapTileService;
   authService?: AuthService;
   meService?: MeService;
   savedPlacesService?: SavedPlacesService;
@@ -77,7 +79,8 @@ export async function buildApp(options: AppOptions = {}) {
   await app.register(registerMeModule, {
     prefix: API_PREFIX,
     authService: options.authService,
-    meService: options.meService
+    meService: options.meService,
+    savedPlacesService: options.savedPlacesService
   });
 
   await app.register(registerSavedPlacesModule, {
@@ -110,6 +113,7 @@ export async function buildApp(options: AppOptions = {}) {
   await app.register(registerMapModule, {
     prefix: API_PREFIX,
     mapPlacesService: options.mapPlacesService,
+    mapTileService: options.mapTileService,
     authService: options.authService,
     savedPlacesService: options.savedPlacesService
   });

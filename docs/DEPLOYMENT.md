@@ -39,6 +39,7 @@ GHCR_USERNAME
 GHCR_READ_TOKEN
 SUPABASE_URL
 SUPABASE_SERVICE_ROLE_KEY
+SUPABASE_DB_URL
 ```
 
 Required only when deploying/refreshing the self-hosted observability stack
@@ -57,6 +58,9 @@ https://grafana.sloco.pp.ua
 ```
 
 Do not commit real secrets. `SUPABASE_SERVICE_ROLE_KEY` must stay server-side.
+`SUPABASE_DB_URL` is the pooled Postgres connection string used by the gateway for
+binary vector tiles (`/v1/map/tiles/...mvt`); use the Supabase pooler connection
+string, not a public API URL.
 
 ## Deploy Flow
 

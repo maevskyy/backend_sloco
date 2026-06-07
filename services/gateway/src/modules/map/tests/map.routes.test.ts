@@ -4,6 +4,7 @@ import { AppRoute, VersionedAppRoute } from "../../../config/routes.js";
 import type { AuthService, AuthenticatedUser } from "../../auth/auth.service.js";
 import type { SavedPlacesService } from "../../saved-places/index.js";
 import type {
+  MapTileService,
   MapPlacePin,
   MapPlacesResult,
   MapPlacesService
@@ -273,6 +274,116 @@ describe("map routes", () => {
 
     expect(response.statusCode).toBe(200);
     expect(capturedZoom).toBe(13);
+  });
+
+  it("returns map vector tile config", async () => {
+    const app = await buildApp();
+
+    const response = await app.inject({
+      method: "GET",
+      url: VersionedAppRoute.mapConfig
+    });
+
+    await app.close();
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({
+      tileVersion: 1,
+      tileUrlTemplate: "/v1/map/tiles/{z}/{x}/{y}.mvt?v=1",
+      sourceLayer: "places"
+    });
+  });
+
+  it("returns a binary map tile", async () => {
+    const tile = Buffer.from([1, 2, 3]);
+    const mapTileService: MapTileService = async (params) => {
+      expect(params).toEqual({ z: 13, x: 4501, y: 2899 });
+      return {
+        statusCode: 200,
+        body: tile,
+        etag: "\"v1\"",
+        cacheControl: "public, max-age=31536000, immutable"
+      };
+    };
+    const app = await buildApp({
+      mapTileService
+    });
+
+    const response = await app.inject({
+      method: "GET",
+      url: "/v1/map/tiles/13/4501/2899.mvt"
+    });
+
+    await app.close();
+
+    expect(response.statusCode).toBe(200);
+    expect(response.headers["content-type"]).toContain(
+      "application/vnd.mapbox-vector-tile"
+    );
+    expect(response.headers.etag).toBe("\"v1\"");
+    expect(Buffer.from(response.rawPayload)).toEqual(tile);
+  });
+
+  it("returns 204 for an empty map tile", async () => {
+    const app = await buildApp({
+      mapTileService: async () => ({
+        statusCode: 204,
+        body: null,
+        etag: "\"v1\"",
+        cacheControl: "public, max-age=31536000, immutable"
+      })
+    });
+
+    const response = await app.inject({
+      method: "GET",
+      url: "/v1/map/tiles/13/4501/2899.mvt"
+    });
+
+    await app.close();
+
+    expect(response.statusCode).toBe(204);
+    expect(response.body).toBe("");
+  });
+
+  it("returns 304 when the map tile etag matches", async () => {
+    const app = await buildApp({
+      mapTileService: async () => ({
+        statusCode: 200,
+        body: Buffer.from([1, 2, 3]),
+        etag: "\"v1\"",
+        cacheControl: "public, max-age=31536000, immutable"
+      })
+    });
+
+    const response = await app.inject({
+      method: "GET",
+      url: "/v1/map/tiles/13/4501/2899.mvt",
+      headers: {
+        "if-none-match": "\"v1\""
+      }
+    });
+
+    await app.close();
+
+    expect(response.statusCode).toBe(304);
+    expect(response.body).toBe("");
+  });
+
+  it("returns 400 for invalid map tile params", async () => {
+    const app = await buildApp({
+      mapTileService: async () => {
+        throw new Error("should not be called");
+      }
+    });
+
+    const response = await app.inject({
+      method: "GET",
+      url: "/v1/map/tiles/13/999999/2899.mvt"
+    });
+
+    await app.close();
+
+    expect(response.statusCode).toBe(400);
   });
 
   it("returns 200 when zoom is omitted", async () => {

@@ -12,8 +12,19 @@ import {
   logResponseSummary,
   LogMessagePrefix
 } from "../../../http/response-log.js";
-import { mapPlacesRouteSchema } from "../common/map.openapi.js";
+import {
+  mapConfigRouteSchema,
+  mapPlacesRouteSchema,
+  mapTileRouteSchema
+} from "../common/map.openapi.js";
 import { mapPlacesQuerySchema } from "../common/map.schemas.js";
+import {
+  MAP_TILE_CONTENT_TYPE,
+  getMapTileUrlTemplate,
+  mapTileParamsSchema,
+  type MapTileService
+} from "../common/map.tiles.js";
+import { env } from "../../../config/env.js";
 import type { MapPlacesService } from "../common/map.types.js";
 import { enrichSavedState } from "../services/map.service.js";
 import type { SavedPlacesService } from "../../saved-places/index.js";
@@ -23,6 +34,7 @@ export class MapController {
 
   constructor(
     private readonly mapPlacesService: MapPlacesService,
+    private readonly mapTileService: MapTileService,
     private readonly savedPlacesService: SavedPlacesService,
     authService: AuthService
   ) {
@@ -34,6 +46,16 @@ export class MapController {
       AppRoute.MapPlaces,
       docsRoute(mapPlacesRouteSchema),
       this.getMapPlaces.bind(this)
+    );
+    app.get(
+      AppRoute.MapConfig,
+      docsRoute(mapConfigRouteSchema),
+      this.getMapConfig.bind(this)
+    );
+    app.get(
+      AppRoute.MapTile,
+      docsRoute(mapTileRouteSchema),
+      this.getMapTile.bind(this)
     );
   }
 
@@ -81,6 +103,52 @@ export class MapController {
         error,
         "Invalid map places query"
       );
+    }
+  }
+
+  private async getMapConfig() {
+    return {
+      tileVersion: env.MAP_TILE_VERSION,
+      tileUrlTemplate: getMapTileUrlTemplate(env.MAP_TILE_VERSION),
+      sourceLayer: "places" as const
+    };
+  }
+
+  private async getMapTile(request: FastifyRequest, reply: FastifyReply) {
+    try {
+      const params = mapTileParamsSchema.parse(request.params);
+      const result = await this.mapTileService(params);
+
+      reply
+        .header("Cache-Control", result.cacheControl)
+        .header("ETag", result.etag);
+
+      if (request.headers["if-none-match"] === result.etag) {
+        return reply.code(304).send();
+      }
+
+      if (result.statusCode === 204) {
+        return reply.code(204).send();
+      }
+
+      logResponseSummary(
+        request,
+        VersionedAppRoute.mapTile,
+        {
+          z: params.z,
+          x: params.x,
+          y: params.y,
+          bytes: result.body.length
+        },
+        `${LogMessagePrefix.Response} ${VersionedAppRoute.mapTile} ${params.z}/${params.x}/${params.y}`
+      );
+
+      return reply
+        .code(200)
+        .type(MAP_TILE_CONTENT_TYPE)
+        .send(result.body);
+    } catch (error) {
+      return handleCommonError(request, reply, error, "Invalid map tile request");
     }
   }
 }

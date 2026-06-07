@@ -2,15 +2,21 @@ import { describe, expect, it } from "vitest";
 import { RedisCacheStore } from "./redis-cache-store.js";
 
 class FakeRedis {
-  readonly data = new Map<string, string>();
+  readonly data = new Map<string, string | Buffer>();
   readonly deleted: string[] = [];
   private scanSnapshot: string[] = [];
 
   async get(key: string) {
-    return this.data.get(key) ?? null;
+    const value = this.data.get(key);
+    return typeof value === "string" ? value : null;
   }
 
-  async set(...args: [string, string, "EX", number]) {
+  async getBuffer(key: string) {
+    const value = this.data.get(key);
+    return Buffer.isBuffer(value) ? value : null;
+  }
+
+  async set(...args: [string, string | Buffer, "EX", number]) {
     const [key, value] = args;
 
     this.data.set(key, value);
@@ -61,6 +67,17 @@ describe("RedisCacheStore", () => {
       id: 1,
       name: "Place"
     });
+  });
+
+  it("stores binary buffers without JSON serialization", async () => {
+    const redis = new FakeRedis();
+    const cache = new RedisCacheStore(redis);
+    const tile = Buffer.from([1, 2, 3]);
+
+    await cache.setBuffer("tile:v1:1/2/3", tile, 60);
+
+    expect(await cache.getBuffer("tile:v1:1/2/3")).toEqual(tile);
+    expect(await cache.get("tile:v1:1/2/3")).toBeNull();
   });
 
   it("treats invalid JSON as cache miss", async () => {
