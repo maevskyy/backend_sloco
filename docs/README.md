@@ -6,6 +6,8 @@ This folder documents the backend monorepo as a multi-service system.
 
 - `ARCHITECTURE.md` - monorepo layout, service map, network boundaries, ports,
   and ownership rules.
+- `CURRENT_STATE.md` - what is done, what is not done, and the current platform
+  score.
 - `DEPLOYMENT.md` - production deploy workflow, secrets, server layout, and
   rollback.
 - `tasks/` - backend-platform task plans and migration history.
@@ -17,7 +19,7 @@ This folder documents the backend monorepo as a multi-service system.
 
 - `tasks/TBD_PLATFORM_HARDENING.md` - whole-repo backlog of known gaps/concerns
   (load testing, alerting, staging, DR/backups, algorithm pipeline, rate limiting)
-  with a `~7.5/10` architecture snapshot and priority order.
+  with the current architecture snapshot and priority order.
 - `tasks/TBD_CICD_SECRETS_AND_RUNNERS.md` - CI/CD, secrets, private repos, and
   self-hosted runners. Largely closed by `tasks/TASKS_2_BACKEND_MONOREPO_CONSOLIDATION.md`
   (kept for rationale/history).

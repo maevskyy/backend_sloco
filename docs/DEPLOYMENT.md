@@ -28,7 +28,7 @@ source of truth.
 
 The backend monorepo owns one production secret contour.
 
-Required:
+Required for normal app deploys:
 
 ```text
 DEPLOY_HOST
@@ -39,6 +39,12 @@ GHCR_USERNAME
 GHCR_READ_TOKEN
 SUPABASE_URL
 SUPABASE_SERVICE_ROLE_KEY
+```
+
+Required only when deploying/refreshing the self-hosted observability stack
+(`with_observability=true`):
+
+```text
 GF_SECURITY_ADMIN_USER
 GF_SECURITY_ADMIN_PASSWORD
 GF_SERVER_ROOT_URL
@@ -68,6 +74,8 @@ Inputs:
 - `service=recommender` builds/deploys only the recommendation image and
   preserves the current Gateway image tag.
 - `ref` is the branch, tag, or commit SHA to deploy.
+- `with_observability=true` also converges Loki, Prometheus, and Grafana. Leave it
+  off for normal app-only deploys.
 
 The workflow:
 
@@ -75,7 +83,14 @@ The workflow:
 2. builds and pushes image tags to GHCR;
 3. syncs stack files to `/opt/backend_sloco`;
 4. renders `.env`;
-5. runs:
+5. runs app-only by default:
+
+   ```bash
+   docker compose pull
+   docker compose up -d
+   ```
+
+   With `with_observability=true`, it runs:
 
    ```bash
    docker compose --profile observability pull
@@ -100,8 +115,8 @@ Alloy -> 127.0.0.1:9090 Prometheus
 Nginx -> 127.0.0.1:3001 Grafana
 ```
 
-The deploy workflow starts the stack with the `observability` profile. Redis is a
-normal service, not a profile-only optional dependency.
+Redis is a normal service, not a profile-only optional dependency. The
+observability services are converged when `with_observability=true`.
 
 ## Nginx And HTTPS
 

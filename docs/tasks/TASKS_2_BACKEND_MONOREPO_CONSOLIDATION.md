@@ -1,6 +1,6 @@
 # TASKS 2: Backend Monorepo Consolidation + Deploy/Secrets/Load
 
-**Status: In Progress.**
+**Status: Done.**
 
 ## Context
 
@@ -104,7 +104,7 @@ Notes:
   the `backend_sloco` repo write access in the package settings, or repoint the
   recommender image under the monorepo's package namespace.
 
-## Step 2 — Path-Filtered CI
+## Step 2 — Path-Filtered CI (DONE)
 
 One `.github/workflows/ci.yml`. A filter job decides which service changed; Node and
 Python jobs run only when their folder changed (and always on workflow file change).
@@ -119,7 +119,7 @@ Key change from today's per-repo CI: add `working-directory` + pnpm
 `cache-dependency-path: services/gateway/pnpm-lock.yaml`, since the project is no
 longer at repo root. See the committed `ci.yml` for the exact matrix.
 
-## Step 3 — Deploy Owns The Whole Stack
+## Step 3 — Deploy Owns The Whole Stack (DONE)
 
 One `deploy-production.yml` (`workflow_dispatch` with a `service` choice:
 `gateway` / `recommender` / `all`). It removes the manual `scp` step:
@@ -129,16 +129,18 @@ One `deploy-production.yml` (`workflow_dispatch` with a `service` choice:
    `services/gateway/grafana/provisioning` to `/opt/backend_sloco`;
 3. **render `/opt/backend_sloco/.env` from GitHub secrets** (heredoc over SSH), not
    hand-edited `sed`;
-4. `docker compose --profile observability up -d` + health-check loop.
+4. `docker compose up -d` for normal app deploys, or
+   `docker compose --profile observability up -d` when `with_observability=true`;
+5. health-check loop.
 
 A `verify` job runs the full CI checks (build/test/lint/typecheck) on the deployed
 `ref` first, and `build` `needs: verify` — so a manual deploy can never ship a ref
 that failed checks.
 
-Result: adding Grafana/Loki/Prometheus (TASKS_31) becomes a normal push — no manual
-server step. Re-running is idempotent.
+Result: adding Grafana/Loki/Prometheus (TASKS_31) became a normal deploy workflow
+run — no manual server file copy. Re-running is idempotent.
 
-## Step 4 — One Secret Contour
+## Step 4 — One Secret Contour (DONE)
 
 - One repo ⇒ one secret set. One SSH deploy key, one GHCR token, defined and rotated
   in a single place (repo secrets; promote to GitHub Environments `prod`/`staging`
@@ -148,15 +150,14 @@ server step. Re-running is idempotent.
 - Optional hardening: SOPS + age — commit an encrypted `.env` in-repo, decrypt with a
   single age key on deploy. Keeps "everything in one place" without external SaaS.
 
-## Step 5 — Load Testing From Day One
+## Step 5 — Load Testing From Day One (DONE AS HARNESS)
 
 `load/` with Artillery scenarios. Hot path first: `GET /v1/map/places` with varying
 bbox + zoom, then `/v1/feed/places` and `/v1/places/:id`.
 
 - Run locally: `make load` (target: a `BASE_URL`, default `http://127.0.0.1:3000`).
-- SLOs recorded in `load/README.md`, e.g. p95 `/v1/map/places` < 150ms at a defined
-  RPS. Today there is **no** load test and **no** measured latency for map or
-  recommender — this closes that gap.
+- SLO placeholders are recorded in `load/README.md`, e.g. p95 `/v1/map/places`
+  < 150ms at a defined RPS. A real baseline run is still a hardening follow-up.
 - Optional manual/nightly CI job against staging (never hammer prod by default).
 
 ## Test Plan / Verification
@@ -168,12 +169,12 @@ bbox + zoom, then `/v1/feed/places` and `/v1/places/:id`.
   `http://recommendation-service:8000/v1/health/ready`.
 - CI: a change only under `services/gateway/**` triggers the Node job and skips the
   Python job (and vice versa); a `grafana/**` change triggers dashboard validation.
-- Deploy: `workflow_dispatch` against a server with only `.env` secrets set brings up
-  the full stack with no manual `scp`; second run is idempotent.
+- Deploy: `workflow_dispatch` against production brings up the stack with no manual
+  `scp`; the workflow has been tested on prod and re-runs idempotently.
 - Secrets: deploy key / GHCR token live in one place; rotating once applies to all
   services.
-- Load: `make load` runs Artillery on `/v1/map/places` and prints p95/p99; SLOs in
-  `load/README.md`.
+- Load: `make load` runs Artillery on `/v1/map/places` and prints p95/p99; real SLO
+  baseline is tracked in `TBD_PLATFORM_HARDENING.md`.
 - Old repos archived; `frontend_sloco` untouched.
 
 ## Assumptions / Risks

@@ -6,7 +6,7 @@ up:
 	docker compose up -d
 
 up-all:
-	docker compose --profile cache --profile observability up -d
+	docker compose --profile observability up -d
 
 down:
 	docker compose down

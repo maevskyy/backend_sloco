@@ -12,21 +12,44 @@ duplicated.
 
 ## Snapshot (for context)
 
-Honest self-assessment at the time of writing: **~7.5 / 10** for a solo MVP.
+Honest self-assessment after the monorepo deploy and self-hosted observability
+were tested on production: **~8.7 / 10** for a solo MVP backend platform.
 
 | Axis | Score | Note |
 | --- | --- | --- |
 | Code architecture (gateway/recommender) | 8.5 | layered modules, Zod→OpenAPI, clean boundaries |
 | Service boundaries (polyglot split) | 8.5 | public Node gateway + private Python recommender |
-| Repo topology | 8 | monorepo, `services/`, code vs infra split |
-| Deploy / CI-CD | 8 | idempotent, verify-gated, stack-owning, observability opt-in |
-| Observability | 7.5 | self-hosted, provisioned-as-code, dual-write; no alerts |
-| Secrets / security | 7 | one contour; no rate-limit; SOPS not done |
+| Repo topology | 9 | monorepo, `services/`, code vs infra split, no nested repos |
+| Deploy / CI-CD | 8.7 | prod-tested, verify-gated, stack-owning, observability opt-in |
+| Observability | 8.5 | self-hosted Grafana/Loki/Prometheus live; no alerts/backups yet |
+| Secrets / security | 7.5 | one contour; no rate-limit; SOPS not done |
 | **Testing / load** | 5 | harness exists, never run; no measured SLO |
 | Data / algorithm | 6 | simplified recommender port; no embedding pipeline |
 | Resilience / DR | 6 | stateless host, but single box, no staging, no backups |
 
-The remaining ~2 points are not "rewrite" — they are **prove and protect**.
+The remaining points are not "rewrite" — they are **prove and protect**.
+
+## Done
+
+- Backend is now one monorepo with `services/gateway`, `services/recommendation`,
+  root `deploy/`, root `docker-compose.yml`, root CI/CD, and one secret contour.
+- Production deploy was tested through `.github/workflows/deploy-production.yml`.
+- Stack files are shipped by CI/CD; normal deploys no longer require manual `scp`.
+- Redis is a normal runtime dependency and works for `GET /v1/places/:id` cache.
+- Self-hosted Grafana/Loki/Prometheus are deployed/provisioned and usable.
+- Grafana dashboards are provisioned from repo files instead of manual import.
+- Load-test harness exists under `load/`.
+
+## Not Done Yet
+
+- Real load baseline and measured SLOs.
+- Alertmanager / alert rules.
+- Staging environment.
+- Rollback drill.
+- Backups/retention validation for Grafana/Loki/Prometheus volumes.
+- Reproducible embedding-generation pipeline.
+- Rate limiting / additional app security hardening.
+- Final Grafana Cloud token/account deletion if it has not already been completed.
 
 ## Concerns (prioritized)
 

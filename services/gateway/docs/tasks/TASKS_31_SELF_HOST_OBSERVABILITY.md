@@ -1,8 +1,11 @@
 # TASKS 31: Self-Hosted Observability On Hetzner
 
-Status: In Progress. Local compose/config/provisioning files are implemented
-and the backend monorepo deploy workflow now ships stack files. Nginx/certbot
-setup, Alloy dual-write, and Cloud cutover are still pending.
+Status: Done. The self-hosted Grafana/Loki/Prometheus stack is deployed through
+the backend monorepo workflow and has been tested on production. Grafana is
+provisioned from repo files and reachable on the self-hosted domain.
+
+Remaining hardening is tracked separately: alerting, backups/retention validation,
+load baseline, and final Grafana Cloud token/account cleanup if not already done.
 
 ## Goal
 
@@ -156,8 +159,9 @@ volumes:
   prometheus_data:
 ```
 
-`make up-all` already runs `--profile cache --profile observability`, so the whole
-stack comes up with the existing target.
+`make up-all` runs `--profile observability`, so the app stack plus
+Grafana/Loki/Prometheus comes up with the existing target. Redis is a normal
+service and does not need a profile.
 
 ## Step 2 — Loki Config
 
@@ -329,7 +333,7 @@ Live is needed:
     }
 ```
 
-## Step 7 — Server Setup / Cutover Runbook
+## Step 7 — Server Setup / Cutover Runbook (DONE FOR SELF-HOSTED STACK)
 
 All commands run on the Hetzner host in `/opt/backend_sloco` unless noted.
 
@@ -367,11 +371,11 @@ Do Step 6 (vhost + certbot). Open `https://grafana.sloco.pp.ua`, log in, confirm
 `Sloco` folder has all three dashboards and both datasources exist under
 Connections → Data sources.
 
-### 7.4 Point Alloy at the local stack (dual-write first)
+### 7.4 Point Alloy at the local stack
 
 Alloy stays a host systemd service (`/etc/alloy/config.alloy`, not versioned). Keep
 the existing exporter pipelines from `TASKS_5_LOGGING.md` / `TASKS_10`. Change only
-the **destinations** — first add local **alongside** Cloud, so nothing goes dark:
+the **destinations**. The safe migration path is dual-write first, then local-only:
 
 ```alloy
 // Local logs sink (dual-write with existing Grafana Cloud loki.write)
@@ -403,7 +407,8 @@ sudo journalctl -u alloy -n 100 --no-pager      # no push/remote_write errors
 After local dashboards show real data (see Test Plan), remove the Grafana Cloud
 `loki.write` / `prometheus.remote_write` destinations from `forward_to`, restart
 Alloy, and revoke the Grafana Cloud access tokens in Grafana Cloud → Access Policies.
-Stop using the Cloud stack.
+Stop using the Cloud stack. If the Cloud stack/trial still exists, delete it after
+confirming self-hosted dashboards have fresh logs and metrics.
 
 ## Test Plan
 
@@ -456,8 +461,8 @@ curl "https://sloco.pp.ua/v1/map/places?swLat=52.4800&swLng=13.3300&neLat=52.560
 - `grafana.sloco.pp.ua` DNS can be created and a Let's Encrypt cert issued.
 - Existing Alloy exporter pipelines (logs + host/container metrics) keep working;
   only destinations change.
-- Manual file copy for compose/config is acceptable for this infra step; automating
-  it belongs with the CI/CD redesign in `../../docs/tasks/TBD_CICD_SECRETS_AND_RUNNERS.md`.
+- Compose/config/dashboard files are now shipped by the backend monorepo deploy
+  workflow, not by manual file copy.
 
 ## Follow-Ups
 

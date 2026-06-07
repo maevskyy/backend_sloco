@@ -1,5 +1,11 @@
 # TBD: CI/CD, Secrets, Private Repos, And Self-Hosted Runners
 
+Status: Mostly Closed. The immediate multi-repo/secrets/deploy pain was solved by
+`TASKS_2_BACKEND_MONOREPO_CONSOLIDATION.md`: one backend monorepo, one deploy
+workflow, and one GitHub secret contour. This doc remains for future decisions
+around private repos, self-hosted runners, TeamCity, SOPS/age, or a dedicated
+secret manager.
+
 ## Why This Exists
 
 Current CI/CD is good enough for the first MVP services, but it is already
