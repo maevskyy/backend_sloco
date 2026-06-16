@@ -1,0 +1,39 @@
+# Artillery load test for the production map tile endpoint.
+# Generate payload first:
+#   node gen-tiles.mjs > tiles.csv
+#
+# Run:
+#   artillery run -t https://sloco.pp.ua tiles.yml
+#   artillery run --record --key $ARTILLERY_CLOUD_API_KEY -t https://sloco.pp.ua tiles.yml
+config:
+  target: "http://127.0.0.1:3000"
+  payload:
+    path: "tiles.csv"
+    fields:
+      - z
+      - x
+      - y
+      - bbox
+    order: random
+  phases:
+    - name: warmup
+      duration: 30
+      arrivalRate: 5
+    - name: ramp
+      duration: 120
+      arrivalRate: 20
+      rampTo: 200
+    - name: stress
+      duration: 180
+      arrivalRate: 200
+  ensure:
+    thresholds:
+      - http.response_time.p95: 250
+      - http.response_time.p99: 1000
+      - http.codes.500: 0
+
+scenarios:
+  - name: map-vector-tile
+    flow:
+      - get:
+          url: "/v1/map/tiles/{{ z }}/{{ x }}/{{ y }}.mvt?v=1"

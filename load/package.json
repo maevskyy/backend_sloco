@@ -3,7 +3,10 @@
   "private": true,
   "description": "Artillery load/stress scenarios for the backend hot paths.",
   "scripts": {
-    "map": "artillery run map-places.yml"
+    "gen:tiles": "node gen-tiles.mjs > tiles.csv",
+    "map": "artillery run map-places.yml",
+    "tiles": "npm run gen:tiles && artillery run tiles.yml",
+    "tiles:record": "npm run gen:tiles && artillery run --record --key $ARTILLERY_CLOUD_API_KEY tiles.yml"
   },
   "devDependencies": {
     "artillery": "^2.0.0"

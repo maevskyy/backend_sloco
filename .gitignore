@@ -22,3 +22,4 @@ htmlcov/
 
 # Large/local data dumps (keep canonical service artifacts in artifacts/)
 dumps/places_v2_import.csv
+load/tiles.csv
