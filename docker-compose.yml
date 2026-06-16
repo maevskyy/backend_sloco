@@ -150,6 +150,71 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  # --- Load-test exporters (Prometheus scrape targets) -------------------------
+  redis_exporter:
+    image: oliver006/redis_exporter:v1.62.0
+    profiles:
+      - observability
+    restart: unless-stopped
+    command: ["--redis.addr=redis://redis:6379"]
+    expose:
+      - "9121"
+    depends_on:
+      - redis
+    networks:
+      - sloco_net
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Per-container CPU/RAM/throttling. Linux host (prod); some mounts are no-ops on macOS.
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.49.1
+    profiles:
+      - observability
+    restart: unless-stopped
+    privileged: true
+    devices:
+      - /dev/kmsg
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    expose:
+      - "8080"
+    networks:
+      - sloco_net
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Host CPU/RAM/net/disk (the Hetzner box).
+  node_exporter:
+    image: prom/node-exporter:v1.8.2
+    profiles:
+      - observability
+    restart: unless-stopped
+    command:
+      - "--path.rootfs=/host"
+    pid: host
+    volumes:
+      - /:/host:ro,rslave
+    expose:
+      - "9100"
+    networks:
+      - sloco_net
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
 networks:
   sloco_net:
     driver: bridge

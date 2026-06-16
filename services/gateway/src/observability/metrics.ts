@@ -7,6 +7,11 @@ import type {
 } from "fastify";
 import { LogEvent, LogEventType } from "../config/log-events.js";
 import type { CacheMetricInput } from "../lib/cache/cache-store.js";
+import {
+  observeCacheEvent,
+  observeDependency,
+  observeHttpRequest
+} from "./prometheus.js";
 
 type RequestMetricContext = {
   log: FastifyBaseLogger;
@@ -39,6 +44,15 @@ export function logHttpRequestMetric(
 ) {
   const path = getRequestPath(request.url);
   const responseBytes = getResponseBytes(reply);
+
+  // Prometheus: use the matched route template (e.g. /v1/map/tiles/:z/:x/:y.mvt),
+  // never the raw URL — per-tile paths would explode label cardinality.
+  observeHttpRequest(
+    request.method,
+    request.routeOptions?.url ?? "unmatched",
+    reply.statusCode,
+    reply.elapsedTime
+  );
 
   request.log.info(
     {
@@ -75,6 +89,8 @@ export async function measureDependencyMetric<T>(
 }
 
 export function logCacheMetric(input: CacheMetricInput) {
+  observeCacheEvent(input.cacheName, input.cacheStatus);
+
   const context = requestMetricContext.getStore();
 
   if (!context) {
@@ -105,6 +121,8 @@ function logDependencyMetric(
   success: boolean,
   rowsCount?: number
 ) {
+  observeDependency(input.dependency, input.operation, success, durationMs);
+
   const context = requestMetricContext.getStore();
 
   if (!context) {

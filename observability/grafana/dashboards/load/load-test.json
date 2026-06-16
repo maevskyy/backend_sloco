@@ -1,0 +1,179 @@
+{
+  "uid": "load-test",
+  "title": "Load Test — what broke & when",
+  "tags": ["load", "stress"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "5s",
+  "time": { "from": "now-15m", "to": "now" },
+  "templating": { "list": [] },
+  "annotations": { "list": [] },
+  "panels": [
+    {
+      "type": "row",
+      "title": "Verdict — did it break, and when",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Requests/sec (by route)",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 1 },
+      "fieldConfig": { "defaults": { "unit": "reqps" }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "sum(rate(http_requests_total[1m]))", "legendFormat": "total" },
+        { "refId": "B", "expr": "sum by (route) (rate(http_requests_total[1m]))", "legendFormat": "{{route}}" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Error rate (5xx / 4xx per sec)",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 1 },
+      "fieldConfig": { "defaults": { "unit": "reqps" }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "sum(rate(http_requests_total{status_code=~\"5..\"}[1m]))", "legendFormat": "5xx" },
+        { "refId": "B", "expr": "sum(rate(http_requests_total{status_code=~\"4..\"}[1m]))", "legendFormat": "4xx" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "HTTP latency p50 / p95 / p99",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 1 },
+      "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "histogram_quantile(0.50, sum by (le) (rate(http_request_duration_seconds_bucket[1m])))", "legendFormat": "p50" },
+        { "refId": "B", "expr": "histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket[1m])))", "legendFormat": "p95" },
+        { "refId": "C", "expr": "histogram_quantile(0.99, sum by (le) (rate(http_request_duration_seconds_bucket[1m])))", "legendFormat": "p99" }
+      ]
+    },
+    {
+      "type": "row",
+      "title": "Gateway / Node runtime",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 9 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Event-loop lag p99 (Node)",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 10 },
+      "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "nodejs_eventloop_lag_p99_seconds{job=\"gateway\"}", "legendFormat": "lag p99" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Gateway memory (RSS / heap used)",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 10 },
+      "fieldConfig": { "defaults": { "unit": "bytes" }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "process_resident_memory_bytes{job=\"gateway\"}", "legendFormat": "rss" },
+        { "refId": "B", "expr": "nodejs_heap_size_used_bytes{job=\"gateway\"}", "legendFormat": "heap used" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Gateway CPU (cores)",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 10 },
+      "fieldConfig": { "defaults": { "unit": "none" }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "rate(process_cpu_seconds_total{job=\"gateway\"}[1m])", "legendFormat": "cpu cores" }
+      ]
+    },
+    {
+      "type": "row",
+      "title": "Dependencies (from the gateway's view)",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 18 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Dependency latency p95 (by dependency)",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 19 },
+      "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "histogram_quantile(0.95, sum by (le, dependency) (rate(dependency_duration_seconds_bucket[1m])))", "legendFormat": "{{dependency}}" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Dependency errors/sec + cache hit/miss",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 19 },
+      "fieldConfig": { "defaults": { "unit": "reqps" }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "sum by (dependency) (rate(dependency_duration_seconds_count{success=\"false\"}[1m]))", "legendFormat": "err {{dependency}}" },
+        { "refId": "B", "expr": "sum by (status) (rate(cache_events_total[1m]))", "legendFormat": "cache {{status}}" }
+      ]
+    },
+    {
+      "type": "row",
+      "title": "Redis (exporter)",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 27 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Redis memory: used vs max",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 28 },
+      "fieldConfig": { "defaults": { "unit": "bytes" }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "redis_memory_used_bytes", "legendFormat": "used" },
+        { "refId": "B", "expr": "redis_memory_max_bytes", "legendFormat": "max (0 = unlimited)" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Redis evictions/sec + ops/sec",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 28 },
+      "fieldConfig": { "defaults": { "unit": "ops" }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "rate(redis_evicted_keys_total[1m])", "legendFormat": "evictions" },
+        { "refId": "B", "expr": "rate(redis_commands_processed_total[1m])", "legendFormat": "ops" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Redis clients + keyspace hit ratio",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 28 },
+      "fieldConfig": { "defaults": { "unit": "none" }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "redis_connected_clients", "legendFormat": "clients" },
+        { "refId": "B", "expr": "rate(redis_keyspace_hits_total[5m]) / clamp_min(rate(redis_keyspace_hits_total[5m]) + rate(redis_keyspace_misses_total[5m]), 1)", "legendFormat": "hit ratio" }
+      ]
+    },
+    {
+      "type": "row",
+      "title": "Containers (cAdvisor)",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 36 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Container CPU (cores, by container)",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 37 },
+      "fieldConfig": { "defaults": { "unit": "none" }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "sum by (name) (rate(container_cpu_usage_seconds_total{name=~\".+\"}[1m]))", "legendFormat": "{{name}}" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Container memory + CPU throttling",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 37 },
+      "fieldConfig": { "defaults": { "unit": "bytes" }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "container_memory_usage_bytes{name=~\".+\"}", "legendFormat": "mem {{name}}" },
+        { "refId": "B", "expr": "sum by (name) (rate(container_cpu_cfs_throttled_seconds_total{name=~\".+\"}[1m]))", "legendFormat": "throttle {{name}}" }
+      ]
+    }
+  ]
+}

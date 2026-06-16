@@ -11,6 +11,10 @@ import {
   enterRequestMetricContext,
   logHttpRequestMetric
 } from "./observability/metrics.js";
+import {
+  metricsContentType,
+  renderMetrics
+} from "./observability/prometheus.js";
 import { registerHealthModule } from "./modules/health/index.js";
 import {
   registerMapModule,
@@ -67,6 +71,13 @@ export async function buildApp(options: AppOptions = {}) {
 
   await app.register(cors, {
     origin: true
+  });
+
+  // Prometheus scrape endpoint. Not under /v1 → Nginx (which proxies only /v1/)
+  // does not expose it publicly; Prometheus scrapes it on the private network.
+  app.get("/metrics", async (_request, reply) => {
+    reply.header("Content-Type", metricsContentType);
+    return renderMetrics();
   });
 
   await registerSwaggerDocs(app);
