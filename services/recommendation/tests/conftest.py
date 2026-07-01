@@ -12,6 +12,7 @@ from recommendation_service.main import create_app
 def client(monkeypatch: pytest.MonkeyPatch) -> Iterator[TestClient]:
     fixtures_dir = Path(__file__).parent / "fixtures"
     monkeypatch.setenv("APP_ENV", "test")
+    monkeypatch.setenv("RECOMMENDER_ALGORITHM", "embedding_recommender_v1")
     monkeypatch.setenv("EMBEDDINGS_NPY_PATH", str(fixtures_dir / "tiny_embeddings.npy"))
     monkeypatch.setenv(
         "EMBEDDING_METADATA_PATH",

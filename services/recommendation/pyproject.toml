@@ -11,6 +11,8 @@ dependencies = [
     "pydantic (>=2.10.4,<3.0.0)",
     "pydantic-settings (>=2.7.0,<3.0.0)",
     "uvicorn[standard] (>=0.34.0,<0.35.0)",
+    "pandas (>=2.2,<3.0)",
+    "scikit-learn (>=1.5,<2.0)",
 ]
 
 [project.scripts]
@@ -37,6 +39,8 @@ pythonpath = ["src"]
 line-length = 88
 target-version = "py312"
 src = ["src", "tests"]
+# Vendored recommendation algorithm (ported research code): not linted here.
+extend-exclude = ["src/recommendation_service/algorithms/location_recommender"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
@@ -46,3 +50,12 @@ python_version = "3.12"
 strict = true
 mypy_path = "src"
 packages = ["recommendation_service"]
+
+# Vendored recommendation algorithm (ported research code): not strictly typed.
+[[tool.mypy.overrides]]
+module = ["recommendation_service.algorithms.location_recommender.*"]
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = ["pandas.*", "sklearn.*"]
+ignore_missing_imports = true

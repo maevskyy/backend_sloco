@@ -7,5 +7,6 @@ Start here:
 
 ```text
 TASKS_1_embedding_recommender_endpoint.md
+TASKS_2_location_recommender_v4.md
 ```
 

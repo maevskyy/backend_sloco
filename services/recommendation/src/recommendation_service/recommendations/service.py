@@ -1,6 +1,6 @@
 from starlette.concurrency import run_in_threadpool
 
-from recommendation_service.algorithms.embedding_recommender import EmbeddingRecommender
+from recommendation_service.algorithms.base import PersonalizedRecommender
 from recommendation_service.config import Settings
 from recommendation_service.recommendations.schemas import (
     InputSummary,
@@ -11,7 +11,7 @@ from recommendation_service.recommendations.schemas import (
 
 
 async def recommend_personalized(
-    recommender: EmbeddingRecommender,
+    recommender: PersonalizedRecommender,
     request: PersonalizedRequest,
     settings: Settings,
 ) -> PersonalizedResponse:

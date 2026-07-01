@@ -6,6 +6,7 @@ from contextlib import asynccontextmanager
 import uvicorn
 from fastapi import FastAPI
 
+from recommendation_service.algorithms.base import PersonalizedRecommender
 from recommendation_service.algorithms.embedding_recommender import (
     ALGORITHM_VERSION,
     EmbeddingRecommender,
@@ -25,23 +26,37 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     settings = get_settings()
     started_at = time.perf_counter()
-    recommender = EmbeddingRecommender.from_artifacts(
-        npy_path=settings.embeddings_npy_path,
-        metadata_csv_path=settings.embedding_metadata_path,
-        embedding_run_id=settings.embedding_run_id,
-        favorites_weight=settings.favorites_weight,
-        want_to_go_weight=settings.want_to_go_weight,
-    )
+
+    recommender: PersonalizedRecommender
+    if settings.recommender_algorithm == "location_recommender_v4":
+        from recommendation_service.algorithms.location_recommender.adapter import (
+            ALGORITHM_VERSION as LOCATION_V4_VERSION,
+            build_location_recommender_v4,
+        )
+
+        recommender = build_location_recommender_v4(settings)
+        algorithm_version = LOCATION_V4_VERSION
+    else:
+        recommender = EmbeddingRecommender.from_artifacts(
+            npy_path=settings.embeddings_npy_path,
+            metadata_csv_path=settings.embedding_metadata_path,
+            embedding_run_id=settings.embedding_run_id,
+            favorites_weight=settings.favorites_weight,
+            want_to_go_weight=settings.want_to_go_weight,
+        )
+        algorithm_version = ALGORITHM_VERSION
+
     app.state.recommender = recommender
     registry.register(
         AlgorithmDescriptor(
-            name=ALGORITHM_VERSION,
+            name=algorithm_version,
             version=settings.embedding_run_id,
         )
     )
     logger.info(
-        "Loaded embedding recommender: "
-        "candidates=%s embedding_run_id=%s elapsed_ms=%.2f",
+        "Loaded recommender: algorithm=%s candidates=%s "
+        "embedding_run_id=%s elapsed_ms=%.2f",
+        algorithm_version,
         recommender.candidate_count,
         settings.embedding_run_id,
         (time.perf_counter() - started_at) * 1000,

@@ -1,0 +1,7 @@
+place_id,name,primary_type,ai_tags_json,map_visibility_score,ai_confidence,google_rating,google_user_rating_count,price_level
+place_1,Alpha Coffee,coffee_shop,"[""cozy"",""specialty_coffee""]",80,high,4.6,320,2
+place_2,Beta Wine Bar,wine_bar,"[""wine"",""date_night""]",70,high,4.4,210,3
+place_3,Gamma Cafe,coffee_shop,"[""work_friendly"",""specialty_coffee""]",90,high,4.7,540,2
+place_4,Delta Pub,bar,"[""late_night"",""beer""]",60,medium,4.1,150,2
+place_5,Epsilon Brunch,restaurant,"[""brunch"",""cozy""]",75,high,4.5,275,2
+place_6,Zeta Fast Food,fast_food,"[""quick_bite""]",40,low,3.6,90,1

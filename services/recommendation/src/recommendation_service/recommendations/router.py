@@ -2,7 +2,7 @@ from typing import cast
 
 from fastapi import APIRouter, HTTPException, Request, status
 
-from recommendation_service.algorithms.embedding_recommender import EmbeddingRecommender
+from recommendation_service.algorithms.base import PersonalizedRecommender
 from recommendation_service.config import get_settings
 from recommendation_service.recommendations.schemas import (
     PersonalizedRequest,
@@ -28,7 +28,7 @@ async def personalized_recommendations(
             detail="Recommendation model is not loaded.",
         )
     return await recommend_personalized(
-        cast(EmbeddingRecommender, recommender),
+        cast(PersonalizedRecommender, recommender),
         payload,
         get_settings(),
     )

@@ -48,6 +48,20 @@ class Settings(BaseSettings):
     )
     favorites_weight: float = Field(default=1.0, alias="FAVORITES_WEIGHT", gt=0)
     want_to_go_weight: float = Field(default=0.55, alias="WANT_TO_GO_WEIGHT", gt=0)
+    recommender_algorithm: Literal[
+        "embedding_recommender_v1", "location_recommender_v4"
+    ] = Field(
+        default="embedding_recommender_v1",
+        alias="RECOMMENDER_ALGORITHM",
+    )
+    locations_csv_path: Path = Field(
+        default=Path("artifacts/locations_combined_food_ttd.csv"),
+        alias="LOCATIONS_CSV_PATH",
+    )
+    recommender_weights_preset: Literal["text_only", "text_direct"] = Field(
+        default="text_only",
+        alias="RECOMMENDER_WEIGHTS_PRESET",
+    )
 
 
 @lru_cache
