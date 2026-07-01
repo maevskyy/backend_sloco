@@ -90,16 +90,30 @@ Request:
 }
 ```
 
-The recommender is embeddings-only. It does not call OpenAI, Supabase, or any
-database at request time. It loads these artifacts at startup:
+Two algorithms are available, selected by `RECOMMENDER_ALGORITHM`:
+
+- `embedding_recommender_v1` (default) — legacy, embeddings-only (numpy): one
+  weighted taste centroid + cosine similarity.
+- `location_recommender_v4` — multi-profile hybrid engine (taste clustering,
+  CSLS, MMR, cold-start fallback). Needs `pandas` + `scikit-learn` and, besides
+  the embeddings, a **locations table** (`LOCATIONS_CSV_PATH`) with place
+  metadata. A thin adapter maps its rich result down to the response below, so
+  the API contract is identical for both. See
+  `docs/TASKS_2_location_recommender_v4.md`.
+
+Neither calls OpenAI, Supabase, or any database at request time; each loads its
+artifacts once at startup, configured by `EMBEDDINGS_NPY_PATH` /
+`EMBEDDING_METADATA_PATH` (+ `LOCATIONS_CSV_PATH` for v4), e.g. the committed
+legacy run:
 
 ```text
 artifacts/location_embeddings_20260531T173837Z.npy
 artifacts/location_embeddings_20260531T173837Z_metadata.csv
 ```
 
-If no valid input place has an embedding, recommendations are empty because this
-thin recommender has no cold-start signal.
+With `embedding_recommender_v1`, if no valid input place has an embedding the
+result is empty (no cold-start signal). `location_recommender_v4` instead falls
+back to a quality-ranked list for cold-start users.
 
 Manual smoke:
 

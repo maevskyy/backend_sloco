@@ -37,6 +37,10 @@ Database/Auth/Storage: managed Supabase
 - There is no staging environment.
 - Rollback is documented but has not been drilled.
 - Grafana/Loki/Prometheus volume backup and retention behavior are not proven.
+- Recommendation `location_recommender_v4` is ported and selectable via
+  `RECOMMENDER_ALGORITHM` (default still legacy `embedding_recommender_v1`);
+  enabling it in prod needs the data cutover to the new `cid`-keyed format (new
+  `sloco` mapper). See `services/recommendation/docs/TASKS_2_location_recommender_v4.md`.
 - Recommendation embedding generation is not reproducible yet.
 - Gateway rate limiting is not implemented.
 - Supabase import/migration process still needs more operational discipline.

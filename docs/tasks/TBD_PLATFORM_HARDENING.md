@@ -98,15 +98,18 @@ Supabase). The same box runs app + monitoring — a single point of failure.
 
 ### 5. Algorithm drift + no embedding pipeline
 
-Prod `services/recommendation/.../embedding_recommender.py` is a **simplified port**
-of Ilya's fuller recommender (now only in git history / archived repos, after the
-`algorithms/` import was removed). The embedding `.npy` artifact in
-`services/recommendation/artifacts/` is a frozen snapshot with **no reproducible
-generation flow** — there is no pipeline to regenerate or refresh embeddings.
+Prod defaults to `embedding_recommender_v1` — a **simplified** numpy-only port. The
+data team's full engine is now vendored as `location_recommender_v4`
+(`services/recommendation/src/recommendation_service/algorithms/location_recommender/`)
+and selectable via `RECOMMENDER_ALGORITHM` (see
+`services/recommendation/docs/TASKS_2_location_recommender_v4.md`). Remaining to
+enable it: the data cutover (reimport `places` in the new `cid`-keyed format via a
+new `sloco` mapper) and flipping the prod flag. The embedding `.npy` artifacts still
+have **no reproducible generation flow** — no pipeline to regenerate or refresh them.
 
-- Direction: decide to complete the prod algorithm or freeze the simplification
-  consciously; build a reproducible embedding-generation job (the notebook is in git
-  history). Tracked also in `TASKS_2_BACKEND_MONOREPO_CONSOLIDATION.md` follow-ups.
+- Direction: finish the data cutover + enable v4 (staging → prod); build a
+  reproducible embedding-generation job (the notebook is in git history). Tracked in
+  `TASKS_2_location_recommender_v4.md`.
 
 ### 6. Secrets / app security
 

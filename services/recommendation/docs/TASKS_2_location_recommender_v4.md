@@ -17,6 +17,16 @@ Source of the algorithm: the data team's repo `bedkir/sloco_recommendation_syste
 (`recommendation_system/ai_location_recommender/`). We take only the algorithm; the
 data is our own.
 
+## Status
+
+- Workstream B (algorithm swap) — **implemented** behind `RECOMMENDER_ALGORITHM`
+  (default still `embedding_recommender_v1`). Pending local
+  `poetry run pytest / ruff / mypy` verification.
+- Workstream A (data cutover: new `sloco` mapper → `places` keyed by `cid`) —
+  **not started**.
+- Enabling v4 in prod (ship artifacts + flip the flag) — **pending**, after A and
+  verification. The destructive `places` reimport requires explicit sign-off.
+
 ## Approach
 
 Swap in place. Keep the FastAPI skeleton (`main.py`, routers, `health/`, the
