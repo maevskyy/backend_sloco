@@ -60,6 +60,44 @@ Output:
 dumps/osm_bucharest_places.csv
 ```
 
+## Sloco AI Catalog
+
+The data team's enriched catalog (numeric Google `cid` in `place_id`), mapped into
+the v2 `public.places` shape with `source = "sloco_ai"`. This is the current
+**primary** places source.
+
+Input (from the data handoff):
+
+```text
+catalog/locations_combined_food_ttd.csv
+```
+
+Run:
+
+```bash
+pnpm map:sloco /path/to/handoff_for_backend/catalog/locations_combined_food_ttd.csv --out dumps/sloco_places.csv
+```
+
+Output:
+
+```text
+dumps/sloco_places.csv
+```
+
+Notes:
+
+- `place_id` (numeric `cid`) maps to `source_id` — the join key the recommender
+  and gateway share. It must match the embedding metadata's `place_id`.
+- `ai_tags` / `types` are emitted as Postgres array literals (`{a,b}`);
+  `ai_tags_json`, `serves`, `features`, `attributes`, `raw` as JSON strings.
+- `ai_confidence` is mapped from the analyst's `high/medium/low` to numeric
+  (`1` / `0.5` / `0`); already-numeric values pass through.
+- Unmapped source columns (`theme`, `theme_group`, `ai_tags_csv`, `ai_model`, ...)
+  are preserved under `attributes`; the full row is kept in `raw`.
+
+Import via the same **Supabase Import** flow below (keep `id`, `geom`,
+`created_at`, `updated_at`, and photo columns unmapped — the database owns them).
+
 ## Supabase Import
 
 1. Run migration `supabase/migrations/002_create_places.sql`.

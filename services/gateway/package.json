@@ -12,6 +12,7 @@
     "test": "vitest run",
     "map:tripadvisor": "tsx scripts/integrations/tripadvisor/map.ts",
     "map:osm": "tsx scripts/integrations/osm/map.ts",
+    "map:sloco": "tsx scripts/integrations/sloco/map.ts",
     "photos:upload": "tsx scripts/photos/upload-place-photos.ts"
   },
   "keywords": [],

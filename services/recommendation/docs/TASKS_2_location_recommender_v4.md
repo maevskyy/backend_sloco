@@ -23,7 +23,8 @@ data is our own.
   (default still `embedding_recommender_v1`). Pending local
   `poetry run pytest / ruff / mypy` verification.
 - Workstream A (data cutover: new `sloco` mapper → `places` keyed by `cid`) —
-  **not started**.
+  mapper **implemented** (`services/gateway/scripts/integrations/sloco/map.ts` +
+  `map:sloco`); pending `pnpm build / lint` and the (destructive) `places` reimport.
 - Enabling v4 in prod (ship artifacts + flip the flag) — **pending**, after A and
   verification. The destructive `places` reimport requires explicit sign-off.
 
