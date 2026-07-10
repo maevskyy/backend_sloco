@@ -19,7 +19,8 @@ __all__ = ["PersonalizedRecommender", "RecommendationPayload"]
 class PersonalizedRecommender(Protocol):
     """Anything the recommendations service can call at request time."""
 
-    candidate_count: int
+    @property
+    def candidate_count(self) -> int: ...
 
     def recommend(
         self,

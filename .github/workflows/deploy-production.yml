@@ -171,11 +171,13 @@ jobs:
           GF_SECURITY_ADMIN_USER: ${{ secrets.GF_SECURITY_ADMIN_USER }}
           GF_SECURITY_ADMIN_PASSWORD: ${{ secrets.GF_SECURITY_ADMIN_PASSWORD }}
           GF_SERVER_ROOT_URL: ${{ secrets.GF_SERVER_ROOT_URL }}
+          # Repository Variable (not a secret): set to location_recommender_v4 to enable v4.
+          RECOMMENDER_ALGORITHM: ${{ vars.RECOMMENDER_ALGORITHM }}
         with:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
-          envs: SERVICE,SHORT_SHA,WITH_OBS,GATEWAY_IMAGE,RECOMMENDER_IMAGE,GHCR_USERNAME,GHCR_READ_TOKEN,SUPABASE_URL,SUPABASE_SERVICE_ROLE_KEY,SUPABASE_DB_URL,GF_SECURITY_ADMIN_USER,GF_SECURITY_ADMIN_PASSWORD,GF_SERVER_ROOT_URL
+          envs: SERVICE,SHORT_SHA,WITH_OBS,GATEWAY_IMAGE,RECOMMENDER_IMAGE,GHCR_USERNAME,GHCR_READ_TOKEN,SUPABASE_URL,SUPABASE_SERVICE_ROLE_KEY,SUPABASE_DB_URL,GF_SECURITY_ADMIN_USER,GF_SECURITY_ADMIN_PASSWORD,GF_SERVER_ROOT_URL,RECOMMENDER_ALGORITHM
           script: |
             set -euo pipefail
             cd /opt/backend_sloco
@@ -213,6 +215,20 @@ jobs:
 
             REDIS_URL=redis://redis:6379/0
             EOF
+
+            # Recommender v4 is opt-in via the RECOMMENDER_ALGORITHM repo Variable;
+            # artifact paths are pinned together with the flag so the pair cannot drift.
+            if [ "${RECOMMENDER_ALGORITHM:-}" = "location_recommender_v4" ]; then
+              cat >> .env <<EOF
+
+            RECOMMENDER_ALGORITHM=location_recommender_v4
+            EMBEDDINGS_NPY_PATH=artifacts/location_embeddings_combined_food_ttd.npy
+            EMBEDDING_METADATA_PATH=artifacts/location_embeddings_combined_food_ttd_metadata.csv
+            EMBEDDING_RUN_ID=combined_food_ttd
+            LOCATIONS_CSV_PATH=artifacts/locations_combined_food_ttd.csv
+            RECOMMENDER_WEIGHTS_PRESET=text_only
+            EOF
+            fi
 
             # Observability (Grafana/Loki/Prometheus) is opt-in via with_observability.
             if [ "$WITH_OBS" = "true" ]; then

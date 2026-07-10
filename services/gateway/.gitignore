@@ -3,3 +3,4 @@ dist
 .env
 .DS_Store
 dumps/places_v2_import.csv
+dumps/sloco_places.csv

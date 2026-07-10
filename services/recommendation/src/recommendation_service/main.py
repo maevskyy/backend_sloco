@@ -31,6 +31,8 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     if settings.recommender_algorithm == "location_recommender_v4":
         from recommendation_service.algorithms.location_recommender.adapter import (
             ALGORITHM_VERSION as LOCATION_V4_VERSION,
+        )
+        from recommendation_service.algorithms.location_recommender.adapter import (
             build_location_recommender_v4,
         )
 

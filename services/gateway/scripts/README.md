@@ -146,3 +146,57 @@ Full upload, after sample validation:
 ```bash
 pnpm photos:upload /Users/dimitriymaevskiy/Downloads/backend_dataset_20260531_214446 --ensure-bucket --concurrency 5
 ```
+
+## Sloco Photo Index (R2)
+
+Indexes the R2-hosted `cid`-keyed photo set into `public.place_photos`
+(see `docs/tasks/TASKS_33_PHOTO_STORAGE.md`). Files are already in R2 — this
+script only writes metadata rows; serving stays storage-agnostic via
+`PHOTO_BASE_URL`.
+
+1. Generate the manifest on the box that holds the photos:
+
+   ```bash
+   rclone lsf -R r2:sloco-photos/sloco_ai --files-only > sloco_photos_manifest.txt
+   ```
+
+2. Dry run, then index (needs `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` in `.env`):
+
+   ```bash
+   pnpm photos:index-sloco ~/Downloads/sloco_photos_manifest.txt \
+     --base-url https://pub-<hash>.r2.dev --dry-run
+   pnpm photos:index-sloco ~/Downloads/sloco_photos_manifest.txt \
+     --base-url https://pub-<hash>.r2.dev
+   ```
+
+3. Backfill primary photos + counts (Supabase SQL Editor):
+
+   ```sql
+   update public.places p
+      set primary_photo_path = pp.storage_path
+     from (
+       select distinct on (place_source, place_source_id)
+              place_source, place_source_id, storage_path
+         from public.place_photos
+        where place_source = 'sloco_ai'
+        order by place_source, place_source_id,
+                 photo_index asc nulls last, photo_item_id asc
+     ) pp
+    where pp.place_source = p.source
+      and pp.place_source_id = p.source_id;
+
+   update public.places p
+      set vibe_photo_count = c.cnt,
+          total_photo_count = c.cnt
+     from (
+       select place_source_id, count(*) as cnt
+         from public.place_photos
+        where place_source = 'sloco_ai'
+        group by place_source_id
+     ) c
+    where p.source = 'sloco_ai'
+      and p.source_id = c.place_source_id;
+   ```
+
+When the CDN domain replaces the r2.dev URL, re-run the indexer with the new
+`--base-url` (rows are upserted in place) — no file moves needed.
