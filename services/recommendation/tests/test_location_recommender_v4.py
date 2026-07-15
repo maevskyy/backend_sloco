@@ -24,6 +24,8 @@ RESPONSE_KEYS = {
 INPUT_SUMMARY_KEYS = {
     "favourites_count",
     "want_to_go_count",
+    "dislike_count",
+    "hide_count",
     "valid_input_count",
     "invalid_place_ids",
     "candidate_count",
@@ -117,3 +119,49 @@ def test_similarity_hidden_unless_debug(client: TestClient) -> None:
     )
     for item in with_debug["recommendations"]:
         assert item["similarity"] is not None
+
+
+def test_excludes_disliked_and_hidden_places(client: TestClient) -> None:
+    data = _post(
+        client,
+        favourites_place_ids=["place_1", "place_2", "place_3"],
+        want_to_go_place_ids=[],
+        dislike_place_ids=["place_4"],
+        hide_place_ids=["place_5"],
+        debug=True,
+    )
+    returned = {item["place_id"] for item in data["recommendations"]}
+    assert "place_4" not in returned
+    assert "place_5" not in returned
+    assert data["input_summary"]["dislike_count"] == 1
+    assert data["input_summary"]["hide_count"] == 1
+
+
+def test_excluded_seed_is_not_returned_or_marked_invalid(client: TestClient) -> None:
+    data = _post(
+        client,
+        favourites_place_ids=["place_1", "place_2"],
+        want_to_go_place_ids=["place_3"],
+        dislike_place_ids=["place_2"],
+        hide_place_ids=["place_3"],
+        debug=True,
+    )
+    returned = {item["place_id"] for item in data["recommendations"]}
+    assert "place_2" not in returned
+    assert "place_3" not in returned
+    assert "place_2" not in data["input_summary"]["invalid_place_ids"]
+    assert "place_3" not in data["input_summary"]["invalid_place_ids"]
+
+
+def test_exclusion_also_applies_to_cold_start_path(client: TestClient) -> None:
+    data = _post(
+        client,
+        favourites_place_ids=["place_1"],
+        want_to_go_place_ids=[],
+        dislike_place_ids=["place_2"],
+        hide_place_ids=["place_4"],
+        debug=True,
+    )
+    returned = {item["place_id"] for item in data["recommendations"]}
+    assert "place_2" not in returned
+    assert "place_4" not in returned

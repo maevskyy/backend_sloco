@@ -27,5 +27,7 @@ class PersonalizedRecommender(Protocol):
         favourites_place_ids: list[str] | None,
         want_to_go_place_ids: list[str] | None,
         limit: int,
+        dislike_place_ids: list[str] | None = ...,
+        hide_place_ids: list[str] | None = ...,
         exclude_input_places: bool = ...,
     ) -> RecommendationPayload: ...

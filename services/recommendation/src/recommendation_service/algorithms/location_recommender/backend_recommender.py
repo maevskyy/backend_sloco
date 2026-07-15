@@ -1056,6 +1056,8 @@ class LocationRecommender:
         favourites_place_ids: list[str] | None,
         want_to_go_place_ids: list[str] | None,
         limit: int = 100,
+        dislike_place_ids: list[str] | None = None,  # backend extension (not in upstream)
+        hide_place_ids: list[str] | None = None,  # backend extension (not in upstream)
         exclude_input_places: bool = True,
         debug: bool = False,
         user_id: str | None = None,
@@ -1068,10 +1070,22 @@ class LocationRecommender:
 
         favourites = _dedupe_preserve_order(favourites_place_ids)
         want_to_go = _dedupe_preserve_order(want_to_go_place_ids)
+        exclude_ids = _dedupe_preserve_order(  # backend extension (not in upstream)
+            (dislike_place_ids or []) + (hide_place_ids or [])
+        )
+        exclude_set = set(exclude_ids)  # backend extension (not in upstream)
+        favourites = [
+            place_id for place_id in favourites if place_id not in exclude_set
+        ]  # backend extension (not in upstream)
+        want_to_go = [
+            place_id for place_id in want_to_go if place_id not in exclude_set
+        ]  # backend extension (not in upstream)
         input_place_ids = _dedupe_preserve_order(favourites + want_to_go)
 
         seed_df, invalid_place_ids = self._build_seed_dataframe(favourites, want_to_go, cfg)
         candidate_df = self._candidate_pool(cfg)
+        if exclude_set:  # backend extension (not in upstream)
+            candidate_df = candidate_df[~candidate_df["place_id"].isin(exclude_set)].copy()
         if exclude_input_places and input_place_ids:
             candidate_df = candidate_df[~candidate_df["place_id"].isin(input_place_ids)].copy()
         candidate_df = self._attach_geo_score(candidate_df, cfg, user_lat, user_lon)
@@ -1100,6 +1114,8 @@ class LocationRecommender:
             "input_summary": {
                 "favourites_count": len(favourites),
                 "want_to_go_count": len(want_to_go),
+                "dislike_count": len(_dedupe_preserve_order(dislike_place_ids)),
+                "hide_count": len(_dedupe_preserve_order(hide_place_ids)),
                 "valid_input_count": int(len(seed_df)),
                 "invalid_place_ids": invalid_place_ids,
                 "profiles_count": len(profiles),

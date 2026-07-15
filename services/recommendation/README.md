@@ -84,6 +84,8 @@ Request:
   "user_id": "user_123",
   "favourites_place_ids": ["ChIJ..."],
   "want_to_go_place_ids": ["ChIJ..."],
+  "dislike_place_ids": ["ChIJ..."],
+  "hide_place_ids": ["ChIJ..."],
   "limit": 50,
   "exclude_input_places": true,
   "debug": false
@@ -114,6 +116,13 @@ artifacts/location_embeddings_20260531T173837Z_metadata.csv
 With `embedding_recommender_v1`, if no valid input place has an embedding the
 result is empty (no cold-start signal). `location_recommender_v4` instead falls
 back to a quality-ranked list for cold-start users.
+
+`dislike_place_ids` and `hide_place_ids` are accepted by the wire contract for
+both algorithms. In `location_recommender_v4`, both are hard-excluded from the
+candidate pool before scoring and their counts are echoed in
+`input_summary.dislike_count` / `input_summary.hide_count`. In the legacy
+`embedding_recommender_v1`, the fields are accepted so the contract stays stable,
+but real exclusion is not implemented there yet.
 
 Manual smoke:
 

@@ -51,11 +51,15 @@ class LocationRecommenderV4Adapter:
         favourites_place_ids: list[str] | None,
         want_to_go_place_ids: list[str] | None,
         limit: int,
+        dislike_place_ids: list[str] | None = None,
+        hide_place_ids: list[str] | None = None,
         exclude_input_places: bool = True,
     ) -> RecommendationPayload:
         result: dict[str, Any] = self._recommender.recommend(
             favourites_place_ids,
             want_to_go_place_ids,
+            dislike_place_ids=dislike_place_ids,
+            hide_place_ids=hide_place_ids,
             limit=limit,
             exclude_input_places=exclude_input_places,
         )
@@ -77,6 +81,8 @@ class LocationRecommenderV4Adapter:
             "input_summary": {
                 "favourites_count": summary["favourites_count"],
                 "want_to_go_count": summary["want_to_go_count"],
+                "dislike_count": summary["dislike_count"],
+                "hide_count": summary["hide_count"],
                 "valid_input_count": summary["valid_input_count"],
                 "invalid_place_ids": summary["invalid_place_ids"],
                 "candidate_count": summary["candidate_count"],

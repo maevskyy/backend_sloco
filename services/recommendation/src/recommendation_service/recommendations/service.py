@@ -23,10 +23,12 @@ async def recommend_personalized(
     limit = min(limit, settings.recommend_max_limit)
     result = await run_in_threadpool(
         recommender.recommend,
-        request.favourites_place_ids,
-        request.want_to_go_place_ids,
-        limit,
-        request.exclude_input_places,
+        favourites_place_ids=request.favourites_place_ids,
+        want_to_go_place_ids=request.want_to_go_place_ids,
+        dislike_place_ids=request.dislike_place_ids,
+        hide_place_ids=request.hide_place_ids,
+        limit=limit,
+        exclude_input_places=request.exclude_input_places,
     )
 
     recommendations = [

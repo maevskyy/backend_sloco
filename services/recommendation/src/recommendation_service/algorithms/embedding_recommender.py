@@ -26,6 +26,8 @@ class RecommendationResult(TypedDict):
 class InputSummary(TypedDict):
     favourites_count: int
     want_to_go_count: int
+    dislike_count: int
+    hide_count: int
     valid_input_count: int
     invalid_place_ids: list[str]
     candidate_count: int
@@ -144,6 +146,8 @@ class EmbeddingRecommender:
         favourites_place_ids: list[str] | None,
         want_to_go_place_ids: list[str] | None,
         limit: int,
+        dislike_place_ids: list[str] | None = None,
+        hide_place_ids: list[str] | None = None,
         exclude_input_places: bool = True,
     ) -> RecommendationPayload:
         limit = max(int(limit), 0)
@@ -171,6 +175,8 @@ class EmbeddingRecommender:
                 "input_summary": {
                     "favourites_count": len(favourites),
                     "want_to_go_count": len(want_to_go),
+                    "dislike_count": 0,
+                    "hide_count": 0,
                     "valid_input_count": len(seed_rows),
                     "invalid_place_ids": invalid_place_ids,
                     "candidate_count": self._candidate_count_after_exclusions(
@@ -191,6 +197,8 @@ class EmbeddingRecommender:
             "input_summary": {
                 "favourites_count": len(favourites),
                 "want_to_go_count": len(want_to_go),
+                "dislike_count": 0,
+                "hide_count": 0,
                 "valid_input_count": len(seed_rows),
                 "invalid_place_ids": invalid_place_ids,
                 "candidate_count": self._candidate_count_after_exclusions(
