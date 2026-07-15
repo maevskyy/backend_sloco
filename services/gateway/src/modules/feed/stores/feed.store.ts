@@ -3,7 +3,7 @@ import { measureDependencyMetric } from "../../../observability/metrics.js";
 import type {
   FeedPlaceRow,
   FeedPlacesQuery,
-  FeedSavedSignals,
+  FeedUserSignals,
   FeedStoreContract
 } from "../common/feed.types.js";
 
@@ -36,6 +36,12 @@ type SavedCollectionSignalRow = {
     | null;
 };
 
+type ReactionSignalRow = {
+  source_id: string;
+  reaction: "favorite" | "dislike" | "hide";
+  updated_at: string;
+};
+
 function measureFeedDependency<T>(
   operation: string,
   name: string,
@@ -54,10 +60,11 @@ function measureFeedDependency<T>(
 }
 
 export class FeedStore implements FeedStoreContract {
-  async getSavedSignals(userId: string): Promise<FeedSavedSignals> {
-    const [savedRows, collectionRows] = await Promise.all([
+  async getUserSignals(userId: string): Promise<FeedUserSignals> {
+    const [savedRows, collectionRows, reactionRows] = await Promise.all([
       this.getSavedPlaceRows(userId),
-      this.getSavedCollectionPlaceRows(userId)
+      this.getSavedCollectionPlaceRows(userId),
+      this.getReactionRows(userId)
     ]);
 
     const allSaved = dedupe(
@@ -75,12 +82,37 @@ export class FeedStore implements FeedStoreContract {
         .map((row) => normalizePlaceRecord(row.places)?.source_id)
     );
     const wantToGoSet = new Set(wantToGo);
-    const favourites = allSaved.filter((sourceId) => !wantToGoSet.has(sourceId));
+    const explicitFavorites = dedupe(
+      reactionRows
+        .filter((row) => row.reaction === "favorite")
+        .sort((a, b) => b.updated_at.localeCompare(a.updated_at))
+        .map((row) => row.source_id)
+    );
+    const dislikes = dedupe(
+      reactionRows
+        .filter((row) => row.reaction === "dislike")
+        .sort((a, b) => b.updated_at.localeCompare(a.updated_at))
+        .map((row) => row.source_id)
+    );
+    const hidden = dedupe(
+      reactionRows
+        .filter((row) => row.reaction === "hide")
+        .sort((a, b) => b.updated_at.localeCompare(a.updated_at))
+        .map((row) => row.source_id)
+    );
+    const derivedFavourites = allSaved.filter(
+      (sourceId) => !wantToGoSet.has(sourceId)
+    );
+    const fallbackFavourites =
+      derivedFavourites.length > 0 || wantToGo.length > 0
+        ? derivedFavourites
+        : allSaved;
 
     return {
-      favouritesPlaceIds:
-        favourites.length > 0 || wantToGo.length > 0 ? favourites : allSaved,
-      wantToGoPlaceIds: wantToGo
+      favouritesPlaceIds: dedupe([...explicitFavorites, ...fallbackFavourites]),
+      wantToGoPlaceIds: wantToGo,
+      dislikePlaceIds: dislikes,
+      hidePlaceIds: hidden
     };
   }
 
@@ -173,6 +205,23 @@ export class FeedStore implements FeedStoreContract {
     if (error) throw error;
 
     return (data ?? []) as unknown as SavedCollectionSignalRow[];
+  }
+
+  private async getReactionRows(userId: string) {
+    const { data, error } = await measureFeedDependency(
+      "select",
+      "feed_reaction_signal_places",
+      async () =>
+        getSupabaseClient()
+          .from("place_reactions")
+          .select("source_id,reaction,updated_at")
+          .eq("user_id", userId),
+      (result) => result.data?.length
+    );
+
+    if (error) throw error;
+
+    return (data ?? []) as unknown as ReactionSignalRow[];
   }
 }
 

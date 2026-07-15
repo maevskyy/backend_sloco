@@ -1,5 +1,9 @@
 import { createHash } from "node:crypto";
 import { recommendationClient } from "../../../lib/recommendation-client.js";
+import {
+  reactionsService,
+  type ReactionsService
+} from "../../reactions/index.js";
 import type { SavedPlacesService } from "../../saved-places/index.js";
 import { savedPlacesService } from "../../saved-places/index.js";
 import { mapFeedRowToCard } from "../common/feed.mappers.js";
@@ -12,7 +16,7 @@ import type {
   FeedPlacesService,
   FeedRecommendationClient,
   FeedRecommendationResponse,
-  FeedSavedSignals,
+  FeedUserSignals,
   FeedStoreContract
 } from "../common/feed.types.js";
 import { FeedStore } from "../stores/feed.store.js";
@@ -83,7 +87,8 @@ export function createFeedPlacesService(
   store: FeedStoreContract = new FeedStore(),
   client: FeedRecommendationClient = recommendationClient,
   savedService: SavedPlacesService = savedPlacesService,
-  cache = new FeedRecommendationCache()
+  cache = new FeedRecommendationCache(),
+  reactionsServiceOverride: ReactionsService = reactionsService
 ): FeedPlacesService {
   return async ({ query, user }) => {
     const generatedAt = Date.now();
@@ -97,11 +102,13 @@ export function createFeedPlacesService(
         inputSummary: emptyInputSummary(),
         generatedAt,
         savedService,
-        userId: undefined
+        reactionsService: reactionsServiceOverride,
+        userId: undefined,
+        excludedSourceIds: new Set()
       });
     }
 
-    const signals = await store.getSavedSignals(user.id);
+    const signals = await store.getUserSignals(user.id);
 
     if (!hasSignals(signals)) {
       return fallbackFeed({
@@ -112,7 +119,9 @@ export function createFeedPlacesService(
         inputSummary: inputSummaryFromSignals(signals),
         generatedAt,
         savedService,
-        userId: user.id
+        reactionsService: reactionsServiceOverride,
+        userId: user.id,
+        excludedSourceIds: excludedSourceIdsFromSignals(signals)
       });
     }
 
@@ -134,6 +143,8 @@ export function createFeedPlacesService(
           user_id: user.id,
           favourites_place_ids: signals.favouritesPlaceIds,
           want_to_go_place_ids: signals.wantToGoPlaceIds,
+          dislike_place_ids: signals.dislikePlaceIds,
+          hide_place_ids: signals.hidePlaceIds,
           limit: recommendationLimit,
           exclude_input_places: true,
           debug: query.debug
@@ -155,7 +166,9 @@ export function createFeedPlacesService(
           inputSummary: inputSummaryFromSignals(signals),
           generatedAt,
           savedService,
-          userId: user.id
+          reactionsService: reactionsServiceOverride,
+          userId: user.id,
+          excludedSourceIds: excludedSourceIdsFromSignals(signals)
         });
       }
     }
@@ -179,7 +192,9 @@ export function createFeedPlacesService(
         ),
         generatedAt,
         savedService,
-        userId: user.id
+        reactionsService: reactionsServiceOverride,
+        userId: user.id,
+        excludedSourceIds: excludedSourceIdsFromSignals(signals)
       });
     }
 
@@ -212,7 +227,9 @@ export function createFeedPlacesService(
         ),
         generatedAt,
         savedService,
-        userId: user.id
+        reactionsService: reactionsServiceOverride,
+        userId: user.id,
+        excludedSourceIds: excludedSourceIdsFromSignals(signals)
       });
     }
 
@@ -228,7 +245,12 @@ export function createFeedPlacesService(
       inputSummary: mapRecommendationInputSummary(
         cachedOrFresh.response.input_summary
       ),
-      places: await enrichFeedSavedState(places, user.id, savedService)
+      places: await enrichFeedSavedState(
+        places,
+        user.id,
+        savedService,
+        reactionsServiceOverride
+      )
     };
   };
 }
@@ -243,10 +265,15 @@ async function fallbackFeed(input: {
   inputSummary: FeedInputSummary;
   generatedAt: number;
   savedService: SavedPlacesService;
+  reactionsService: ReactionsService;
   userId: string | undefined;
+  excludedSourceIds: Set<string>;
 }): Promise<FeedPlacesResult> {
   const rows = await input.store.fallbackFeedPlaces(input.query, input.query.limit);
-  const places = rows.map((row, index) =>
+  const visibleRows = rows.filter(
+    (row) => !input.excludedSourceIds.has(row.source_id)
+  );
+  const places = visibleRows.map((row, index) =>
     mapFeedRowToCard(row, {
       status: input.status,
       rank: index + 1
@@ -263,38 +290,47 @@ async function fallbackFeed(input: {
       expiresAt: null
     },
     inputSummary: input.inputSummary,
-    places: await enrichFeedSavedState(places, input.userId, input.savedService)
+    places: await enrichFeedSavedState(
+      places,
+      input.userId,
+      input.savedService,
+      input.reactionsService
+    )
   };
 }
 
 export async function enrichFeedSavedState(
   places: FeedPlaceCard[],
   userId: string | undefined,
-  savedService: SavedPlacesService
+  savedService: SavedPlacesService,
+  reactionsServiceOverride: ReactionsService
 ): Promise<FeedPlaceCard[]> {
   if (!userId || places.length === 0) {
-    return places.map(markPlaceAsUnsaved);
+    return places.map(markPlaceAsUnsignedUserState);
   }
 
-  const savedPlaceIds = await savedService.getSavedPlaceIds(
-    userId,
-    places.map((place) => place.id)
-  );
+  const placeIds = places.map((place) => place.id);
+  const [savedPlaceIds, reactionsByPlaceId] = await Promise.all([
+    savedService.getSavedPlaceIds(userId, placeIds),
+    reactionsServiceOverride.getReactionMap(userId, placeIds)
+  ]);
 
   return places.map((place) => ({
     ...place,
-    isSaved: savedPlaceIds.has(place.id)
+    isSaved: savedPlaceIds.has(place.id),
+    reaction: reactionsByPlaceId.get(place.id) ?? null
   }));
 }
 
-function markPlaceAsUnsaved(place: FeedPlaceCard): FeedPlaceCard {
+function markPlaceAsUnsignedUserState(place: FeedPlaceCard): FeedPlaceCard {
   return {
     ...place,
-    isSaved: false
+    isSaved: false,
+    reaction: null
   };
 }
 
-function hasSignals(signals: FeedSavedSignals) {
+function hasSignals(signals: FeedUserSignals) {
   return (
     signals.favouritesPlaceIds.length > 0 || signals.wantToGoPlaceIds.length > 0
   );
@@ -302,14 +338,16 @@ function hasSignals(signals: FeedSavedSignals) {
 
 function createRecommendationCacheKey(
   userId: string,
-  signals: FeedSavedSignals,
+  signals: FeedUserSignals,
   limit: number
 ) {
   const signalHash = createHash("sha256")
     .update(
       JSON.stringify({
         favourites: signals.favouritesPlaceIds,
-        wantToGo: signals.wantToGoPlaceIds
+        wantToGo: signals.wantToGoPlaceIds,
+        dislikes: signals.dislikePlaceIds,
+        hidden: signals.hidePlaceIds
       })
     )
     .digest("hex")
@@ -318,7 +356,7 @@ function createRecommendationCacheKey(
   return `${userId}:${signalHash}:${limit}:exclude-input`;
 }
 
-function inputSummaryFromSignals(signals: FeedSavedSignals): FeedInputSummary {
+function inputSummaryFromSignals(signals: FeedUserSignals): FeedInputSummary {
   const validInputIds = new Set([
     ...signals.favouritesPlaceIds,
     ...signals.wantToGoPlaceIds
@@ -330,6 +368,10 @@ function inputSummaryFromSignals(signals: FeedSavedSignals): FeedInputSummary {
     validInputCount: validInputIds.size,
     invalidPlaceIds: []
   };
+}
+
+function excludedSourceIdsFromSignals(signals: FeedUserSignals) {
+  return new Set([...signals.dislikePlaceIds, ...signals.hidePlaceIds]);
 }
 
 function mapRecommendationInputSummary(

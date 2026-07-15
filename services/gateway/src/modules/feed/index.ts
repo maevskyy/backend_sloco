@@ -18,7 +18,7 @@ export type {
   FeedRecommendationClient,
   FeedRecommendationRequest,
   FeedRecommendationResponse,
-  FeedSavedSignals,
+  FeedUserSignals,
   FeedStoreContract
 } from "./common/feed.types.js";
 export type { FeedPlacesQuery } from "./common/feed.schemas.js";

@@ -126,6 +126,7 @@ describe("place details service cache", () => {
     expect(second?.place.id).toBe(123);
     expect(second?.place.isSaved).toBe(false);
     expect(second?.place.savedCollectionIds).toEqual([]);
+    expect(second?.place.reaction).toBeNull();
   });
 
   it("does not store user-specific saved fields in cache", async () => {
@@ -139,6 +140,7 @@ describe("place details service cache", () => {
 
     expect(rawCached).not.toHaveProperty("isSaved");
     expect(rawCached).not.toHaveProperty("savedCollectionIds");
+    expect(rawCached).not.toHaveProperty("reaction");
   });
 
   it("reads from store again after cache ttl expires", async () => {

@@ -1,5 +1,6 @@
 import type { z } from "zod";
 import type { AuthenticatedUser } from "../../auth/auth.service.js";
+import type { PlaceReaction } from "../../reactions/index.js";
 import type {
   feedCacheStatusSchema,
   feedInputSummarySchema,
@@ -41,9 +42,11 @@ export type FeedPlaceRow = FeedPrimaryPhotoFields & {
   distance_m: number | null;
 };
 
-export type FeedSavedSignals = {
+export type FeedUserSignals = {
   favouritesPlaceIds: string[];
   wantToGoPlaceIds: string[];
+  dislikePlaceIds: string[];
+  hidePlaceIds: string[];
 };
 
 export type FeedRecommendationItem = {
@@ -73,6 +76,8 @@ export type FeedRecommendationRequest = {
   user_id: string;
   favourites_place_ids: string[];
   want_to_go_place_ids: string[];
+  dislike_place_ids: string[];
+  hide_place_ids: string[];
   limit: number;
   exclude_input_places: boolean;
   debug: boolean;
@@ -100,7 +105,7 @@ export type FeedPersonalizationStatus = z.infer<
 export type FeedCacheStatus = z.infer<typeof feedCacheStatusSchema>;
 
 export type FeedStoreContract = {
-  getSavedSignals(userId: string): Promise<FeedSavedSignals>;
+  getUserSignals(userId: string): Promise<FeedUserSignals>;
   feedPlacesBySourceIds(
     sourceIds: string[],
     query: FeedPlacesQuery,
@@ -116,6 +121,8 @@ export type FeedPlacesServiceInput = {
   query: FeedPlacesQuery;
   user: AuthenticatedUser | null;
 };
+
+export type FeedReactionMap = Map<number, PlaceReaction>;
 
 export type FeedPlacesService = (
   input: FeedPlacesServiceInput

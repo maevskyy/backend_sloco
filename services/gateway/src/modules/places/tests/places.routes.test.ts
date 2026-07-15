@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { buildApp } from "../../../app.js";
 import { AppRoute, VersionedAppRoute } from "../../../config/routes.js";
 import type { AuthService, AuthenticatedUser } from "../../auth/auth.service.js";
+import type { ReactionsService } from "../../reactions/index.js";
 import type { SavedPlacesService } from "../../saved-places/index.js";
 import type { PlaceDetails, PlaceDetailsService } from "../index.js";
 
@@ -38,6 +39,22 @@ function createSavedPlacesService(
     getSavedPlaceStates: unused,
     ...overrides
   } as SavedPlacesService;
+}
+
+function createReactionsService(
+  overrides: Partial<ReactionsService> = {}
+): ReactionsService {
+  const unused = async () => {
+    throw new Error("not used");
+  };
+
+  return {
+    setReaction: unused,
+    deleteReaction: unused,
+    getReactions: unused,
+    getReactionMap: unused,
+    ...overrides
+  } as ReactionsService;
 }
 
 function placeDetails(overrides: Partial<PlaceDetails> = {}): PlaceDetails {
@@ -111,6 +128,7 @@ function placeDetails(overrides: Partial<PlaceDetails> = {}): PlaceDetails {
     rawCuisineStyle: null,
     isSaved: false,
     savedCollectionIds: [],
+    reaction: null,
     ...overrides
   };
 }
@@ -154,6 +172,13 @@ describe("place details routes", () => {
           ]);
         }
       }),
+      reactionsService: createReactionsService({
+        async getReactionMap(userId: string, placeIds: number[]) {
+          expect(userId).toBe(authenticatedUser.id);
+          expect(placeIds).toEqual([123]);
+          return new Map([[123, "favorite"]]);
+        }
+      }),
       placeDetailsService: async () => ({
         place: placeDetails()
       })
@@ -173,7 +198,8 @@ describe("place details routes", () => {
     expect(response.json().place).toMatchObject({
       id: 123,
       isSaved: true,
-      savedCollectionIds: ["4b572b66-d74d-49bb-b9b5-9780c266c6f7"]
+      savedCollectionIds: ["4b572b66-d74d-49bb-b9b5-9780c266c6f7"],
+      reaction: "favorite"
     });
   });
 

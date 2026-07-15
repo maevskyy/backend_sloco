@@ -115,6 +115,7 @@ export async function buildApp(options: AppOptions = {}) {
     prefix: API_PREFIX,
     authService: options.authService,
     savedPlacesService: options.savedPlacesService,
+    reactionsService: options.reactionsService,
     placeDetailsService: options.placeDetailsService,
     cacheStore: options.cacheStore
   });
@@ -129,7 +130,9 @@ export async function buildApp(options: AppOptions = {}) {
   await app.register(registerFeedModule, {
     prefix: API_PREFIX,
     feedPlacesService: options.feedPlacesService,
-    authService: options.authService
+    authService: options.authService,
+    savedPlacesService: options.savedPlacesService,
+    reactionsService: options.reactionsService
   });
 
   await app.register(registerMapModule, {

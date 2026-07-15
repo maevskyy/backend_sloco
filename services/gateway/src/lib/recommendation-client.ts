@@ -11,6 +11,8 @@ export type PersonalizedRecommendationRequest = {
   user_id: string;
   favourites_place_ids: string[];
   want_to_go_place_ids: string[];
+  dislike_place_ids: string[];
+  hide_place_ids: string[];
   limit: number;
   exclude_input_places: boolean;
   debug: boolean;

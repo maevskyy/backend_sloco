@@ -12,6 +12,7 @@ import {
 } from "../../../http/response-log.js";
 import { docsRoute } from "../../../http/route.js";
 import type { AuthService } from "../../auth/auth.service.js";
+import type { ReactionsService } from "../../reactions/index.js";
 import type { SavedPlacesService } from "../../saved-places/index.js";
 import { getPlaceDetailsRouteSchema } from "../common/places.openapi.js";
 import { placeDetailsParamsSchema } from "../common/places.schemas.js";
@@ -31,6 +32,7 @@ export class PlacesController {
   constructor(
     private readonly placeDetailsService: PlaceDetailsService,
     private readonly savedPlacesService: SavedPlacesService,
+    private readonly reactionsService: ReactionsService,
     authService: AuthService
   ) {
     this.authGuard = createAuthGuard(authService);
@@ -96,12 +98,16 @@ export class PlacesController {
     const savedState = (
       await this.savedPlacesService.getSavedPlaceStates(userId, [result.place.id])
     ).get(result.place.id);
+    const reaction = (
+      await this.reactionsService.getReactionMap(userId, [result.place.id])
+    ).get(result.place.id);
 
     return {
       place: {
         ...result.place,
         isSaved: savedState?.isSaved ?? false,
-        savedCollectionIds: savedState?.collectionIds ?? []
+        savedCollectionIds: savedState?.collectionIds ?? [],
+        reaction: reaction ?? null
       }
     };
   }

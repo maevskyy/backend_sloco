@@ -39,6 +39,7 @@ function feedPlace(overrides: Partial<FeedPlaceCard> = {}): FeedPlaceCard {
     distanceMeters: null,
     primaryPhoto: null,
     isSaved: false,
+    reaction: null,
     ...overrides
   };
 }

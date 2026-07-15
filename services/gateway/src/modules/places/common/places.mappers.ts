@@ -72,7 +72,8 @@ export function mapPlaceDetailRow(row: PlaceDetailRow): PlaceDetails {
       getStringAttribute(row.attributes, "raw_cuisine_style") ??
       getStringAttribute(row.attributes, "cuisine"),
     isSaved: false,
-    savedCollectionIds: []
+    savedCollectionIds: [],
+    reaction: null
   };
 }
 

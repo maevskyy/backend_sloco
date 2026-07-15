@@ -1,6 +1,10 @@
 import type { FastifyInstance } from "fastify";
 import { supabaseAuthService, type AuthService } from "../auth/auth.service.js";
 import {
+  reactionsService,
+  type ReactionsService
+} from "../reactions/index.js";
+import {
   savedPlacesService,
   type SavedPlacesService
 } from "../saved-places/index.js";
@@ -15,6 +19,7 @@ export type PlacesModuleOptions = {
   cacheStore?: CacheStore;
   authService?: AuthService;
   savedPlacesService?: SavedPlacesService;
+  reactionsService?: ReactionsService;
 };
 
 export async function registerPlacesModule(
@@ -27,6 +32,7 @@ export async function registerPlacesModule(
   const controller = new PlacesController(
     placeDetailsService,
     options.savedPlacesService ?? savedPlacesService,
+    options.reactionsService ?? reactionsService,
     options.authService ?? supabaseAuthService
   );
 

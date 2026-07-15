@@ -37,7 +37,8 @@ export function mapFeedRowToCard(
     tags: getTags(row),
     distanceMeters: row.distance_m,
     primaryPhoto: mapPrimaryPhoto(row),
-    isSaved: false
+    isSaved: false,
+    reaction: null
   };
 }
 

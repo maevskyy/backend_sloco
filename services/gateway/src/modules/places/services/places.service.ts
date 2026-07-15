@@ -16,7 +16,7 @@ const PLACE_CACHE_PREFIX = "place:v1";
 
 type CachedPlaceDetails = Omit<
   PlaceDetails,
-  "isSaved" | "savedCollectionIds"
+  "isSaved" | "savedCollectionIds" | "reaction"
 >;
 
 export function createPlaceDetailsService(
@@ -101,6 +101,7 @@ function toCachedPlaceDetails(place: PlaceDetails): CachedPlaceDetails {
   const publicPlace: Partial<PlaceDetails> = { ...place };
   delete publicPlace.isSaved;
   delete publicPlace.savedCollectionIds;
+  delete publicPlace.reaction;
 
   return publicPlace as CachedPlaceDetails;
 }
@@ -109,7 +110,8 @@ function fromCachedPlaceDetails(place: CachedPlaceDetails): PlaceDetails {
   return {
     ...place,
     isSaved: false,
-    savedCollectionIds: []
+    savedCollectionIds: [],
+    reaction: null
   };
 }
 

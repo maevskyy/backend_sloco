@@ -83,7 +83,8 @@ export const feedPlaceCardSchema = z.object({
   tags: z.array(z.string()),
   distanceMeters: z.number().nullable(),
   primaryPhoto: feedPrimaryPhotoSchema.nullable(),
-  isSaved: z.boolean()
+  isSaved: z.boolean(),
+  reaction: z.enum(["favorite", "dislike", "hide"]).nullable()
 });
 
 export const feedPlacesResponseSchema = z.object({

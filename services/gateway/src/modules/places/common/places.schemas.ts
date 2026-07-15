@@ -83,7 +83,8 @@ export const placeDetailsSchema = z.object({
   photoDetails: jsonObjectSchema,
   rawCuisineStyle: z.string().nullable(),
   isSaved: z.boolean(),
-  savedCollectionIds: z.array(z.string().uuid())
+  savedCollectionIds: z.array(z.string().uuid()),
+  reaction: z.enum(["favorite", "dislike", "hide"]).nullable()
 });
 
 export const placeDetailsResponseSchema = z.object({

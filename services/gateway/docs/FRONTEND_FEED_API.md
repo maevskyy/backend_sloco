@@ -91,7 +91,8 @@ or when reopening the screen after a reasonable interval.
       "tags": ["quiet", "specialty coffee"],
       "distanceMeters": null,
       "primaryPhoto": null,
-      "isSaved": false
+      "isSaved": false,
+      "reaction": null
     }
   ]
 }

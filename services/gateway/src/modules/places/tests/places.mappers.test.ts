@@ -160,7 +160,8 @@ describe("place details mapper", () => {
       photoDetails: { primaryPhotoFile: "photo.jpg" },
       rawCuisineStyle: "Coffee, Desserts",
       isSaved: false,
-      savedCollectionIds: []
+      savedCollectionIds: [],
+      reaction: null
     });
   });
 });

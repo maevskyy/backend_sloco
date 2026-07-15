@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import type { ReactionsService } from "../../reactions/index.js";
 import type { SavedPlacesService } from "../../saved-places/index.js";
 import type {
   FeedPlaceRow,
@@ -46,10 +47,12 @@ function createStore(
   overrides: Partial<FeedStoreContract> = {}
 ): FeedStoreContract {
   return {
-    async getSavedSignals() {
+    async getUserSignals() {
       return {
         favouritesPlaceIds: ["place_1"],
-        wantToGoPlaceIds: ["place_2"]
+        wantToGoPlaceIds: ["place_2"],
+        dislikePlaceIds: ["place_4"],
+        hidePlaceIds: ["place_5"]
       };
     },
     async feedPlacesBySourceIds(sourceIds) {
@@ -81,6 +84,8 @@ function createClient(): {
         callCount += 1;
         expect(request.favourites_place_ids).toEqual(["place_1"]);
         expect(request.want_to_go_place_ids).toEqual(["place_2"]);
+        expect(request.dislike_place_ids).toEqual(["place_4"]);
+        expect(request.hide_place_ids).toEqual(["place_5"]);
 
         return {
           user_id: request.user_id,
@@ -134,6 +139,22 @@ function createSavedService(
   } as SavedPlacesService;
 }
 
+function createReactionsService(
+  overrides: Partial<ReactionsService> = {}
+): ReactionsService {
+  const unused = async () => {
+    throw new Error("not used");
+  };
+
+  return {
+    setReaction: unused,
+    deleteReaction: unused,
+    getReactions: unused,
+    getReactionMap: async () => new Map(),
+    ...overrides
+  } as ReactionsService;
+}
+
 describe("feed places service", () => {
   it("calls recommendation service and preserves hydrated order", async () => {
     const { client } = createClient();
@@ -145,6 +166,14 @@ describe("feed places service", () => {
           expect(userId).toBe("user-1");
           expect(placeIds).toEqual([1, 2]);
           return new Set([2]);
+        }
+      }),
+      new FeedRecommendationCache(),
+      createReactionsService({
+        async getReactionMap(userId, placeIds) {
+          expect(userId).toBe("user-1");
+          expect(placeIds).toEqual([1, 2]);
+          return new Map([[1, "hide"]]);
         }
       })
     );
@@ -176,13 +205,15 @@ describe("feed places service", () => {
           sourceId: "place_2",
           rank: 1,
           matchScore: 98,
-          isSaved: false
+          isSaved: false,
+          reaction: "hide"
         },
         {
           sourceId: "place_3",
           rank: 2,
           matchScore: 75,
-          isSaved: true
+          isSaved: true,
+          reaction: null
         }
       ]
     });
@@ -194,7 +225,8 @@ describe("feed places service", () => {
       createStore(),
       client,
       createSavedService(),
-      new FeedRecommendationCache()
+      new FeedRecommendationCache(),
+      createReactionsService()
     );
     const input = {
       query: {
@@ -219,7 +251,9 @@ describe("feed places service", () => {
     const service = createFeedPlacesService(
       createStore(),
       createClient().client,
-      createSavedService()
+      createSavedService(),
+      new FeedRecommendationCache(),
+      createReactionsService()
     );
 
     await expect(
@@ -238,7 +272,8 @@ describe("feed places service", () => {
       places: [
         {
           sourceId: "fallback_1",
-          matchScore: 91
+          matchScore: 91,
+          reaction: null
         }
       ]
     });
@@ -252,7 +287,9 @@ describe("feed places service", () => {
           throw new Error("boom");
         }
       },
-      createSavedService()
+      createSavedService(),
+      new FeedRecommendationCache(),
+      createReactionsService()
     );
 
     await expect(
@@ -277,5 +314,145 @@ describe("feed places service", () => {
         }
       ]
     });
+  });
+
+  it("filters disliked and hidden places from fallback responses", async () => {
+    const service = createFeedPlacesService(
+      createStore({
+        async getUserSignals() {
+          return {
+            favouritesPlaceIds: ["place_1"],
+            wantToGoPlaceIds: [],
+            dislikePlaceIds: ["fallback_1"],
+            hidePlaceIds: ["fallback_2"]
+          };
+        },
+        async fallbackFeedPlaces() {
+          return [
+            feedRow({ id: 9, source_id: "fallback_1", name: "Disliked" }),
+            feedRow({ id: 10, source_id: "fallback_2", name: "Hidden" }),
+            feedRow({ id: 11, source_id: "fallback_3", name: "Visible" })
+          ];
+        }
+      }),
+      {
+        async personalizedPlaces() {
+          throw new Error("boom");
+        }
+      },
+      createSavedService(),
+      new FeedRecommendationCache(),
+      createReactionsService()
+    );
+
+    await expect(
+      service({
+        query: {
+          limit: 20,
+          debug: false
+        },
+        user: {
+          id: "user-1",
+          email: "user@example.com"
+        }
+      })
+    ).resolves.toMatchObject({
+      feed: {
+        personalizationStatus: "recommendation_service_fallback"
+      },
+      places: [
+        {
+          sourceId: "fallback_3"
+        }
+      ]
+    });
+  });
+
+  it("returns a filtered no-signals fallback for users with only dislikes and hides", async () => {
+    const service = createFeedPlacesService(
+      createStore({
+        async getUserSignals() {
+          return {
+            favouritesPlaceIds: [],
+            wantToGoPlaceIds: [],
+            dislikePlaceIds: ["fallback_1"],
+            hidePlaceIds: []
+          };
+        },
+        async fallbackFeedPlaces() {
+          return [
+            feedRow({ id: 9, source_id: "fallback_1", name: "Blocked" }),
+            feedRow({ id: 10, source_id: "fallback_2", name: "Visible" })
+          ];
+        }
+      }),
+      createClient().client,
+      createSavedService(),
+      new FeedRecommendationCache(),
+      createReactionsService()
+    );
+
+    await expect(
+      service({
+        query: {
+          limit: 20,
+          debug: false
+        },
+        user: {
+          id: "user-1",
+          email: "user@example.com"
+        }
+      })
+    ).resolves.toMatchObject({
+      feed: {
+        personalizationStatus: "no_signals_fallback"
+      },
+      places: [
+        {
+          sourceId: "fallback_2"
+        }
+      ]
+    });
+  });
+
+  it("invalidates the recommendation cache when reaction lists change", async () => {
+    let signals = {
+      favouritesPlaceIds: ["place_1"],
+      wantToGoPlaceIds: ["place_2"],
+      dislikePlaceIds: [] as string[],
+      hidePlaceIds: [] as string[]
+    };
+    const { client, calls } = createClient();
+    const service = createFeedPlacesService(
+      createStore({
+        async getUserSignals() {
+          return signals;
+        }
+      }),
+      client,
+      createSavedService(),
+      new FeedRecommendationCache(),
+      createReactionsService()
+    );
+    const input = {
+      query: {
+        limit: 20,
+        debug: false
+      },
+      user: {
+        id: "user-1",
+        email: "user@example.com"
+      }
+    };
+
+    await service(input);
+    signals = {
+      ...signals,
+      dislikePlaceIds: ["place_4"]
+    };
+    const second = await service(input);
+
+    expect(calls()).toBe(2);
+    expect(second.feed.cacheStatus).toBe("miss");
   });
 });
