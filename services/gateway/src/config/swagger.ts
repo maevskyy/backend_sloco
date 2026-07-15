@@ -6,6 +6,7 @@ import { healthComponentSchemas } from "../modules/health/index.js";
 import { mapComponentSchemas } from "../modules/map/index.js";
 import { meComponentSchemas } from "../modules/me/index.js";
 import { placesComponentSchemas } from "../modules/places/index.js";
+import { reactionsComponentSchemas } from "../modules/reactions/index.js";
 import { savedPlacesComponentSchemas } from "../modules/saved-places/index.js";
 import { searchComponentSchemas } from "../modules/search/index.js";
 import { httpErrorComponentSchemas } from "./http-schemas.js";
@@ -25,6 +26,10 @@ export async function registerSwaggerDocs(app: FastifyInstance) {
   }
 
   for (const schema of meComponentSchemas) {
+    app.addSchema(schema);
+  }
+
+  for (const schema of reactionsComponentSchemas) {
     app.addSchema(schema);
   }
 
@@ -91,6 +96,10 @@ export async function registerSwaggerDocs(app: FastifyInstance) {
         {
           name: "Map",
           description: "Map discovery endpoints used by the iOS app."
+        },
+        {
+          name: "Reactions",
+          description: "Authenticated place reaction endpoints."
         },
         {
           name: "Places",

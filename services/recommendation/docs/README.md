@@ -8,5 +8,9 @@ Start here:
 ```text
 TASKS_1_embedding_recommender_endpoint.md
 TASKS_2_location_recommender_v4.md
+TASKS_3_user_reactions_contract.md
 ```
+
+`TASKS_3` is part 1 of 3 of the cross-service user-reactions feature; the gateway
+halves are `services/gateway/docs/tasks/TASKS_34` (storage) and `TASKS_35` (feed).
 

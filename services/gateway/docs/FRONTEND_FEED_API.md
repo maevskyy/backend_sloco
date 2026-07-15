@@ -121,3 +121,61 @@ GET /v1/places/:placeId
 ```
 
 Do not call the private recommendation service from iOS.
+
+## User Reactions
+
+Authenticated clients can persist one mutually-exclusive reaction per place:
+`favorite`, `dislike`, or `hide`.
+
+```http
+PUT /v1/me/places/:placeId/reaction
+Authorization: Bearer <supabase_access_token>
+Content-Type: application/json
+```
+
+Body:
+
+```json
+{
+  "reaction": "favorite"
+}
+```
+
+Response:
+
+```json
+{
+  "placeId": 123,
+  "reaction": "favorite"
+}
+```
+
+Delete a reaction:
+
+```http
+DELETE /v1/me/places/:placeId/reaction
+Authorization: Bearer <supabase_access_token>
+```
+
+Response:
+
+```http
+204 No Content
+```
+
+Read all reactions:
+
+```http
+GET /v1/me/reactions
+Authorization: Bearer <supabase_access_token>
+```
+
+Response:
+
+```json
+{
+  "favorites": [123, 456],
+  "dislikes": [789],
+  "hidden": [321]
+}
+```

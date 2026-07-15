@@ -40,6 +40,8 @@ Task files live here as `TASKS_N_NAME.md`.
 | Done | `TASKS_30_PLACE_DETAILS_REDIS_CACHE.md` | Stage 1 Redis cache for public `GET /v1/places/:id` details with TTL and manual import flush. |
 | Done | `TASKS_31_SELF_HOST_OBSERVABILITY.md` | Move observability off Grafana Cloud to self-hosted Grafana + Loki + Prometheus on the Hetzner prod host; deploy/provisioning works in production. |
 | Planned | `TASKS_32_MAP_VECTOR_TILES.md` | Production map via Mapbox Vector Tiles generated from PostGIS, with Redis/CDN tile cache and `feature-state` saved styling. |
+| Planned | `TASKS_34_USER_REACTIONS_STORE.md` | User-reactions part 2/3: `place_reactions` table (keyed by `source_id`) + a separate `reactions` CRUD module (PUT/DELETE/GET). Standalone; no feed effect yet. |
+| Planned | `TASKS_35_USER_REACTIONS_FEED_INTEGRATION.md` | User-reactions part 3/3: feed seeding + hard-exclusion (engine & fallback), reaction in the cache key, and `reaction` echo on the feed card / place detail. Depends on `TASKS_34` and recommendation `TASKS_3`. |
 
 ## TBD Backlog
 
