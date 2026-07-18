@@ -197,6 +197,28 @@ supabase/migrations/
 
 Do not commit Supabase service role keys or other secrets.
 
+### Migration Restraint Rule
+
+Do not add a database migration unless the change genuinely needs Postgres to
+change — a new table, column, index, constraint, or a changed stored function
+(RPC) body. The schema is already many migrations deep; each migration is a
+permanent, ordered, run-once artifact and the count should not grow casually.
+
+Before writing a migration, check whether the same result can be achieved in the
+application layer instead:
+
+- new read shape → change the query (`select`, filters, ordering) or the mapper;
+- windowing / slicing that fits within existing query limits → do it in the
+  gateway, not a new migration;
+- derived or computed fields → compute in the service/mapper.
+
+Changing an existing RPC body (e.g. raising a hardcoded `limit`) *is* a legitimate
+migration when that limit genuinely blocks a feature — the point is not to avoid
+migrations dogmatically, but to not reach for one when an app-layer change works.
+
+Reach for a migration only when none of the above can express the change. When in
+doubt, prefer the query/app-layer change and leave the schema alone.
+
 ### Destructive SQL Warning Rule
 
 When asking the user to run any SQL/migration that contains destructive or

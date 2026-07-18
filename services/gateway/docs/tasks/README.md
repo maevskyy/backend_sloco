@@ -42,8 +42,8 @@ Task files live here as `TASKS_N_NAME.md`.
 | Planned | `TASKS_32_MAP_VECTOR_TILES.md` | Production map via Mapbox Vector Tiles generated from PostGIS, with Redis/CDN tile cache and `feature-state` saved styling. |
 | Planned | `TASKS_34_USER_REACTIONS_STORE.md` | User-reactions part 2/3: `place_reactions` table (keyed by `source_id`) + a separate `reactions` CRUD module (PUT/DELETE/GET). Standalone; no feed effect yet. |
 | Planned | `TASKS_35_USER_REACTIONS_FEED_INTEGRATION.md` | User-reactions part 3/3: feed seeding + hard-exclusion (engine & fallback), reaction in the cache key, and `reaction` echo on the feed card / place detail. Depends on `TASKS_34` and recommendation `TASKS_3`. |
-| Planned | `TASKS_36_PLACE_PHOTOS_LIST.md` | Frontend request 1/3: add best-first `photos[]` (direct R2 URLs, cap 20) to `GET /v1/places/:id` for the fullscreen gallery. Gateway-only; a second indexed `place_photos` query, no migration. |
-| Planned | `TASKS_37_FEED_PAGINATION.md` | Frontend request 2/3: stable `offset` pagination for `GET /v1/feed/places` — fixed cached snapshot, cache key decoupled from `limit`/`offset`, global `rank`. Gateway-only; raises the feed RPC 50-cap. |
+| Done | `TASKS_36_PLACE_PHOTOS_LIST.md` | Frontend request 1/3: best-first `photos[]` (direct R2 URLs, cap 20) on `GET /v1/places/:id` for the fullscreen gallery. Gateway-only; a second indexed `place_photos` query, no migration. Commit `0c6e9ed`. |
+| Planned | `TASKS_37_FEED_PAGINATION.md` | Frontend request 2/3: stable `offset` pagination for `GET /v1/feed/places` — bigger cached rec snapshot (~100) hydrated in full and windowed per page, cache key decoupled from `limit`/`offset`, global `rank`. Migration `016` raises both feed RPC caps 50→200 so personalized **and** fallback page deep. |
 
 ## TBD Backlog
 

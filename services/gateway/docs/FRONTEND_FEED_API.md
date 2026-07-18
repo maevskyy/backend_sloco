@@ -25,6 +25,7 @@ Query params:
 
 ```text
 limit    optional, default 20, max 50
+offset   optional, default 0, min 0
 lat      optional, send together with lng
 lng      optional, send together with lat
 city     optional context boost
@@ -37,7 +38,7 @@ debug    optional "true" | "false", default "false"
 Call once when `DecideScreen` opens:
 
 ```http
-GET https://sloco.pp.ua/v1/feed/places?limit=20
+GET https://sloco.pp.ua/v1/feed/places?limit=20&offset=0
 ```
 
 If the user is logged in, attach the Supabase Auth access token:
@@ -49,6 +50,20 @@ Authorization: Bearer <session.access_token>
 Keep the returned cards in the screen/store memory. Swiping between cards should
 not call the backend. Refresh only when the user explicitly asks for new picks,
 or when reopening the screen after a reasonable interval.
+
+For pagination, keep the same query context and advance only `offset`:
+
+```http
+GET https://sloco.pp.ua/v1/feed/places?limit=30&offset=60
+```
+
+The backend serves pages from one cached ranked snapshot per user/context, so
+page 2 keeps the same ordering as page 1 instead of reshuffling. `rank` is
+global within that snapshot, not local to the page.
+
+Stop paging when the backend returns fewer than `limit` cards. `offset` at or
+beyond the end returns `places: []`. Today the snapshot depth is about 100 cards
+per refresh cycle.
 
 ## Response Shape
 

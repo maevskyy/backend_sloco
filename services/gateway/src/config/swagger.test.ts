@@ -37,6 +37,7 @@ describe("swagger docs", () => {
     expect(openApi.paths[VersionedAppRoute.meReactions]).toBeDefined();
     expect(openApi.paths[VersionedAppRoute.meSaved]).toBeDefined();
     expect(openApi.paths[VersionedAppRoute.meSavedPlaces]).toBeDefined();
+    expect(openApi.paths[VersionedAppRoute.feedPlaces]).toBeDefined();
     expect(
       openApi.paths[
         VersionedAppRoute.mePlaceReaction.replace(":placeId", "{placeId}")
@@ -67,6 +68,7 @@ describe("swagger docs", () => {
     expect(openApi.components.schemas.AuthErrorResponse).toBeDefined();
     expect(openApi.components.schemas.MapPlacePin).toBeDefined();
     expect(openApi.components.schemas.MapPlacesResponse).toBeDefined();
+    expect(openApi.components.schemas.FeedPlacesQuery).toBeDefined();
     expect(openApi.components.schemas.PlaceDetails).toBeDefined();
     expect(openApi.components.schemas.PlaceDetailsResponse).toBeDefined();
     expect(
@@ -78,5 +80,8 @@ describe("swagger docs", () => {
     expect(openApi.components.schemas.UnsavePlaceResponse).toBeDefined();
     expect(openApi.components.schemas.SavedDashboardResponse).toBeDefined();
     expect(openApi.components.schemas.SavedCollectionDetailResponse).toBeDefined();
+    expect(
+      openApi.components.schemas.FeedPlacesQuery.properties.offset
+    ).toBeDefined();
   });
 });

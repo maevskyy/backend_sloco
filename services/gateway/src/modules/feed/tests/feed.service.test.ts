@@ -4,6 +4,8 @@ import type { SavedPlacesService } from "../../saved-places/index.js";
 import type {
   FeedPlaceRow,
   FeedRecommendationClient,
+  FeedRecommendationItem,
+  FeedRecommendationRequest,
   FeedStoreContract
 } from "../common/feed.types.js";
 import {
@@ -71,17 +73,41 @@ function createStore(
   };
 }
 
+function createRecommendations(count: number): FeedRecommendationItem[] {
+  return Array.from({ length: count }, (_, index) => ({
+    rank: index + 1,
+    place_id: `place_${index + 1}`,
+    score: Math.max(0.01, 1 - index * 0.01)
+  }));
+}
+
 function createClient(): {
   client: FeedRecommendationClient;
   calls: () => number;
+  requests: () => FeedRecommendationRequest[];
 } {
   let callCount = 0;
+  const requests: FeedRecommendationRequest[] = [];
+  const recommendations = [
+    {
+      rank: 1,
+      place_id: "place_2",
+      score: 0.98
+    },
+    {
+      rank: 2,
+      place_id: "place_3",
+      score: 0.75
+    }
+  ];
 
   return {
     calls: () => callCount,
+    requests: () => requests,
     client: {
       async personalizedPlaces(request) {
         callCount += 1;
+        requests.push(request);
         expect(request.favourites_place_ids).toEqual(["place_1"]);
         expect(request.want_to_go_place_ids).toEqual(["place_2"]);
         expect(request.dislike_place_ids).toEqual(["place_4"]);
@@ -97,18 +123,7 @@ function createClient(): {
             valid_input_count: 2,
             invalid_place_ids: []
           },
-          recommendations: [
-            {
-              rank: 1,
-              place_id: "place_2",
-              score: 0.98
-            },
-            {
-              rank: 2,
-              place_id: "place_3",
-              score: 0.75
-            }
-          ]
+          recommendations
         };
       }
     }
@@ -157,7 +172,7 @@ function createReactionsService(
 
 describe("feed places service", () => {
   it("calls recommendation service and preserves hydrated order", async () => {
-    const { client } = createClient();
+    const { client, requests } = createClient();
     const service = createFeedPlacesService(
       createStore(),
       client,
@@ -182,6 +197,7 @@ describe("feed places service", () => {
       service({
         query: {
           limit: 20,
+          offset: 0,
           debug: false
         },
         user: {
@@ -217,6 +233,8 @@ describe("feed places service", () => {
         }
       ]
     });
+
+    expect(requests()[0]?.limit).toBe(100);
   });
 
   it("uses cached recommendations for repeated requests with same signals", async () => {
@@ -231,6 +249,7 @@ describe("feed places service", () => {
     const input = {
       query: {
         limit: 20,
+        offset: 0,
         debug: false
       },
       user: {
@@ -260,6 +279,7 @@ describe("feed places service", () => {
       service({
         query: {
           limit: 20,
+          offset: 0,
           debug: false
         },
         user: null
@@ -296,6 +316,7 @@ describe("feed places service", () => {
       service({
         query: {
           limit: 20,
+          offset: 0,
           debug: false
         },
         user: {
@@ -349,6 +370,7 @@ describe("feed places service", () => {
       service({
         query: {
           limit: 20,
+          offset: 0,
           debug: false
         },
         user: {
@@ -396,6 +418,7 @@ describe("feed places service", () => {
       service({
         query: {
           limit: 20,
+          offset: 0,
           debug: false
         },
         user: {
@@ -437,6 +460,7 @@ describe("feed places service", () => {
     const input = {
       query: {
         limit: 20,
+        offset: 0,
         debug: false
       },
       user: {
@@ -454,5 +478,215 @@ describe("feed places service", () => {
 
     expect(calls()).toBe(2);
     expect(second.feed.cacheStatus).toBe("miss");
+  });
+
+  it("paginates personalized snapshots past rank 50", async () => {
+    const recommendations = createRecommendations(100);
+    const requests: FeedRecommendationRequest[] = [];
+    const service = createFeedPlacesService(
+      createStore({
+        async feedPlacesBySourceIds(sourceIds, _query, limit) {
+          expect(limit).toBe(100);
+          return sourceIds.map((sourceId, index) =>
+            feedRow({
+              id: index + 1,
+              source_id: sourceId,
+              name: `Place ${sourceId}`
+            })
+          );
+        }
+      }),
+      {
+        async personalizedPlaces(request) {
+          requests.push(request);
+          return {
+            user_id: request.user_id,
+            algorithm_version: "embedding_recommender_v1",
+            embedding_run_id: "test-run",
+            input_summary: {
+              favourites_count: 1,
+              want_to_go_count: 1,
+              valid_input_count: 2,
+              invalid_place_ids: []
+            },
+            recommendations
+          };
+        }
+      },
+      createSavedService(),
+      new FeedRecommendationCache(),
+      createReactionsService()
+    );
+
+    const result = await service({
+      query: {
+        limit: 30,
+        offset: 60,
+        debug: false
+      },
+      user: {
+        id: "user-1",
+        email: "user@example.com"
+      }
+    });
+
+    expect(requests[0]?.limit).toBe(100);
+    expect(result.places).toHaveLength(30);
+    expect(result.places[0]).toMatchObject({
+      sourceId: "place_61",
+      rank: 61
+    });
+    expect(result.places.at(-1)).toMatchObject({
+      sourceId: "place_90",
+      rank: 90
+    });
+  });
+
+  it("reuses one cached snapshot across page 1 and page 2", async () => {
+    const recommendations = createRecommendations(100);
+    let callCount = 0;
+    const service = createFeedPlacesService(
+      createStore(),
+      {
+        async personalizedPlaces(request) {
+          callCount += 1;
+          return {
+            user_id: request.user_id,
+            algorithm_version: "embedding_recommender_v1",
+            embedding_run_id: "test-run",
+            input_summary: {
+              favourites_count: 1,
+              want_to_go_count: 1,
+              valid_input_count: 2,
+              invalid_place_ids: []
+            },
+            recommendations
+          };
+        }
+      },
+      createSavedService(),
+      new FeedRecommendationCache(),
+      createReactionsService()
+    );
+
+    const pageOne = await service({
+      query: {
+        limit: 20,
+        offset: 0,
+        debug: false
+      },
+      user: {
+        id: "user-1",
+        email: "user@example.com"
+      }
+    });
+    const pageTwo = await service({
+      query: {
+        limit: 30,
+        offset: 20,
+        debug: false
+      },
+      user: {
+        id: "user-1",
+        email: "user@example.com"
+      }
+    });
+
+    expect(callCount).toBe(1);
+    expect(pageOne.feed.cacheStatus).toBe("miss");
+    expect(pageTwo.feed.cacheStatus).toBe("hit");
+    expect(pageOne.places.map((place) => place.rank)).toEqual(
+      Array.from({ length: 20 }, (_, index) => index + 1)
+    );
+    expect(pageTwo.places.map((place) => place.rank)).toEqual(
+      Array.from({ length: 30 }, (_, index) => index + 21)
+    );
+    expect(
+      new Set([
+        ...pageOne.places.map((place) => place.sourceId),
+        ...pageTwo.places.map((place) => place.sourceId)
+      ]).size
+    ).toBe(50);
+  });
+
+  it("returns an empty personalized page when offset is beyond the snapshot", async () => {
+    const service = createFeedPlacesService(
+      createStore(),
+      {
+        async personalizedPlaces(request) {
+          return {
+            user_id: request.user_id,
+            algorithm_version: "embedding_recommender_v1",
+            embedding_run_id: "test-run",
+            input_summary: {
+              favourites_count: 1,
+              want_to_go_count: 1,
+              valid_input_count: 2,
+              invalid_place_ids: []
+            },
+            recommendations: createRecommendations(70)
+          };
+        }
+      },
+      createSavedService(),
+      new FeedRecommendationCache(),
+      createReactionsService()
+    );
+
+    const result = await service({
+      query: {
+        limit: 30,
+        offset: 70,
+        debug: false
+      },
+      user: {
+        id: "user-1",
+        email: "user@example.com"
+      }
+    });
+
+    expect(result.feed.personalizationStatus).toBe("personalized");
+    expect(result.places).toEqual([]);
+  });
+
+  it("paginates fallback snapshots past rank 50", async () => {
+    const service = createFeedPlacesService(
+      createStore({
+        async fallbackFeedPlaces(_query, limit) {
+          expect(limit).toBe(100);
+          return Array.from({ length: 100 }, (_, index) =>
+            feedRow({
+              id: index + 1,
+              source_id: `fallback_${index + 1}`,
+              name: `Fallback ${index + 1}`
+            })
+          );
+        }
+      }),
+      createClient().client,
+      createSavedService(),
+      new FeedRecommendationCache(),
+      createReactionsService()
+    );
+
+    const result = await service({
+      query: {
+        limit: 30,
+        offset: 60,
+        debug: false
+      },
+      user: null
+    });
+
+    expect(result.feed.personalizationStatus).toBe("anonymous_fallback");
+    expect(result.places).toHaveLength(30);
+    expect(result.places[0]).toMatchObject({
+      sourceId: "fallback_61",
+      rank: 61
+    });
+    expect(result.places.at(-1)).toMatchObject({
+      sourceId: "fallback_90",
+      rank: 90
+    });
   });
 });

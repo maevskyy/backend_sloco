@@ -1,6 +1,8 @@
 # TASKS 36: Place Details — Enumerated Photo List
 
-**Status: Planned (awaiting approval).**
+**Status: Done** (commit `0c6e9ed` — "feat(gateway): add enumerated place photos
+to place details"). Shipped without a migration, as planned (second `place_photos`
+query).
 
 Frontend request (iOS, item 1 of 3): the fullscreen photo gallery is blocked
 because `GET /v1/places/:id` returns only **one** photo (`primaryPhoto`). The

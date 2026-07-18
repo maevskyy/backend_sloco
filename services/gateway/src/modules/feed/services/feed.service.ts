@@ -25,6 +25,7 @@ export type { FeedPlacesService } from "../common/feed.types.js";
 
 const CACHE_TTL_MS = 10 * 60 * 1000;
 const MAX_CACHE_ENTRIES = 500;
+const FEED_SNAPSHOT_SIZE = 100;
 const FALLBACK_ALGORITHM_VERSION = "fallback_visibility_v1";
 
 type CachedRecommendation = {
@@ -125,12 +126,7 @@ export function createFeedPlacesService(
       });
     }
 
-    const recommendationLimit = Math.min(query.limit * 2, 50);
-    const cacheKey = createRecommendationCacheKey(
-      user.id,
-      signals,
-      recommendationLimit
-    );
+    const cacheKey = createRecommendationCacheKey(user.id, signals);
     const cached = query.debug ? null : cache.get(cacheKey, generatedAt);
     let cacheStatus: FeedCacheStatus = query.debug ? "bypass" : "hit";
     let cachedOrFresh = cached;
@@ -145,7 +141,7 @@ export function createFeedPlacesService(
           want_to_go_place_ids: signals.wantToGoPlaceIds,
           dislike_place_ids: signals.dislikePlaceIds,
           hide_place_ids: signals.hidePlaceIds,
-          limit: recommendationLimit,
+          limit: FEED_SNAPSHOT_SIZE,
           exclude_input_places: true,
           debug: query.debug
         });
@@ -201,22 +197,20 @@ export function createFeedPlacesService(
     const rows = await store.feedPlacesBySourceIds(
       recommendations.map((item) => item.sourceId),
       query,
-      recommendationLimit
+      FEED_SNAPSHOT_SIZE
     );
     const recommendationBySourceId = new Map(
       recommendations.map((item) => [item.sourceId, item])
     );
-    const places = rows
-      .map((row, index) =>
-        mapFeedRowToCard(row, {
-          status: "personalized",
-          recommendation: recommendationBySourceId.get(row.source_id),
-          rank: index + 1
-        })
-      )
-      .slice(0, query.limit);
+    const snapshot = rows.map((row, index) =>
+      mapFeedRowToCard(row, {
+        status: "personalized",
+        recommendation: recommendationBySourceId.get(row.source_id),
+        rank: index + 1
+      })
+    );
 
-    if (places.length === 0) {
+    if (snapshot.length === 0) {
       return fallbackFeed({
         store,
         query,
@@ -232,6 +226,8 @@ export function createFeedPlacesService(
         excludedSourceIds: excludedSourceIdsFromSignals(signals)
       });
     }
+
+    const places = snapshot.slice(query.offset, query.offset + query.limit);
 
     return {
       feed: {
@@ -269,15 +265,21 @@ async function fallbackFeed(input: {
   userId: string | undefined;
   excludedSourceIds: Set<string>;
 }): Promise<FeedPlacesResult> {
-  const rows = await input.store.fallbackFeedPlaces(input.query, input.query.limit);
-  const visibleRows = rows.filter(
-    (row) => !input.excludedSourceIds.has(row.source_id)
+  const rows = await input.store.fallbackFeedPlaces(
+    input.query,
+    FEED_SNAPSHOT_SIZE
   );
-  const places = visibleRows.map((row, index) =>
-    mapFeedRowToCard(row, {
-      status: input.status,
-      rank: index + 1
-    })
+  const snapshot = rows
+    .filter((row) => !input.excludedSourceIds.has(row.source_id))
+    .map((row, index) =>
+        mapFeedRowToCard(row, {
+          status: input.status,
+          rank: index + 1
+        })
+      );
+  const places = snapshot.slice(
+    input.query.offset,
+    input.query.offset + input.query.limit
   );
 
   return {
@@ -338,8 +340,7 @@ function hasSignals(signals: FeedUserSignals) {
 
 function createRecommendationCacheKey(
   userId: string,
-  signals: FeedUserSignals,
-  limit: number
+  signals: FeedUserSignals
 ) {
   const signalHash = createHash("sha256")
     .update(
@@ -347,13 +348,14 @@ function createRecommendationCacheKey(
         favourites: signals.favouritesPlaceIds,
         wantToGo: signals.wantToGoPlaceIds,
         dislikes: signals.dislikePlaceIds,
-        hidden: signals.hidePlaceIds
+        hidden: signals.hidePlaceIds,
+        snapshotSize: FEED_SNAPSHOT_SIZE
       })
     )
     .digest("hex")
     .slice(0, 24);
 
-  return `${userId}:${signalHash}:${limit}:exclude-input`;
+  return `${userId}:${signalHash}:exclude-input`;
 }
 
 function inputSummaryFromSignals(signals: FeedUserSignals): FeedInputSummary {

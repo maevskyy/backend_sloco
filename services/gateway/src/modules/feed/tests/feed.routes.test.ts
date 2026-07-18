@@ -47,6 +47,7 @@ function feedPlace(overrides: Partial<FeedPlaceCard> = {}): FeedPlaceCard {
 function feedService(): FeedPlacesService {
   return async ({ query, user }) => {
     expect(query.limit).toBe(20);
+    expect(query.offset).toBe(0);
     expect(query.debug).toBe(false);
 
     return {
@@ -115,6 +116,42 @@ describe("feed routes", () => {
 
     expect(response.statusCode).toBe(200);
     expect(response.json().feed.personalizationStatus).toBe("personalized");
+  });
+
+  it("passes offset through to the feed service", async () => {
+    const app = await buildApp({
+      feedPlacesService: async ({ query }) => {
+        expect(query.limit).toBe(10);
+        expect(query.offset).toBe(30);
+
+        return {
+          feed: {
+            personalizationStatus: "anonymous_fallback",
+            cacheStatus: "not_applicable",
+            algorithmVersion: "test",
+            embeddingRunId: null,
+            generatedAt: "2026-06-01T10:00:00.000Z",
+            expiresAt: null
+          },
+          inputSummary: {
+            favouritesCount: 0,
+            wantToGoCount: 0,
+            validInputCount: 0,
+            invalidPlaceIds: []
+          },
+          places: [feedPlace()]
+        };
+      }
+    });
+
+    const response = await app.inject({
+      method: "GET",
+      url: `${VersionedAppRoute.feedPlaces}?limit=10&offset=30`
+    });
+
+    await app.close();
+
+    expect(response.statusCode).toBe(200);
   });
 
   it("returns 401 for invalid auth", async () => {

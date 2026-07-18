@@ -31,7 +31,7 @@ export function mapFeedRowToCard(
     numberOfReviews: row.reviews_count,
     mapVisibilityScore: Number(row.map_visibility_score ?? 0),
     matchScore: getMatchScore(row, context.recommendation),
-    rank: context.recommendation?.rank ?? context.rank,
+    rank: getRank(context),
     whyRecommended: getWhyRecommended(row, context.status),
     blurb: getBlurb(row),
     tags: getTags(row),
@@ -40,6 +40,10 @@ export function mapFeedRowToCard(
     isSaved: false,
     reaction: null
   };
+}
+
+function getRank(context: FeedMapContext) {
+  return context.recommendation?.rank ?? context.rank;
 }
 
 function getMatchScore(
