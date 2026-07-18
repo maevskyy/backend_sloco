@@ -4,6 +4,7 @@ import { NoopCacheStore } from "../../../lib/cache/noop-cache-store.js";
 import { createPlaceDetailsService } from "../services/places.service.js";
 import type {
   PlaceDetailRow,
+  PlacePhotoRow,
   PlacesStoreContract
 } from "../common/places.types.js";
 
@@ -100,14 +101,31 @@ function placeRow(overrides: Partial<PlaceDetailRow> = {}): PlaceDetailRow {
   } as PlaceDetailRow;
 }
 
+function photoRow(overrides: Partial<PlacePhotoRow> = {}): PlacePhotoRow {
+  return {
+    storage_path: "google/ChIJ123/vibe/photo-1.jpg",
+    public_url: "https://r2.example.com/google/ChIJ123/vibe/photo-1.jpg",
+    width: 1200,
+    height: 900,
+    photo_source: "vibe",
+    ...overrides
+  };
+}
+
 function createStore(row: PlaceDetailRow | null): PlacesStoreContract & {
   calls: number;
+  photoCalls: number;
 } {
   return {
     calls: 0,
+    photoCalls: 0,
     async placeDetailsById() {
       this.calls += 1;
       return row;
+    },
+    async placePhotos() {
+      this.photoCalls += 1;
+      return [photoRow()];
     }
   };
 }
@@ -122,11 +140,22 @@ describe("place details service cache", () => {
     const second = await service(123);
 
     expect(store.calls).toBe(1);
+    expect(store.photoCalls).toBe(1);
     expect(first?.place.id).toBe(123);
+    expect(first?.place.photos).toEqual([
+      {
+        path: "google/ChIJ123/vibe/photo-1.jpg",
+        url: "https://r2.example.com/google/ChIJ123/vibe/photo-1.jpg",
+        width: 1200,
+        height: 900,
+        source: "vibe"
+      }
+    ]);
     expect(second?.place.id).toBe(123);
     expect(second?.place.isSaved).toBe(false);
     expect(second?.place.savedCollectionIds).toEqual([]);
     expect(second?.place.reaction).toBeNull();
+    expect(second?.place.photos).toEqual(first?.place.photos);
   });
 
   it("does not store user-specific saved fields in cache", async () => {
@@ -141,6 +170,7 @@ describe("place details service cache", () => {
     expect(rawCached).not.toHaveProperty("isSaved");
     expect(rawCached).not.toHaveProperty("savedCollectionIds");
     expect(rawCached).not.toHaveProperty("reaction");
+    expect(rawCached).toHaveProperty("photos");
   });
 
   it("reads from store again after cache ttl expires", async () => {
@@ -153,6 +183,7 @@ describe("place details service cache", () => {
     await service(123);
 
     expect(store.calls).toBe(2);
+    expect(store.photoCalls).toBe(2);
   });
 
   it("falls back to store when cache is disabled", async () => {
@@ -163,6 +194,7 @@ describe("place details service cache", () => {
     await service(123);
 
     expect(store.calls).toBe(2);
+    expect(store.photoCalls).toBe(2);
   });
 
   it("does not cache missing places", async () => {
@@ -174,6 +206,7 @@ describe("place details service cache", () => {
     await service(999);
 
     expect(store.calls).toBe(2);
+    expect(store.photoCalls).toBe(0);
     expect(cache.peek("place:v1:999")).toBeUndefined();
   });
 
@@ -189,5 +222,22 @@ describe("place details service cache", () => {
 
     expect(result?.place.id).toBe(123);
     expect(store.calls).toBe(1);
+    expect(store.photoCalls).toBe(1);
+  });
+
+  it("defaults to an empty photo list when the place has no extra photos", async () => {
+    const store = {
+      ...createStore(placeRow()),
+      async placePhotos() {
+        this.photoCalls += 1;
+        return [];
+      }
+    };
+    const service = createPlaceDetailsService(store, new NoopCacheStore(), 3600);
+
+    const result = await service(123);
+
+    expect(result?.place.photos).toEqual([]);
+    expect(store.photoCalls).toBe(1);
   });
 });

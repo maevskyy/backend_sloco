@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { mapPlaceDetailRow } from "../common/places.mappers.js";
-import type { PlaceDetailRow, PlaceDetails } from "../common/places.types.js";
+import type {
+  PlaceDetailRow,
+  PlaceDetails,
+  PlacePhotoRow
+} from "../common/places.types.js";
 
 export function placeDetailRow(
   overrides: Partial<PlaceDetailRow> = {}
@@ -85,7 +89,24 @@ export function placeDetailRow(
 
 describe("place details mapper", () => {
   it("maps rich place rows to place details", () => {
-    expect(mapPlaceDetailRow(placeDetailRow())).toEqual<PlaceDetails>({
+    const photos: PlacePhotoRow[] = [
+      {
+        storage_path: "google/ChIJ123/vibe/photo-1.jpg",
+        public_url: "https://example.com/photo-1.jpg",
+        width: 1200,
+        height: 900,
+        photo_source: "vibe"
+      },
+      {
+        storage_path: "google/ChIJ123/vibe/photo-2.jpg",
+        public_url: "https://example.com/photo-2.jpg",
+        width: 1000,
+        height: 750,
+        photo_source: "review"
+      }
+    ];
+
+    expect(mapPlaceDetailRow(placeDetailRow(), photos)).toEqual<PlaceDetails>({
       id: 123,
       source: "google",
       sourceId: "ChIJ123",
@@ -150,6 +171,22 @@ describe("place details mapper", () => {
         height: 900,
         source: "vibe"
       },
+      photos: [
+        {
+          path: "google/ChIJ123/vibe/photo-1.jpg",
+          url: "https://example.com/photo-1.jpg",
+          width: 1200,
+          height: 900,
+          source: "vibe"
+        },
+        {
+          path: "google/ChIJ123/vibe/photo-2.jpg",
+          url: "https://example.com/photo-2.jpg",
+          width: 1000,
+          height: 750,
+          source: "review"
+        }
+      ],
       totalPhotoCount: 3,
       openingHours: { openNow: true },
       serves: ["coffee"],
@@ -162,6 +199,13 @@ describe("place details mapper", () => {
       isSaved: false,
       savedCollectionIds: [],
       reaction: null
+    });
+  });
+
+  it("defaults photos to an empty list", () => {
+    expect(mapPlaceDetailRow(placeDetailRow({ primary_photo_path: null }))).toMatchObject({
+      primaryPhoto: null,
+      photos: []
     });
   });
 });

@@ -1,6 +1,13 @@
-import type { PlaceDetailRow, PlaceDetails } from "./places.types.js";
+import type {
+  PlaceDetailRow,
+  PlaceDetails,
+  PlacePhotoRow
+} from "./places.types.js";
 
-export function mapPlaceDetailRow(row: PlaceDetailRow): PlaceDetails {
+export function mapPlaceDetailRow(
+  row: PlaceDetailRow,
+  photos: PlacePhotoRow[] = []
+): PlaceDetails {
   return {
     id: row.id,
     source: row.source,
@@ -60,6 +67,7 @@ export function mapPlaceDetailRow(row: PlaceDetailRow): PlaceDetails {
     reviewPhotoCount: row.review_photo_count ?? 0,
     vibePhotoCount: row.vibe_photo_count ?? 0,
     primaryPhoto: mapPrimaryPhoto(row),
+    photos: photos.map(mapPhotoRow),
     totalPhotoCount: row.total_photo_count ?? 0,
     openingHours: row.opening_hours ?? null,
     serves: row.serves ?? null,
@@ -88,6 +96,16 @@ function mapPrimaryPhoto(row: PlaceDetailRow): PlaceDetails["primaryPhoto"] {
     width: row.primary_photo_width,
     height: row.primary_photo_height,
     source: row.primary_photo_source
+  };
+}
+
+function mapPhotoRow(photo: PlacePhotoRow): NonNullable<PlaceDetails["photos"]>[number] {
+  return {
+    path: photo.storage_path,
+    url: photo.public_url,
+    width: photo.width,
+    height: photo.height,
+    source: photo.photo_source
   };
 }
 

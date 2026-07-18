@@ -114,6 +114,8 @@ Place search is global, fuzzy, and independent from the current map bbox.
 Decide feed reads are card-oriented, recommendation-service backed for
 authenticated users, and fall back to quality/visibility picks for anonymous or
 cold-start users.
+Place details now expose both `primaryPhoto` and a bounded `photos[]` gallery
+list with direct R2 `public_url` values for fullscreen gallery clients.
 
 ## Active Data Flow
 

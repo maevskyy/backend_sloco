@@ -117,6 +117,7 @@ function placeDetails(overrides: Partial<PlaceDetails> = {}): PlaceDetails {
     reviewPhotoCount: 1,
     vibePhotoCount: 2,
     primaryPhoto: null,
+    photos: [],
     totalPhotoCount: 3,
     openingHours: { openNow: true },
     serves: ["coffee"],

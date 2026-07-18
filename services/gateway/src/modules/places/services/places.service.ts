@@ -40,7 +40,8 @@ export function createPlaceDetailsService(
       return null;
     }
 
-    const place = mapPlaceDetailRow(row);
+    const photos = await store.placePhotos(row.source, row.source_id);
+    const place = mapPlaceDetailRow(row, photos);
 
     await setCachedPlace(cacheStore, cacheKey, place, ttlSeconds);
 

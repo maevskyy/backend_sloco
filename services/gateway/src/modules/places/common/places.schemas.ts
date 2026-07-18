@@ -73,6 +73,7 @@ export const placeDetailsSchema = z.object({
   reviewPhotoCount: z.number().int(),
   vibePhotoCount: z.number().int(),
   primaryPhoto: placePrimaryPhotoSchema.nullable(),
+  photos: z.array(placePrimaryPhotoSchema),
   totalPhotoCount: z.number().int(),
   openingHours: z.unknown().nullable(),
   serves: z.unknown().nullable(),

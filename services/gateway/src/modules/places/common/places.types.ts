@@ -80,11 +80,20 @@ export type PlaceDetailRow = {
   attributes: JsonObject | null;
 };
 
+export type PlacePhotoRow = {
+  storage_path: string;
+  public_url: string | null;
+  width: number | null;
+  height: number | null;
+  photo_source: string | null;
+};
+
 export type PlaceDetails = z.infer<typeof placeDetailsSchema>;
 export type PlaceDetailsResult = z.infer<typeof placeDetailsResponseSchema>;
 
 export type PlacesStoreContract = {
   placeDetailsById(placeId: number): Promise<PlaceDetailRow | null>;
+  placePhotos(source: string, sourceId: string): Promise<PlacePhotoRow[]>;
 };
 
 export type PlaceDetailsService = (

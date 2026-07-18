@@ -69,6 +69,9 @@ describe("swagger docs", () => {
     expect(openApi.components.schemas.MapPlacesResponse).toBeDefined();
     expect(openApi.components.schemas.PlaceDetails).toBeDefined();
     expect(openApi.components.schemas.PlaceDetailsResponse).toBeDefined();
+    expect(
+      openApi.components.schemas.PlaceDetails.properties.photos
+    ).toBeDefined();
     expect(openApi.components.schemas.SearchPlaceResult).toBeDefined();
     expect(openApi.components.schemas.SearchPlacesResponse).toBeDefined();
     expect(openApi.components.schemas.SavePlaceResponse).toBeDefined();
