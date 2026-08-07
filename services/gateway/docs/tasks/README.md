@@ -44,6 +44,9 @@ Task files live here as `TASKS_N_NAME.md`.
 | Planned | `TASKS_35_USER_REACTIONS_FEED_INTEGRATION.md` | User-reactions part 3/3: feed seeding + hard-exclusion (engine & fallback), reaction in the cache key, and `reaction` echo on the feed card / place detail. Depends on `TASKS_34` and recommendation `TASKS_3`. |
 | Done | `TASKS_36_PLACE_PHOTOS_LIST.md` | Frontend request 1/3: best-first `photos[]` (direct R2 URLs, cap 20) on `GET /v1/places/:id` for the fullscreen gallery. Gateway-only; a second indexed `place_photos` query, no migration. Commit `0c6e9ed`. |
 | Planned | `TASKS_37_FEED_PAGINATION.md` | Frontend request 2/3: stable `offset` pagination for `GET /v1/feed/places` — bigger cached rec snapshot (~100) hydrated in full and windowed per page, cache key decoupled from `limit`/`offset`, global `rank`. Migration `016` raises both feed RPC caps 50→200 so personalized **and** fallback page deep. |
+| Planned | `TASKS_38_ONBOARDING_COMPLETE.md` | Onboarding 1/5 (GW): new `onboarding` module + `POST /v1/onboarding/complete` — picks → `saved_places` (favourites), set `profiles.onboarding_status`, no cache bust. Independent, ship-now. |
+| Planned | `TASKS_39_ONBOARDING_TREE.md` | Onboarding 2/5 (GW): `GET /v1/onboarding/tree?city=` — fetch artifact from rec (`TASKS_4`), resolve numeric `placeId`, rewrite `photos[]`→R2 `photoUrls[]`, cache per city. |
+| Planned | `TASKS_40_ONBOARDING_SIMILAR.md` | Onboarding 3/5 (GW): `POST /v1/onboarding/similar` — thin proxy to rec `TASKS_5` for off-artifact expansion; reuses `TASKS_39` id/photo helpers. |
 
 ## TBD Backlog
 
