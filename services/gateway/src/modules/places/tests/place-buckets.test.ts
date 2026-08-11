@@ -49,6 +49,12 @@ describe("place buckets", () => {
     expect(matchesBucketKeywords(natureKeywords, ["Restaurant"])).toBe(false);
     expect(matchesBucketKeywords(natureKeywords, ["Gastropub"])).toBe(false);
     expect(matchesBucketKeywords(natureKeywords, ["Botanical garden"])).toBe(true);
+
+    // "Beer garden" is a venue kind in this catalog — a bar, not nature.
+    expect(matchesBucketKeywords(natureKeywords, ["Beer garden"])).toBe(false);
+    expect(matchesBucketKeywords(bucketsToKeywords(["bar"]), ["Beer garden"])).toBe(
+      true
+    );
   });
 
   it("keeps the seven-bucket contract stable", () => {

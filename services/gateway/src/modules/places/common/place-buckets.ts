@@ -94,7 +94,9 @@ const PLACE_BUCKET_KEYWORDS: Record<PlaceBucket, readonly string[]> = {
   ],
   nature: [
     "park",
-    "garden",
+    // NOT a bare "garden": the catalog's venue kinds include "Beer garden",
+    // which is a bar (it matches `bar` via "beer"). A real botanical garden is
+    // caught by "botanical".
     "botanical",
     "nature",
     "zoo",

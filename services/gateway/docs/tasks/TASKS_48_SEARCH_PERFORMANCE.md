@@ -72,6 +72,20 @@ scores each one. Not addressed here — options, cheapest first: raise
 `map_visibility_score` before scoring; or a materialized top-N. Needs
 `EXPLAIN (ANALYZE, BUFFERS)` from the SQL editor first — do not guess.
 
+## Measurements after `020` (2026-08-12)
+
+Browse mode: **0.19–0.24 s**, and it holds under 8 concurrent requests — down from
+2.9–4.3 s. The KNN branch + `places_geog_gist` did it.
+
+Remaining, both about the **text** path:
+
+- `q=co` still ~0.9–1.4 s (unchanged — `020` did not touch text scoring).
+- Under 6 concurrent `q=coffee`, latency degrades to 1.0–2.1 s while cached tile requests
+  stay at 0.13 s. The gateway's pg pool is `max: 5` (`lib/pg.ts`) and text search now
+  holds a connection for the duration of its scoring, so search competes with itself and
+  with tiles. Raising the pool is the obvious first lever, but fix the query cost first —
+  a bigger pool just buys more parallel slow queries.
+
 ## Follow-ups (not in this task)
 
 - **Feed fallback (2.3 s)** — the anonymous feed scores the whole table per request
