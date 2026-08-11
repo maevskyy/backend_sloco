@@ -42,18 +42,39 @@ transport itself (gateway → Supabase HTTP API) adds ~0.11 s plus cold-connecti
    `pg` pool instead of PostgREST — same pattern as `map-tile.store.ts`. Persistent
    connections also remove the cold-spike class.
 
-## Acceptance
+## Measurements after `018` + deploy (2026-08-11, connection reused)
 
-After migration `018` + deploy, warm `?q=coffee` from the same vantage point lands around
-**0.3–0.45 s** (floor ~0.15 + pool hop + a двузначный-ms query), and `?q=co` stops being an
-outlier. Record the before/after table here.
+| query | before | after `018` | verdict |
+|---|---|---|---|
+| `q=coffee` | 0.6–0.94 s (spikes 2.2–4.0) | **0.36–0.40 s** | fixed |
+| `q=bar` | ~0.5 s | **0.30–0.35 s** | fixed |
+| `q=pizza` / `q=wine` | 0.34–0.42 s | **0.26–0.34 s** | fixed |
+| `q=cafe` | — | 0.63 s | acceptable, watch |
+| `q=co` (2 chars) | ~1.1 s | **0.87–1.42 s** | ❌ still slow |
+| `category=cafe` (browse, new) | — | **2.9–4.3 s** | ❌ worst endpoint |
+
+TLS handshake to this vantage point is ~0.10 s and the gateway floor ~0.15 s, so the
+fixed queries are now essentially floor + a двузначный-ms query. The two failures are
+different problems:
+
+**Browse mode (fixed in `020`, pending deploy).** With no text query the function still ran
+the whole scoring pipeline (six `word_similarity` calls per row against a NULL query),
+computed `st_distance` for every row, and filtered with
+`st_dwithin(geom::geography, …)` — a cast no existing index could answer, so every chip tap
+scanned the catalog. Migration `020` gives browse mode its own branch: no scoring, KNN
+ordering via `geom::geography <-> origin` backed by a new functional GiST index
+(`places_geog_gist`), plus a trigram index on `primary_type_norm` for the bucket LIKE.
+Expected after deploy: well under 0.3 s.
+
+**Short queries (`q=co`, open).** The trigram path matches thousands of candidates and
+scores each one. Not addressed here — options, cheapest first: raise
+`pg_trgm.word_similarity_threshold` for very short queries; pre-cut candidates by
+`map_visibility_score` before scoring; or a materialized top-N. Needs
+`EXPLAIN (ANALYZE, BUFFERS)` from the SQL editor first — do not guess.
 
 ## Follow-ups (not in this task)
 
 - **Feed fallback (2.3 s)** — the anonymous feed scores the whole table per request
-  through PostgREST, uncached. Candidates: same pg-pool switch for `feed.store.ts`, and/or
-  a short-TTL gateway cache for the anonymous snapshot. Do after measuring post-018
-  numbers (the norm columns don't touch this path).
-- If search is still query-bound after `018`: `EXPLAIN (ANALYZE, BUFFERS)` the RPC body in
-  the SQL editor; the next lever is a KNN-style top-N via a GiST trigram index instead of
-  scoring every candidate.
+  through PostgREST, uncached. Candidates: the same pg-pool switch for `feed.store.ts`,
+  and/or a short-TTL gateway cache for the anonymous snapshot.
+- **Short-query cost** — see above.

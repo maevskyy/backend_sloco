@@ -5,8 +5,13 @@ import { z } from "zod";
 // values; changing a name is a contract change.
 //
 // Keywords are matched WORD-BOUNDARY (SQL: ' '||col||' ' like '% '||kw||' %')
-// against the normalized category / primary_type / types columns (migration
-// 018) — substring matching would put "barbecue restaurant" into `bar`.
+// against the normalized category / primary_type columns — substring matching
+// would put "barbecue restaurant" into `bar`.
+//
+// The catalog's `types` array is deliberately NOT matched (migration 020): it is
+// an attribute bag, not a taxonomy — `garden` there means "has a terrace", so
+// matching it filed every restaurant with outdoor seating under `nature`.
+// `primary_type` is the authoritative venue kind.
 // Keyword choice is data-driven from the live catalog's primary_type
 // distribution (12 578 places); `nature` and `shopping` are near-empty in the
 // current two-city catalog — kept for contract stability, documented to iOS.
@@ -171,9 +176,10 @@ export function bucketsToKeywords(buckets: readonly PlaceBucket[]): string[] {
 }
 
 // The TS twin of the SQL word-boundary match, for filtering rows the gateway
-// already holds (the personalized feed path). `haystack` fields are plain
-// ASCII English in the catalog, so lowercasing stands in for the SQL
-// normalization.
+// already holds (the personalized feed path). Callers pass the venue-kind
+// fields (category, primary_type) — the same inputs the SQL uses, so both feed
+// paths agree. `haystack` fields are plain ASCII English in the catalog, so
+// lowercasing stands in for the SQL normalization.
 export function matchesBucketKeywords(
   keywords: readonly string[],
   fields: ReadonlyArray<string | null | undefined>

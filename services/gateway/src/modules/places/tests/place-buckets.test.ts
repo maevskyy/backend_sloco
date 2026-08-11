@@ -40,6 +40,17 @@ describe("place buckets", () => {
     ).toBe(true);
   });
 
+  it("does not treat terrace/attribute words as a venue kind", () => {
+    // Regression: the catalog's `types` bag carries `garden` meaning "has a
+    // terrace", which filed restaurants under `nature` (migration 020).
+    // Callers must pass venue-kind fields only.
+    const natureKeywords = bucketsToKeywords(["nature"]);
+
+    expect(matchesBucketKeywords(natureKeywords, ["Restaurant"])).toBe(false);
+    expect(matchesBucketKeywords(natureKeywords, ["Gastropub"])).toBe(false);
+    expect(matchesBucketKeywords(natureKeywords, ["Botanical garden"])).toBe(true);
+  });
+
   it("keeps the seven-bucket contract stable", () => {
     expect(PLACE_BUCKET_NAMES).toEqual([
       "cafe",
