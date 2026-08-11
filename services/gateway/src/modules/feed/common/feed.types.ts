@@ -113,7 +113,8 @@ export type FeedStoreContract = {
   ): Promise<FeedPlaceRow[]>;
   fallbackFeedPlaces(
     query: FeedPlacesQuery,
-    limit: number
+    limit: number,
+    categoryKeywords: string[] | null
   ): Promise<FeedPlaceRow[]>;
 };
 

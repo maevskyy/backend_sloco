@@ -1,6 +1,30 @@
 # TASKS 45: Search — `category` + `radiusMeters` on `GET /v1/search/places`
 
-**Status: Planned.**
+**Status: In progress** — implemented 2026-08-11 on `dev` (165/165 tests, build/lint/
+typecheck clean); remaining: run migration `018` in Supabase, deploy, live acceptance,
+send the vocabulary to iOS. Implementation notes vs the plan below:
+
+- Migration `018_search_category_radius_norms.sql` also carries the `TASKS_48` performance
+  half (stored `*_norm` columns + trigger + backfill + column index) — one rewrite of
+  `search_places` instead of two back-to-back.
+- Bucket matching is **word-boundary**, not substring (`' '||col||' ' like '% kw %'`) —
+  substring matching put "barbecue restaurant" into `bar` and "coffee shop" into
+  `shopping`. Covered by unit tests (`places/tests/place-buckets.test.ts`).
+- The vocabulary lives in `places/common/place-buckets.ts` (seven buckets), exported via
+  the places `index.ts`; keyword lists are data-driven from the live catalog. **Honesty
+  note for iOS:** `nature` and `shopping` are near-empty in the current two-city catalog
+  (no parks/malls were ingested) — the buckets exist for contract stability, but their
+  chips will return few or no results until the catalog grows. Casinos/gambling/adult
+  venues are deliberately in no bucket.
+- The search store also moved off PostgREST onto the direct pg pool (`TASKS_48`).
+- Response `query` echoes `""` in browse mode (the field stays a non-null string for the
+  existing client decoder).
+- **Backward compatible with the currently deployed gateway.** The new params carry
+  `DEFAULT NULL`, so the old 6-named-argument PostgREST call still resolves, the defaults
+  reproduce the old behaviour, and the returned columns are unchanged — running `018`
+  before deploying does not break production search (it only makes it faster).
+- **Rollback:** `supabase/rollback/2026-08-11_018_019_rollback.sql` restores the `011`/`016`
+  function bodies verbatim. No data is at risk: `018` writes only the columns it adds.
 
 iOS ask `frontend_new/messages-to-backend-dev/not-done/SEARCH_CATEGORY_FILTER.md` — the search
 page's seven category chips are blocked on this and deliberately render inert until it ships.

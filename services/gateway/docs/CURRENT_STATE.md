@@ -72,7 +72,7 @@ GET /v1/map/config
 GET /v1/map/tiles/:z/:x/:y.mvt?v=...
 GET /v1/places/:placeId
 GET /v1/search/places?q=...&lat=...&lng=...
-GET /v1/feed/places?limit=...&offset=...&lat=...&lng=...&debug=...
+GET /v1/feed/places?limit=...&offset=...&lat=...&lng=...&sort=...&debug=...
 GET /v1/swagger/docs
 GET /v1/swagger/openapi.json
 ```
@@ -127,9 +127,15 @@ place via `GET /v1/places/:placeId`.
 Place search is global, fuzzy, and independent from the current map bbox.
 Decide feed reads are card-oriented, recommendation-service backed for
 authenticated users, and fall back to quality/visibility picks for anonymous or
-cold-start users. Reactions (`favorite|dislike|hide`) seed the personalization
-signals, hard-exclude disliked/hidden places, and are echoed on feed cards and
-place details.
+cold-start users. The ranked snapshot is 200 places deep and can be served in
+`relevance` (default) or `distance` order via `sort`. Reactions
+(`favorite|dislike|hide`) seed the personalization signals, hard-exclude
+disliked/hidden places, and are echoed on feed cards and place details.
+Map tiles are capped per tile by `mapVisibilityScore` (6/10/15/25 by zoom band,
+uncapped from z18).
+Place details carry address, opening hours, phone, website, price level and the
+Google Maps URI (imported 2026-08-11 from the raw scrape; `businessStatus` is
+still empty — absent at the source).
 Place details now expose both `primaryPhoto` and a bounded `photos[]` gallery
 list with direct R2 `public_url` values for fullscreen gallery clients.
 

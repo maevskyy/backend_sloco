@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { placeBucketsQuerySchema } from "../../places/index.js";
 
 const coordinateSchema = z.coerce.number().finite();
 const optionalContextSchema = z.string().trim().min(1).max(100).optional();
@@ -19,6 +20,7 @@ export const feedPlacesQuerySchema = z
     city: optionalContextSchema,
     country: optionalContextSchema,
     sort: feedSortSchema.default("relevance"),
+    category: placeBucketsQuerySchema,
     debug: debugQuerySchema
   })
   .refine((query) => (query.lat === undefined) === (query.lng === undefined), {

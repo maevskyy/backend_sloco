@@ -1,6 +1,20 @@
 # TASKS 42: Feed — `sort=relevance|distance` on `GET /v1/feed/places`
 
-**Status: In progress** — implemented 2026-08-11 on `dev`: `sort` enum + `distance requires
+**Status: DONE** — shipped and verified in production 2026-08-11 against the spec's own
+acceptance criteria (Bucharest): AC1 no-`sort` ≡ `relevance` ✅ · AC2 `distanceMeters`
+non-decreasing, 0 nulls (58 m → 300 m) ✅ · AC3 same id **set over the full snapshot**
+(200/200) ✅ *restated* · AC4 `offset=20` continues the ordering (300 m → 309 m, ranks
+21–40) ✅ · AC5 `sort=nearest` → 400 ✅ · AC6 `distance` without coords → 400 ✅ ·
+AC7 toggling returns each order correctly ✅.
+
+**AC3 restatement (worth remembering).** As written it assumed `limit` = snapshot depth
+(both 100 at the time). With `TASKS_43` raising the snapshot to 200, any page shorter than
+the snapshot is a *window*, so the top 50 by relevance and the top 50 by distance overlap
+by only 16/50 — correct behaviour, not a regression. The invariant that holds is
+set-equality over the whole snapshot. Recorded in the iOS spec (now in `done/`) and in
+`FRONTEND_FEED_API.md`.
+
+**Was: In progress** — implemented 2026-08-11 on `dev`: `sort` enum + `distance requires
 lat/lng` refine in `feed.schemas.ts` (component `FeedSort`, `feed.sort` echo on `FeedMeta`),
 `applySort` in `feed.service.ts` (stable re-sort of the whole snapshot before the offset
 slice, positional rank, both paths), spec's acceptance criteria as tests (4 new service

@@ -1,8 +1,11 @@
 # TASKS 44: Places — `price_level` + `google_maps_uri` backfills (no external data)
 
-**Status: In progress** — root cause found and code half done 2026-08-11 (see the
-addendum at the bottom); remaining: the two UPDATEs in Supabase (ops) + cache flush +
-live verification.
+**Status: DONE** — root cause found, code fixed and both backfills applied 2026-08-11.
+Verified live the same day: `googleMapsUri` **18/18** on a never-cached sample;
+`priceLevel` **107/400** on `/v1/map/places` (≈27%, in line with the source's 23.5%) and
+3/18 on the detail sample. Note for whoever reads a stale response: `GET /v1/places/{id}`
+is Redis-cached for an hour, so entries fetched *before* the UPDATE keep showing nulls
+until they expire or `place:v1:*` is flushed.
 
 The two quick wins split out of iOS ask
 `frontend_new/messages-to-backend-dev/not-done/PLACE_DETAILS_MISSING_FIELDS.md` (0/30 sampled

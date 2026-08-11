@@ -1,7 +1,15 @@
 # TASKS 47: Places — import address / hours / phone / website from the raw DataForSEO scrape
 
-**Status: In progress** — mapper built, run and verified 2026-08-11; remaining: the staging
-import + UPDATE in Supabase (ops), cache flush, live verification, then close the iOS ask.
+**Status: DONE** — mapper built, delta imported and applied 2026-08-11; verified live the
+same day on 18 places sampled from `/v1/map/places` and never fetched before (so no cached
+responses): `shortFormattedAddress` **18/18**, `phone` **17/18**, `openingHours` **15/18**,
+`websiteUrl` **13/18**, `priceLevel` 3/18 — matching the delta's coverage table below.
+iOS spec closed → `messages-to-backend-dev/done/PLACE_DETAILS_MISSING_FIELDS.md`, with
+`businessStatus` reported as unavailable-at-source rather than pending.
+
+⚠️ `GET /v1/places/{id}` is Redis-cached for an hour: any place fetched *before* the UPDATE
+keeps returning nulls until the entry expires or `place:v1:*` is flushed (step 6). This is
+the one thing that makes a correct import look broken.
 
 Promotes `TBD_PLACE_DETAILS_ENRICHMENT.md` (kept for rationale/history). Closes the long
 half of iOS ask `frontend_new/messages-to-backend-dev/not-done/PLACE_DETAILS_MISSING_FIELDS.md`.

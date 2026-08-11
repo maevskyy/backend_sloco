@@ -30,8 +30,15 @@ lat      optional, send together with lng
 lng      optional, send together with lat
 city     optional context boost
 country  optional context boost
+sort     optional "relevance" | "distance", default "relevance"
 debug    optional "true" | "false", default "false"
 ```
+
+`sort=distance` re-orders the **same** ranked snapshot by great-circle distance from
+`lat`/`lng` (ascending, ties keep relevance order) — it is not a different query, so
+personalization, `matchScore` and `whyRecommended` behave exactly as on `relevance`.
+It requires `lat`/`lng` (**400** without them), and an unknown `sort` value is a **400**
+rather than a silent fallback. The effective value is echoed back as `feed.sort`.
 
 ## How The Screen Should Use It
 
@@ -59,11 +66,16 @@ GET https://sloco.pp.ua/v1/feed/places?limit=30&offset=60
 
 The backend serves pages from one cached ranked snapshot per user/context, so
 page 2 keeps the same ordering as page 1 instead of reshuffling. `rank` is
-global within that snapshot, not local to the page.
+global within that snapshot, not local to the page — under `sort=distance` it is
+positional in the distance ordering, so `offset` windows continue that ordering.
 
 Stop paging when the backend returns fewer than `limit` cards. `offset` at or
-beyond the end returns `places: []`. Today the snapshot depth is about 100 cards
-per refresh cycle.
+beyond the end returns `places: []`. The snapshot depth is **200 cards** per
+refresh cycle (raised from 100 on 2026-08-11).
+
+Note when comparing the two sorts: the **whole snapshot** is the same set of places in
+both orderings, but any page shorter than the snapshot is not — the first 50 by
+relevance and the first 50 by distance are different windows of the same 200.
 
 ## Response Shape
 

@@ -1,6 +1,23 @@
 # TASKS 46: Feed — `category` filter on `GET /v1/feed/places`
 
-**Status: Planned.**
+**Status: In progress** — implemented 2026-08-11 on `dev` (165/165 tests, build/lint/
+typecheck clean); remaining: run migration `019` (after `018` — it depends on the norm
+columns), deploy, live acceptance. Implementation notes vs the plan below:
+
+- Fallback path filters inside `feed_fallback_places` (migration `019`), before scoring —
+  full snapshot depth preserved. Personalized path filters the hydrated rows in the
+  gateway with the TS twin of the SQL matcher (`matchesBucketKeywords` on
+  `category`/`primary_type`; the SQL side also sees `types`, which the feed row does not
+  carry — accepted asymmetry, `primary_type` carries the signal).
+- Under a category filter the personalized rank turns positional (the recommender's ranks
+  have gaps after filtering); offset windows stay contiguous.
+- If the filter empties a personalized snapshot, the service falls into the existing
+  `empty_recommendation_fallback` → the fallback RPC applies the same filter — consistent
+  category behavior on both paths.
+- **Backward compatible with the currently deployed gateway**, same reasoning as `TASKS_45`:
+  `category_keywords` defaults to NULL, so the old 5-named-argument call resolves and
+  behaves exactly as before.
+- **Rollback:** `supabase/rollback/2026-08-11_018_019_rollback.sql` (covers `018` + `019`).
 
 The `category` half of iOS ask
 `frontend_new/messages-to-backend-dev/not-done/FEED_FILTERS_AND_DEPTH.md` §2 (the feed's

@@ -206,6 +206,55 @@ describe("feed routes", () => {
     expect(response.statusCode).toBe(400);
   });
 
+  it("returns 400 for an unknown category value", async () => {
+    const app = await buildApp();
+
+    const response = await app.inject({
+      method: "GET",
+      url: `${VersionedAppRoute.feedPlaces}?category=nightlife`
+    });
+
+    await app.close();
+
+    expect(response.statusCode).toBe(400);
+  });
+
+  it("parses CSV category values and passes them to the service", async () => {
+    const app = await buildApp({
+      feedPlacesService: async ({ query }) => {
+        expect(query.category).toEqual(["bar", "cafe"]);
+
+        return {
+          feed: {
+            personalizationStatus: "anonymous_fallback",
+            cacheStatus: "not_applicable",
+            sort: query.sort,
+            algorithmVersion: "test",
+            embeddingRunId: null,
+            generatedAt: "2026-06-01T10:00:00.000Z",
+            expiresAt: null
+          },
+          inputSummary: {
+            favouritesCount: 0,
+            wantToGoCount: 0,
+            validInputCount: 0,
+            invalidPlaceIds: []
+          },
+          places: [feedPlace()]
+        };
+      }
+    });
+
+    const response = await app.inject({
+      method: "GET",
+      url: `${VersionedAppRoute.feedPlaces}?category=bar,cafe`
+    });
+
+    await app.close();
+
+    expect(response.statusCode).toBe(200);
+  });
+
   it("returns 400 for an unknown sort value", async () => {
     const app = await buildApp();
 

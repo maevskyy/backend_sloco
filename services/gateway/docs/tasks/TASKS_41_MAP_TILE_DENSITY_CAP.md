@@ -1,6 +1,16 @@
 # TASKS 41: Map — per-tile place cap in `map_tile()`
 
-**Status: In progress** — implemented 2026-08-11 on `dev`: migration
+**Status: DONE** — shipped and verified in production 2026-08-11. `GET /v1/map/config`
+reports `tileVersion: 2`; feature counts per centre tile, measured with an MVT parser:
+Bucharest z11 209→**6**, z12 74→**6**, z13 119→**10**, z14 55→**10**, z15 36→**10**,
+z16 18→**15**, z17 7→**15**, z18 **2** (uncapped); Tbilisi z11 88→**6**, z12 56→**6**,
+z13 **235→10**, z14 110→**10**, z15 112→**10**, z16 17→**15**, z17 9→**25**, z18 **1**.
+No tile exceeds its cap; z17 Bucharest rising 7→15 is the intended effect of dropping the
+score floor below z18 (sparse tiles keep everything). iOS spec closed → `done/`.
+
+Implementation notes below.
+
+**Was: In progress** — implemented 2026-08-11 on `dev`: migration
 `017_map_tile_per_tile_cap.sql` (cap via `LIMIT`, floor kept only ≥z18) and
 `MAP_TILE_VERSION` 1→2 in `deploy-production.yml`; nginx checklist verified (no
 `proxy_cache` on `/v1/*`, the `?v=` bust reaches the gateway). No gateway TS changed, so

@@ -76,7 +76,7 @@ describe("search routes", () => {
       });
 
       return {
-        query: query.q,
+        query: query.q ?? "",
         places: [searchPlace()]
       };
     };
@@ -109,7 +109,7 @@ describe("search routes", () => {
         }
       }),
       searchPlacesService: async (query) => ({
-        query: query.q,
+        query: query.q ?? "",
         places: [
           searchPlace({
             id: 1,
@@ -183,6 +183,59 @@ describe("search routes", () => {
     await app.close();
 
     expect(response.statusCode).toBe(400);
+  });
+
+  it("returns 400 when neither q nor category is sent", async () => {
+    const app = await buildApp();
+
+    const response = await app.inject({
+      method: "GET",
+      url: `${VersionedAppRoute.searchPlaces}?limit=5`
+    });
+
+    await app.close();
+
+    expect(response.statusCode).toBe(400);
+  });
+
+  it("returns 400 for an unknown category value", async () => {
+    const app = await buildApp();
+
+    const response = await app.inject({
+      method: "GET",
+      url: `${VersionedAppRoute.searchPlaces}?category=nightlife`
+    });
+
+    await app.close();
+
+    expect(response.statusCode).toBe(400);
+  });
+
+  it("passes browse-mode category and radius through to the service", async () => {
+    const service: SearchPlacesService = async (query) => {
+      expect(query.q).toBeUndefined();
+      expect(query.category).toEqual(["cafe", "bar"]);
+      expect(query.radiusMeters).toBe(1500);
+      expect(query.lat).toBe(44.43);
+
+      return {
+        query: "",
+        places: [searchPlace({ matchReason: "category" })]
+      };
+    };
+    const app = await buildApp({
+      searchPlacesService: service
+    });
+
+    const response = await app.inject({
+      method: "GET",
+      url: `${VersionedAppRoute.searchPlaces}?category=cafe,bar&radiusMeters=1500&lat=44.43&lng=26.10`
+    });
+
+    await app.close();
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json().places[0].matchReason).toBe("category");
   });
 
   it("returns 400 when only one coordinate is sent", async () => {

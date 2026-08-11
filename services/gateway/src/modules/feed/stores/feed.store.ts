@@ -143,7 +143,8 @@ export class FeedStore implements FeedStoreContract {
 
   async fallbackFeedPlaces(
     query: FeedPlacesQuery,
-    limit: number
+    limit: number,
+    categoryKeywords: string[] | null
   ): Promise<FeedPlaceRow[]> {
     const { data, error } = await measureFeedDependency(
       "rpc",
@@ -154,7 +155,8 @@ export class FeedStore implements FeedStoreContract {
           user_lng: query.lng ?? null,
           user_city: query.city ?? null,
           user_country: query.country ?? null,
-          result_limit: limit
+          result_limit: limit,
+          category_keywords: categoryKeywords
         }),
       (result) => result.data?.length
     );

@@ -38,6 +38,13 @@ https://sloco.pp.ua/v1/map/tiles/{z}/{x}/{y}.mvt?v={DATA_VERSION}
 - The MVT layer name inside each tile is **`places`** → that's your `sourceLayer`.
 - Each feature's **`id` is the backend place id** (set via `ST_AsMVT` feature id)
   → `setFeatureState` works directly, no `promoteId` needed.
+
+**Density is capped server-side** (since 2026-08-11, `v=2`): each tile carries at most
+the top **N places by `mapVisibilityScore`** — 6 up to z12, 10 at z13–z15, 15 at z16,
+25 at z17, uncapped from z18. Draw what the tile contains; do not thin on the client.
+Measured after the change: a z13 tile over Bucharest went 119 → 10 features, Tbilisi
+235 → 10. Zooming in only ever reveals more places, never fewer, and
+`mapVisibilityScore` stays in the tile for collision priority.
 - Fetch current config first:
   ```
   GET /v1/map/config

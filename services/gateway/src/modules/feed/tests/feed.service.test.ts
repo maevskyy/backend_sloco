@@ -702,6 +702,82 @@ describe("feed places service", () => {
     });
   });
 
+  describe("category filter", () => {
+    it("passes flattened bucket keywords to the fallback store", async () => {
+      let receivedKeywords: string[] | null = null;
+      const service = createFeedPlacesService(
+        createStore({
+          async fallbackFeedPlaces(_query, _limit, categoryKeywords) {
+            receivedKeywords = categoryKeywords;
+            return [
+              feedRow({ id: 9, source_id: "fallback_1", primary_type: "wine bar" })
+            ];
+          }
+        }),
+        createClient().client,
+        createSavedService(),
+        new FeedRecommendationCache(),
+        createReactionsService()
+      );
+
+      const result = await service({
+        query: {
+          limit: 20,
+          offset: 0,
+          sort: "relevance" as const,
+          category: ["bar"],
+          debug: false
+        },
+        user: null
+      });
+
+      expect(receivedKeywords).toEqual(expect.arrayContaining(["bar", "pub"]));
+      expect(receivedKeywords).not.toEqual(expect.arrayContaining(["museum"]));
+      expect(result.places).toHaveLength(1);
+    });
+
+    it("filters the personalized snapshot and re-ranks positionally", async () => {
+      const { client } = createClient();
+      const service = createFeedPlacesService(
+        createStore({
+          async feedPlacesBySourceIds(sourceIds) {
+            const types: Record<string, string> = {
+              place_2: "cafe",
+              place_3: "wine bar"
+            };
+            return sourceIds.map((sourceId, index) =>
+              feedRow({
+                id: index + 1,
+                source_id: sourceId,
+                primary_type: types[sourceId] ?? null
+              })
+            );
+          }
+        }),
+        client,
+        createSavedService(),
+        new FeedRecommendationCache(),
+        createReactionsService()
+      );
+
+      const result = await service({
+        query: {
+          limit: 20,
+          offset: 0,
+          sort: "relevance" as const,
+          category: ["bar"],
+          debug: false
+        },
+        user: { id: "user-1", email: "user@example.com" }
+      });
+
+      expect(result.feed.personalizationStatus).toBe("personalized");
+      expect(result.places.map((place) => place.sourceId)).toEqual(["place_3"]);
+      // gapless positional rank after filtering
+      expect(result.places.map((place) => place.rank)).toEqual([1]);
+    });
+  });
+
   describe("sort=distance", () => {
     function distanceQuery(overrides: Partial<{ limit: number; offset: number }> = {}) {
       return {

@@ -1,6 +1,11 @@
 # TASKS 43: Feed — raise the ranked snapshot 100 → 200
 
-**Status: In progress** — implemented 2026-08-11 on `dev`: `FEED_SNAPSHOT_SIZE = 200`
+**Status: DONE** — shipped and verified in production 2026-08-11:
+`?limit=50&offset=100` → 50 cards, ranks 101–150; `offset=150` → ranks 151–200;
+`offset=200` → `[]`. The depth question is answered in the iOS spec
+(`FEED_FILTERS_AND_DEPTH.md`, which stays open for the `category` half only).
+
+**Was: In progress** — implemented 2026-08-11 on `dev`: `FEED_SNAPSHOT_SIZE = 200`
 (with a comment pinning why 200 is the ceiling), the four tests asserting the snapshot
 limit updated 100→200. Verified: `pnpm build`, 153/153 tests, lint, typecheck — clean.
 Remaining: deploy + live smoke (`?limit=50&offset=100` → ranks 101–150; `offset=200` →

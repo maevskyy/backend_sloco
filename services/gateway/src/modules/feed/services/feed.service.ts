@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { bucketsToKeywords, matchesBucketKeywords } from "../../places/index.js";
 import { recommendationClient } from "../../../lib/recommendation-client.js";
 import {
   reactionsService,
@@ -206,10 +207,29 @@ export function createFeedPlacesService(
     const recommendationBySourceId = new Map(
       recommendations.map((item) => [item.sourceId, item])
     );
-    const snapshot = rows.map((row, index) =>
+    // The rec engine knows nothing about categories, so the personalized path
+    // filters the hydrated rows here — a filtered personalized feed can be
+    // shallower than the snapshot (documented in the frontend contract). The
+    // fallback path filters inside the RPC instead, keeping full depth.
+    const categoryKeywords = query.category
+      ? bucketsToKeywords(query.category)
+      : null;
+    const filteredRows = categoryKeywords
+      ? rows.filter((row) =>
+          matchesBucketKeywords(categoryKeywords, [
+            row.category,
+            row.primary_type
+          ])
+        )
+      : rows;
+    const snapshot = filteredRows.map((row, index) =>
       mapFeedRowToCard(row, {
         status: "personalized",
-        recommendation: recommendationBySourceId.get(row.source_id),
+        // Under a category filter the recommender's rank has gaps; rank turns
+        // positional so offset windows stay contiguous.
+        recommendation: categoryKeywords
+          ? undefined
+          : recommendationBySourceId.get(row.source_id),
         rank: index + 1
       })
     );
@@ -273,7 +293,8 @@ async function fallbackFeed(input: {
 }): Promise<FeedPlacesResult> {
   const rows = await input.store.fallbackFeedPlaces(
     input.query,
-    FEED_SNAPSHOT_SIZE
+    FEED_SNAPSHOT_SIZE,
+    input.query.category ? bucketsToKeywords(input.query.category) : null
   );
   const snapshot = rows
     .filter((row) => !input.excludedSourceIds.has(row.source_id))
