@@ -8,6 +8,8 @@ const debugQuerySchema = z
   .default("false")
   .transform((value) => value === "true");
 
+export const feedSortSchema = z.enum(["relevance", "distance"]);
+
 export const feedPlacesQuerySchema = z
   .object({
     limit: z.coerce.number().int().min(1).max(50).default(20),
@@ -16,11 +18,16 @@ export const feedPlacesQuerySchema = z
     lng: coordinateSchema.optional(),
     city: optionalContextSchema,
     country: optionalContextSchema,
+    sort: feedSortSchema.default("relevance"),
     debug: debugQuerySchema
   })
   .refine((query) => (query.lat === undefined) === (query.lng === undefined), {
     message: "lat and lng must be sent together",
     path: ["lat"]
+  })
+  .refine((query) => query.sort !== "distance" || query.lat !== undefined, {
+    message: "sort=distance requires lat and lng",
+    path: ["sort"]
   });
 
 export const feedPrimaryPhotoSchema = z.object({
@@ -49,6 +56,7 @@ export const feedCacheStatusSchema = z.enum([
 export const feedMetaSchema = z.object({
   personalizationStatus: feedPersonalizationStatusSchema,
   cacheStatus: feedCacheStatusSchema,
+  sort: feedSortSchema,
   algorithmVersion: z.string().nullable(),
   embeddingRunId: z.string().nullable(),
   generatedAt: z.string(),
@@ -97,6 +105,7 @@ export const feedPlacesResponseSchema = z.object({
 export const feedSchemaRegistry = z.registry<{ id: string }>();
 
 feedSchemaRegistry.add(feedPlacesQuerySchema, { id: "FeedPlacesQuery" });
+feedSchemaRegistry.add(feedSortSchema, { id: "FeedSort" });
 feedSchemaRegistry.add(feedPrimaryPhotoSchema, { id: "FeedPrimaryPhoto" });
 feedSchemaRegistry.add(feedPersonalizationStatusSchema, {
   id: "FeedPersonalizationStatus"

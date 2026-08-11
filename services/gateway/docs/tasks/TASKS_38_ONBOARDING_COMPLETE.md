@@ -2,6 +2,19 @@
 
 **Status: Planned (awaiting approval).**
 
+> **Addendum (2026-08-11):** iOS ask
+> `frontend_new/messages-to-backend-dev/not-done/ONBOARDING_STATUS_WRITE.md` lands on this
+> task — it needs exactly one writable, enumerated onboarding state readable via `GET /v1/me`
+> on any device. Two additions to the scope below:
+> (1) document the vocabulary in the contract — `MeProfile.onboardingStatus` becomes
+> `z.enum(["not_started", "completed", "skipped"])` in `me.schemas.ts` (safe: `not_started`
+> is the only value in the wild — the column has never had a writer; this endpoint stays the
+> single one);
+> (2) after ship, answer/close the iOS spec file — the client then deletes its
+> `isNewlyCreatedAccount()` stopgap and branches on `== "completed"`.
+> The DB stays free-text (the Out Of Scope note below is unchanged — the enum lives in the
+> API contract, not a CHECK constraint).
+
 Part **1 of 5** of the onboarding feature (data-team handoff `2026-08-01`). This is
 the **independent, ship-now** piece: it has **no dependency** on the recommendation
 service or the precomputed artifact. It also scaffolds the new gateway `onboarding`

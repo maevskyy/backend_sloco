@@ -198,6 +198,7 @@ describe("feed places service", () => {
         query: {
           limit: 20,
           offset: 0,
+          sort: "relevance" as const,
           debug: false
         },
         user: {
@@ -234,7 +235,7 @@ describe("feed places service", () => {
       ]
     });
 
-    expect(requests()[0]?.limit).toBe(100);
+    expect(requests()[0]?.limit).toBe(200);
   });
 
   it("uses cached recommendations for repeated requests with same signals", async () => {
@@ -250,6 +251,7 @@ describe("feed places service", () => {
       query: {
         limit: 20,
         offset: 0,
+        sort: "relevance" as const,
         debug: false
       },
       user: {
@@ -280,6 +282,7 @@ describe("feed places service", () => {
         query: {
           limit: 20,
           offset: 0,
+          sort: "relevance" as const,
           debug: false
         },
         user: null
@@ -317,6 +320,7 @@ describe("feed places service", () => {
         query: {
           limit: 20,
           offset: 0,
+          sort: "relevance" as const,
           debug: false
         },
         user: {
@@ -371,6 +375,7 @@ describe("feed places service", () => {
         query: {
           limit: 20,
           offset: 0,
+          sort: "relevance" as const,
           debug: false
         },
         user: {
@@ -419,6 +424,7 @@ describe("feed places service", () => {
         query: {
           limit: 20,
           offset: 0,
+          sort: "relevance" as const,
           debug: false
         },
         user: {
@@ -461,6 +467,7 @@ describe("feed places service", () => {
       query: {
         limit: 20,
         offset: 0,
+        sort: "relevance" as const,
         debug: false
       },
       user: {
@@ -486,7 +493,7 @@ describe("feed places service", () => {
     const service = createFeedPlacesService(
       createStore({
         async feedPlacesBySourceIds(sourceIds, _query, limit) {
-          expect(limit).toBe(100);
+          expect(limit).toBe(200);
           return sourceIds.map((sourceId, index) =>
             feedRow({
               id: index + 1,
@@ -522,6 +529,7 @@ describe("feed places service", () => {
       query: {
         limit: 30,
         offset: 60,
+        sort: "relevance" as const,
         debug: false
       },
       user: {
@@ -530,7 +538,7 @@ describe("feed places service", () => {
       }
     });
 
-    expect(requests[0]?.limit).toBe(100);
+    expect(requests[0]?.limit).toBe(200);
     expect(result.places).toHaveLength(30);
     expect(result.places[0]).toMatchObject({
       sourceId: "place_61",
@@ -573,6 +581,7 @@ describe("feed places service", () => {
       query: {
         limit: 20,
         offset: 0,
+        sort: "relevance" as const,
         debug: false
       },
       user: {
@@ -584,6 +593,7 @@ describe("feed places service", () => {
       query: {
         limit: 30,
         offset: 20,
+        sort: "relevance" as const,
         debug: false
       },
       user: {
@@ -637,6 +647,7 @@ describe("feed places service", () => {
       query: {
         limit: 30,
         offset: 70,
+        sort: "relevance" as const,
         debug: false
       },
       user: {
@@ -653,7 +664,7 @@ describe("feed places service", () => {
     const service = createFeedPlacesService(
       createStore({
         async fallbackFeedPlaces(_query, limit) {
-          expect(limit).toBe(100);
+          expect(limit).toBe(200);
           return Array.from({ length: 100 }, (_, index) =>
             feedRow({
               id: index + 1,
@@ -673,6 +684,7 @@ describe("feed places service", () => {
       query: {
         limit: 30,
         offset: 60,
+        sort: "relevance" as const,
         debug: false
       },
       user: null
@@ -687,6 +699,188 @@ describe("feed places service", () => {
     expect(result.places.at(-1)).toMatchObject({
       sourceId: "fallback_90",
       rank: 90
+    });
+  });
+
+  describe("sort=distance", () => {
+    function distanceQuery(overrides: Partial<{ limit: number; offset: number }> = {}) {
+      return {
+        limit: 20,
+        offset: 0,
+        lat: 44.43,
+        lng: 26.1,
+        sort: "distance" as const,
+        debug: false,
+        ...overrides
+      };
+    }
+
+    it("re-orders the personalized snapshot by distance with positional rank", async () => {
+      const { client } = createClient();
+      const service = createFeedPlacesService(
+        createStore({
+          async feedPlacesBySourceIds(sourceIds) {
+            const distances: Record<string, number> = {
+              place_2: 500,
+              place_3: 100
+            };
+            return sourceIds.map((sourceId, index) =>
+              feedRow({
+                id: index + 1,
+                source_id: sourceId,
+                name: `Place ${sourceId}`,
+                distance_m: distances[sourceId] ?? null
+              })
+            );
+          }
+        }),
+        client,
+        createSavedService(),
+        new FeedRecommendationCache(),
+        createReactionsService()
+      );
+
+      const result = await service({
+        query: distanceQuery(),
+        user: { id: "user-1", email: "user@example.com" }
+      });
+
+      expect(result.feed.sort).toBe("distance");
+      expect(result.places.map((place) => place.sourceId)).toEqual([
+        "place_3",
+        "place_2"
+      ]);
+      expect(result.places.map((place) => place.rank)).toEqual([1, 2]);
+      expect(
+        result.places.map((place) => place.distanceMeters)
+      ).toEqual([100, 500]);
+    });
+
+    it("breaks distance ties by relevance order", async () => {
+      const { client } = createClient();
+      const service = createFeedPlacesService(
+        createStore({
+          async feedPlacesBySourceIds(sourceIds) {
+            return sourceIds.map((sourceId, index) =>
+              feedRow({
+                id: index + 1,
+                source_id: sourceId,
+                distance_m: 250
+              })
+            );
+          }
+        }),
+        client,
+        createSavedService(),
+        new FeedRecommendationCache(),
+        createReactionsService()
+      );
+
+      const result = await service({
+        query: distanceQuery(),
+        user: { id: "user-1", email: "user@example.com" }
+      });
+
+      expect(result.places.map((place) => place.sourceId)).toEqual([
+        "place_2",
+        "place_3"
+      ]);
+    });
+
+    it("continues the distance ordering across offset windows", async () => {
+      const recommendations = createRecommendations(100);
+      const service = createFeedPlacesService(
+        createStore({
+          async feedPlacesBySourceIds(sourceIds) {
+            // Distance order is the exact reverse of relevance order.
+            return sourceIds.map((sourceId, index) =>
+              feedRow({
+                id: index + 1,
+                source_id: sourceId,
+                distance_m: (sourceIds.length - index) * 10
+              })
+            );
+          }
+        }),
+        {
+          async personalizedPlaces(request) {
+            return {
+              user_id: request.user_id,
+              algorithm_version: "embedding_recommender_v1",
+              embedding_run_id: "test-run",
+              input_summary: {
+                favourites_count: 1,
+                want_to_go_count: 1,
+                valid_input_count: 2,
+                invalid_place_ids: []
+              },
+              recommendations
+            };
+          }
+        },
+        createSavedService(),
+        new FeedRecommendationCache(),
+        createReactionsService()
+      );
+
+      const pageOne = await service({
+        query: distanceQuery({ limit: 20, offset: 0 }),
+        user: { id: "user-1", email: "user@example.com" }
+      });
+      const pageTwo = await service({
+        query: distanceQuery({ limit: 20, offset: 20 }),
+        user: { id: "user-1", email: "user@example.com" }
+      });
+
+      const pageOneDistances = pageOne.places.map(
+        (place) => place.distanceMeters ?? 0
+      );
+      const pageTwoDistances = pageTwo.places.map(
+        (place) => place.distanceMeters ?? 0
+      );
+
+      expect(pageOneDistances).toEqual([...pageOneDistances].sort((a, b) => a - b));
+      expect(pageTwoDistances[0]).toBeGreaterThanOrEqual(
+        pageOneDistances.at(-1) ?? 0
+      );
+      expect(pageOne.places.map((place) => place.rank)).toEqual(
+        Array.from({ length: 20 }, (_, index) => index + 1)
+      );
+      expect(pageTwo.places.map((place) => place.rank)).toEqual(
+        Array.from({ length: 20 }, (_, index) => index + 21)
+      );
+    });
+
+    it("sorts the fallback snapshot by distance too", async () => {
+      const service = createFeedPlacesService(
+        createStore({
+          async fallbackFeedPlaces() {
+            return [
+              feedRow({ id: 9, source_id: "fallback_1", distance_m: 300 }),
+              feedRow({ id: 10, source_id: "fallback_2", distance_m: 100 }),
+              feedRow({ id: 11, source_id: "fallback_3", distance_m: 200 })
+            ];
+          }
+        }),
+        createClient().client,
+        createSavedService(),
+        new FeedRecommendationCache(),
+        createReactionsService()
+      );
+
+      const result = await service({
+        query: distanceQuery(),
+        user: null
+      });
+
+      expect(result.feed.personalizationStatus).toBe("anonymous_fallback");
+      expect(result.feed.sort).toBe("distance");
+      expect(result.places.map((place) => place.sourceId)).toEqual([
+        "fallback_2",
+        "fallback_3",
+        "fallback_1"
+      ]);
+      expect(result.places.map((place) => place.rank)).toEqual([1, 2, 3]);
     });
   });
 });

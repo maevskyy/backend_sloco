@@ -208,7 +208,9 @@ jobs:
             RECOMMENDATION_SERVICE_URL=http://recommendation-service:8000
             PLACE_CACHE_TTL_SECONDS=3600
             MAP_TILE_CACHE_TTL_SECONDS=604800
-            MAP_TILE_VERSION=1
+            # v2 = per-tile density cap (migration 017); bumping busts Redis keys,
+            # the ETag and the client-facing ?v= from /v1/map/config together.
+            MAP_TILE_VERSION=2
 
             RECOMMENDATION_APP_ENV=production
             RECOMMENDATION_LOG_LEVEL=info

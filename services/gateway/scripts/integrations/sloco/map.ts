@@ -36,6 +36,7 @@ const SLOCO_COLUMNS = [
   "category",
   "latitude",
   "longitude",
+  "google_maps_uri",
   "primary_type",
   "types",
   "google_rating",
@@ -150,16 +151,19 @@ function mapSlocoRow(row: RawCsvRow): SlocoCsvRow {
   const country = cityRaw ? (CITY_COUNTRY[cityRaw.toLowerCase()] ?? "others") : "others";
   const category =
     optionalText(row.primary_type) ?? optionalText(row.theme_group) ?? UNKNOWN_TEXT;
+  const sourceId = requiredText(row.place_id);
 
   return {
     source: SOURCE,
-    source_id: requiredText(row.place_id),
+    source_id: sourceId,
     name: requiredText(row.name),
     country,
     city: cityRaw ?? "others",
     category,
     latitude: numberCell(parseRequiredNumber(row.latitude, "latitude")),
     longitude: numberCell(parseRequiredNumber(row.longitude, "longitude")),
+    // place_id is the numeric Google CID; ?cid= is the canonical place link.
+    google_maps_uri: `https://maps.google.com/?cid=${sourceId}`,
     primary_type: textCell(row.primary_type),
     types: pgTextArray(parseStringList(row.types)),
     google_rating: optionalNumberCell(row.google_rating),
@@ -171,7 +175,7 @@ function mapSlocoRow(row: RawCsvRow): SlocoCsvRow {
     rating_score_0_100: optionalNumberCell(row.rating_score_0_100),
     popularity_score_0_100: optionalNumberCell(row.popularity_score_0_100),
     rating_confidence_0_100: optionalNumberCell(row.rating_confidence_0_100),
-    price_level: optionalNumberCell(row.price_level),
+    price_level: priceLevelCell(row.price_level),
     price_min_ron: optionalNumberCell(row.price_min_ron),
     price_max_ron: optionalNumberCell(row.price_max_ron),
     ai_card_summary: textCell(row.ai_card_summary),
@@ -253,6 +257,35 @@ function optionalNumberCell(value: string | undefined): string {
 
 function numericOrNullCell(value: number | null): string {
   return value === null ? "" : String(value);
+}
+
+// The catalog's `price_level` is categorical (inexpensive/moderate/expensive/
+// very_expensive) while the column is integer 0-4 (Google semantics: 1..4).
+// The old numeric-only parse silently emitted NULL for every row — the reason
+// prod served priceLevel: null everywhere (TASKS_44). Map the words, pass
+// through already-numeric values.
+const PRICE_LEVEL_WORDS: Record<string, number> = {
+  free: 0,
+  inexpensive: 1,
+  moderate: 2,
+  expensive: 3,
+  very_expensive: 4
+};
+
+function priceLevelCell(value: string | undefined): string {
+  const normalized = value?.trim().toLowerCase();
+
+  if (!normalized) {
+    return "";
+  }
+
+  const mapped = PRICE_LEVEL_WORDS[normalized];
+
+  if (mapped !== undefined) {
+    return String(mapped);
+  }
+
+  return optionalNumberCell(value);
 }
 
 // analyst `ai_confidence` is categorical (high/medium/low) but the column is

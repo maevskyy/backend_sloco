@@ -48,12 +48,14 @@ function feedService(): FeedPlacesService {
   return async ({ query, user }) => {
     expect(query.limit).toBe(20);
     expect(query.offset).toBe(0);
+    expect(query.sort).toBe("relevance");
     expect(query.debug).toBe(false);
 
     return {
       feed: {
         personalizationStatus: user ? "personalized" : "anonymous_fallback",
         cacheStatus: "not_applicable",
+        sort: query.sort,
         algorithmVersion: "test",
         embeddingRunId: null,
         generatedAt: "2026-06-01T10:00:00.000Z",
@@ -128,6 +130,7 @@ describe("feed routes", () => {
           feed: {
             personalizationStatus: "anonymous_fallback",
             cacheStatus: "not_applicable",
+            sort: query.sort,
             algorithmVersion: "test",
             embeddingRunId: null,
             generatedAt: "2026-06-01T10:00:00.000Z",
@@ -201,6 +204,72 @@ describe("feed routes", () => {
     await app.close();
 
     expect(response.statusCode).toBe(400);
+  });
+
+  it("returns 400 for an unknown sort value", async () => {
+    const app = await buildApp();
+
+    const response = await app.inject({
+      method: "GET",
+      url: `${VersionedAppRoute.feedPlaces}?sort=nearest&lat=44.43&lng=26.1`
+    });
+
+    await app.close();
+
+    expect(response.statusCode).toBe(400);
+  });
+
+  it("returns 400 for sort=distance without coordinates", async () => {
+    const app = await buildApp();
+
+    const response = await app.inject({
+      method: "GET",
+      url: `${VersionedAppRoute.feedPlaces}?sort=distance`
+    });
+
+    await app.close();
+
+    expect(response.statusCode).toBe(400);
+  });
+
+  it("passes sort=distance through and echoes it in the meta", async () => {
+    const app = await buildApp({
+      feedPlacesService: async ({ query }) => {
+        expect(query.sort).toBe("distance");
+        expect(query.lat).toBe(44.43);
+        expect(query.lng).toBe(26.1);
+
+        return {
+          feed: {
+            personalizationStatus: "anonymous_fallback",
+            cacheStatus: "not_applicable",
+            sort: query.sort,
+            algorithmVersion: "test",
+            embeddingRunId: null,
+            generatedAt: "2026-06-01T10:00:00.000Z",
+            expiresAt: null
+          },
+          inputSummary: {
+            favouritesCount: 0,
+            wantToGoCount: 0,
+            validInputCount: 0,
+            invalidPlaceIds: []
+          },
+          places: [feedPlace({ distanceMeters: 120 })]
+        };
+      }
+    });
+
+    const response = await app.inject({
+      method: "GET",
+      url: `${VersionedAppRoute.feedPlaces}?sort=distance&lat=44.43&lng=26.1`
+    });
+
+    await app.close();
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json().feed.sort).toBe("distance");
+    expect(response.json().places[0].distanceMeters).toBe(120);
   });
 
   it("does not expose unversioned feed routes", async () => {

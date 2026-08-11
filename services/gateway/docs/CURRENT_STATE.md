@@ -11,7 +11,9 @@ Runtime host: Hetzner Ubuntu server
 App runtime: Docker Compose + Nginx
 Deploy: GitHub Actions -> GHCR -> SSH -> docker compose
 Database: Supabase managed Postgres
-Observability: Grafana Cloud + Alloy on the server
+Cache: Redis (place details, map tiles)
+Observability: self-hosted Grafana + Loki + Prometheus (root compose observability profile; TASKS_31)
+Recommendation service: private Python service on the Docker network (feed personalization)
 Auth direction: iOS Supabase Auth SDK + backend JWT validation
 ```
 
@@ -28,9 +30,10 @@ pnpm lint
 pnpm typecheck
 ```
 
-Data mapper commands:
+Data mapper commands (`sloco_ai` is the primary source; see `../scripts/README.md`):
 
 ```bash
+pnpm map:sloco /path/to/handoff/catalog/locations_combined_food_ttd.csv --out dumps/sloco_places.csv
 pnpm map:tripadvisor dumps/raw_tripadvisor_restaurants_import.csv --out dumps/tripadvisor_places.csv
 pnpm map:osm dumps/bucharest_cafes.csv --out dumps/osm_bucharest_places.csv
 ```
@@ -50,6 +53,10 @@ curl "https://sloco.pp.ua/v1/search/places?q=coffee&lat=44.43&lng=26.10&city=Buc
 GET /v1/health
 GET /v1/health/supabase
 GET /v1/me
+GET /v1/me/reactions
+GET /v1/me/saved/ids
+PUT /v1/me/places/:placeId/reaction
+DELETE /v1/me/places/:placeId/reaction
 GET /v1/me/saved
 GET /v1/me/saved/collections/:collectionId
 POST /v1/me/saved/places
@@ -61,9 +68,11 @@ POST /v1/me/saved/collections/:collectionId/places
 DELETE /v1/me/saved/collections/:collectionId/places/:placeId
 PATCH /v1/me/saved/collections/:collectionId/places/order
 GET /v1/map/places?swLat=...&swLng=...&neLat=...&neLng=...&zoom=...
+GET /v1/map/config
+GET /v1/map/tiles/:z/:x/:y.mvt?v=...
 GET /v1/places/:placeId
 GET /v1/search/places?q=...&lat=...&lng=...
-GET /v1/feed/places?limit=...&lat=...&lng=...
+GET /v1/feed/places?limit=...&offset=...&lat=...&lng=...&debug=...
 GET /v1/swagger/docs
 GET /v1/swagger/openapi.json
 ```
@@ -100,7 +109,10 @@ Auth profile table: public.profiles
 Saved places table: public.saved_places
 Saved collections table: public.saved_collections
 Saved collection membership table: public.saved_collection_places
+Place photos table: public.place_photos (R2 public_url; primary + bounded photos[])
+Reactions table: public.place_reactions (favorite|dislike|hide, keyed by source_id)
 Map pin RPC: public.map_places_in_bbox(sw_lat, sw_lng, ne_lat, ne_lng, result_limit)
+Map tile RPC: public.map_tile(z, x, y) (MVT bytea; min-score floor via map_tile_min_score(z))
 Place detail RPC: public.place_details_by_id(place_id)
 Search RPC: public.search_places(q, user_lat, user_lng, user_city, user_country, result_limit)
 Feed hydration RPC: public.feed_places_by_source_ids(source_ids, user_lat, user_lng, result_limit)
@@ -108,12 +120,16 @@ Feed fallback RPC: public.feed_fallback_places(user_lat, user_lng, user_city, us
 Migrations: supabase/migrations/
 ```
 
-Map reads are bbox-only and return lightweight pins. Rich place data is fetched
-only after a user selects a place via `GET /v1/places/:placeId`.
+The iOS map renders from the vector tiles (`/v1/map/config` + `/v1/map/tiles`,
+Redis-cached, versioned by `MAP_TILE_VERSION`); `/v1/map/places` remains the
+bbox JSON endpoint. Rich place data is fetched only after a user selects a
+place via `GET /v1/places/:placeId`.
 Place search is global, fuzzy, and independent from the current map bbox.
 Decide feed reads are card-oriented, recommendation-service backed for
 authenticated users, and fall back to quality/visibility picks for anonymous or
-cold-start users.
+cold-start users. Reactions (`favorite|dislike|hide`) seed the personalization
+signals, hard-exclude disliked/hidden places, and are echoed on feed cards and
+place details.
 Place details now expose both `primaryPhoto` and a bounded `photos[]` gallery
 list with direct R2 `public_url` values for fullscreen gallery clients.
 
@@ -130,9 +146,13 @@ provider dump CSV
 Current providers:
 
 ```text
+Sloco AI catalog (primary) -> scripts/integrations/sloco/map.ts  (source = "sloco_ai", source_id = Google CID)
 TripAdvisor -> scripts/integrations/tripadvisor/map.ts
 OpenStreetMap -> scripts/integrations/osm/map.ts
 ```
+
+Place photos are R2 objects indexed into `public.place_photos` by
+`pnpm photos:index-sloco` (see `../scripts/README.md`).
 
 ## Active Module Architecture
 
@@ -156,8 +176,9 @@ controller -> service -> store
 ```
 
 `src/modules/saved-places/` is the reference implementation. All product modules
-(`map`, `me`, `health`, `saved-places`) now use this shape; `auth` stays a shared
-service (no HTTP) with its Supabase call isolated in a store.
+(`map`, `me`, `health`, `saved-places`, `places`, `search`, `feed`, `reactions`)
+use this shape; `auth` stays a shared service (no HTTP) with its Supabase call
+isolated in a store.
 
 Shared code is split by responsibility: `src/lib/` (infrastructure adapters),
 `src/config/` (wiring, plus the `openapi.ts` zod→component generator and
@@ -168,12 +189,13 @@ module, so request validation and docs cannot drift.
 
 ## Current Priorities
 
+- Ship the open iOS asks: the cross-service plan is
+  `../../../ios-asks-implementation-plan.md` (task files `tasks/TASKS_41`–`46`,
+  `TASKS_38`, recommendation `TASKS_6`, and `tasks/TBD_PLACE_DETAILS_ENRICHMENT.md`).
 - Keep backend deploy simple: one Hetzner host, Docker Compose, managed
   Supabase.
-- Keep map API lightweight: bbox query, density/ranking, no heavy place details.
-- Build the next user-owned product layers: taste profile, favorite place input,
-  and personalization on top of saved places.
+- Keep map API lightweight: tiles + bbox pins; rich data stays behind
+  `GET /v1/places/:placeId`.
 - Keep task docs as history/plans; prefer this file for current context.
 - Do not self-host Postgres during MVP unless there is a real business or cost
   reason.
-- Treat self-hosted Grafana/Loki/Prometheus as TBD, not current runtime.

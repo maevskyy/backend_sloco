@@ -46,6 +46,12 @@ class LocationRecommenderV4Adapter:
         locations = self._recommender.locations
         return int(locations["has_embedding"].sum())
 
+    @property
+    def locations_count(self) -> int:
+        # Catalog size before the embedding join — the denominator for the
+        # startup coverage guard (candidate_count / locations_count).
+        return int(len(self._recommender.locations))
+
     def recommend(
         self,
         favourites_place_ids: list[str] | None,

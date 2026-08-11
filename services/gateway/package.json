@@ -13,6 +13,7 @@
     "map:tripadvisor": "tsx scripts/integrations/tripadvisor/map.ts",
     "map:osm": "tsx scripts/integrations/osm/map.ts",
     "map:sloco": "tsx scripts/integrations/sloco/map.ts",
+    "details:dataforseo": "tsx scripts/integrations/dataforseo/details-delta.ts",
     "photos:upload": "tsx scripts/photos/upload-place-photos.ts",
     "photos:index-sloco": "tsx scripts/photos/index-sloco-photos.ts"
   },

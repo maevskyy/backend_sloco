@@ -21,6 +21,29 @@ from recommendation_service.recommendations.router import (
 
 logger = logging.getLogger(__name__)
 
+# A mismatched artifact set (embeddings/metadata vs locations CSV) silently marks
+# unmatched places has_embedding=False and drops them from candidates — see
+# recommender-config-audit.md P0-2. Full matching sets sit at 100%.
+COVERAGE_WARN_RATIO = 0.95
+
+
+def log_v4_embedding_coverage(candidate_count: int, locations_count: int) -> None:
+    coverage = candidate_count / locations_count if locations_count else 0.0
+    logger.info(
+        "v4 embedding coverage: %s/%s locations have embeddings (%.1f%%)",
+        candidate_count,
+        locations_count,
+        coverage * 100,
+    )
+    if coverage < COVERAGE_WARN_RATIO:
+        logger.warning(
+            "v4 embedding coverage %.1f%% is below %.0f%% — the embeddings/metadata "
+            "artifact set likely does not match LOCATIONS_CSV_PATH; unmatched places "
+            "are silently excluded from candidates (recommender-config-audit.md P0-2)",
+            coverage * 100,
+            COVERAGE_WARN_RATIO * 100,
+        )
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
@@ -38,6 +61,9 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
         recommender = build_location_recommender_v4(settings)
         algorithm_version = LOCATION_V4_VERSION
+        log_v4_embedding_coverage(
+            recommender.candidate_count, recommender.locations_count
+        )
     else:
         recommender = EmbeddingRecommender.from_artifacts(
             npy_path=settings.embeddings_npy_path,

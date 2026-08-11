@@ -12,6 +12,7 @@ import type {
   FeedInputSummary,
   FeedPersonalizationStatus,
   FeedPlaceCard,
+  FeedPlacesQuery,
   FeedPlacesResult,
   FeedPlacesService,
   FeedRecommendationClient,
@@ -25,7 +26,10 @@ export type { FeedPlacesService } from "../common/feed.types.js";
 
 const CACHE_TTL_MS = 10 * 60 * 1000;
 const MAX_CACHE_ENTRIES = 500;
-const FEED_SNAPSHOT_SIZE = 100;
+// 200 = the ceiling everything downstream is provisioned for: migration 016 caps
+// both feed RPCs at 200 and the rec-service RECOMMEND_MAX_LIMIT defaults to 200.
+// Deeper needs those raised too (TASKS_43).
+const FEED_SNAPSHOT_SIZE = 200;
 const FALLBACK_ALGORITHM_VERSION = "fallback_visibility_v1";
 
 type CachedRecommendation = {
@@ -227,12 +231,14 @@ export function createFeedPlacesService(
       });
     }
 
-    const places = snapshot.slice(query.offset, query.offset + query.limit);
+    const ordered = applySort(snapshot, query.sort);
+    const places = ordered.slice(query.offset, query.offset + query.limit);
 
     return {
       feed: {
         personalizationStatus: "personalized",
         cacheStatus,
+        sort: query.sort,
         algorithmVersion: cachedOrFresh.response.algorithm_version,
         embeddingRunId: cachedOrFresh.response.embedding_run_id,
         generatedAt: toIso(cachedOrFresh.cachedAt),
@@ -277,7 +283,7 @@ async function fallbackFeed(input: {
           rank: index + 1
         })
       );
-  const places = snapshot.slice(
+  const places = applySort(snapshot, input.query.sort).slice(
     input.query.offset,
     input.query.offset + input.query.limit
   );
@@ -286,6 +292,7 @@ async function fallbackFeed(input: {
     feed: {
       personalizationStatus: input.status,
       cacheStatus: input.cacheStatus,
+      sort: input.query.sort,
       algorithmVersion: FALLBACK_ALGORITHM_VERSION,
       embeddingRunId: null,
       generatedAt: toIso(input.generatedAt),
@@ -330,6 +337,29 @@ function markPlaceAsUnsignedUserState(place: FeedPlaceCard): FeedPlaceCard {
     isSaved: false,
     reaction: null
   };
+}
+
+// sort=distance re-orders the whole snapshot BEFORE the offset slice, so offset
+// windows continue the distance ordering. Array.prototype.sort is stable, so
+// equal distances keep their relevance order; rank becomes positional over the
+// sorted snapshot (the client treats rank as positional — FEED_SORT_SPEC).
+// Validation guarantees lat/lng, so distanceMeters is set on every row; nulls
+// would sort last as a safety net.
+function applySort(
+  snapshot: FeedPlaceCard[],
+  sort: FeedPlacesQuery["sort"]
+): FeedPlaceCard[] {
+  if (sort !== "distance") {
+    return snapshot;
+  }
+
+  return [...snapshot]
+    .sort(
+      (a, b) =>
+        (a.distanceMeters ?? Number.POSITIVE_INFINITY) -
+        (b.distanceMeters ?? Number.POSITIVE_INFINITY)
+    )
+    .map((card, index) => ({ ...card, rank: index + 1 }));
 }
 
 function hasSignals(signals: FeedUserSignals) {
