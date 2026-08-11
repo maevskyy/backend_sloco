@@ -34,12 +34,17 @@ deployment, compose, Nginx, observability, and load-test docs live in root
 ## Repo Map
 
 ```text
-src/        application code
-docs/       documentation and task plans
-supabase/   database migrations
-dumps/      small sample/import data files
-scripts/    offline ETL and source integration mappers
+src/                  application code
+docs/                 documentation and task plans
+supabase/migrations/  database migrations
+supabase/rollback/    undo scripts for migrations that replace RPC signatures
+dumps/                small sample/import data files
+scripts/              offline ETL and source integration mappers
 ```
+
+`supabase/rollback/` holds hand-written undo scripts, one per risky migration — see its
+`README.md` for when a migration needs one. They are never run as part of the migration
+sequence.
 
 Start with:
 
@@ -112,9 +117,16 @@ pnpm build
 pnpm test
 pnpm lint
 pnpm typecheck
+pnpm map:sloco <catalog.csv> --out dumps/sloco_places.csv          # primary source (sloco_ai)
 pnpm map:tripadvisor dumps/raw_tripadvisor_restaurants_import.csv --out dumps/tripadvisor_places.csv
 pnpm map:osm dumps/bucharest_cafes.csv --out dumps/osm_bucharest_places.csv
+pnpm details:dataforseo <places.jsonl…> --out dumps/place_details_delta.csv
+pnpm photos:index-sloco
 ```
+
+`map:*` produce a full `public.places` import CSV; `details:dataforseo` produces a delta
+CSV keyed by `cid` (= `places.source_id`) for a NULL-guarded UPDATE import — see
+`docs/tasks/TASKS_47_PLACE_DETAILS_IMPORT.md`.
 
 Before finishing backend code changes, run:
 
@@ -166,24 +178,45 @@ DELETE /v1/me/saved/collections/:collectionId/places/:placeId
 PATCH /v1/me/saved/collections/:collectionId/places/order
 ```
 
+The rest of the product surface (full list in `docs/CURRENT_STATE.md`):
+
+```http
+GET /v1/map/config
+GET /v1/map/tiles/:z/:x/:y.mvt
+GET /v1/places/:placeId
+GET /v1/search/places
+GET /v1/feed/places
+GET /v1/me/reactions
+PUT /v1/me/places/:placeId/reaction
+DELETE /v1/me/places/:placeId/reaction
+POST /v1/onboarding/complete
+```
+
 Contract docs:
 
 ```text
 https://sloco.pp.ua/v1/swagger/openapi.json
 docs/FRONTEND_MAP_API.md
+docs/FRONTEND_MAP_VECTOR_TILES.md
+docs/FRONTEND_SEARCH_API.md
+docs/FRONTEND_FEED_API.md
+docs/FRONTEND_ONBOARDING_API.md
 ```
 
-Map endpoint payloads should stay lightweight. Full place details should be a
-separate endpoint later.
+Map endpoint payloads should stay lightweight; full place details live behind
+`GET /v1/places/:placeId`.
 
 ## Database
 
 Supabase is the managed Postgres provider.
 
-Current serving table:
+Current serving tables:
 
 ```text
-public.places
+public.places                    the catalog (source `sloco_ai`, Google CID as source_id)
+public.place_photos              R2 photo metadata
+public.place_reactions           favorite | dislike | hide, keyed by source_id
+public.profiles                  display name + onboarding_status
 public.saved_places
 public.saved_collections
 public.saved_collection_places

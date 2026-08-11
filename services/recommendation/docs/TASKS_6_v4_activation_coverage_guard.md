@@ -40,7 +40,7 @@ artifact swaps; today's coverage is already proven at 100%, so this is not urgen
 
 Resolves the still-open P0 items of `../../../recommender-config-audit.md` (P0-1 "verify
 which algorithm prod actually runs", P0-2 "switch ALL artifact env vars together") and
-answers iOS ask `frontend_new/messages-to-backend-dev/not-done/RECOMMENDER_STATUS.md`
+answers iOS ask `frontend_new/messages-to-backend-dev/done/RECOMMENDER_STATUS.md`
 (Q1: deployed? which version?). Umbrella plan:
 `../../../ios-asks-implementation-plan.md` §1.
 

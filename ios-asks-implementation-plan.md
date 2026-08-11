@@ -1,9 +1,12 @@
 # iOS asks — backend implementation plan
 
-**Date:** 2026-08-11 · **Sources:** the seven open spec files in
-`frontend_new/messages-to-backend-dev/not-done/` (plus the two in `done/`), compared line-by-line
-against this repo's code (gateway `src/`, `supabase/migrations/`, `scripts/`, and
-`services/recommendation/`).
+**Date:** 2026-08-11 · **Closed:** 2026-08-12 · **Sources:** the nine spec files in
+`frontend_new/messages-to-backend-dev/` — seven open at the time of writing, all nine now
+in `done/` — compared line-by-line against this repo's code (gateway `src/`,
+`supabase/migrations/`, `scripts/`, and `services/recommendation/`).
+
+**Outcome: every ask shipped.** The consolidated reply to the iOS side is
+`frontend_new/messages-from-backend-dev/2026-08-12-ALL-NINE-ASKS-ANSWERED.md`.
 
 This is the working plan. Each section states: what the code actually shows (with file
 references), the verdict for the spec, and the concrete steps. Suggested execution order is at

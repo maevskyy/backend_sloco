@@ -19,7 +19,7 @@ the Supabase SQL editor → deploy (gateway restart picks `MAP_TILE_VERSION=2`) 
 acceptance below → then fold docs (`FRONTEND_MAP_VECTOR_TILES.md`, `DECISIONS.md` row) —
 held back deliberately so the docs of record keep describing live behavior.
 
-iOS ask `frontend_new/messages-to-backend-dev/not-done/MAP_TILE_DENSITY.md` (measured live:
+iOS ask `frontend_new/messages-to-backend-dev/done/MAP_TILE_DENSITY.md` (measured live:
 one Tbilisi z13 tile carries **235** places, Bucharest z13 **119**; a phone screen is ~1.35
 tiles → ~300 places per screenful where Google shows 5–10). Umbrella plan:
 `../../../../ios-asks-implementation-plan.md` §7.

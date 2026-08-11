@@ -12,7 +12,7 @@ keeps returning nulls until the entry expires or `place:v1:*` is flushed (step 6
 the one thing that makes a correct import look broken.
 
 Promotes `TBD_PLACE_DETAILS_ENRICHMENT.md` (kept for rationale/history). Closes the long
-half of iOS ask `frontend_new/messages-to-backend-dev/not-done/PLACE_DETAILS_MISSING_FIELDS.md`.
+half of iOS ask `frontend_new/messages-to-backend-dev/done/PLACE_DETAILS_MISSING_FIELDS.md`.
 The quick half (price backfill from `raw`, maps-uri from CID) is `TASKS_44`.
 
 ## Context

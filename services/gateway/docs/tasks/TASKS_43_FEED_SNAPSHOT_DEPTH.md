@@ -11,7 +11,7 @@ limit updated 100→200. Verified: `pnpm build`, 153/153 tests, lint, typecheck 
 Remaining: deploy + live smoke (`?limit=50&offset=100` → ranks 101–150; `offset=200` →
 `[]`), then answer the depth question in the iOS spec file (`FEED_FILTERS_AND_DEPTH.md`).
 
-Part of iOS ask `frontend_new/messages-to-backend-dev/not-done/FEED_FILTERS_AND_DEPTH.md`
+Part of iOS ask `frontend_new/messages-to-backend-dev/done/FEED_FILTERS_AND_DEPTH.md`
 (§1: "the feed just ends" — `offset=100` returns `[]`; for a swipe-one-place-per-screen feed,
 100 is a session, not a supply). Umbrella plan: `../../../../ios-asks-implementation-plan.md`
 §4. The `category` half of that spec is `TASKS_46`.

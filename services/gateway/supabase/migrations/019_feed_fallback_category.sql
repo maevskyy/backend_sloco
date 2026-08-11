@@ -1,6 +1,15 @@
 -- TASKS_46: category filter on the feed fallback path (iOS ask
 -- FEED_FILTERS_AND_DEPTH §2).
 --
+-- WARNING: THIS MIGRATION DROPS THE FUNCTION public.feed_fallback_places
+-- (FIVE-ARGUMENT SIGNATURE) AND RECREATES IT WITH AN EXTRA DEFAULTED PARAMETER.
+-- NO TABLE, COLUMN OR ROW IS TOUCHED. THE ANONYMOUS AND COLD-START FEED RUNS ON
+-- THIS FUNCTION, SO THE FEED IS SERVED BY THE NEW BODY THE MOMENT IT COMMITS.
+--
+-- The new parameter DEFAULTS to NULL, so callers that send the old five named
+-- arguments keep working unchanged. Undo: supabase/rollback/
+-- 2026-08-11_018_019_rollback.sql restores the migration-016 body verbatim.
+--
 -- Depends on migration 018 (the *_norm columns and their backfill).
 --
 -- feed_fallback_places() gains category_keywords text[] (default null). The
@@ -9,8 +18,8 @@
 -- "whichever survived a post-hoc cut". Matching is word-boundary over the
 -- normalized category/primary_type/types, identical to search_places (018).
 --
--- The signature changes, so the old function is dropped rather than replaced.
--- Non-destructive otherwise; the body is the 016 version plus the filter.
+-- The signature changes, so the old function is dropped rather than replaced
+-- (see the WARNING above); the body is the 016 version plus the filter.
 
 drop function if exists public.feed_fallback_places(
   double precision,

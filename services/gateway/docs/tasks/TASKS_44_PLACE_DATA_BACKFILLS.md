@@ -8,7 +8,7 @@ is Redis-cached for an hour, so entries fetched *before* the UPDATE keep showing
 until they expire or `place:v1:*` is flushed.
 
 The two quick wins split out of iOS ask
-`frontend_new/messages-to-backend-dev/not-done/PLACE_DETAILS_MISSING_FIELDS.md` (0/30 sampled
+`frontend_new/messages-to-backend-dev/done/PLACE_DETAILS_MISSING_FIELDS.md` (0/30 sampled
 places carry `priceLevel`; 0/30 carry `googleMapsUri`). The fields that genuinely need new
 external data (hours, addresses, phone, website, business status) are
 `TBD_PLACE_DETAILS_ENRICHMENT.md`. Umbrella plan: `../../../../ios-asks-implementation-plan.md`

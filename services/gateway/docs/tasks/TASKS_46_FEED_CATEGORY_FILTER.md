@@ -28,7 +28,7 @@ Implementation notes vs the plan below:
 - **Rollback:** `supabase/rollback/2026-08-11_018_019_rollback.sql` (covers `018` + `019`).
 
 The `category` half of iOS ask
-`frontend_new/messages-to-backend-dev/not-done/FEED_FILTERS_AND_DEPTH.md` §2 (the feed's
+`frontend_new/messages-to-backend-dev/done/FEED_FILTERS_AND_DEPTH.md` §2 (the feed's
 chips currently filter the already-loaded snapshot on the client, so "bars" can leave three
 cards). Depth is `TASKS_43`, sort is `TASKS_42`. Umbrella plan:
 `../../../../ios-asks-implementation-plan.md` §4.
@@ -67,7 +67,8 @@ cards). Depth is `TASKS_43`, sort is `TASKS_42`. Umbrella plan:
 1. **Migration `0NN_feed_fallback_category.sql`** — `CREATE OR REPLACE
    public.feed_fallback_places(..., category_keywords text[] default null)`: bucket-match
    WHERE (same `ilike any` shape as `TASKS_45`) applied in the `scored` CTE before the
-   ordering/limit. Non-destructive.
+   ordering/limit. The signature change means a drop/recreate — hence the CAPS warning in
+   the migration header.
 2. `common/feed.schemas.ts` — `category` param (zod enum array via CSV/repeat, optional).
 3. `stores/feed.store.ts` — pass `category_keywords` to the fallback RPC.
 4. `services/feed.service.ts` — personalized path: post-hydration bucket filter; unified

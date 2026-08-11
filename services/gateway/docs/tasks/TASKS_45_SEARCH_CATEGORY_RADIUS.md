@@ -45,7 +45,7 @@ Implementation notes vs the plan below:
 - **Rollback:** `supabase/rollback/2026-08-11_018_019_rollback.sql` restores the `011`/`016`
   function bodies verbatim. No data is at risk: `018` writes only the columns it adds.
 
-iOS ask `frontend_new/messages-to-backend-dev/not-done/SEARCH_CATEGORY_FILTER.md` — the search
+iOS ask `frontend_new/messages-to-backend-dev/done/SEARCH_CATEGORY_FILTER.md` — the search
 page's seven category chips are blocked on this and deliberately render inert until it ships.
 Umbrella plan: `../../../../ios-asks-implementation-plan.md` §6.
 
@@ -87,7 +87,8 @@ Umbrella plan: `../../../../ios-asks-implementation-plan.md` §6.
 1. **Migration `0NN_search_category_radius.sql`** — `CREATE OR REPLACE
    public.search_places(q, user_lat, user_lng, user_city, user_country, result_limit,
    category_keywords text[] default null, radius_meters integer default null)` with the two
-   modes above (drop/recreate with the new signature, grants re-applied; non-destructive).
+   modes above (drop/recreate with the new signature, grants re-applied — the drop is why
+   the migration carries a CAPS warning in its header).
    Browse-mode bucket match: `primary_type ilike any(...) or category ilike any(...) or
    exists (select 1 from unnest(types) t where t ilike any(...))` — same normalization
    (`f_unaccent`, lower) as the existing keywords.

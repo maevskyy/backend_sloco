@@ -36,7 +36,7 @@ Implementation notes vs the plan:
 - Contract doc: `docs/FRONTEND_ONBOARDING_API.md`. No migration needed.
 
 > **Addendum (2026-08-11):** iOS ask
-> `frontend_new/messages-to-backend-dev/not-done/ONBOARDING_STATUS_WRITE.md` lands on this
+> `frontend_new/messages-to-backend-dev/done/ONBOARDING_STATUS_WRITE.md` lands on this
 > task — it needs exactly one writable, enumerated onboarding state readable via `GET /v1/me`
 > on any device. Two additions to the scope below:
 > (1) document the vocabulary in the contract — `MeProfile.onboardingStatus` becomes

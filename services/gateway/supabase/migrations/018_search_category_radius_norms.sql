@@ -1,6 +1,18 @@
 -- TASKS_45 (+ the query half of TASKS_48): search category/radius + precomputed
 -- normalization.
 --
+-- WARNING: THIS MIGRATION CONTAINS HIGH-RISK OPERATIONS. IT DROPS THE FUNCTION
+-- public.search_places (SIX-ARGUMENT SIGNATURE) AND THE INDEX places_name_trgm,
+-- AND RUNS A FULL-TABLE UPDATE OVER public.places (~12.6k ROWS) TO BACKFILL THE
+-- NEW COLUMNS. NO ROW DATA IS DELETED AND NO EXISTING COLUMN IS OVERWRITTEN —
+-- THE UPDATE WRITES ONLY THE COLUMNS THIS MIGRATION ADDS — BUT THE FUNCTION AND
+-- INDEX ARE REPLACED, NOT PRESERVED. RUN IT DURING A QUIET DEPLOY WINDOW.
+--
+-- The dropped function is recreated below with a superset signature whose new
+-- parameters all DEFAULT to NULL, so callers that send the old six named
+-- arguments keep working unchanged. Undo: supabase/rollback/
+-- 2026-08-11_018_019_rollback.sql restores the migration-011 bodies verbatim.
+--
 -- Two changes in one rewrite of search_places():
 --
 -- 1. PERFORMANCE (TASKS_48): the old function recomputed
@@ -18,9 +30,10 @@
 --    map_visibility_score. The gateway validates that at least one of q /
 --    category is present.
 --
--- Non-destructive: adds columns, backfills them (full-table UPDATE over ~12.6k
--- rows), replaces one index and one function. places_name_trgm (expression
--- index) is dropped in favour of places_name_norm_trgm (column index).
+-- Schema footprint: adds five nullable columns, backfills them, swaps the name
+-- trigram index from the expression form (places_name_trgm) to the stored-column
+-- form (places_name_norm_trgm), and replaces two functions. See the WARNING at
+-- the top for the destructive parts.
 
 -- 1. Stored normalized columns -------------------------------------------------
 

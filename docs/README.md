@@ -17,6 +17,18 @@ This folder documents the backend monorepo as a multi-service system.
 - `tasks/TASKS_3_OBSERVABILITY_TOPLEVEL.md` - move Grafana/Prometheus/Loki config to a
   top-level `observability/` directory with dashboards grouped by `app/`/`infra/`.
 
+## Cross-Service Working Docs
+
+Root-level docs that span both services (they are not service docs and not task plans):
+
+- `../ios-asks-implementation-plan.md` - the 2026-08 round of iOS asks: spec-vs-code
+  comparison, per-ask plan, and the ship ritual. All nine asks are shipped; kept as the
+  record of what was decided and why.
+- `../recommender-config-audit.md` - recommendation-service configuration audit
+  (algorithm/artifact pairing). P0 items resolved 2026-08-11.
+- `../user-reactions-spec.md` - the cross-service user-reactions contract (gateway
+  `TASKS_34`/`35` + recommendation `TASKS_3`).
+
 ## TBD Thinking Docs
 
 - `tasks/TBD_PLATFORM_HARDENING.md` - whole-repo backlog of known gaps/concerns

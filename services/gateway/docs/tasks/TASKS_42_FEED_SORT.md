@@ -23,7 +23,7 @@ Verified: `pnpm build`, **153/153 tests**, `pnpm lint`, `pnpm typecheck` — all
 24, the CI version). Remaining: deploy, live smoke (the spec's Bucharest curls), then fold
 docs (`FRONTEND_FEED_API.md`, `DECISIONS.md`) and answer/close the iOS spec file.
 
-iOS ask `frontend_new/messages-to-backend-dev/not-done/FEED_SORT_SPEC.md` — a full contract
+iOS ask `frontend_new/messages-to-backend-dev/done/FEED_SORT_SPEC.md` — a full contract
 with validation rules and 7 acceptance criteria; this task implements it verbatim. Umbrella
 plan: `../../../../ios-asks-implementation-plan.md` §4–5.
 

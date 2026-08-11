@@ -62,9 +62,11 @@ start at the monorepo root:
   https://sloco.pp.ua/v1/swagger/openapi.json
   ```
 
-- Frontend map endpoint contract:
+- Frontend map endpoint contracts:
   ```text
-  FRONTEND_MAP_API.md
+  FRONTEND_MAP_API.md            bbox JSON pins
+  FRONTEND_MAP_VECTOR_TILES.md   the vector tiles the iOS map renders from
+  FRONTEND_MAP_PINS_STABILITY.md pin membership / zoom-stability notes
   ```
 
 - Frontend search endpoint contract:

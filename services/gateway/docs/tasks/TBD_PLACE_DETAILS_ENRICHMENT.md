@@ -5,7 +5,7 @@ found in the local raw DataForSEO scrape (see the Finding below), so the externa
 blocker dissolved; kept for rationale/decision history.
 
 The long half of iOS ask
-`frontend_new/messages-to-backend-dev/not-done/PLACE_DETAILS_MISSING_FIELDS.md`. The in-repo
+`frontend_new/messages-to-backend-dev/done/PLACE_DETAILS_MISSING_FIELDS.md`. The in-repo
 quick wins (`price_level`, `google_maps_uri`) are `TASKS_44_PLACE_DATA_BACKFILLS.md`.
 
 ## What is established (so nobody re-investigates)

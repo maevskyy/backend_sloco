@@ -81,14 +81,50 @@ Frontend agents should use `/v1/swagger/openapi.json` as the source of truth.
 ## Current Map API
 
 ```http
+GET /v1/map/config
+GET /v1/map/tiles/:z/:x/:y.mvt?v=2
 GET /v1/map/places?swLat=52.4800&swLng=13.3300&neLat=52.5600&neLng=13.4700&zoom=13
 GET /v1/places/:placeId
 ```
 
+The iOS map renders from the vector tiles; `/v1/map/places` remains the bbox JSON
+endpoint. Tiles are capped per tile by `mapVisibilityScore` and versioned by
+`MAP_TILE_VERSION` (`docs/FRONTEND_MAP_VECTOR_TILES.md`).
+
 ## Current Search API
 
 ```http
-GET /v1/search/places?q=coffee&lat=44.43&lng=26.10&city=Bucharest&country=RO
+GET /v1/search/places?q=coffee&lat=44.43&lng=26.10&radiusMeters=20000
+GET /v1/search/places?category=cafe&lat=44.43&lng=26.10&radiusMeters=1500
+```
+
+Two modes: text (`q`) and category browse (`category` without `q`, for the chips), with an
+optional hard `radiusMeters` cut. `docs/FRONTEND_SEARCH_API.md`.
+
+## Current Feed API
+
+```http
+GET /v1/feed/places?limit=20&offset=0&lat=44.43&lng=26.10&sort=distance&category=bar
+```
+
+Ranked snapshot 200 deep, personalized for users with signals.
+`docs/FRONTEND_FEED_API.md`.
+
+## Current Onboarding API
+
+```http
+POST /v1/onboarding/complete
+```
+
+Saves the onboarding picks as favourites and records `profiles.onboarding_status`.
+`docs/FRONTEND_ONBOARDING_API.md`.
+
+## Current Reactions API
+
+```http
+GET /v1/me/reactions
+PUT /v1/me/places/:placeId/reaction
+DELETE /v1/me/places/:placeId/reaction
 ```
 
 ## Current Saved Places API
