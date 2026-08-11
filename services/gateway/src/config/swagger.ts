@@ -5,6 +5,7 @@ import { feedComponentSchemas } from "../modules/feed/index.js";
 import { healthComponentSchemas } from "../modules/health/index.js";
 import { mapComponentSchemas } from "../modules/map/index.js";
 import { meComponentSchemas } from "../modules/me/index.js";
+import { onboardingComponentSchemas } from "../modules/onboarding/index.js";
 import { placesComponentSchemas } from "../modules/places/index.js";
 import { reactionsComponentSchemas } from "../modules/reactions/index.js";
 import { savedPlacesComponentSchemas } from "../modules/saved-places/index.js";
@@ -26,6 +27,10 @@ export async function registerSwaggerDocs(app: FastifyInstance) {
   }
 
   for (const schema of meComponentSchemas) {
+    app.addSchema(schema);
+  }
+
+  for (const schema of onboardingComponentSchemas) {
     app.addSchema(schema);
   }
 
@@ -92,6 +97,10 @@ export async function registerSwaggerDocs(app: FastifyInstance) {
         {
           name: "Me",
           description: "Authenticated user endpoints."
+        },
+        {
+          name: "Onboarding",
+          description: "Authenticated onboarding-flow endpoints."
         },
         {
           name: "Map",

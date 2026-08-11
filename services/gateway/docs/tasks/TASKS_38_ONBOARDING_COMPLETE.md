@@ -1,6 +1,24 @@
 # TASKS 38: Onboarding — `POST /v1/onboarding/complete`
 
-**Status: Planned (awaiting approval).**
+**Status: In progress** — implemented 2026-08-12 on `dev` exactly as planned below
+(177/177 tests, build/lint/typecheck clean; 11 new tests). Remaining: deploy + live
+verification (401 without token is checkable anonymously; the happy path needs a real
+Bearer — easiest from the app once the client wires the call, or one curl with a Supabase
+token), then close the iOS ask `ONBOARDING_STATUS_WRITE.md`.
+
+Implementation notes vs the plan:
+
+- **The status write is an upsert, not an update.** The profiles row is normally created
+  by `GET /v1/me`, but the current iOS build never calls it — a plain `update` would
+  silently write to zero rows. `upsert({user_id, onboarding_status}, onConflict user_id)`
+  covers both cases; `/v1/me`'s own default-upsert only sends `user_id`, so it can never
+  clobber a written status.
+- Picks are deduped; saves run before the status write, so a mid-way failure leaves the
+  status unset and the whole call safely retryable. `PlaceNotFoundError` per pick is
+  skipped (counted out of `savedCount`), any other error propagates as 500.
+- The addendum shipped too: `MeProfile.onboardingStatus` is now
+  `z.enum(["not_started", "completed", "skipped"])` in the contract (DB stays free text).
+- Contract doc: `docs/FRONTEND_ONBOARDING_API.md`. No migration needed.
 
 > **Addendum (2026-08-11):** iOS ask
 > `frontend_new/messages-to-backend-dev/not-done/ONBOARDING_STATUS_WRITE.md` lands on this

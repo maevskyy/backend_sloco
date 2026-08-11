@@ -77,6 +77,11 @@ start at the monorepo root:
   FRONTEND_FEED_API.md
   ```
 
+- Frontend onboarding endpoint contract:
+  ```text
+  FRONTEND_ONBOARDING_API.md
+  ```
+
 Current note:
 
 - Markdown API docs are usage docs.
