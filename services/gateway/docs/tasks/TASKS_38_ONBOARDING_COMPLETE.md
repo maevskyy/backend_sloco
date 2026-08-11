@@ -1,10 +1,25 @@
 # TASKS 38: Onboarding — `POST /v1/onboarding/complete`
 
-**Status: In progress** — implemented 2026-08-12 on `dev` exactly as planned below
-(177/177 tests, build/lint/typecheck clean; 11 new tests). Remaining: deploy + live
-verification (401 without token is checkable anonymously; the happy path needs a real
-Bearer — easiest from the app once the client wires the call, or one curl with a Supabase
-token), then close the iOS ask `ONBOARDING_STATUS_WRITE.md`.
+**Status: DONE** — shipped and verified in production 2026-08-12.
+
+Anonymous checks: `POST /v1/onboarding/complete` → 401 without a token and with a bad one;
+the path, the `Onboarding` tag and all three components are in the OpenAPI document;
+`MeProfile.onboardingStatus` publishes `enum: [not_started, completed, skipped]`.
+
+Authenticated end-to-end (real Bearer):
+
+```
+POST /v1/onboarding/complete {"pickedPlaceIds":[4096,9139,5032],"status":"completed"}
+GET  /v1/me → profile.onboardingStatus == "completed"
+GET  /v1/feed/places (same user) → personalizationStatus == "personalized"
+                                   algorithmVersion == "location_recommender_v4_more_direct"
+```
+
+That last line is the point of the whole task: the picks became favourites and the user
+landed on the personalized feed in the same session — which also closed the separate iOS
+ask `RECOMMENDER_STATUS`. Both specs are now in `messages-to-backend-dev/done/`.
+
+Built exactly as planned below (177/177 tests, build/lint/typecheck clean; 11 new tests).
 
 Implementation notes vs the plan:
 

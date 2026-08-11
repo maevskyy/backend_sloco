@@ -27,13 +27,16 @@ fixture boot shows `6/6 (100.0%)`).
 > this container.) Change 1 is therefore **done and verified**; audit P0-1/P0-2 recorded
 > as resolved.
 
-Remaining: (b) deploy the coverage guard with the next recommender deploy (it is a
-seatbelt for future artifact swaps — today's coverage is already proven 100%); (c) the
-authenticated feed verification below, then record the result here and close the iOS ask.
-Cheapest end-to-end check without token juggling: favorite one place in the signed-in iOS
-app, refresh the feed, then on the server
-`docker compose logs backend | grep 'feed/places' | tail -5` → the response summary log
-shows `personalizationStatus: "personalized"` with `authenticated: true`.
+> **End-to-end confirmed (2026-08-12).** An authenticated account with three favourites
+> (seeded through the new `POST /v1/onboarding/complete`) received:
+> `personalizationStatus: "personalized"`, `algorithmVersion:
+> "location_recommender_v4_more_direct"`, `embeddingRunId: "combined_food_ttd"`.
+> The personalized path is therefore live end to end, on v4, over the full catalog. The
+> iOS ask `RECOMMENDER_STATUS` is closed.
+
+Remaining: (b) deploy the coverage guard with the next **recommender** deploy — the
+gateway deploys since then did not rebuild this service. It is a seatbelt for future
+artifact swaps; today's coverage is already proven at 100%, so this is not urgent.
 
 Resolves the still-open P0 items of `../../../recommender-config-audit.md` (P0-1 "verify
 which algorithm prod actually runs", P0-2 "switch ALL artifact env vars together") and

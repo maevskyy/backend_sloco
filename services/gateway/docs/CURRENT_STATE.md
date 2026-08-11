@@ -53,6 +53,7 @@ curl "https://sloco.pp.ua/v1/search/places?q=coffee&lat=44.43&lng=26.10&city=Buc
 GET /v1/health
 GET /v1/health/supabase
 GET /v1/me
+POST /v1/onboarding/complete
 GET /v1/me/reactions
 GET /v1/me/saved/ids
 PUT /v1/me/places/:placeId/reaction
@@ -199,9 +200,13 @@ module, so request validation and docs cannot drift.
 
 ## Current Priorities
 
-- Ship the open iOS asks: the cross-service plan is
-  `../../../ios-asks-implementation-plan.md` (task files `tasks/TASKS_41`–`46`,
-  `TASKS_38`, recommendation `TASKS_6`, and `tasks/TBD_PLACE_DETAILS_ENRICHMENT.md`).
+- **All nine iOS asks are shipped** (2026-08-12) — `frontend_new/messages-to-backend-dev/
+  not-done/` is empty; the cross-service record is `../../../ios-asks-implementation-plan.md`
+  (task files `TASKS_38`, `TASKS_41`–`47`, recommendation `TASKS_6`). Personalization is
+  live end to end: onboarding picks become favourites and the feed returns `personalized`
+  on v4.
+- Open next: search quality (`TASKS_49` — text search matches names, not intent; needs a
+  product decision) and search latency on the text path (`TASKS_48`).
 - Keep backend deploy simple: one Hetzner host, Docker Compose, managed
   Supabase.
 - Keep map API lightweight: tiles + bbox pins; rich data stays behind
