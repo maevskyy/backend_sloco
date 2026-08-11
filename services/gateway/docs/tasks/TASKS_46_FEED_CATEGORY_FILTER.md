@@ -1,8 +1,16 @@
 # TASKS 46: Feed — `category` filter on `GET /v1/feed/places`
 
-**Status: In progress** — implemented 2026-08-11 on `dev` (165/165 tests, build/lint/
-typecheck clean); remaining: run migration `019` (after `018` — it depends on the norm
-columns), deploy, live acceptance. Implementation notes vs the plan below:
+**Status: DONE** — shipped and verified in production 2026-08-12.
+
+Live acceptance: `?category=bar&limit=50` returns **50 cards, and 50 more at `offset=50`**
+— the ask's core complaint ("a chip can leave three cards") is closed, because the filter
+runs before ranking. Buckets are clean (`culture` → performing arts theatres/movie
+theatres/concert halls, `leisure` → escape rooms/amusement centres/stadiums). Composes
+with the rest: `?category=bar&sort=distance` is monotone 145 m → 397 m with contiguous
+ranks. Unknown bucket → 400; CSV multi-bucket works; a no-`category` request is unchanged
+(`anonymous_fallback`, `sort: relevance`).
+
+Implementation notes vs the plan below:
 
 - Fallback path filters inside `feed_fallback_places` (migration `019`), before scoring —
   full snapshot depth preserved. Personalized path filters the hydrated rows in the

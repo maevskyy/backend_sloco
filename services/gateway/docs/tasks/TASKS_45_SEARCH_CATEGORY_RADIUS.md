@@ -1,8 +1,27 @@
 # TASKS 45: Search — `category` + `radiusMeters` on `GET /v1/search/places`
 
-**Status: In progress** — implemented 2026-08-11 on `dev` (165/165 tests, build/lint/
-typecheck clean); remaining: run migration `018` in Supabase, deploy, live acceptance,
-send the vocabulary to iOS. Implementation notes vs the plan below:
+**Status: DONE** — shipped and verified in production 2026-08-12.
+
+Live acceptance (Bucharest centre): `?category=cafe&radiusMeters=1500` returns 20 cafés,
+**all in Bucharest** (the ask's core complaint — zero Tbilisi), all inside the radius,
+nearest-first, `matchReason: category`, `query: ""`. Per-bucket spot checks are clean:
+`bar` → Lounge/Wine bar/Pub/Karaoke bar, `culture` → theatres and concert halls,
+`leisure` → night clubs/comedy/escape rooms, `cafe` → Cafe/Coffee shop/Tea house/Bakery.
+Word-boundary matching holds (no "barbecue" in `bar`, no "coffee shop" in `shopping`).
+Validation: neither `q` nor `category` → 400, unknown bucket → 400, `q`+`category` → 200,
+plain `q` unchanged. Browse latency **0.18–0.22 s** (see `TASKS_48`).
+
+Two rounds of live fixes were needed after the first deploy — both in migration `020` and
+the bucket table: matching the `types` attribute bag put restaurants in `nature`, and the
+bare `garden` keyword then pulled in beer gardens. Both closed; beer gardens now resolve
+to `bar` (verified on "London Garden", id 10957).
+
+**Catalog reality to pass to the client:** within 5 km of Bucharest centre the buckets
+hold 50+/50+/50+/50+/50+ for cafe/food/bar/culture/leisure but **1 for `shopping` and 0
+for `nature`** — that data simply is not in the two-city catalog. The buckets stay in the
+contract; hiding those two chips is a client-side product call.
+
+Implementation notes vs the plan below:
 
 - Migration `018_search_category_radius_norms.sql` also carries the `TASKS_48` performance
   half (stored `*_norm` columns + trigger + backfill + column index) — one rewrite of

@@ -71,8 +71,8 @@ GET /v1/map/places?swLat=...&swLng=...&neLat=...&neLng=...&zoom=...
 GET /v1/map/config
 GET /v1/map/tiles/:z/:x/:y.mvt?v=...
 GET /v1/places/:placeId
-GET /v1/search/places?q=...&lat=...&lng=...
-GET /v1/feed/places?limit=...&offset=...&lat=...&lng=...&sort=...&debug=...
+GET /v1/search/places?q=...&category=...&radiusMeters=...&lat=...&lng=...
+GET /v1/feed/places?limit=...&offset=...&lat=...&lng=...&sort=...&category=...&debug=...
 GET /v1/swagger/docs
 GET /v1/swagger/openapi.json
 ```
@@ -124,7 +124,11 @@ The iOS map renders from the vector tiles (`/v1/map/config` + `/v1/map/tiles`,
 Redis-cached, versioned by `MAP_TILE_VERSION`); `/v1/map/places` remains the
 bbox JSON endpoint. Rich place data is fetched only after a user selects a
 place via `GET /v1/places/:placeId`.
-Place search is global, fuzzy, and independent from the current map bbox.
+Place search is global, fuzzy, and independent from the current map bbox. It has two
+modes: text (`q`) and category browse (`category` without `q`, for the chips), with an
+optional hard `radiusMeters` cut. Text matching is trigram — it finds names, not intent
+(`TASKS_49`). The seven-bucket vocabulary lives in
+`src/modules/places/common/place-buckets.ts` and is shared with the feed's `category`.
 Decide feed reads are card-oriented, recommendation-service backed for
 authenticated users, and fall back to quality/visibility picks for anonymous or
 cold-start users. The ranked snapshot is 200 places deep and can be served in

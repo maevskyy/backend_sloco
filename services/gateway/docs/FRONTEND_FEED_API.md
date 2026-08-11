@@ -31,8 +31,16 @@ lng      optional, send together with lat
 city     optional context boost
 country  optional context boost
 sort     optional "relevance" | "distance", default "relevance"
+category optional one or more of cafe|food|bar|culture|nature|shopping|leisure (CSV or repeated)
 debug    optional "true" | "false", default "false"
 ```
+
+`category` filters **before** ranking, so a filtered feed is still a full snapshot of the
+best places of that kind — not "whatever survived a cut". Same vocabulary as
+`/v1/search/places`; an unknown value is a **400**. On the personalized path the filter is
+applied after the recommender returns, so a filtered personalized feed can be shallower
+than 200. `nature` and `shopping` are nearly empty in the current catalog — see
+`FRONTEND_SEARCH_API.md`.
 
 `sort=distance` re-orders the **same** ranked snapshot by great-circle distance from
 `lat`/`lng` (ascending, ties keep relevance order) — it is not a different query, so
