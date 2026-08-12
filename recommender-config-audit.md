@@ -71,6 +71,17 @@ the fuller fix, the log+warn is the cheap one.
 
 ## P1. Vendored engine lags upstream — re-vendor after the next upstream push
 
+> **RESOLVED 2026-08-12.** Re-vendored whole-file from the research working tree
+> (`recommendation_system/ai_location_recommender/`, 2026-07-02 state) — every row of
+> the table below is now present: `WEIGHT_GROUPS` + `weight_groups_enabled=True`,
+> `interleave_into_window()` + `cross_theme_inject_window`, the KL focus damper and
+> `cross_theme_inject_max=0.10`. `location_recommender_utils.py` turned out to carry
+> ZERO drift (byte-identical after the import rewrite); `common.py` /
+> `item_to_item_rerank.py` were already identical. The only local deltas are the
+> relative-import rewrite and the dislike/hide backend extension, every line of it
+> marked `# backend extension (not in upstream)`. See
+> `services/recommendation/docs/TASKS_7_direct_image_openclip.md`.
+
 `src/recommendation_service/algorithms/location_recommender/backend_recommender.py`
 (2 676 lines) matches the upstream git repo at commit `fb3c8c9` (2026-07-02), except
 it also dropped `cross_theme_inject_window` + `interleave_into_window()`. Meanwhile
@@ -90,6 +101,16 @@ top of the file — re-apply it and nothing else. Don't cherry-pick individual
 features; a whole-file refresh keeps the diff auditable.
 
 ## P2. Known quality gap (informational — blocked on artifacts, no action now)
+
+> **RESOLVED 2026-08-12.** The artifacts turned out to be far smaller than the
+> "0.5–1 GB class" guess: the place-level OpenCLIP ViT-B/32 set is 18 MB
+> (`(17936, 512)` float16) + 0.75 MB of parquet metadata, both committed under
+> `services/recommendation/artifacts/` and covering 11 483/12 578 = 91.3% of the live
+> catalog. The channel is wired (`DIRECT_IMAGE_*` settings → adapter → startup
+> coverage log) and the deploy workflow now pins `RECOMMENDER_WEIGHTS_PRESET=
+> text_direct` together with the two paths. Photo-level shards and the GPT-4V
+> `visual_*` channel remain out of scope. See
+> `services/recommendation/docs/TASKS_7_direct_image_openclip.md`.
 
 This deploy runs the `text_only` weights preset (semantic 0.72). The upstream
 production default is text+direct-image (`semantic 0.26 / direct_image 0.50`), which

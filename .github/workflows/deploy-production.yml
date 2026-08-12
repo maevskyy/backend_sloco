@@ -228,7 +228,9 @@ jobs:
             EMBEDDING_METADATA_PATH=artifacts/location_embeddings_combined_food_ttd_metadata.csv
             EMBEDDING_RUN_ID=combined_food_ttd
             LOCATIONS_CSV_PATH=artifacts/locations_combined_food_ttd.csv
-            RECOMMENDER_WEIGHTS_PRESET=text_only
+            RECOMMENDER_WEIGHTS_PRESET=text_direct
+            DIRECT_IMAGE_EMBEDDINGS_NPY_PATH=artifacts/direct_place_image_embeddings_openclip_vitb32_v1.npy
+            DIRECT_IMAGE_METADATA_PATH=artifacts/direct_place_image_embeddings_openclip_vitb32_v1_metadata.parquet
             EOF
             fi
 

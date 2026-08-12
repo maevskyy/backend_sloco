@@ -2,7 +2,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Literal
 
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 AppEnv = Literal["development", "test", "production"]
@@ -62,6 +62,34 @@ class Settings(BaseSettings):
         default="text_only",
         alias="RECOMMENDER_WEIGHTS_PRESET",
     )
+    # Direct-image (photo) channel artifacts. Unset -> the channel stays off and the
+    # engine scores text-only, whatever the weights preset says.
+    direct_image_embeddings_npy_path: Path | None = Field(
+        default=None,
+        alias="DIRECT_IMAGE_EMBEDDINGS_NPY_PATH",
+    )
+    direct_image_metadata_path: Path | None = Field(
+        default=None,
+        alias="DIRECT_IMAGE_METADATA_PATH",
+    )
+    direct_image_profiles_csv_path: Path | None = Field(
+        default=None,
+        alias="DIRECT_IMAGE_PROFILES_CSV_PATH",
+    )
+
+    @field_validator(
+        "direct_image_embeddings_npy_path",
+        "direct_image_metadata_path",
+        "direct_image_profiles_csv_path",
+        mode="before",
+    )
+    @classmethod
+    def _blank_is_unset(cls, value: object) -> object:
+        # docker-compose passes `${VAR:-}`, so "channel off" arrives as an empty
+        # string; without this it would become Path(".") and be loaded as an artifact.
+        if isinstance(value, str) and not value.strip():
+            return None
+        return value
 
 
 @lru_cache

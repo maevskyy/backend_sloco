@@ -52,6 +52,16 @@ class LocationRecommenderV4Adapter:
         # startup coverage guard (candidate_count / locations_count).
         return int(len(self._recommender.locations))
 
+    @property
+    def direct_candidate_count(self) -> int:
+        # Catalog places that carry a direct-image (photo) embedding. The column is
+        # written by the engine's direct-image merge; it is absent only when the
+        # engine was built without the channel.
+        locations = self._recommender.locations
+        if "has_direct_image_embedding" not in locations.columns:
+            return 0
+        return int(locations["has_direct_image_embedding"].sum())
+
     def recommend(
         self,
         favourites_place_ids: list[str] | None,
@@ -100,7 +110,12 @@ class LocationRecommenderV4Adapter:
 def build_location_recommender_v4(
     settings: Settings,
 ) -> LocationRecommenderV4Adapter:
-    """Construct the v4 recommender from artifacts (text-only, DB-free)."""
+    """Construct the v4 recommender from artifacts (DB-free).
+
+    The direct-image (photo) channel is on when its artifact paths are configured;
+    the GPT-4V ``visual_*`` channel stays off — it carries weight 0 in both presets
+    and its artifacts are deliberately not shipped.
+    """
     weights = _WEIGHTS_PRESETS[settings.recommender_weights_preset]
     recommender = LocationRecommender.from_artifacts(
         locations_csv=settings.locations_csv_path,
@@ -109,9 +124,9 @@ def build_location_recommender_v4(
         visual_embeddings_npy=None,
         visual_metadata_path=None,
         visual_profiles_csv=None,
-        direct_image_embeddings_npy=None,
-        direct_image_metadata_path=None,
-        direct_image_profiles_csv=None,
+        direct_image_embeddings_npy=settings.direct_image_embeddings_npy_path,
+        direct_image_metadata_path=settings.direct_image_metadata_path,
+        direct_image_profiles_csv=settings.direct_image_profiles_csv_path,
         config={
             "weights": weights,
             "embedding_run_id": settings.embedding_run_id,

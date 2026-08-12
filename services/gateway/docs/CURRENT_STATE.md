@@ -205,6 +205,11 @@ module, so request validation and docs cannot drift.
   (task files `TASKS_38`, `TASKS_41`–`47`, recommendation `TASKS_6`). Personalization is
   live end to end: onboarding picks become favourites and the feed returns `personalized`
   on v4.
+- The recommender's photo channel (recommendation `TASKS_7`) is **built and locally
+  verified, awaiting deploy**: the engine is re-vendored to the research 2026-07-02
+  state, OpenCLIP direct-image embeddings are committed (91.3% catalog coverage) and the
+  deploy workflow now pins the dashboard-default `text_direct` weights. That deploy also
+  ships the `TASKS_6` startup coverage guard, which has been code-complete since 08-11.
 - Open next: search quality (`TASKS_49` — text search matches names, not intent; needs a
   product decision) and search latency on the text path (`TASKS_48`).
 - Keep backend deploy simple: one Hetzner host, Docker Compose, managed

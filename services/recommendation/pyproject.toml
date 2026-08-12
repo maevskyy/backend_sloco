@@ -13,6 +13,10 @@ dependencies = [
     "uvicorn[standard] (>=0.34.0,<0.35.0)",
     "pandas (>=2.2,<3.0)",
     "scikit-learn (>=1.5,<2.0)",
+    # Parquet engine for pandas: the direct-image metadata artifact ships as .parquet
+    # because the vendored engine merges it on a string place_id without casting —
+    # a CSV round-trip would re-infer the numeric CID as int64 and silently join nothing.
+    "pyarrow (>=18.0,<22.0)",
 ]
 
 [project.scripts]

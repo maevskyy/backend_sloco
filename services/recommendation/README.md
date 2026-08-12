@@ -117,6 +117,14 @@ With `embedding_recommender_v1`, if no valid input place has an embedding the
 result is empty (no cold-start signal). `location_recommender_v4` instead falls
 back to a quality-ranked list for cold-start users.
 
+`location_recommender_v4` also scores a **direct-image (photo) channel** when
+`DIRECT_IMAGE_EMBEDDINGS_NPY_PATH` + `DIRECT_IMAGE_METADATA_PATH` point at a place
+embedding set (OpenCLIP ViT-B/32, committed under `artifacts/`). It only contributes
+under `RECOMMENDER_WEIGHTS_PRESET=text_direct` (photo weight 0.50, the research
+default), so the flag and the two paths always travel together — the startup log
+prints `v4 direct-image coverage: N/M` and WARNs when nothing joined the catalog.
+See `docs/TASKS_7_direct_image_openclip.md`.
+
 `dislike_place_ids` and `hide_place_ids` are accepted by the wire contract for
 both algorithms. In `location_recommender_v4`, both are hard-excluded from the
 candidate pool before scoring and their counts are echoed in

@@ -45,6 +45,25 @@ def log_v4_embedding_coverage(candidate_count: int, locations_count: int) -> Non
         )
 
 
+def log_v4_direct_image_coverage(direct_count: int, locations_count: int) -> None:
+    # No ratio threshold here: the photo set genuinely covers only ~91% of the
+    # catalog, so only "nothing joined at all" is a misconfiguration signal.
+    coverage = direct_count / locations_count if locations_count else 0.0
+    logger.info(
+        "v4 direct-image coverage: %s/%s locations have photo embeddings (%.1f%%)",
+        direct_count,
+        locations_count,
+        coverage * 100,
+    )
+    if direct_count == 0:
+        logger.warning(
+            "v4 direct-image coverage is 0 — DIRECT_IMAGE_* artifacts are configured "
+            "but none of them joined the catalog (wrong path, or place_ids from a "
+            "different catalog); the photo channel contributes nothing and scoring "
+            "silently degrades to text-only (recommender-config-audit.md P0-2)"
+        )
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     settings = get_settings()
@@ -64,6 +83,13 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         log_v4_embedding_coverage(
             recommender.candidate_count, recommender.locations_count
         )
+        if (
+            settings.direct_image_embeddings_npy_path
+            and settings.direct_image_metadata_path
+        ):
+            log_v4_direct_image_coverage(
+                recommender.direct_candidate_count, recommender.locations_count
+            )
     else:
         recommender = EmbeddingRecommender.from_artifacts(
             npy_path=settings.embeddings_npy_path,
