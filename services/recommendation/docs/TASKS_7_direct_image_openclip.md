@@ -319,11 +319,26 @@ absolute is the existing v4 cost on a laptop, not something this change introduc
 (`backend_recommender.py:1119`, downcasting on `.fillna`) — upstream code, harmless
 today, will need the research side to fix it before pandas 3.
 
+### Pre-deploy production baseline (captured 2026-08-12, before the deploy)
+
+`GET /v1/feed/places?limit=10` as `testuser1123@mail.com` (3 favourites), on the live
+`text_only` v4 — `personalizationStatus: "personalized"`:
+
+```text
+2797 Bollo - Restaurant · 707 Naan Project · 9968 Candy Bar · 7884 shandra'ma Batistei
+8715 Haveli Pakistani/indian Restaurant · 8229 Simbio · 10168 Soprano
+4614 MoMo Bucharest · 3394 Exile · 9554 Zepelin 1929 Resto-Bar
+```
+
+The post-deploy list must differ from this one. Mind the feed's per-user
+**10-minute recommendation cache** (`CACHE_TTL_MS`, `feed.service.ts`): a request right
+after the restart can still serve the pre-deploy snapshot, so compare after the TTL or
+treat only a clearly different list as proof.
+
 ### Remaining (Kirill's steps)
 
 1. `git add -A && git commit && git push origin dev` in `backend_sloco`.
-2. **Before deploying**, capture the pre-deploy top-5 for `testuser1123@mail.com` (needs a
-   fresh access token — sign-in is his action, not the agent's).
-3. `gh workflow run deploy-production.yml --ref dev -f service=recommender -f ref=dev`
+2. `gh workflow run deploy-production.yml --ref dev -f service=recommender -f ref=dev`
    (this deploy also finally ships the TASKS_6 coverage guard).
-4. Post-deploy acceptance per §6.4, then flip this file's Status to DONE.
+3. Post-deploy acceptance per §6.4 against the baseline above, then flip this file's
+   Status to DONE.
