@@ -61,6 +61,9 @@ describe("swagger docs", () => {
       openApi.paths[VersionedAppRoute.place.replace(":placeId", "{placeId}")]
     ).toBeDefined();
     expect(openApi.paths[VersionedAppRoute.searchPlaces]).toBeDefined();
+    expect(openApi.paths[VersionedAppRoute.cities]).toBeDefined();
+    expect(openApi.components.schemas.CitiesResponse).toBeDefined();
+    expect(openApi.components.schemas.CatalogCity).toBeDefined();
     expect(openApi.components.securitySchemes.bearerAuth).toBeDefined();
     expect(openApi.components.schemas.MeResponse).toBeDefined();
     expect(openApi.components.schemas.ReactionsResponse).toBeDefined();

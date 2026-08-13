@@ -186,6 +186,7 @@ GET /v1/map/tiles/:z/:x/:y.mvt
 GET /v1/places/:placeId
 GET /v1/search/places
 GET /v1/feed/places
+GET /v1/cities
 GET /v1/me/reactions
 PUT /v1/me/places/:placeId/reaction
 DELETE /v1/me/places/:placeId/reaction
@@ -201,6 +202,7 @@ docs/FRONTEND_MAP_VECTOR_TILES.md
 docs/FRONTEND_SEARCH_API.md
 docs/FRONTEND_FEED_API.md
 docs/FRONTEND_ONBOARDING_API.md
+docs/FRONTEND_CITIES_API.md
 ```
 
 Map endpoint payloads should stay lightweight; full place details live behind

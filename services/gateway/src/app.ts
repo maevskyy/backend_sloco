@@ -46,6 +46,10 @@ import {
   registerFeedModule,
   type FeedPlacesService
 } from "./modules/feed/index.js";
+import {
+  registerCitiesModule,
+  type CitiesService
+} from "./modules/cities/index.js";
 import type { AuthService } from "./modules/auth/auth.service.js";
 import type { CacheStore } from "./lib/cache/cache-store.js";
 
@@ -62,6 +66,7 @@ type AppOptions = {
   cacheStore?: CacheStore;
   searchPlacesService?: SearchPlacesService;
   feedPlacesService?: FeedPlacesService;
+  citiesService?: CitiesService;
 };
 
 export async function buildApp(options: AppOptions = {}) {
@@ -144,6 +149,11 @@ export async function buildApp(options: AppOptions = {}) {
     authService: options.authService,
     savedPlacesService: options.savedPlacesService,
     reactionsService: options.reactionsService
+  });
+
+  await app.register(registerCitiesModule, {
+    prefix: API_PREFIX,
+    citiesService: options.citiesService
   });
 
   await app.register(registerMapModule, {

@@ -28,7 +28,7 @@ limit    optional, default 20, max 50
 offset   optional, default 0, min 0
 lat      optional, send together with lng
 lng      optional, send together with lat
-city     optional context boost
+city     optional hard cut on shown places (unaccent / case-insensitive)
 country  optional context boost
 sort     optional "relevance" | "distance", default "relevance"
 category optional one or more of cafe|food|bar|culture|nature|shopping|leisure (CSV or repeated)
@@ -41,6 +41,15 @@ best places of that kind — not "whatever survived a cut". Same vocabulary as
 applied after the recommender returns, so a filtered personalized feed can be shallower
 than 200. `nature` and `shopping` are nearly empty in the current catalog — see
 `FRONTEND_SEARCH_API.md`.
+
+`city` is a **hard cut on the shown cards**, not a ranking boost and not a taste-model
+input. Seeds and clusters still use likes/saves from every city; only the candidate
+list is restricted. Match is `lower(unaccent(place.city))` (the same fold the fallback
+RPC uses). Unknown or unmatched names (`Bucuresti` ≠ `Bucharest`) return an **empty
+page**, not the unscoped ranking. On the personalized path the cut is applied after
+hydration, so a city-filtered personalized feed can be shallower than 200. The
+fallback path filters inside `feed_fallback_places` and keeps full depth. City names
+come from `GET /v1/cities`.
 
 `sort=distance` re-orders the **same** ranked snapshot by great-circle distance from
 `lat`/`lng` (ascending, ties keep relevance order) — it is not a different query, so

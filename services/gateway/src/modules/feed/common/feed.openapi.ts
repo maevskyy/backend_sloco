@@ -19,7 +19,7 @@ const defineRoute = makeDefineRoute({
 export const feedPlacesRouteSchema = defineRoute({
   summary: "Get a ranked place feed for Decide for me.",
   description:
-    "Returns a card-ready ranked feed. Valid authenticated users get recommendation-service backed personalization; anonymous or cold-start requests receive a quality fallback feed.",
+    "Returns a card-ready ranked feed. Valid authenticated users get recommendation-service backed personalization; anonymous or cold-start requests receive a quality fallback feed. `city` is a hard cut on what is shown, not a taste-model input: seeds still come from every city.",
   query: "FeedPlacesQuery",
   ok: "FeedPlacesResponse"
 });

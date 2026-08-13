@@ -1,6 +1,7 @@
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import type { FastifyInstance } from "fastify";
+import { citiesComponentSchemas } from "../modules/cities/index.js";
 import { feedComponentSchemas } from "../modules/feed/index.js";
 import { healthComponentSchemas } from "../modules/health/index.js";
 import { mapComponentSchemas } from "../modules/map/index.js";
@@ -55,6 +56,10 @@ export async function registerSwaggerDocs(app: FastifyInstance) {
   }
 
   for (const schema of feedComponentSchemas) {
+    app.addSchema(schema);
+  }
+
+  for (const schema of citiesComponentSchemas) {
     app.addSchema(schema);
   }
 
@@ -126,6 +131,10 @@ export async function registerSwaggerDocs(app: FastifyInstance) {
           name: "Feed",
           description:
             "Ranked place feed endpoints for Decide for me experiences."
+        },
+        {
+          name: "Cities",
+          description: "Catalog cities that have places in the database."
         }
       ]
     }

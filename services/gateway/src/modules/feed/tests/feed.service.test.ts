@@ -778,6 +778,123 @@ describe("feed places service", () => {
     });
   });
 
+  describe("city hard cut", () => {
+    it("keeps only matching-city cards on the personalized path", async () => {
+      const { client } = createClient();
+      const service = createFeedPlacesService(
+        createStore({
+          async feedPlacesBySourceIds(sourceIds) {
+            const cities: Record<string, string> = {
+              place_2: "Bucharest",
+              place_3: "Tbilisi"
+            };
+            return sourceIds.map((sourceId, index) =>
+              feedRow({
+                id: index + 1,
+                source_id: sourceId,
+                city: cities[sourceId] ?? "Bucharest"
+              })
+            );
+          }
+        }),
+        client,
+        createSavedService(),
+        new FeedRecommendationCache(),
+        createReactionsService()
+      );
+
+      const result = await service({
+        query: {
+          limit: 20,
+          offset: 0,
+          sort: "relevance" as const,
+          city: "Tbilisi",
+          debug: false
+        },
+        user: { id: "user-1", email: "user@example.com" }
+      });
+
+      expect(result.feed.personalizationStatus).toBe("personalized");
+      expect(result.places.map((place) => place.sourceId)).toEqual(["place_3"]);
+      expect(result.places.map((place) => place.city)).toEqual(["Tbilisi"]);
+      expect(result.places.map((place) => place.rank)).toEqual([1]);
+    });
+
+    it("matches city case-insensitively and without diacritics", async () => {
+      const { client } = createClient();
+      const service = createFeedPlacesService(
+        createStore({
+          async feedPlacesBySourceIds(sourceIds) {
+            return sourceIds.map((sourceId, index) =>
+              feedRow({
+                id: index + 1,
+                source_id: sourceId,
+                city: sourceId === "place_3" ? "Tbilisi" : "Bucharest"
+              })
+            );
+          }
+        }),
+        client,
+        createSavedService(),
+        new FeedRecommendationCache(),
+        createReactionsService()
+      );
+
+      const result = await service({
+        query: {
+          limit: 20,
+          offset: 0,
+          sort: "relevance" as const,
+          city: "tbilisí",
+          debug: false
+        },
+        user: { id: "user-1", email: "user@example.com" }
+      });
+
+      expect(result.places.map((place) => place.sourceId)).toEqual(["place_3"]);
+    });
+
+    it("does not silently fall back to the mixed ranking for an unmatched city name", async () => {
+      let fallbackCity: string | undefined;
+      const { client } = createClient();
+      const service = createFeedPlacesService(
+        createStore({
+          async feedPlacesBySourceIds(sourceIds) {
+            return sourceIds.map((sourceId, index) =>
+              feedRow({
+                id: index + 1,
+                source_id: sourceId,
+                city: "Bucharest"
+              })
+            );
+          },
+          async fallbackFeedPlaces(query) {
+            fallbackCity = query.city;
+            return [];
+          }
+        }),
+        client,
+        createSavedService(),
+        new FeedRecommendationCache(),
+        createReactionsService()
+      );
+
+      const result = await service({
+        query: {
+          limit: 20,
+          offset: 0,
+          sort: "relevance" as const,
+          city: "Bucuresti",
+          debug: false
+        },
+        user: { id: "user-1", email: "user@example.com" }
+      });
+
+      expect(fallbackCity).toBe("Bucuresti");
+      expect(result.places).toEqual([]);
+    });
+  });
+
   describe("sort=distance", () => {
     function distanceQuery(overrides: Partial<{ limit: number; offset: number }> = {}) {
       return {

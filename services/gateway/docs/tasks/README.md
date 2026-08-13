@@ -57,6 +57,7 @@ Task files live here as `TASKS_N_NAME.md`.
 | Planned | `TASKS_49_SEARCH_INTENT.md` | "coffee" finds only places NAMED coffee (15/15 name matches; 1 of 5 real nearby cafés found), and Cyrillic queries return nothing. Needs a product decision: intent→bucket dictionary (recommended), synonyms in `search_keywords`, or semantic search on the existing embeddings. `radiusMeters` already fixes the cross-city half today. |
 | In progress | `TASKS_48_SEARCH_PERFORMANCE.md` | "Поиск очень медленно": measured 0.6–1.2 s warm / 2–4 s spikes. Fixes: stored `*_norm` columns (migration `018`, kills per-query renormalization) + search store on the direct pg pool instead of PostgREST. Awaiting migration + deploy + re-measure; feed fallback (2.3 s) tracked as follow-up. |
 | Done | `TASKS_47_PLACE_DETAILS_IMPORT.md` | iOS ask (long half): address/hours/phone/website from the raw DataForSEO scrape on Kirill's SSD — `details:dataforseo` mapper + `dumps/place_details_delta.csv` (100% of prod CIDs matched), staged and applied via a NULL-guarded UPDATE. Live: addr 18/18, phone 17/18, hours 15/18 on a never-cached sample. `businessStatus` unavailable at source. |
+| Done in code | `TASKS_50_CITIES_LIST.md` | iOS ask: `GET /v1/cities` + hard `city=` cut on the feed. Cities module on the pg pool (no migration). Fallback RPC WHERE in migration `021`. Personalized path post-filters; seeds stay global. Awaiting prod migration + live check. |
 
 ## TBD Backlog
 

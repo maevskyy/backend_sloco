@@ -73,7 +73,8 @@ GET /v1/map/config
 GET /v1/map/tiles/:z/:x/:y.mvt?v=...
 GET /v1/places/:placeId
 GET /v1/search/places?q=...&category=...&radiusMeters=...&lat=...&lng=...
-GET /v1/feed/places?limit=...&offset=...&lat=...&lng=...&sort=...&category=...&debug=...
+GET /v1/feed/places?limit=...&offset=...&lat=...&lng=...&sort=...&category=...&city=...&debug=...
+GET /v1/cities
 GET /v1/swagger/docs
 GET /v1/swagger/openapi.json
 ```
@@ -100,6 +101,12 @@ Human docs for the Decide feed endpoint:
 
 ```text
 docs/FRONTEND_FEED_API.md
+```
+
+Human docs for catalog cities:
+
+```text
+docs/FRONTEND_CITIES_API.md
 ```
 
 ## Active Database
@@ -133,7 +140,9 @@ optional hard `radiusMeters` cut. Text matching is trigram — it finds names, n
 Decide feed reads are card-oriented, recommendation-service backed for
 authenticated users, and fall back to quality/visibility picks for anonymous or
 cold-start users. The ranked snapshot is 200 places deep and can be served in
-`relevance` (default) or `distance` order via `sort`. Reactions
+`relevance` (default) or `distance` order via `sort`. `city=` is a hard cut on
+shown cards (taste clusters stay global); city names come from `GET /v1/cities`.
+Reactions
 (`favorite|dislike|hide`) seed the personalization signals, hard-exclude
 disliked/hidden places, and are echoed on feed cards and place details.
 Map tiles are capped per tile by `mapVisibilityScore` (6/10/15/25 by zoom band,

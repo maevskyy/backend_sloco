@@ -30,3 +30,5 @@ Rules:
   stored `*_norm` columns) and `019` (feed fallback category). Restores
   `search_places` from migration `011`, `feed_fallback_places` from `016`, the
   pre-018 keyword trigger and the `places_name_trgm` index.
+- `2026-08-13_021_feed_city_cut_rollback.sql` — undoes `021` (feed city hard
+  cut). Restores `feed_fallback_places` from migration `020`.

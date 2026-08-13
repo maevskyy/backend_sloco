@@ -79,6 +79,11 @@ start at the monorepo root:
   FRONTEND_FEED_API.md
   ```
 
+- Frontend catalog cities contract:
+  ```text
+  FRONTEND_CITIES_API.md
+  ```
+
 - Frontend onboarding endpoint contract:
   ```text
   FRONTEND_ONBOARDING_API.md

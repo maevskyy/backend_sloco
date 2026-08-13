@@ -13,6 +13,7 @@ import type {
   FeedInputSummary,
   FeedPersonalizationStatus,
   FeedPlaceCard,
+  FeedPlaceRow,
   FeedPlacesQuery,
   FeedPlacesResult,
   FeedPlacesService,
@@ -207,29 +208,21 @@ export function createFeedPlacesService(
     const recommendationBySourceId = new Map(
       recommendations.map((item) => [item.sourceId, item])
     );
-    // The rec engine knows nothing about categories, so the personalized path
-    // filters the hydrated rows here — a filtered personalized feed can be
-    // shallower than the snapshot (documented in the frontend contract). The
-    // fallback path filters inside the RPC instead, keeping full depth.
-    const categoryKeywords = query.category
-      ? bucketsToKeywords(query.category)
-      : null;
-    const filteredRows = categoryKeywords
-      ? rows.filter((row) =>
-          matchesBucketKeywords(categoryKeywords, [
-            row.category,
-            row.primary_type
-          ])
-        )
-      : rows;
+    // The rec engine is not passed city or category, so the personalized path
+    // filters the hydrated rows here. Seeds/clusters stay global (likes from
+    // other cities still teach taste). A filtered personalized feed can be
+    // shallower than the snapshot. The fallback path filters inside the RPC
+    // instead, keeping full depth.
+    const filteredRows = applyFeedCuts(rows, query);
     const snapshot = filteredRows.map((row, index) =>
       mapFeedRowToCard(row, {
         status: "personalized",
-        // Under a category filter the recommender's rank has gaps; rank turns
-        // positional so offset windows stay contiguous.
-        recommendation: categoryKeywords
-          ? undefined
-          : recommendationBySourceId.get(row.source_id),
+        // Under a category or city cut the recommender's rank has gaps; rank
+        // turns positional so offset windows stay contiguous.
+        recommendation:
+          query.category || query.city
+            ? undefined
+            : recommendationBySourceId.get(row.source_id),
         rank: index + 1
       })
     );
@@ -366,6 +359,41 @@ function markPlaceAsUnsignedUserState(place: FeedPlaceCard): FeedPlaceCard {
 // sorted snapshot (the client treats rank as positional — FEED_SORT_SPEC).
 // Validation guarantees lat/lng, so distanceMeters is set on every row; nulls
 // would sort last as a safety net.
+function applyFeedCuts(
+  rows: FeedPlaceRow[],
+  query: FeedPlacesQuery
+): FeedPlaceRow[] {
+  const categoryKeywords = query.category
+    ? bucketsToKeywords(query.category)
+    : null;
+  return rows.filter((row) => {
+    if (
+      categoryKeywords &&
+      !matchesBucketKeywords(categoryKeywords, [row.category, row.primary_type])
+    ) {
+      return false;
+    }
+    if (query.city && !citiesMatch(row.city, query.city)) {
+      return false;
+    }
+    return true;
+  });
+}
+
+// Twin of `lower(public.f_unaccent(...))` used by feed_fallback_places.
+// "Bucuresti" does not match "Bucharest" — unknown spellings stay empty.
+function citiesMatch(placeCity: string, asked: string): boolean {
+  return foldCity(placeCity) === foldCity(asked);
+}
+
+function foldCity(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/\p{M}/gu, "")
+    .trim()
+    .toLowerCase();
+}
+
 function applySort(
   snapshot: FeedPlaceCard[],
   sort: FeedPlacesQuery["sort"]

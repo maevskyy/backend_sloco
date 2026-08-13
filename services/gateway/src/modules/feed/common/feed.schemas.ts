@@ -17,7 +17,9 @@ export const feedPlacesQuerySchema = z
     offset: z.coerce.number().int().min(0).default(0),
     lat: coordinateSchema.optional(),
     lng: coordinateSchema.optional(),
-    city: optionalContextSchema,
+    city: optionalContextSchema.describe(
+      "Hard cut: only places whose city matches (unaccent, case-insensitive). Unknown names return an empty page, not the unscoped ranking. Does not change taste clustering."
+    ),
     country: optionalContextSchema,
     sort: feedSortSchema.default("relevance"),
     category: placeBucketsQuerySchema,
