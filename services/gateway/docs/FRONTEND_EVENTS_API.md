@@ -94,10 +94,15 @@ training join — put them on every event that originates from a feed card.
 ## Event dictionary accepted as `known_type=true` today
 
 `impression, map_viewport, card_open, card_dwell, photo_swipe, similar_open,
-save_favourite, save_want_to_go, unsave_favourite, unsave_want_to_go, dislike,
-hide, share, route_click, external_click, search_query, search_result_click,
-filter_apply, onboarding_card_like, onboarding_complete, onboarding_skip,
-app_open, app_background`
+save_favourite, save_want_to_go, unsave_favourite, unsave_want_to_go, like,
+dislike, hide, share, route_click, external_click, search_query,
+search_result_click, filter_apply, onboarding_card_like, onboarding_complete,
+onboarding_skip, app_open, app_background`
+
+(`like` was added 2026-08-16 after the app started sending it; rows ingested
+before that keep `known_type=false` — the flag records what the dictionary knew
+at INGEST time and is never backfilled. Treat the dictionary, not the stored
+flag, as the source of truth when reading.)
 
 New types are still accepted (see above) — tell the backend so the dictionary and
 the action-weights config catch up.

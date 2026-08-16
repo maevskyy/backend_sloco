@@ -15,6 +15,9 @@ export const KNOWN_EVENT_TYPES = new Set([
   "save_want_to_go",
   "unsave_favourite",
   "unsave_want_to_go",
+  // Not in the original frontend-spec dictionary, but the app sends it and the
+  // weights config prices it (like: 1.0) — observed live 2026-08-16.
+  "like",
   "dislike",
   "hide",
   "share",
