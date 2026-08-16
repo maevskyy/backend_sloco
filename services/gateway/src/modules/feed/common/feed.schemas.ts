@@ -63,6 +63,12 @@ export const feedMetaSchema = z.object({
   sort: feedSortSchema,
   algorithmVersion: z.string().nullable(),
   embeddingRunId: z.string().nullable(),
+  requestId: z
+    .uuid()
+    .nullable()
+    .describe(
+      "Serving id from the recommender — put it (with each card's position) into telemetry events. One id per recommendation snapshot: pages and re-sorts of the same snapshot share it. Null on fallback feeds."
+    ),
   generatedAt: z.string(),
   expiresAt: z.string().nullable()
 });
@@ -91,6 +97,14 @@ export const feedPlaceCardSchema = z.object({
   mapVisibilityScore: z.number(),
   matchScore: z.number().int().min(0).max(100),
   rank: z.number().int().min(1),
+  position: z
+    .number()
+    .int()
+    .min(0)
+    .nullable()
+    .describe(
+      "0-based position in the recommender's snapshot (stable under sort= and category=; rank is positional per page instead). Echo it in telemetry events together with feed.requestId. Null on fallback feeds."
+    ),
   whyRecommended: z.string(),
   blurb: z.string(),
   tags: z.array(z.string()),

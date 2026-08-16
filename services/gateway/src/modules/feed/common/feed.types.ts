@@ -49,11 +49,17 @@ export type FeedUserSignals = {
   hidePlaceIds: string[];
 };
 
+// Serving-receipt fields are optional so an older rec-service (without them)
+// keeps working during deploy skew — the gateway then serves requestId: null
+// and skips the rec_served write.
 export type FeedRecommendationItem = {
   rank: number;
   place_id: string;
   score: number;
   similarity?: number | null;
+  position?: number;
+  profile_id?: number | null;
+  score_components?: Record<string, unknown> | null;
 };
 
 export type FeedRecommendationInputSummary = {
@@ -62,12 +68,16 @@ export type FeedRecommendationInputSummary = {
   valid_input_count: number;
   invalid_place_ids: string[];
   candidate_count?: number;
+  profiles_count?: number;
 };
 
 export type FeedRecommendationResponse = {
   user_id: string | null;
+  request_id?: string;
   algorithm_version: string;
   embedding_run_id: string;
+  weights_preset?: string | null;
+  fallback_used?: boolean;
   input_summary: FeedRecommendationInputSummary;
   recommendations: FeedRecommendationItem[];
 };
@@ -93,6 +103,36 @@ export type FeedRecommendationSeed = {
   rank: number;
   sourceId: string;
   score: number;
+};
+
+// One serving "receipt" for the async rec_served / rec_served_items write
+// (event-log spec 2.0). Serialized exactly as received from the rec-service —
+// nothing is recomputed.
+export type RecServedItemWrite = {
+  position: number;
+  placeId: string;
+  profileId: number | null;
+  score: number;
+  scoreComponents: Record<string, unknown> | null;
+};
+
+export type RecServedWrite = {
+  requestId: string;
+  userId: string | null;
+  surface: string;
+  city: string | null;
+  algorithmVersion: string;
+  weightsPreset: string | null;
+  valueWeightsVersion: string;
+  configOverrides: Record<string, unknown>;
+  profilesCount: number | null;
+  fallbackUsed: boolean;
+  latencyMs: number;
+  items: RecServedItemWrite[];
+};
+
+export type RecServedStoreContract = {
+  insertServing(write: RecServedWrite): Promise<void>;
 };
 
 export type FeedPlacesQuery = z.infer<typeof feedPlacesQuerySchema>;

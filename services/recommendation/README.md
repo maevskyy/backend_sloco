@@ -132,6 +132,21 @@ candidate pool before scoring and their counts are echoed in
 `embedding_recommender_v1`, the fields are accepted so the contract stays stable,
 but real exclusion is not implemented there yet.
 
+The response also carries a **serving receipt** (event-log spec, `docs/TASKS_8_serving_receipt.md`):
+top-level `request_id` (uuid per serving), `weights_preset`, `fallback_used`,
+`input_summary.profiles_count`, and per item `position` (0-based), `profile_id`
+and the full `score_components` (always present — the gateway persists them into
+`rec_served_items`; the flat `similarity` stays debug-only). This service still
+never touches a database: the gateway does the writing.
+
+## Event-log export script
+
+`scripts/export_event_log.py` (ships in this image because pandas/pyarrow live
+here; psycopg is a dependency ONLY for it) exports one UTC day of
+`events_raw` / `rec_served(+items)` / labeled impressions to parquet. It is run
+by a host cron via `docker compose run` — see
+`../gateway/docs/tasks/TASKS_51_EVENT_LOG.md` for the cron line.
+
 Manual smoke:
 
 ```bash

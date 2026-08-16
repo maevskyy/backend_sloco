@@ -33,6 +33,7 @@ function feedPlace(overrides: Partial<FeedPlaceCard> = {}): FeedPlaceCard {
     mapVisibilityScore: 91,
     matchScore: 94,
     rank: 1,
+    position: 0,
     whyRecommended: "Because this matches places you saved.",
     blurb: "Calm specialty coffee spot.",
     tags: ["quiet", "coffee"],
@@ -58,6 +59,7 @@ function feedService(): FeedPlacesService {
         sort: query.sort,
         algorithmVersion: "test",
         embeddingRunId: null,
+        requestId: null,
         generatedAt: "2026-06-01T10:00:00.000Z",
         expiresAt: null
       },
@@ -133,6 +135,7 @@ describe("feed routes", () => {
             sort: query.sort,
             algorithmVersion: "test",
             embeddingRunId: null,
+            requestId: null,
             generatedAt: "2026-06-01T10:00:00.000Z",
             expiresAt: null
           },
@@ -231,6 +234,7 @@ describe("feed routes", () => {
             sort: query.sort,
             algorithmVersion: "test",
             embeddingRunId: null,
+            requestId: null,
             generatedAt: "2026-06-01T10:00:00.000Z",
             expiresAt: null
           },
@@ -295,6 +299,7 @@ describe("feed routes", () => {
             sort: query.sort,
             algorithmVersion: "test",
             embeddingRunId: null,
+            requestId: null,
             generatedAt: "2026-06-01T10:00:00.000Z",
             expiresAt: null
           },

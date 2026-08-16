@@ -36,8 +36,11 @@ _WEIGHTS_PRESETS = {
 class LocationRecommenderV4Adapter:
     """Wraps ``LocationRecommender`` and exposes the legacy recommender surface."""
 
-    def __init__(self, recommender: LocationRecommender) -> None:
+    def __init__(
+        self, recommender: LocationRecommender, weights_preset: str | None = None
+    ) -> None:
         self._recommender = recommender
+        self._weights_preset = weights_preset
 
     @property
     def candidate_count(self) -> int:
@@ -88,12 +91,18 @@ class LocationRecommenderV4Adapter:
                 # legacy contract exposes a flat `similarity`; the rich result
                 # keeps it inside score_components.
                 "similarity": item["score_components"]["similarity"],
+                # serving receipt (event-log spec 2.0): the full breakdown as
+                # scored at serve time, never recomputed.
+                "profile_id": item["profile_id"],
+                "score_components": item["score_components"],
             }
             for item in result["recommendations"]
         ]
         return {
             "algorithm_version": result["algorithm_version"],
             "embedding_run_id": result["embedding_run_id"],
+            "weights_preset": self._weights_preset,
+            "fallback_used": bool(result["fallback_used"]),
             "input_summary": {
                 "favourites_count": summary["favourites_count"],
                 "want_to_go_count": summary["want_to_go_count"],
@@ -102,6 +111,7 @@ class LocationRecommenderV4Adapter:
                 "valid_input_count": summary["valid_input_count"],
                 "invalid_place_ids": summary["invalid_place_ids"],
                 "candidate_count": summary["candidate_count"],
+                "profiles_count": summary["profiles_count"],
             },
             "recommendations": recommendations,
         }
@@ -132,4 +142,6 @@ def build_location_recommender_v4(
             "embedding_run_id": settings.embedding_run_id,
         },
     )
-    return LocationRecommenderV4Adapter(recommender)
+    return LocationRecommenderV4Adapter(
+        recommender, weights_preset=settings.recommender_weights_preset
+    )

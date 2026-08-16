@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import { bucketsToKeywords, matchesBucketKeywords } from "../../places/index.js";
+import { eventValueWeights } from "../../../config/event-value-weights.js";
 import { recommendationClient } from "../../../lib/recommendation-client.js";
 import {
   reactionsService,
@@ -20,9 +21,11 @@ import type {
   FeedRecommendationClient,
   FeedRecommendationResponse,
   FeedUserSignals,
-  FeedStoreContract
+  FeedStoreContract,
+  RecServedStoreContract
 } from "../common/feed.types.js";
 import { FeedStore } from "../stores/feed.store.js";
+import { RecServedStore } from "../stores/rec-served.store.js";
 
 export type { FeedPlacesService } from "../common/feed.types.js";
 
@@ -95,7 +98,8 @@ export function createFeedPlacesService(
   client: FeedRecommendationClient = recommendationClient,
   savedService: SavedPlacesService = savedPlacesService,
   cache = new FeedRecommendationCache(),
-  reactionsServiceOverride: ReactionsService = reactionsService
+  reactionsServiceOverride: ReactionsService = reactionsService,
+  recServedStore: RecServedStoreContract = new RecServedStore()
 ): FeedPlacesService {
   return async ({ query, user }) => {
     const generatedAt = Date.now();
@@ -141,6 +145,7 @@ export function createFeedPlacesService(
       cacheStatus = query.debug ? "bypass" : "miss";
 
       try {
+        const recStartedAt = Date.now();
         const response = await client.personalizedPlaces({
           user_id: user.id,
           favourites_place_ids: signals.favouritesPlaceIds,
@@ -150,6 +155,16 @@ export function createFeedPlacesService(
           limit: FEED_SNAPSHOT_SIZE,
           exclude_input_places: true,
           debug: query.debug
+        });
+
+        // Serving receipt (event-log spec 2.0): one write per FRESH snapshot —
+        // cache hits reuse the already-logged request_id. Fire-and-forget so
+        // logging never blocks or fails the feed.
+        persistServingLog(recServedStore, response, {
+          userId: user.id,
+          city: query.city ?? null,
+          debug: query.debug,
+          latencyMs: Date.now() - recStartedAt
         });
 
         cachedOrFresh = query.debug
@@ -208,6 +223,14 @@ export function createFeedPlacesService(
     const recommendationBySourceId = new Map(
       recommendations.map((item) => [item.sourceId, item])
     );
+    // Snapshot position for telemetry (0-based, event-log spec 2.1). Falls back
+    // to rank-1 when an older rec-service does not send position yet.
+    const positionBySourceId = new Map(
+      cachedOrFresh.response.recommendations.map((item) => [
+        item.place_id,
+        item.position ?? item.rank - 1
+      ])
+    );
     // The rec engine is not passed city or category, so the personalized path
     // filters the hydrated rows here. Seeds/clusters stay global (likes from
     // other cities still teach taste). A filtered personalized feed can be
@@ -223,7 +246,10 @@ export function createFeedPlacesService(
           query.category || query.city
             ? undefined
             : recommendationBySourceId.get(row.source_id),
-        rank: index + 1
+        rank: index + 1,
+        // position survives every cut and sort: it identifies the card inside
+        // the logged snapshot, not its place on the current page.
+        position: positionBySourceId.get(row.source_id) ?? null
       })
     );
 
@@ -254,6 +280,7 @@ export function createFeedPlacesService(
         sort: query.sort,
         algorithmVersion: cachedOrFresh.response.algorithm_version,
         embeddingRunId: cachedOrFresh.response.embedding_run_id,
+        requestId: cachedOrFresh.response.request_id ?? null,
         generatedAt: toIso(cachedOrFresh.cachedAt),
         expiresAt: query.debug ? null : toIso(cachedOrFresh.expiresAt)
       },
@@ -309,6 +336,10 @@ async function fallbackFeed(input: {
       sort: input.query.sort,
       algorithmVersion: FALLBACK_ALGORITHM_VERSION,
       embeddingRunId: null,
+      // Fallback feeds are not recommender servings: no receipt row is written,
+      // so telemetry events from them carry request_id null (an expected,
+      // monitored share — event-log spec "not MVP" table).
+      requestId: null,
       generatedAt: toIso(input.generatedAt),
       expiresAt: null
     },
@@ -409,6 +440,58 @@ function applySort(
         (b.distanceMeters ?? Number.POSITIVE_INFINITY)
     )
     .map((card, index) => ({ ...card, rank: index + 1 }));
+}
+
+// The write is fire-and-forget with ONE retry; a second failure is logged and
+// the receipt is lost — acceptable per spec 2.0 ("потеря единичных записей
+// допустима"). The serialized object is exactly what the client received.
+function persistServingLog(
+  recServedStore: RecServedStoreContract,
+  response: FeedRecommendationResponse,
+  request: {
+    userId: string;
+    city: string | null;
+    debug: boolean;
+    latencyMs: number;
+  }
+) {
+  const requestId = response.request_id;
+
+  // An older rec-service (deploy skew) sends no request_id — nothing to log.
+  if (!requestId) {
+    return;
+  }
+
+  const write = {
+    requestId,
+    userId: request.userId,
+    surface: "feed",
+    city: request.city,
+    algorithmVersion: response.algorithm_version,
+    weightsPreset: response.weights_preset ?? null,
+    valueWeightsVersion: eventValueWeights.version,
+    configOverrides: request.debug ? { debug: true } : {},
+    profilesCount: response.input_summary.profiles_count ?? null,
+    fallbackUsed: response.fallback_used ?? false,
+    latencyMs: request.latencyMs,
+    items: response.recommendations.map((item) => ({
+      position: item.position ?? item.rank - 1,
+      placeId: item.place_id,
+      profileId: item.profile_id ?? null,
+      score: item.score,
+      scoreComponents: item.score_components ?? null
+    }))
+  };
+
+  void recServedStore
+    .insertServing(write)
+    .catch(() => recServedStore.insertServing(write))
+    .catch((error) => {
+      console.error(
+        `rec_served write failed twice, serving lost: ${write.requestId}`,
+        error
+      );
+    });
 }
 
 function hasSignals(signals: FeedUserSignals) {

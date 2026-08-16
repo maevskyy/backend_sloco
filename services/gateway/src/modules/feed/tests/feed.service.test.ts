@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { ReactionsService } from "../../reactions/index.js";
 import type { SavedPlacesService } from "../../saved-places/index.js";
 import type {
@@ -6,8 +6,10 @@ import type {
   FeedRecommendationClient,
   FeedRecommendationItem,
   FeedRecommendationRequest,
-  FeedStoreContract
+  FeedStoreContract,
+  RecServedStoreContract
 } from "../common/feed.types.js";
+import { eventValueWeights } from "../../../config/event-value-weights.js";
 import {
   createFeedPlacesService,
   FeedRecommendationCache
@@ -1075,5 +1077,249 @@ describe("feed places service", () => {
       ]);
       expect(result.places.map((place) => place.rank)).toEqual([1, 2, 3]);
     });
+  });
+});
+
+describe("serving receipt log (rec_served)", () => {
+  type ServingWrite = Parameters<RecServedStoreContract["insertServing"]>[0];
+
+  function createRecServedStore(failures = 0): {
+    store: RecServedStoreContract;
+    writes: () => ServingWrite[];
+  } {
+    const writes: ServingWrite[] = [];
+    let remainingFailures = failures;
+
+    return {
+      writes: () => writes,
+      store: {
+        async insertServing(write) {
+          if (remainingFailures > 0) {
+            remainingFailures -= 1;
+            throw new Error("insert failed");
+          }
+          writes.push(write);
+        }
+      }
+    };
+  }
+
+  function createReceiptClient(): FeedRecommendationClient {
+    return {
+      async personalizedPlaces(request) {
+        return {
+          user_id: request.user_id,
+          request_id: "3f0e8a3e-a8a9-4c93-9f3a-111111111111",
+          algorithm_version: "location_recommender_v4_more_direct",
+          embedding_run_id: "combined_food_ttd",
+          weights_preset: "text_direct",
+          fallback_used: false,
+          input_summary: {
+            favourites_count: 1,
+            want_to_go_count: 1,
+            valid_input_count: 2,
+            invalid_place_ids: [],
+            profiles_count: 2
+          },
+          recommendations: [
+            {
+              rank: 1,
+              place_id: "place_2",
+              position: 0,
+              profile_id: 1,
+              score: 0.98,
+              score_components: { similarity: 0.9, quality_score: 0.7 }
+            },
+            {
+              rank: 2,
+              place_id: "place_3",
+              position: 1,
+              profile_id: 2,
+              score: 0.75,
+              score_components: { similarity: 0.6, quality_score: 0.5 }
+            }
+          ]
+        };
+      }
+    };
+  }
+
+  function relevanceQuery() {
+    return {
+      limit: 20,
+      offset: 0,
+      sort: "relevance" as const,
+      debug: false
+    };
+  }
+
+  const user = { id: "user-1", email: "user@example.com" };
+
+  async function flushAsyncWrites() {
+    await new Promise((resolve) => setImmediate(resolve));
+  }
+
+  it("writes one receipt per fresh snapshot and none on cache hits", async () => {
+    const { store: recServedStore, writes } = createRecServedStore();
+    const service = createFeedPlacesService(
+      createStore(),
+      createReceiptClient(),
+      createSavedService(),
+      new FeedRecommendationCache(),
+      createReactionsService(),
+      recServedStore
+    );
+
+    const first = await service({ query: relevanceQuery(), user });
+    const second = await service({ query: relevanceQuery(), user });
+    await flushAsyncWrites();
+
+    expect(first.feed.requestId).toBe("3f0e8a3e-a8a9-4c93-9f3a-111111111111");
+    expect(second.feed.cacheStatus).toBe("hit");
+    expect(second.feed.requestId).toBe(first.feed.requestId);
+    expect(writes()).toHaveLength(1);
+    expect(writes()[0]).toMatchObject({
+      requestId: "3f0e8a3e-a8a9-4c93-9f3a-111111111111",
+      userId: "user-1",
+      surface: "feed",
+      city: null,
+      algorithmVersion: "location_recommender_v4_more_direct",
+      weightsPreset: "text_direct",
+      valueWeightsVersion: eventValueWeights.version,
+      configOverrides: {},
+      profilesCount: 2,
+      fallbackUsed: false
+    });
+    expect(writes()[0]?.items).toEqual([
+      {
+        position: 0,
+        placeId: "place_2",
+        profileId: 1,
+        score: 0.98,
+        scoreComponents: { similarity: 0.9, quality_score: 0.7 }
+      },
+      {
+        position: 1,
+        placeId: "place_3",
+        profileId: 2,
+        score: 0.75,
+        scoreComponents: { similarity: 0.6, quality_score: 0.5 }
+      }
+    ]);
+  });
+
+  it("keeps snapshot positions on cards while sort=distance re-ranks", async () => {
+    const { store: recServedStore } = createRecServedStore();
+    const service = createFeedPlacesService(
+      createStore({
+        async feedPlacesBySourceIds(sourceIds) {
+          return sourceIds.map((sourceId, index) =>
+            feedRow({
+              id: index + 1,
+              source_id: sourceId,
+              distance_m: sourceId === "place_2" ? 500 : 100
+            })
+          );
+        }
+      }),
+      createReceiptClient(),
+      createSavedService(),
+      new FeedRecommendationCache(),
+      createReactionsService(),
+      recServedStore
+    );
+
+    const result = await service({
+      query: { limit: 20, offset: 0, sort: "distance" as const, debug: false },
+      user
+    });
+    await flushAsyncWrites();
+
+    // place_3 is closer, so it ranks first — but position still says where each
+    // card sat in the logged snapshot.
+    expect(
+      result.places.map((place) => [place.sourceId, place.rank, place.position])
+    ).toEqual([
+      ["place_3", 1, 1],
+      ["place_2", 2, 0]
+    ]);
+  });
+
+  it("does not fail the feed when the receipt write fails twice", async () => {
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const { store: recServedStore, writes } = createRecServedStore(2);
+    const service = createFeedPlacesService(
+      createStore(),
+      createReceiptClient(),
+      createSavedService(),
+      new FeedRecommendationCache(),
+      createReactionsService(),
+      recServedStore
+    );
+
+    const result = await service({ query: relevanceQuery(), user });
+    await flushAsyncWrites();
+
+    expect(result.feed.personalizationStatus).toBe("personalized");
+    expect(result.places.length).toBeGreaterThan(0);
+    expect(writes()).toHaveLength(0);
+    expect(errorSpy).toHaveBeenCalledOnce();
+    errorSpy.mockRestore();
+  });
+
+  it("retries the receipt write once after a single failure", async () => {
+    const { store: recServedStore, writes } = createRecServedStore(1);
+    const service = createFeedPlacesService(
+      createStore(),
+      createReceiptClient(),
+      createSavedService(),
+      new FeedRecommendationCache(),
+      createReactionsService(),
+      recServedStore
+    );
+
+    await service({ query: relevanceQuery(), user });
+    await flushAsyncWrites();
+
+    expect(writes()).toHaveLength(1);
+  });
+
+  it("skips the receipt and serves requestId null from an older rec-service", async () => {
+    const { store: recServedStore, writes } = createRecServedStore();
+    const service = createFeedPlacesService(
+      createStore(),
+      createClient().client,
+      createSavedService(),
+      new FeedRecommendationCache(),
+      createReactionsService(),
+      recServedStore
+    );
+
+    const result = await service({ query: relevanceQuery(), user });
+    await flushAsyncWrites();
+
+    expect(result.feed.requestId).toBeNull();
+    expect(result.places.map((place) => place.position)).toEqual([0, 1]);
+    expect(writes()).toHaveLength(0);
+  });
+
+  it("serves requestId null and no receipt on fallback feeds", async () => {
+    const { store: recServedStore, writes } = createRecServedStore();
+    const service = createFeedPlacesService(
+      createStore(),
+      createClient().client,
+      createSavedService(),
+      new FeedRecommendationCache(),
+      createReactionsService(),
+      recServedStore
+    );
+
+    const result = await service({ query: relevanceQuery(), user: null });
+    await flushAsyncWrites();
+
+    expect(result.feed.personalizationStatus).toBe("anonymous_fallback");
+    expect(result.feed.requestId).toBeNull();
+    expect(result.places.map((place) => place.position)).toEqual([null]);
+    expect(writes()).toHaveLength(0);
   });
 });

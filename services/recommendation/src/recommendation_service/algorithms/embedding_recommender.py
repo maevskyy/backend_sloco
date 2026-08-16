@@ -21,6 +21,10 @@ class RecommendationResult(TypedDict):
     place_id: str
     score: float
     similarity: float
+    # Serving-receipt fields (event-log spec 2.0). The legacy algorithm has no
+    # taste profiles; its score has one component.
+    profile_id: int | None
+    score_components: dict[str, object]
 
 
 class InputSummary(TypedDict):
@@ -31,11 +35,14 @@ class InputSummary(TypedDict):
     valid_input_count: int
     invalid_place_ids: list[str]
     candidate_count: int
+    profiles_count: int
 
 
 class RecommendationPayload(TypedDict):
     algorithm_version: str
     embedding_run_id: str
+    weights_preset: str | None
+    fallback_used: bool
     input_summary: InputSummary
     recommendations: list[RecommendationResult]
 
@@ -172,6 +179,8 @@ class EmbeddingRecommender:
             return {
                 "algorithm_version": ALGORITHM_VERSION,
                 "embedding_run_id": self.embedding_run_id,
+                "weights_preset": None,
+                "fallback_used": False,
                 "input_summary": {
                     "favourites_count": len(favourites),
                     "want_to_go_count": len(want_to_go),
@@ -183,6 +192,7 @@ class EmbeddingRecommender:
                         set(input_place_ids),
                         exclude_input_places,
                     ),
+                    "profiles_count": 0,
                 },
                 "recommendations": [],
             }
@@ -194,6 +204,8 @@ class EmbeddingRecommender:
         return {
             "algorithm_version": ALGORITHM_VERSION,
             "embedding_run_id": self.embedding_run_id,
+            "weights_preset": None,
+            "fallback_used": False,
             "input_summary": {
                 "favourites_count": len(favourites),
                 "want_to_go_count": len(want_to_go),
@@ -205,6 +217,7 @@ class EmbeddingRecommender:
                     excluded,
                     exclude_input_places,
                 ),
+                "profiles_count": 0,
             },
             "recommendations": recommendations,
         }
@@ -257,6 +270,8 @@ class EmbeddingRecommender:
                 "place_id": place_id,
                 "score": _round_float((similarity + 1) / 2),
                 "similarity": _round_float(similarity),
+                "profile_id": None,
+                "score_components": {"similarity": _round_float(similarity)},
             }
             for rank, (place_id, similarity) in enumerate(rows[:limit], start=1)
         ]

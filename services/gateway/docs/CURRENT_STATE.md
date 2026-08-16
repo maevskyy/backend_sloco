@@ -109,6 +109,12 @@ Human docs for catalog cities:
 docs/FRONTEND_CITIES_API.md
 ```
 
+Human docs for telemetry intake:
+
+```text
+docs/FRONTEND_EVENTS_API.md
+```
+
 ## Active Database
 
 ```text
@@ -119,6 +125,9 @@ Saved collections table: public.saved_collections
 Saved collection membership table: public.saved_collection_places
 Place photos table: public.place_photos (R2 public_url; primary + bounded photos[])
 Reactions table: public.place_reactions (favorite|dislike|hide, keyed by source_id)
+Telemetry events table: public.events_raw (append-only, dedupe by event_id)
+Identity stitching table: public.identity_links (anon_id -> user_id)
+Serving receipt tables: public.rec_served + public.rec_served_items (score_components at serve time)
 Map pin RPC: public.map_places_in_bbox(sw_lat, sw_lng, ne_lat, ne_lng, result_limit)
 Map tile RPC: public.map_tile(z, x, y) (MVT bytea; min-score floor via map_tile_min_score(z))
 Place detail RPC: public.place_details_by_id(place_id)
@@ -152,6 +161,15 @@ Google Maps URI (imported 2026-08-11 from the raw scrape; `businessStatus` is
 still empty — absent at the source).
 Place details now expose both `primaryPhoto` and a bounded `photos[]` gallery
 list with direct R2 `public_url` values for fullscreen gallery clients.
+Telemetry (`TASKS_51`): `POST /v1/events` stores append-only client events in
+`events_raw` (dedupe by `event_id`, unknown types kept with `known_type=false`);
+each fresh recommendation snapshot writes a serving receipt into
+`rec_served`/`rec_served_items` (full `score_components` at serve time), and the
+feed response now carries `feed.requestId` + per-card `position` so events can
+reference the serving. Action weights live in
+`src/config/event-value-weights.json` (version stamped into every receipt).
+A nightly script exports events/servings/labeled-impressions parquet for ML
+(runs from the rec-service image via host cron).
 
 ## Active Data Flow
 
@@ -196,9 +214,9 @@ controller -> service -> store
 ```
 
 `src/modules/saved-places/` is the reference implementation. All product modules
-(`map`, `me`, `health`, `saved-places`, `places`, `search`, `feed`, `reactions`)
-use this shape; `auth` stays a shared service (no HTTP) with its Supabase call
-isolated in a store.
+(`map`, `me`, `health`, `saved-places`, `places`, `search`, `feed`, `reactions`,
+`events`) use this shape; `auth` stays a shared service (no HTTP) with its
+Supabase call isolated in a store.
 
 Shared code is split by responsibility: `src/lib/` (infrastructure adapters),
 `src/config/` (wiring, plus the `openapi.ts` zod→component generator and
@@ -219,6 +237,10 @@ module, so request validation and docs cannot drift.
   state, OpenCLIP direct-image embeddings are committed (91.3% catalog coverage) and the
   deploy workflow now pins the dashboard-default `text_direct` weights. That deploy also
   ships the `TASKS_6` startup coverage guard, which has been code-complete since 08-11.
+- The event log MVP (`TASKS_51` + recommendation `TASKS_8`) is **built and locally
+  verified, awaiting migration `022` + deploy + the export cron**: telemetry intake,
+  serving receipts with `score_components`, requestId/position on the feed, action
+  weights `v1_2026-08`, parquet export. This starts collecting ranker training data.
 - Open next: search quality (`TASKS_49` — text search matches names, not intent; needs a
   product decision) and search latency on the text path (`TASKS_48`).
 - Keep backend deploy simple: one Hetzner host, Docker Compose, managed

@@ -13,6 +13,7 @@ TASKS_4_onboarding_artifact_endpoint.md
 TASKS_5_direct_image_similar.md
 TASKS_6_v4_activation_coverage_guard.md
 TASKS_7_direct_image_openclip.md
+TASKS_8_serving_receipt.md
 ```
 
 `TASKS_3` is part 1 of 3 of the cross-service user-reactions feature; the gateway
@@ -33,3 +34,8 @@ channel with OpenCLIP place embeddings at the dashboard-default `text_direct`
 weights (first half of audit P2). Artifacts come from Kirill's SSD (91.3% catalog
 coverage, verified). The task file is a fully self-contained implementation spec.
 
+
+`TASKS_8` is the rec half of the event log (gateway `TASKS_51`): the response
+carries a serving receipt — request_id, per-item position/profile_id and the full
+score_components (always, not only debug). The gateway persists it; this service
+stays DB-free.

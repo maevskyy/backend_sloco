@@ -17,6 +17,9 @@ dependencies = [
     # because the vendored engine merges it on a string place_id without casting —
     # a CSV round-trip would re-infer the numeric CID as int64 and silently join nothing.
     "pyarrow (>=18.0,<22.0)",
+    # Used ONLY by scripts/export_event_log.py (nightly cron via `docker compose
+    # run`). The service itself stays DB-free at request time.
+    "psycopg[binary] (>=3.2,<4.0)",
 ]
 
 [project.scripts]

@@ -18,22 +18,32 @@ export type PersonalizedRecommendationRequest = {
   debug: boolean;
 };
 
+// Serving-receipt fields (request_id, position, profile_id, score_components,
+// weights_preset, fallback_used, profiles_count) are optional: an older
+// rec-service without them must keep working during deploy skew.
 export type PersonalizedRecommendationResponse = {
   user_id: string | null;
+  request_id?: string;
   algorithm_version: string;
   embedding_run_id: string;
+  weights_preset?: string | null;
+  fallback_used?: boolean;
   input_summary: {
     favourites_count: number;
     want_to_go_count: number;
     valid_input_count: number;
     invalid_place_ids: string[];
     candidate_count?: number;
+    profiles_count?: number;
   };
   recommendations: Array<{
     rank: number;
     place_id: string;
     score: number;
     similarity?: number | null;
+    position?: number;
+    profile_id?: number | null;
+    score_components?: Record<string, unknown> | null;
   }>;
 };
 

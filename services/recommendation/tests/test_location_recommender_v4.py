@@ -7,6 +7,7 @@ cold-start fallback path) plus key invariants — not exact rankings.
 
 from collections.abc import Iterator
 from pathlib import Path
+from uuid import UUID
 
 import pytest
 from fastapi.testclient import TestClient
@@ -16,8 +17,11 @@ from recommendation_service.main import create_app
 
 RESPONSE_KEYS = {
     "user_id",
+    "request_id",
     "algorithm_version",
     "embedding_run_id",
+    "weights_preset",
+    "fallback_used",
     "input_summary",
     "recommendations",
 }
@@ -29,8 +33,17 @@ INPUT_SUMMARY_KEYS = {
     "valid_input_count",
     "invalid_place_ids",
     "candidate_count",
+    "profiles_count",
 }
-RECOMMENDATION_KEYS = {"rank", "place_id", "score", "similarity"}
+RECOMMENDATION_KEYS = {
+    "rank",
+    "place_id",
+    "position",
+    "profile_id",
+    "score",
+    "similarity",
+    "score_components",
+}
 
 
 @pytest.fixture()
@@ -151,6 +164,36 @@ def test_excluded_seed_is_not_returned_or_marked_invalid(client: TestClient) -> 
     assert "place_3" not in returned
     assert "place_2" not in data["input_summary"]["invalid_place_ids"]
     assert "place_3" not in data["input_summary"]["invalid_place_ids"]
+
+
+def test_serving_receipt_contract(client: TestClient) -> None:
+    first = _post(
+        client,
+        favourites_place_ids=["place_1", "place_2", "place_3"],
+        want_to_go_place_ids=[],
+    )
+    second = _post(
+        client,
+        favourites_place_ids=["place_1", "place_2", "place_3"],
+        want_to_go_place_ids=[],
+    )
+
+    # One uuid per serving ("receipt number") — never reused.
+    UUID(first["request_id"])
+    assert first["request_id"] != second["request_id"]
+    assert first["weights_preset"] == "text_only"
+    assert isinstance(first["fallback_used"], bool)
+    assert first["input_summary"]["profiles_count"] >= 1
+
+    assert first["recommendations"], "fixture seeds must produce candidates"
+    for item in first["recommendations"]:
+        assert item["position"] == item["rank"] - 1
+        # The full breakdown ships WITHOUT debug — the gateway persists it into
+        # rec_served_items at serve time.
+        components = item["score_components"]
+        assert components is not None
+        for key in ("similarity", "tag_overlap", "quality_score", "price_match"):
+            assert key in components
 
 
 def test_exclusion_also_applies_to_cold_start_path(client: TestClient) -> None:

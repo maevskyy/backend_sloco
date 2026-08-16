@@ -89,6 +89,11 @@ start at the monorepo root:
   FRONTEND_ONBOARDING_API.md
   ```
 
+- Frontend telemetry intake contract (`POST /v1/events` + requestId/position echo):
+  ```text
+  FRONTEND_EVENTS_API.md
+  ```
+
 Current note:
 
 - Markdown API docs are usage docs.

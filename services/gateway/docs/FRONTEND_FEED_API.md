@@ -103,6 +103,7 @@ relevance and the first 50 by distance are different windows of the same 200.
     "cacheStatus": "miss",
     "algorithmVersion": "embedding_recommender_v1",
     "embeddingRunId": "20260531T173837Z",
+    "requestId": "3f0e8a3e-a8a9-4c93-9f3a-1b2c3d4e5f60",
     "generatedAt": "2026-06-01T10:00:00.000Z",
     "expiresAt": "2026-06-01T10:10:00.000Z"
   },
@@ -130,6 +131,7 @@ relevance and the first 50 by distance are different windows of the same 200.
       "mapVisibilityScore": 91,
       "matchScore": 94,
       "rank": 1,
+      "position": 0,
       "whyRecommended": "Because this matches places you saved.",
       "blurb": "Specialty coffee spot with a calm work-friendly vibe.",
       "tags": ["quiet", "specialty coffee"],
@@ -141,6 +143,24 @@ relevance and the first 50 by distance are different windows of the same 200.
   ]
 }
 ```
+
+## Telemetry ids: `feed.requestId` + card `position` (2026-08-16)
+
+`feed.requestId` is the recommendation serving id ("receipt number") and
+`places[].position` is the card's 0-based position inside that serving's snapshot.
+Put BOTH into the `context` of every telemetry event born from a feed card —
+that link is what turns telemetry into training data. Rules:
+
+- One `requestId` per snapshot: pages, `sort=` re-orders and `category=` cuts of
+  the same snapshot share it; it changes when the snapshot refreshes. Dedupe
+  impressions per `(requestId, placeId)`.
+- `position` is stable under `sort=distance` / `category=` (it points into the
+  snapshot); `rank` stays positional per page — use `rank` for display,
+  `position` for telemetry.
+- Both are `null` on every fallback feed. Send events with
+  `context.request_id: null` then — expected and monitored.
+
+Full intake contract: `FRONTEND_EVENTS_API.md`.
 
 ## Personalization Status
 

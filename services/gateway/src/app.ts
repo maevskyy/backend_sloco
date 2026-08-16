@@ -50,6 +50,10 @@ import {
   registerCitiesModule,
   type CitiesService
 } from "./modules/cities/index.js";
+import {
+  registerEventsModule,
+  type EventsServiceContract
+} from "./modules/events/index.js";
 import type { AuthService } from "./modules/auth/auth.service.js";
 import type { CacheStore } from "./lib/cache/cache-store.js";
 
@@ -67,6 +71,7 @@ type AppOptions = {
   searchPlacesService?: SearchPlacesService;
   feedPlacesService?: FeedPlacesService;
   citiesService?: CitiesService;
+  eventsService?: EventsServiceContract;
 };
 
 export async function buildApp(options: AppOptions = {}) {
@@ -154,6 +159,12 @@ export async function buildApp(options: AppOptions = {}) {
   await app.register(registerCitiesModule, {
     prefix: API_PREFIX,
     citiesService: options.citiesService
+  });
+
+  await app.register(registerEventsModule, {
+    prefix: API_PREFIX,
+    authService: options.authService,
+    eventsService: options.eventsService
   });
 
   await app.register(registerMapModule, {

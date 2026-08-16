@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 from starlette.concurrency import run_in_threadpool
 
 from recommendation_service.algorithms.base import PersonalizedRecommender
@@ -35,16 +37,24 @@ async def recommend_personalized(
         RecommendationItem(
             rank=item["rank"],
             place_id=item["place_id"],
+            position=item["rank"] - 1,
+            profile_id=item["profile_id"],
             score=item["score"],
             similarity=item["similarity"] if request.debug else None,
+            score_components=dict(item["score_components"]),
         )
         for item in result["recommendations"]
     ]
 
     return PersonalizedResponse(
         user_id=request.user_id,
+        # The serving id ("receipt number", event-log spec 2.1). Minted per HTTP
+        # request; the gateway logs it and forwards it to the client.
+        request_id=str(uuid4()),
         algorithm_version=result["algorithm_version"],
         embedding_run_id=result["embedding_run_id"],
+        weights_preset=result["weights_preset"],
+        fallback_used=result["fallback_used"],
         input_summary=InputSummary(**result["input_summary"]),
         recommendations=recommendations,
     )
