@@ -1,6 +1,16 @@
 # TASKS 51: Event log MVP — telemetry intake, serving receipts, ML export
 
-**Status: Done in code — awaiting prod migration `022` + deploy + cron install.**
+**Status: DONE — live in prod, full acceptance passed 2026-08-16.** Migration `022`
+applied, both services deployed, export cron installed (03:15 UTC, root crontab).
+Live evidence: intake `202 {accepted: 2, duplicates: 0, rejected: [bad_client_ts]}`
+→ resend `{accepted: 0, duplicates: 2}`; unknown type accepted; 501 events → 429;
+bad envelope → 400. Personalized feed returned `requestId
+15d41258-6e0a-4a3d-b733-4283479986bb` + positions 0–9 (fallback feed: nulls, as
+designed). A hand-sent impression/open/dwell/save scenario against that serving
+produced the checklist's labeled training row in `impressions_labeled_2026-08-16.parquet`:
+place `4485186644683441449` (Kabo), position 0, score 0.9439 with full serve-time
+`score_components`, `action_types [card_dwell, card_open, save_favourite]`,
+`dwell_ms 12000`, `weights_preset text_direct`, `value_weights_version v1_2026-08`.
 
 Source spec: `x-algorithm` handoff, `sloco_event_log_backend_spec.md` (v2, with the
 2026-08-16 §2.0 clarification: the rec-service PREPARES the receipt data, the gateway
@@ -112,13 +122,14 @@ The rec-service half of this feature is `services/recommendation/docs/TASKS_8_se
    the non-root `app` user — make `exports/` writable for it
    (`chmod 777 /opt/backend_sloco/exports` is fine on this single-purpose host).
 
-## Acceptance (after deploy)
+## Acceptance (all passed live, 2026-08-16)
 
-- [ ] `POST /v1/events` with a small batch → 202; resend → `duplicates` = batch size.
-- [ ] Unknown `event_type` → 202, row lands with `known_type=false`.
-- [ ] Authenticated `GET /v1/feed/places` → `feed.requestId` uuid + `position` on
-      every card; `select count(*) from rec_served_items` grows by snapshot size.
-- [ ] `rec_served.value_weights_version = 'v1_2026-08'` on new rows.
-- [ ] After one night: three parquet files in `exports/`, and joining a hand-made
-      impression + save event pair by `request_id` produces a labeled row
-      (spec checklist item).
+- [x] `POST /v1/events` with a small batch → 202; resend → `duplicates` = batch size.
+- [x] Unknown `event_type` → 202, row lands with `known_type=false`.
+- [x] Authenticated `GET /v1/feed/places` → `feed.requestId` uuid + `position` on
+      every card (and nulls on fallback feeds); the serving's items landed in
+      `rec_served_items` (proven by the labeled join below).
+- [x] `rec_served.value_weights_version = 'v1_2026-08'` on new rows.
+- [x] Export produces the three parquet files, and joining a hand-made
+      impression + save scenario by `request_id` produced a labeled row
+      (spec checklist item) — see Status for the row.

@@ -1,6 +1,9 @@
 # TASKS 8: Serving receipt in the recommendation response
 
-**Status: Done in code — deploys with the next `service=recommender` deploy.**
+**Status: DONE — live in prod 2026-08-16.** Verified end to end through the
+gateway: the personalized feed exposed `request_id` + positions, and the serving's
+`score_components`/`weights_preset: text_direct` came back out of
+`rec_served_items` in the labeled export row (see gateway `TASKS_51` Status).
 
 The rec-service half of the event-log feature (gateway half + tables + intake:
 `services/gateway/docs/tasks/TASKS_51_EVENT_LOG.md`; source spec:

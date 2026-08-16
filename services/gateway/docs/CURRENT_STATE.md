@@ -232,15 +232,15 @@ module, so request validation and docs cannot drift.
   (task files `TASKS_38`, `TASKS_41`–`47`, recommendation `TASKS_6`). Personalization is
   live end to end: onboarding picks become favourites and the feed returns `personalized`
   on v4.
-- The recommender's photo channel (recommendation `TASKS_7`) is **built and locally
-  verified, awaiting deploy**: the engine is re-vendored to the research 2026-07-02
-  state, OpenCLIP direct-image embeddings are committed (91.3% catalog coverage) and the
-  deploy workflow now pins the dashboard-default `text_direct` weights. That deploy also
-  ships the `TASKS_6` startup coverage guard, which has been code-complete since 08-11.
-- The event log MVP (`TASKS_51` + recommendation `TASKS_8`) is **built and locally
-  verified, awaiting migration `022` + deploy + the export cron**: telemetry intake,
-  serving receipts with `score_components`, requestId/position on the feed, action
-  weights `v1_2026-08`, parquet export. This starts collecting ranker training data.
+- **The photo channel and the event log are LIVE (2026-08-16).** Recommendation
+  `TASKS_7` runs in prod at the dashboard-default `text_direct` weights
+  (startup log: text 12578/12578, direct-image 11483/12578 = 91.3%, no WARN;
+  `TASKS_6` guard shipped with it). The event log (`TASKS_51` + rec `TASKS_8`)
+  passed full live acceptance including the first labeled training row: telemetry
+  intake, serving receipts with serve-time `score_components`,
+  requestId/position on the feed, weights `v1_2026-08`, nightly parquet export
+  (cron 03:15 UTC). Ranker training data is now accumulating; the iOS client
+  instrumentation is the remaining half (frontend backlog).
 - Open next: search quality (`TASKS_49` — text search matches names, not intent; needs a
   product decision) and search latency on the text path (`TASKS_48`).
 - Keep backend deploy simple: one Hetzner host, Docker Compose, managed

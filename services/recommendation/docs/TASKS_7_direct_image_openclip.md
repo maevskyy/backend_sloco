@@ -1,9 +1,15 @@
 # TASKS 7: Dashboard parity for the production recommender — re-vendor + direct-image channel
 
-**Status: Implemented locally 2026-08-12 — awaiting commit + `service=recommender`
-deploy** (see "Implementation record" at the end for what was built and measured).
-This spec is written to be **self-contained**: every path, code anchor and command
-needed to execute it is in this file — do not rely on conversation memory.
+**Status: DONE — live in prod 2026-08-16.** Production startup log:
+`v4 embedding coverage: 12578/12578 (100.0%)` + `v4 direct-image coverage:
+11483/12578 (91.3%)`, no WARN, `algorithm=location_recommender_v4_more_direct`,
+boot 3.0 s. Serving receipts (TASKS_8/51) confirm `weights_preset: text_direct`
+end to end. One acceptance caveat: the §6.4 "top-5 differs from the pre-deploy
+baseline for the SAME account" check could not run — the baseline account's
+password was lost and a fresh test account (same 3 favourite ids, different
+account) was used instead; the reordering evidence stands on the pre-deploy local
+run (0/10 top-10 overlap on identical seeds, "Implementation record" below).
+(The implementation record and the original spec follow.)
 
 **Goal in one line:** the production recommender must behave exactly like the research
 dashboard's defaults (`/Volumes/Extreme SSD/sloco/SLOCO/recommendation_system`) — same

@@ -1,7 +1,12 @@
 # TASKS 6: Activate `location_recommender_v4` in prod + startup coverage guard
 
-**Status: In progress** — the coverage guard (change 2) is implemented and verified
-2026-08-11: `log_v4_embedding_coverage` in `main.py` logs
+**Status: DONE — live in prod 2026-08-16.** The guard deployed with the TASKS_7/8
+recommender deploy; the production startup log shows
+`v4 embedding coverage: 12578/12578 locations have embeddings (100.0%)` with no WARN
+(plus the TASKS_7 direct-image line `11483/12578 (91.3%)`).
+
+The guard (change 2) was implemented and verified 2026-08-11:
+`log_v4_embedding_coverage` in `main.py` logs
 `v4 embedding coverage: N/M locations have embeddings (X%)` at engine init and WARNs
 below 95% (`tests/test_startup_coverage.py`; 23/23 pytest, ruff and strict mypy clean;
 fixture boot shows `6/6 (100.0%)`).
