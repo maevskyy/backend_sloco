@@ -22,6 +22,11 @@ psycopg), with the gateway's Postgres URL:
 
 Without --date the previous UTC day is exported. The script is idempotent: it
 overwrites the day's files.
+
+With --retention-days N the script also DELETES exported rows older than N days
+after a successful export (Postgres is the buffer, parquet is the archive —
+TASKS_52). Deletion is per UTC day and only for days whose three files exist in
+--out; a day without files is kept and reported. identity_links is never touched.
 """
 
 from __future__ import annotations
@@ -103,27 +108,120 @@ order by imp.server_ts
 """
 
 
-def export_day(database_url: str, day: date, out_dir: Path) -> None:
+# Days (UTC) older than the retention cutoff that still hold rows, per table.
+CLEANUP_DAYS_SQL = """
+select day from (
+  select distinct (server_ts at time zone 'UTC')::date as day from public.events_raw
+  union
+  select distinct (server_ts at time zone 'UTC')::date as day from public.rec_served
+) as days
+where day < %(cutoff_day)s
+order by day
+"""
+
+# rec_served_items has no timestamp of its own: delete through its serving header.
+CLEANUP_ITEMS_SQL = """
+delete from public.rec_served_items as i
+using public.rec_served as s
+where i.request_id = s.request_id
+  and s.server_ts >= %(day_start)s and s.server_ts < %(day_end)s
+"""
+
+CLEANUP_SERVED_SQL = """
+delete from public.rec_served
+where server_ts >= %(day_start)s and server_ts < %(day_end)s
+"""
+
+CLEANUP_EVENTS_SQL = """
+delete from public.events_raw
+where server_ts >= %(day_start)s and server_ts < %(day_end)s
+"""
+
+
+def day_window(day: date) -> dict[str, datetime]:
     day_start = datetime(day.year, day.month, day.day, tzinfo=UTC)
-    params = {"day_start": day_start, "day_end": day_start + timedelta(days=1)}
+    return {"day_start": day_start, "day_end": day_start + timedelta(days=1)}
+
+
+def day_files(day: date) -> list[str]:
+    return [
+        f"events_{day.isoformat()}.parquet",
+        f"served_{day.isoformat()}.parquet",
+        f"impressions_labeled_{day.isoformat()}.parquet",
+    ]
+
+
+def export_day(
+    connection: psycopg.Connection, day: date, out_dir: Path
+) -> None:
+    params = day_window(day)
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    outputs = {
-        f"events_{day.isoformat()}.parquet": EVENTS_SQL,
-        f"served_{day.isoformat()}.parquet": SERVED_SQL,
-        f"impressions_labeled_{day.isoformat()}.parquet": IMPRESSIONS_LABELED_SQL,
-    }
+    outputs = dict(
+        zip(
+            day_files(day),
+            [EVENTS_SQL, SERVED_SQL, IMPRESSIONS_LABELED_SQL],
+            strict=True,
+        )
+    )
 
-    with psycopg.connect(database_url) as connection:
-        for file_name, sql in outputs.items():
+    for file_name, sql in outputs.items():
+        with connection.cursor() as cursor:
+            cursor.execute(sql, params)
+            columns = [column.name for column in cursor.description or []]
+            frame = pd.DataFrame(cursor.fetchall(), columns=columns)
+        # array_agg comes back as a python list; parquet stores it natively.
+        target = out_dir / file_name
+        frame.to_parquet(target, index=False)
+        print(f"{target}: {len(frame)} rows")
+
+
+def cleanup_exported_days(
+    connection: psycopg.Connection,
+    out_dir: Path,
+    retention_days: int,
+    today: date,
+) -> None:
+    """Delete exported rows older than the retention window (TASKS_52).
+
+    Postgres is a buffer here, not the archive: the parquet files are the
+    durable copy. Deletion is per UTC day, inside one transaction per day, and
+    ONLY for days whose three parquet files are present in ``out_dir`` — a day
+    whose export is missing (failed cron, moved files) is kept and reported, so
+    the failure mode is "data stays", never "data lost". ``identity_links`` is
+    not exported and is never touched.
+    """
+    cutoff_day = today - timedelta(days=retention_days)
+    with connection.cursor() as cursor:
+        cursor.execute(CLEANUP_DAYS_SQL, {"cutoff_day": cutoff_day})
+        days = [row[0] for row in cursor.fetchall()]
+
+    if not days:
+        print(f"cleanup: nothing older than {cutoff_day.isoformat()}")
+        return
+
+    for day in days:
+        missing = [name for name in day_files(day) if not (out_dir / name).exists()]
+        if missing:
+            print(
+                f"cleanup: KEEPING {day.isoformat()} — export files missing "
+                f"({', '.join(missing)}); run --date {day.isoformat()} first"
+            )
+            continue
+
+        params = day_window(day)
+        with connection.transaction():
             with connection.cursor() as cursor:
-                cursor.execute(sql, params)
-                columns = [column.name for column in cursor.description or []]
-                frame = pd.DataFrame(cursor.fetchall(), columns=columns)
-            # array_agg comes back as a python list; parquet stores it natively.
-            target = out_dir / file_name
-            frame.to_parquet(target, index=False)
-            print(f"{target}: {len(frame)} rows")
+                cursor.execute(CLEANUP_ITEMS_SQL, params)
+                items = cursor.rowcount
+                cursor.execute(CLEANUP_SERVED_SQL, params)
+                served = cursor.rowcount
+                cursor.execute(CLEANUP_EVENTS_SQL, params)
+                events = cursor.rowcount
+        print(
+            f"cleanup: {day.isoformat()} deleted — events {events}, "
+            f"servings {served}, items {items}"
+        )
 
 
 def main() -> int:
@@ -146,6 +244,16 @@ def main() -> int:
         or os.environ.get("DATABASE_URL"),
         help="Postgres URL; default: $SUPABASE_DB_URL or $DATABASE_URL",
     )
+    parser.add_argument(
+        "--retention-days",
+        type=int,
+        default=None,
+        help=(
+            "after a successful export, DELETE exported rows older than N days "
+            "(per-day, only days whose parquet files exist in --out); "
+            "default: no cleanup"
+        ),
+    )
     args = parser.parse_args()
 
     if not args.database_url:
@@ -154,9 +262,19 @@ def main() -> int:
             file=sys.stderr,
         )
         return 2
+    if args.retention_days is not None and args.retention_days < 2:
+        # Late events from offline devices reference day-old servings; a window
+        # under 2 days would delete the servings their labels need.
+        print("--retention-days must be at least 2", file=sys.stderr)
+        return 2
 
-    day = args.date or (datetime.now(UTC).date() - timedelta(days=1))
-    export_day(args.database_url, day, args.out)
+    today = datetime.now(UTC).date()
+    day = args.date or (today - timedelta(days=1))
+    with psycopg.connect(args.database_url) as connection:
+        export_day(connection, day, args.out)
+        # Cleanup runs ONLY after the export above succeeded.
+        if args.retention_days is not None:
+            cleanup_exported_days(connection, args.out, args.retention_days, today)
     return 0
 
 

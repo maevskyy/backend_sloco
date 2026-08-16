@@ -143,9 +143,12 @@ never touches a database: the gateway does the writing.
 
 `scripts/export_event_log.py` (ships in this image because pandas/pyarrow live
 here; psycopg is a dependency ONLY for it) exports one UTC day of
-`events_raw` / `rec_served(+items)` / labeled impressions to parquet. It is run
-by a host cron via `docker compose run` — see
-`../gateway/docs/tasks/TASKS_51_EVENT_LOG.md` for the cron line.
+`events_raw` / `rec_served(+items)` / labeled impressions to parquet. With
+`--retention-days N` it then deletes exported days older than N — parquet is the
+archive, Postgres only buffers (only days whose files exist in `--out` are
+deleted; `identity_links` is never touched). It is run by a host cron via
+`docker compose run` — cron line in
+`../gateway/docs/tasks/TASKS_52_EVENT_LOG_RETENTION.md`.
 
 Manual smoke:
 

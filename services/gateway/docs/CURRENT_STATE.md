@@ -239,8 +239,10 @@ module, so request validation and docs cannot drift.
   passed full live acceptance including the first labeled training row: telemetry
   intake, serving receipts with serve-time `score_components`,
   requestId/position on the feed, weights `v1_2026-08`, nightly parquet export
-  (cron 03:15 UTC). Ranker training data is now accumulating; the iOS client
-  instrumentation is the remaining half (frontend backlog).
+  (cron 03:15 UTC; with `--retention-days 30` the exporter also deletes exported
+  days from Postgres — parquet is the archive, the DB only buffers, `TASKS_52`).
+  Ranker training data is now accumulating; the iOS client instrumentation is
+  the remaining half (frontend backlog).
 - Open next: search quality (`TASKS_49` — text search matches names, not intent; needs a
   product decision) and search latency on the text path (`TASKS_48`).
 - Keep backend deploy simple: one Hetzner host, Docker Compose, managed
