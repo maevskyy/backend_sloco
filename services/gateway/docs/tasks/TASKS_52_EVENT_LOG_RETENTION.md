@@ -1,6 +1,11 @@
 # TASKS 52: Event-log retention — Postgres is the buffer, parquet is the archive
 
-**Status: Done in code — Kirill updates the cron line to activate.**
+**Status: DONE — live in prod 2026-08-16.** New image (`94debdb5a052`) boots with
+the same coverage lines (100% text / 91.3% direct-image); a manual run of the
+exact cron command exported yesterday (0-row files — the tables were born the
+same day) and finished with `cleanup: nothing older than 2026-07-17` — the
+retention path executes, the 30-day window is simply still empty. First real
+deletions are expected around 2026-09-15.
 
 Kirill's call (2026-08-16, right after TASKS_51 went live): rows that are already
 exported to parquet have no reason to stay in Postgres. At 1k DAU the serving
