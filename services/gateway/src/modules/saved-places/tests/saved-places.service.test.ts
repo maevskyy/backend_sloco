@@ -17,7 +17,7 @@ const savedAt = "2026-05-31T10:00:00.000Z";
 const collectionRow = {
   id: collectionId,
   user_id: userId,
-  name: "Want to go",
+  name: "Favorites",
   color_hex: "#f0805f",
   is_default: true,
   sort_order: 0,
@@ -222,7 +222,7 @@ describe("saved places service", () => {
 
     expect(result.collection).toMatchObject<Partial<SavedCollection>>({
       id: collectionId,
-      name: "Want to go"
+      name: "Favorites"
     });
   });
 

@@ -15,7 +15,11 @@ import type {
   SavedPlacesStoreContract
 } from "../common/saved-places.types.js";
 
-const DEFAULT_COLLECTION_NAME = "Want to go";
+// The auto-created list every user gets (Profile -> Favorites). It is hidden from
+// "My lists" by the client (isDefault) and cannot be deleted (service guard).
+// Renamed from "Want to go" on 2026-08-16; existing rows updated by the one-off SQL
+// in docs/tasks/TASKS_53_FAVORITES_DEFAULT_LIST.md.
+const DEFAULT_COLLECTION_NAME = "Favorites";
 const DEFAULT_COLLECTION_COLOR = "#f0805f";
 
 const PLACE_COLUMNS = [

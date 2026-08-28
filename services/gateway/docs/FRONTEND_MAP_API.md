@@ -479,7 +479,7 @@ Body:
 ```
 
 If `collectionIds` is omitted, backend adds the place to the user's default
-`Want to go` collection.
+`Favorites` collection (auto-created on first read/write of the saved dashboard).
 
 Response:
 

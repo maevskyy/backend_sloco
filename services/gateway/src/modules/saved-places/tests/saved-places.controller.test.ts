@@ -48,7 +48,7 @@ const placeSummary: SavedPlaceSummary = {
 
 const collection: SavedCollection = {
   id: collectionId,
-  name: "Want to go",
+  name: "Favorites",
   colorHex: "#f0805f",
   placeCount: 1,
   placeIds: [123],
