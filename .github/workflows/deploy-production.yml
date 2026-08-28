@@ -244,9 +244,19 @@ jobs:
             EOF
             fi
 
-            # Authenticate to GHCR for image pulls.
+            # Authenticate to GHCR for image pulls. The packages are PUBLIC, so a pull
+            # works without credentials; the login only helps against rate limits and
+            # would be required if a package ever turns private. An expired
+            # GHCR_READ_TOKEN must therefore NOT abort the deploy (it did on
+            # 2026-08-28: `docker login` answered `denied: denied` and set -e killed the
+            # whole script even though the images were public and already pushed).
+            # A real access problem still fails loudly one line below, on `pull`.
             if [ -n "${GHCR_USERNAME:-}" ] && [ -n "${GHCR_READ_TOKEN:-}" ]; then
-              echo "$GHCR_READ_TOKEN" | docker login ghcr.io -u "$GHCR_USERNAME" --password-stdin
+              if ! echo "$GHCR_READ_TOKEN" | docker login ghcr.io -u "$GHCR_USERNAME" --password-stdin; then
+                echo "WARNING: GHCR login failed (expired GHCR_READ_TOKEN?) — continuing with anonymous pulls."
+              fi
+            else
+              echo "WARNING: GHCR_USERNAME / GHCR_READ_TOKEN not set — pulling anonymously."
             fi
 
             # Converge. Observability profile only when explicitly requested.
