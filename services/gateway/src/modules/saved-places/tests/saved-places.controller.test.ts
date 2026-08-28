@@ -48,7 +48,8 @@ const placeSummary: SavedPlaceSummary = {
 
 const collection: SavedCollection = {
   id: collectionId,
-  name: "Favorites",
+  name: "Saved",
+  slug: "saved",
   colorHex: "#f0805f",
   placeCount: 1,
   placeIds: [123],
@@ -74,6 +75,11 @@ function createSavedPlacesService(
         recentlySaved: [placeSummary]
       };
     },
+    async setPlaceCollections(_userId: string, placeId: number, collectionIds: string[]) {
+      return collectionIds.length === 0
+        ? { placeId, isSaved: false as const, collectionIds: [] as [] }
+        : { placeId, isSaved: true as const, collectionIds, savedAt };
+    },
     async getCollectionDetail() {
       return {
         collection: {
@@ -84,6 +90,7 @@ function createSavedPlacesService(
           placeIds: collection.placeIds,
           createdAt: collection.createdAt,
           updatedAt: collection.updatedAt,
+          slug: collection.slug,
           isDefault: collection.isDefault,
           sortOrder: collection.sortOrder
         },

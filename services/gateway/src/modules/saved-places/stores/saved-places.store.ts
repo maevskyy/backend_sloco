@@ -15,12 +15,17 @@ import type {
   SavedPlacesStoreContract
 } from "../common/saved-places.types.js";
 
-// The auto-created list every user gets (Profile -> Favorites). It is hidden from
-// "My lists" by the client (isDefault) and cannot be deleted (service guard).
-// Renamed from "Want to go" on 2026-08-16; existing rows updated by the one-off SQL
-// in docs/tasks/TASKS_53_FAVORITES_DEFAULT_LIST.md.
-const DEFAULT_COLLECTION_NAME = "Favorites";
-const DEFAULT_COLLECTION_COLOR = "#f0805f";
+// The three SYSTEM lists every user gets (TASKS_54). They are auto-created, cannot
+// be deleted, are hidden from "My lists" by the client and are pinned to the top of
+// its save picker. `slug` is their stable identity; `name` is display text.
+// `saved` is also the default: a save that names no list lands there.
+const SYSTEM_COLLECTIONS = [
+  { slug: "saved", name: "Saved", colorHex: "#f0805f", sortOrder: 0, isDefault: true },
+  { slug: "favorites", name: "Favorites", colorHex: "#e6b15c", sortOrder: 1, isDefault: false },
+  { slug: "been", name: "Been there", colorHex: "#8fb996", sortOrder: 2, isDefault: false }
+] as const;
+
+export const SYSTEM_COLLECTION_SLUGS = SYSTEM_COLLECTIONS.map((item) => item.slug);
 
 const PLACE_COLUMNS = [
   "id",
@@ -86,59 +91,158 @@ export class SavedPlacesStore implements SavedPlacesStoreContract {
     return data !== null;
   }
 
-  async ensureDefaultCollection(userId: string) {
-    const { data: existing, error: existingError } =
-      await measureSavedPlacesDependency(
-        "select",
-        "saved_collections_default",
+  /**
+   * Create the three system lists for this user if they are missing, and return
+   * them by slug. Idempotent, and safe against a user who already created a list
+   * under a system NAME: that row is adopted (its slug is filled in) instead of
+   * colliding with `unique (user_id, name)`.
+   */
+  async ensureSystemCollections(userId: string) {
+    const existing = await this.listCollections(userId);
+    const bySlug = new Map<string, SavedCollectionRow>(
+      existing
+        .filter((row) => row.slug !== null)
+        .map((row) => [row.slug as string, row])
+    );
+
+    for (const system of SYSTEM_COLLECTIONS) {
+      if (bySlug.has(system.slug)) continue;
+
+      const sameName = existing.find(
+        (row) => row.slug === null && row.name === system.name
+      );
+
+      if (sameName) {
+        const { data, error } = await measureSavedPlacesDependency(
+          "update",
+          "saved_collections_adopt_system",
+          async () =>
+            getSupabaseClient()
+              .from("saved_collections")
+              .update({ slug: system.slug })
+              .eq("id", sameName.id)
+              .eq("user_id", userId)
+              .select("*")
+              .single()
+        );
+
+        if (error) throw error;
+        bySlug.set(system.slug, data as SavedCollectionRow);
+        continue;
+      }
+
+      const { data, error } = await measureSavedPlacesDependency(
+        "insert",
+        "saved_collections_system",
         async () =>
           getSupabaseClient()
             .from("saved_collections")
+            .insert({
+              user_id: userId,
+              name: system.name,
+              slug: system.slug,
+              color_hex: system.colorHex,
+              // The default flag has a partial unique index (one per user), so it is
+              // only claimed when the user has no default yet.
+              is_default:
+                system.isDefault && !existing.some((row) => row.is_default),
+              sort_order: system.sortOrder
+            })
             .select("*")
-            .eq("user_id", userId)
-            .eq("is_default", true)
-            .maybeSingle()
+            .single()
       );
 
-    if (existingError) throw existingError;
-    if (existing) return existing as SavedCollectionRow;
+      if (!error) {
+        bySlug.set(system.slug, data as SavedCollectionRow);
+        continue;
+      }
 
+      // Lost a race with a concurrent request: read back what the winner wrote.
+      if (!hasPostgresErrorCode(error, "23505")) throw error;
+
+      const { data: raced, error: refetchError } =
+        await measureSavedPlacesDependency(
+          "select",
+          "saved_collections_system_refetch",
+          async () =>
+            getSupabaseClient()
+              .from("saved_collections")
+              .select("*")
+              .eq("user_id", userId)
+              .eq("slug", system.slug)
+              .single()
+        );
+
+      if (refetchError) throw refetchError;
+      bySlug.set(system.slug, raced as SavedCollectionRow);
+    }
+
+    return bySlug;
+  }
+
+  async ensureDefaultCollection(userId: string) {
+    const bySlug = await this.ensureSystemCollections(userId);
+    const fallback = bySlug.get("saved");
+
+    if (fallback) return fallback;
+
+    // Only reachable if someone cleared the slug by hand.
     const { data, error } = await measureSavedPlacesDependency(
-      "insert",
+      "select",
       "saved_collections_default",
       async () =>
         getSupabaseClient()
           .from("saved_collections")
-          .insert({
-            user_id: userId,
-            name: DEFAULT_COLLECTION_NAME,
-            color_hex: DEFAULT_COLLECTION_COLOR,
-            is_default: true,
-            sort_order: 0
-          })
           .select("*")
+          .eq("user_id", userId)
+          .eq("is_default", true)
           .single()
     );
 
-    if (!error) return data as SavedCollectionRow;
-    if (!hasPostgresErrorCode(error, "23505")) throw error;
+    if (error) throw error;
 
-    const { data: defaultCollection, error: refetchError } =
-      await measureSavedPlacesDependency(
-        "select",
-        "saved_collections_default_refetch",
-        async () =>
-          getSupabaseClient()
-            .from("saved_collections")
-            .select("*")
-            .eq("user_id", userId)
-            .eq("is_default", true)
-            .single()
-      );
+    return data as SavedCollectionRow;
+  }
 
-    if (refetchError) throw refetchError;
+  /** Membership of one place across the user's lists. */
+  async listPlaceCollectionIds(userId: string, placeId: number) {
+    const { data, error } = await measureSavedPlacesDependency(
+      "select",
+      "saved_collection_places_of_place",
+      async () =>
+        getSupabaseClient()
+          .from("saved_collection_places")
+          .select("collection_id")
+          .eq("user_id", userId)
+          .eq("place_id", placeId)
+    );
 
-    return defaultCollection as SavedCollectionRow;
+    if (error) throw error;
+
+    return (data ?? []).map((row) => (row as { collection_id: string }).collection_id);
+  }
+
+  async removePlaceFromCollections(
+    userId: string,
+    placeId: number,
+    collectionIds: string[]
+  ) {
+    if (collectionIds.length === 0) return;
+
+    const { error } = await measureSavedPlacesDependency(
+      "delete",
+      "saved_collection_places_remove_many",
+      async () =>
+        getSupabaseClient()
+          .from("saved_collection_places")
+          .delete()
+          .eq("user_id", userId)
+          .eq("place_id", placeId)
+          .in("collection_id", collectionIds),
+      () => collectionIds.length
+    );
+
+    if (error) throw error;
   }
 
   async listCollections(userId: string) {

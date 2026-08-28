@@ -17,8 +17,9 @@ const savedAt = "2026-05-31T10:00:00.000Z";
 const collectionRow = {
   id: collectionId,
   user_id: userId,
-  name: "Favorites",
+  name: "Saved",
   color_hex: "#f0805f",
+  slug: "saved",
   is_default: true,
   sort_order: 0,
   created_at: savedAt,
@@ -55,6 +56,13 @@ function createRepository(
     async ensureDefaultCollection() {
       return collectionRow;
     },
+    async ensureSystemCollections() {
+      return new Map([["saved", collectionRow]]);
+    },
+    async listPlaceCollectionIds() {
+      return [collectionId];
+    },
+    async removePlaceFromCollections() {},
     async listCollections() {
       return [collectionRow];
     },
@@ -222,7 +230,7 @@ describe("saved places service", () => {
 
     expect(result.collection).toMatchObject<Partial<SavedCollection>>({
       id: collectionId,
-      name: "Favorites"
+      name: "Saved"
     });
   });
 

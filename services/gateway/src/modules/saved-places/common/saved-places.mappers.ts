@@ -21,6 +21,7 @@ export function mapCollectionRow(
     previewPlaces: places.slice(0, 3),
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+    slug: row.slug,
     isDefault: row.is_default,
     sortOrder: row.sort_order
   };
@@ -37,6 +38,7 @@ export function stripPreviewPlaces(
     placeIds: collection.placeIds,
     createdAt: collection.createdAt,
     updatedAt: collection.updatedAt,
+    slug: collection.slug,
     isDefault: collection.isDefault,
     sortOrder: collection.sortOrder
   };

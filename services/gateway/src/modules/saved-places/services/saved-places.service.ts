@@ -22,7 +22,8 @@ export class SavedPlacesServiceImpl implements SavedPlacesServiceContract {
   constructor(private readonly store: SavedPlacesStoreContract) {}
 
   async getSavedDashboard(userId: string) {
-    await this.store.ensureDefaultCollection(userId);
+    // Creates Saved / Favorites / Been there on a fresh account (TASKS_54).
+    await this.store.ensureSystemCollections(userId);
 
     const [collections, recentlySaved, savedPlaceCount] = await Promise.all([
       this.store.listCollections(userId),
@@ -76,8 +77,56 @@ export class SavedPlacesServiceImpl implements SavedPlacesServiceContract {
     return { placeId: input.placeId, isSaved: true as const, collectionIds, savedAt };
   }
 
+  /**
+   * The save picker's write (TASKS_54): make the place's list membership EXACTLY
+   * `collectionIds`. An empty list means "not saved at all" — the place leaves
+   * every list and `saved_places`, which is what an emptied picker means to a user.
+   *
+   * Membership is diffed rather than wiped and re-added, so `created_at` (and with
+   * it the "recently saved" order) survives for lists the user did not touch.
+   */
+  async setPlaceCollections(
+    userId: string,
+    placeId: number,
+    collectionIds: string[]
+  ) {
+    await this.assertPlaceExists(placeId);
+
+    const wanted = [...new Set(collectionIds)];
+
+    if (wanted.length === 0) {
+      return this.unsavePlace(userId, placeId);
+    }
+
+    const found = await this.store.getCollectionsByIds(userId, wanted);
+    const foundIds = new Set(found.map((collection) => collection.id));
+    const missingId = wanted.find((id) => !foundIds.has(id));
+
+    if (missingId) throw new SavedCollectionNotFoundError(missingId);
+
+    const current = await this.store.listPlaceCollectionIds(userId, placeId);
+    const currentSet = new Set(current);
+    const toAdd = wanted.filter((id) => !currentSet.has(id));
+    const toRemove = current.filter((id) => !wanted.includes(id));
+
+    const savedAt = await this.store.savePlace(userId, placeId);
+    await this.store.addPlaceToCollections(userId, placeId, toAdd);
+    await this.store.removePlaceFromCollections(userId, placeId, toRemove);
+
+    return {
+      placeId,
+      isSaved: true as const,
+      collectionIds: wanted,
+      savedAt
+    };
+  }
+
   async unsavePlace(userId: string, placeId: number) {
     await this.assertPlaceExists(placeId);
+    // Leaving `saved_places` must also leave every list, or the place would keep
+    // showing up in Favorites / Been there while the bookmark reads "not saved".
+    const memberships = await this.store.listPlaceCollectionIds(userId, placeId);
+    await this.store.removePlaceFromCollections(userId, placeId, memberships);
     await this.store.unsavePlace(userId, placeId);
 
     return { placeId, isSaved: false as const, collectionIds: [] as [] };
@@ -114,7 +163,8 @@ export class SavedPlacesServiceImpl implements SavedPlacesServiceContract {
   async deleteCollection(userId: string, collectionId: string) {
     const collection = await this.assertCollectionExists(userId, collectionId);
 
-    if (collection.is_default) {
+    // System lists (Saved / Favorites / Been there) belong to the app, not the user.
+    if (collection.is_default || collection.slug !== null) {
       throw new DefaultSavedCollectionDeleteError(collectionId);
     }
 

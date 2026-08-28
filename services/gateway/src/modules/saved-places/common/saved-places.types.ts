@@ -40,6 +40,8 @@ export type SavedCollectionRow = {
   user_id: string;
   name: string;
   color_hex: string | null;
+  /** Stable identity of a SYSTEM list ("saved" | "favorites" | "been"); null for user lists. */
+  slug: string | null;
   is_default: boolean;
   sort_order: number;
   created_at: string;
@@ -86,6 +88,14 @@ export type SavedPlaceState = {
 export type SavedPlacesStoreContract = {
   placeExists(placeId: number): Promise<boolean>;
   ensureDefaultCollection(userId: string): Promise<SavedCollectionRow>;
+  /** Creates the system lists if missing and returns them keyed by slug. */
+  ensureSystemCollections(userId: string): Promise<Map<string, SavedCollectionRow>>;
+  listPlaceCollectionIds(userId: string, placeId: number): Promise<string[]>;
+  removePlaceFromCollections(
+    userId: string,
+    placeId: number,
+    collectionIds: string[]
+  ): Promise<void>;
   listCollections(userId: string): Promise<SavedCollectionRow[]>;
   getCollectionsByIds(
     userId: string,
@@ -146,6 +156,11 @@ export type SavedPlacesServiceContract = {
     input: { placeId: number; collectionIds?: string[] }
   ): Promise<SavePlaceResult>;
   unsavePlace(userId: string, placeId: number): Promise<UnsavePlaceResult>;
+  setPlaceCollections(
+    userId: string,
+    placeId: number,
+    collectionIds: string[]
+  ): Promise<SavePlaceResult | UnsavePlaceResult>;
   createCollection(
     userId: string,
     input: { name: string; colorHex?: string }

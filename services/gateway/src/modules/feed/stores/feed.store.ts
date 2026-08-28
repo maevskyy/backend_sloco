@@ -27,10 +27,12 @@ type SavedCollectionSignalRow = {
   saved_collections:
     | {
         name: string;
+        slug: string | null;
         is_default: boolean;
       }
     | {
         name: string;
+        slug: string | null;
         is_default: boolean;
       }[]
     | null;
@@ -100,8 +102,25 @@ export class FeedStore implements FeedStoreContract {
         .sort((a, b) => b.updated_at.localeCompare(a.updated_at))
         .map((row) => row.source_id)
     );
+    // "Been there" records a VISIT, not a preference (TASKS_54): a place whose only
+    // list is Been there must not become a strong favourite. Visiting a place the
+    // user also filed elsewhere still counts — that membership speaks for itself.
+    const beenOnly = new Set(
+      dedupe(
+        collectionRows
+          .filter((row) => collectionSlugOf(row.saved_collections) === "been")
+          .map((row) => normalizePlaceRecord(row.places)?.source_id)
+      ).filter(
+        (sourceId) =>
+          !collectionRows.some(
+            (row) =>
+              collectionSlugOf(row.saved_collections) !== "been" &&
+              normalizePlaceRecord(row.places)?.source_id === sourceId
+          )
+      )
+    );
     const derivedFavourites = allSaved.filter(
-      (sourceId) => !wantToGoSet.has(sourceId)
+      (sourceId) => !wantToGoSet.has(sourceId) && !beenOnly.has(sourceId)
     );
     const fallbackFavourites =
       derivedFavourites.length > 0 || wantToGo.length > 0
@@ -197,7 +216,7 @@ export class FeedStore implements FeedStoreContract {
               "sort_order",
               "created_at",
               "places!inner(source_id)",
-              "saved_collections!inner(name,is_default)"
+              "saved_collections!inner(name,slug,is_default)"
             ].join(",")
           )
           .eq("user_id", userId),
@@ -239,6 +258,16 @@ function normalizeCollectionRecord(
   return Array.isArray(collection) ? collection[0] : collection;
 }
 
+function collectionSlugOf(
+  collection: SavedCollectionSignalRow["saved_collections"]
+) {
+  return normalizeCollectionRecord(collection)?.slug ?? null;
+}
+
+// The quick-save bucket — the list a save with no explicit choice lands in. It is
+// the system "saved" list since TASKS_54, was the default collection before that,
+// and was literally named "Want to go" before TASKS_53; all three are accepted so
+// old rows keep their meaning.
 function isWantToGoCollection(
   collection: SavedCollectionSignalRow["saved_collections"]
 ) {
@@ -247,6 +276,7 @@ function isWantToGoCollection(
   if (!normalized) return false;
 
   return (
+    normalized.slug === "saved" ||
     normalized.is_default ||
     normalized.name.trim().toLowerCase() === WANT_TO_GO_COLLECTION_NAME
   );

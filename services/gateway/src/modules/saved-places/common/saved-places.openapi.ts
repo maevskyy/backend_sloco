@@ -40,6 +40,20 @@ export const unsavePlaceRouteSchema = defineRoute({
   ok: "UnsavePlaceResponse"
 });
 
+export const setPlaceCollectionsRouteSchema = defineRoute({
+  summary: "Set which lists a place belongs to.",
+  description:
+    "The save picker's write: makes the place's membership EXACTLY collectionIds. " +
+    "Lists not in the array are left; lists already holding the place keep their " +
+    "original savedAt order. An EMPTY array unsaves the place — it leaves every " +
+    "list and the saved set, and the response carries isSaved=false. System lists " +
+    "(slug saved | favorites | been) are ordinary targets here; they simply cannot " +
+    "be deleted as lists.",
+  params: "SavedPlaceParams",
+  body: "SetPlaceCollectionsBody",
+  ok: "PlaceCollectionsResponse"
+});
+
 export const createCollectionRouteSchema = defineRoute({
   summary: "Create saved collection.",
   body: "SavedCollectionBody",
