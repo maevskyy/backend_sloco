@@ -140,6 +140,7 @@ def build_location_recommender_v4(
         config={
             "weights": weights,
             "embedding_run_id": settings.embedding_run_id,
+            "hubness_method": settings.recommender_hubness_method,
         },
     )
     return LocationRecommenderV4Adapter(

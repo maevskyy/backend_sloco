@@ -62,6 +62,15 @@ class Settings(BaseSettings):
         default="text_only",
         alias="RECOMMENDER_WEIGHTS_PRESET",
     )
+    # CSLS hubness correction: penalise candidates that sit close to many others
+    # before ranking. It builds an N x N similarity matrix over the whole candidate
+    # pool, so its cost grows quadratically with the catalog: ~0.4 s on the 12.5k
+    # food+ttd build, but ~9 s and ~6 GB on the 54k all-themes build -- past the
+    # gateway's 5 s client timeout. Set to "none" when serving a large catalog.
+    recommender_hubness_method: Literal["csls", "none"] = Field(
+        default="csls",
+        alias="RECOMMENDER_HUBNESS_METHOD",
+    )
     # Direct-image (photo) channel artifacts. Unset -> the channel stays off and the
     # engine scores text-only, whatever the weights preset says.
     direct_image_embeddings_npy_path: Path | None = Field(

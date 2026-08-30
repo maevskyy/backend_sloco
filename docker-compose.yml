@@ -52,9 +52,18 @@ services:
       EMBEDDING_RUN_ID: ${EMBEDDING_RUN_ID:-20260531T173837Z}
       LOCATIONS_CSV_PATH: ${LOCATIONS_CSV_PATH:-artifacts/locations_combined_food_ttd.csv}
       RECOMMENDER_WEIGHTS_PRESET: ${RECOMMENDER_WEIGHTS_PRESET:-text_only}
+      # "none" disables the CSLS hubness pass; required on large catalogs,
+      # where it costs ~9s/query and exceeds the gateway's 5s timeout.
+      RECOMMENDER_HUBNESS_METHOD: ${RECOMMENDER_HUBNESS_METHOD:-csls}
       # Direct-image (photo) channel: empty = off, so the pair travels with the preset.
       DIRECT_IMAGE_EMBEDDINGS_NPY_PATH: ${DIRECT_IMAGE_EMBEDDINGS_NPY_PATH:-}
       DIRECT_IMAGE_METADATA_PATH: ${DIRECT_IMAGE_METADATA_PATH:-}
+    volumes:
+      # Large model artifacts are NOT in git or the image: they are rsync'd to the host
+      # and mounted read-only. The image still ships its own ./artifacts, so this mount
+      # is inert until the *_PATH vars above point into artifacts_external/ — which makes
+      # rollback a matter of pointing them back.
+      - ${ARTIFACTS_HOST_DIR:-./artifacts_external}:/app/artifacts_external:ro
     expose:
       - "8000"
     healthcheck:

@@ -216,6 +216,11 @@ jobs:
             RECOMMENDATION_LOG_LEVEL=info
 
             REDIS_URL=redis://redis:6379/0
+
+            # Host dir holding the large model artifacts, mounted read-only into the
+            # recommender at /app/artifacts_external. Synced out of band (rsync); these
+            # files are deliberately not in git and not baked into the image.
+            ARTIFACTS_HOST_DIR=/opt/backend_sloco/artifacts_external
             EOF
 
             # Recommender v4 is opt-in via the RECOMMENDER_ALGORITHM repo Variable;
@@ -224,13 +229,23 @@ jobs:
               cat >> .env <<EOF
 
             RECOMMENDER_ALGORITHM=location_recommender_v4
-            EMBEDDINGS_NPY_PATH=artifacts/location_embeddings_combined_food_ttd.npy
-            EMBEDDING_METADATA_PATH=artifacts/location_embeddings_combined_food_ttd_metadata.csv
-            EMBEDDING_RUN_ID=combined_food_ttd
-            LOCATIONS_CSV_PATH=artifacts/locations_combined_food_ttd.csv
+            EMBEDDINGS_NPY_PATH=artifacts_external/location_embeddings_combined_all_themes.npy
+            EMBEDDING_METADATA_PATH=artifacts_external/location_embeddings_combined_all_themes_metadata.csv
+            EMBEDDING_RUN_ID=combined_all_themes
+            LOCATIONS_CSV_PATH=artifacts_external/locations_combined_all_themes.csv
             RECOMMENDER_WEIGHTS_PRESET=text_direct
-            DIRECT_IMAGE_EMBEDDINGS_NPY_PATH=artifacts/direct_place_image_embeddings_openclip_vitb32_v1.npy
-            DIRECT_IMAGE_METADATA_PATH=artifacts/direct_place_image_embeddings_openclip_vitb32_v1_metadata.parquet
+            # CSLS builds an NxN matrix over the whole candidate pool, and this request
+            # path applies no city filter: ~85s/query on the 54k catalog against the
+            # gateway's 5s timeout. Measured benefit here was ~1 suppressed hub per 120
+            # recommendations, so it stays off. See sloco-recommender/CLAUDE.md.
+            RECOMMENDER_HUBNESS_METHOD=none
+            # The photo artifact baked into the image covers Bucharest + Tbilisi only
+            # (17,936 places, 0% Berlin). With weight 0.50 on the photo channel and
+            # missing_direct_image_policy=redistribute, that silently drops Berlin out of
+            # cross-city results. The external artifact is the full run: 81,967 places,
+            # Berlin 96.6% / Bucharest 96.5% / Tbilisi 82.2%.
+            DIRECT_IMAGE_EMBEDDINGS_NPY_PATH=artifacts_external/direct_place_image_embeddings_openclip_vitb32_v1.npy
+            DIRECT_IMAGE_METADATA_PATH=artifacts_external/direct_place_image_embeddings_openclip_vitb32_v1_metadata.parquet
             EOF
             fi
 
