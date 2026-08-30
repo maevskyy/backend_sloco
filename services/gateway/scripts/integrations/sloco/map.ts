@@ -22,7 +22,8 @@ const SOURCE = "sloco_ai";
 
 const CITY_COUNTRY: Record<string, string> = {
   bucharest: "romania",
-  tbilisi: "georgia"
+  tbilisi: "georgia",
+  berlin: "germany"
 };
 
 // Output columns = the `public.places` columns this catalog populates. jsonb

@@ -4,3 +4,6 @@ dist
 .DS_Store
 dumps/places_v2_import.csv
 dumps/sloco_places.csv
+
+# Generated place-import chunks (hundreds of MB, regenerate with map:sloco)
+dumps/sloco_chunks/

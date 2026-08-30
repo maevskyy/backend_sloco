@@ -1,0 +1,31 @@
+-- STEP 1 of 2 — load the mapped catalog into a staging table.
+--
+--     cd services/gateway
+--     psql "$SUPABASE_DB_URL" -f supabase/01_load_places_staging.sql
+--
+-- Notes learned the hard way:
+--   * The staging table is REGULAR, not temporary: the merge in step 2 is long, and a
+--     failure must not cost another 300 MB upload. Step 2 drops it when finished.
+--   * batch_id is declared UP FRONT. Adding it afterwards with ALTER TABLE rewrites the
+--     whole table and crashed the Postgres backend on this instance.
+--   * The `raw` column is deliberately NOT imported. It was 58% of the payload and is
+--     never read — no RPC and no application code touches it. The originals stay on disk.
+--
+-- Safe to re-run: the table is dropped and recreated each time.
+
+\set ON_ERROR_STOP on
+\timing on
+
+drop table if exists places_staging;
+create table places_staging (like public.places including defaults, batch_id bigserial);
+
+\copy places_staging (source, source_id, name, country, city, category, latitude, longitude, google_maps_uri, primary_type, types, google_rating, google_user_rating_count, apify_review_count, apify_rating_avg, rating_count_for_score, bayesian_rating, rating_score_0_100, popularity_score_0_100, rating_confidence_0_100, price_level, price_min_ron, price_max_ron, ai_card_summary, ai_place_type_summary, ai_vibe, ai_what_to_expect, ai_food_and_drinks, ai_price, ai_service, ai_the_move, ai_watch_out, ai_tags, ai_tags_json, ai_confidence, axis_quiet_lively, axis_work_social, axis_day_night, axis_casual_premium, axis_drinks_food, axis_local_tourist, axis_cheap_expensive, axis_traditional_experimental, map_visibility_score, map_visibility_rank, map_min_zoom_global, serves, features, attributes) from 'dumps/sloco_chunks/places_part00.csv' with (format csv, header true)
+\copy places_staging (source, source_id, name, country, city, category, latitude, longitude, google_maps_uri, primary_type, types, google_rating, google_user_rating_count, apify_review_count, apify_rating_avg, rating_count_for_score, bayesian_rating, rating_score_0_100, popularity_score_0_100, rating_confidence_0_100, price_level, price_min_ron, price_max_ron, ai_card_summary, ai_place_type_summary, ai_vibe, ai_what_to_expect, ai_food_and_drinks, ai_price, ai_service, ai_the_move, ai_watch_out, ai_tags, ai_tags_json, ai_confidence, axis_quiet_lively, axis_work_social, axis_day_night, axis_casual_premium, axis_drinks_food, axis_local_tourist, axis_cheap_expensive, axis_traditional_experimental, map_visibility_score, map_visibility_rank, map_min_zoom_global, serves, features, attributes) from 'dumps/sloco_chunks/places_part01.csv' with (format csv, header true)
+\copy places_staging (source, source_id, name, country, city, category, latitude, longitude, google_maps_uri, primary_type, types, google_rating, google_user_rating_count, apify_review_count, apify_rating_avg, rating_count_for_score, bayesian_rating, rating_score_0_100, popularity_score_0_100, rating_confidence_0_100, price_level, price_min_ron, price_max_ron, ai_card_summary, ai_place_type_summary, ai_vibe, ai_what_to_expect, ai_food_and_drinks, ai_price, ai_service, ai_the_move, ai_watch_out, ai_tags, ai_tags_json, ai_confidence, axis_quiet_lively, axis_work_social, axis_day_night, axis_casual_premium, axis_drinks_food, axis_local_tourist, axis_cheap_expensive, axis_traditional_experimental, map_visibility_score, map_visibility_rank, map_min_zoom_global, serves, features, attributes) from 'dumps/sloco_chunks/places_part02.csv' with (format csv, header true)
+\copy places_staging (source, source_id, name, country, city, category, latitude, longitude, google_maps_uri, primary_type, types, google_rating, google_user_rating_count, apify_review_count, apify_rating_avg, rating_count_for_score, bayesian_rating, rating_score_0_100, popularity_score_0_100, rating_confidence_0_100, price_level, price_min_ron, price_max_ron, ai_card_summary, ai_place_type_summary, ai_vibe, ai_what_to_expect, ai_food_and_drinks, ai_price, ai_service, ai_the_move, ai_watch_out, ai_tags, ai_tags_json, ai_confidence, axis_quiet_lively, axis_work_social, axis_day_night, axis_casual_premium, axis_drinks_food, axis_local_tourist, axis_cheap_expensive, axis_traditional_experimental, map_visibility_score, map_visibility_rank, map_min_zoom_global, serves, features, attributes) from 'dumps/sloco_chunks/places_part03.csv' with (format csv, header true)
+\copy places_staging (source, source_id, name, country, city, category, latitude, longitude, google_maps_uri, primary_type, types, google_rating, google_user_rating_count, apify_review_count, apify_rating_avg, rating_count_for_score, bayesian_rating, rating_score_0_100, popularity_score_0_100, rating_confidence_0_100, price_level, price_min_ron, price_max_ron, ai_card_summary, ai_place_type_summary, ai_vibe, ai_what_to_expect, ai_food_and_drinks, ai_price, ai_service, ai_the_move, ai_watch_out, ai_tags, ai_tags_json, ai_confidence, axis_quiet_lively, axis_work_social, axis_day_night, axis_casual_premium, axis_drinks_food, axis_local_tourist, axis_cheap_expensive, axis_traditional_experimental, map_visibility_score, map_visibility_rank, map_min_zoom_global, serves, features, attributes) from 'dumps/sloco_chunks/places_part04.csv' with (format csv, header true)
+\copy places_staging (source, source_id, name, country, city, category, latitude, longitude, google_maps_uri, primary_type, types, google_rating, google_user_rating_count, apify_review_count, apify_rating_avg, rating_count_for_score, bayesian_rating, rating_score_0_100, popularity_score_0_100, rating_confidence_0_100, price_level, price_min_ron, price_max_ron, ai_card_summary, ai_place_type_summary, ai_vibe, ai_what_to_expect, ai_food_and_drinks, ai_price, ai_service, ai_the_move, ai_watch_out, ai_tags, ai_tags_json, ai_confidence, axis_quiet_lively, axis_work_social, axis_day_night, axis_casual_premium, axis_drinks_food, axis_local_tourist, axis_cheap_expensive, axis_traditional_experimental, map_visibility_score, map_visibility_rank, map_min_zoom_global, serves, features, attributes) from 'dumps/sloco_chunks/places_part05.csv' with (format csv, header true)
+
+create index on places_staging (batch_id);
+
+select count(*) as staged, count(distinct source_id) as distinct_ids from places_staging;

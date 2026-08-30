@@ -210,7 +210,10 @@ jobs:
             MAP_TILE_CACHE_TTL_SECONDS=604800
             # v2 = per-tile density cap (migration 017); bumping busts Redis keys,
             # the ETag and the client-facing ?v= from /v1/map/config together.
-            MAP_TILE_VERSION=2
+            # v3 = Berlin + sights/shopping/things_to_do landed in public.places
+            # (58,427 rows). Tiles are built on demand and cached for 7 days, so
+            # without this bump the map would keep serving pre-Berlin tiles.
+            MAP_TILE_VERSION=3
 
             RECOMMENDATION_APP_ENV=production
             RECOMMENDATION_LOG_LEVEL=info
