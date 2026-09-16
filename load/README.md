@@ -47,6 +47,25 @@ put a token into the environment and give the feed requests
 `headers: { authorization: "Bearer {{ $env.SLOCO_BEARER }}" }` in a copy of the
 `app-open` scenario.
 
+## Real session from the gateway log — `prod-session.mjs`
+
+The opposite of a synthetic run: what the app actually sent while someone used it,
+and what each response was made of. The gateway logs every request (`request completed`)
+and every dependency call it made for it (`dependency metric`: Supabase select/rpc/auth,
+`pg`, recommender) with a `reqId`; the script joins them into a timeline and a per-URL
+breakdown — calls per request, sum of call time vs response time (equal means strictly
+sequential), token check cost, cache hit/miss for the feed.
+
+```bash
+ssh sloco 'cd /opt/backend_sloco && docker compose logs backend --no-log-prefix --since 2026-09-16T19:47:00Z' > session.log
+node load/prod-session.mjs session.log             # timeline + breakdown
+node load/prod-session.mjs session.log --shapes    # breakdown only
+```
+
+`lat`/`lng`/`q` are masked, ids collapsed to `:id`. The log has no client IP or user id,
+so pick a quiet window and note who was tapping. First run: 2026-09-16 19:47–19:50 UTC,
+64 requests — findings and follow-ups in Linear SLO-37.
+
 ## What It Hits (`map-places.yml`, `tiles.yml`)
 
 - `GET /v1/map/places` — the hot path. Each virtual user draws a different bbox + zoom
