@@ -25,4 +25,12 @@
 | Gateway: places/search, feed, saved-places+me, onboarding+events+cities | см. git log | `04-gateway.md` |
 | Доки | см. git log | этот файл |
 
-Следующий шаг — деплой `main` (ручной workflow, `ref: main`, `service: all`), затем оба стенда (`pnpm perf:bench`, `make load-hot`) для подтверждения, что поведение не изменилось. После этого `dev` можно удалить или заморозить.
+## Деплой `main` — 2026-09-16 19:10 UTC
+
+Workflow `Deploy Production` (run 35138605378), `ref: main`, `service: all`, образы `aa7b81d`. Прошёл с первого раза. Проверки после:
+
+- смоук эндпоинтов: все 200/204, лента и поиск режут по городу как ожидалось;
+- стенд SQL + HTTP (`docs/perf/2026-09-16-bench-after-deploy-main*.md`) — в пределах шума совпал с дневными «после»: search cafe@Bucharest 87 мс warm, feed_fallback Bucharest 128 мс, HTTP feed 543 мс, search 243/410 мс;
+- нагрузочный смоук на 2–5 arrivals/s в первые 3–7 минут после деплоя — **сильно хуже** утреннего baseline (p95 ленты 7–13 с, запросы без ответа), через 12 минут — норма. Окно деградации после деплоя, не код: см. `docs/perf/2026-09-16-load-smoke-after-deploy.md`. Учесть в SLO-9 и SLO-27/28.
+
+Прод теперь на `main`. Ветка `dev` перенесена полностью и больше не нужна как источник — заморозить или удалить после того, как Роман подтвердит логи рекомендера на сервере (coverage 58k, без крашей).
