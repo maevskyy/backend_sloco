@@ -200,3 +200,25 @@ script only writes metadata rows; serving stays storage-agnostic via
 
 When the CDN domain replaces the r2.dev URL, re-run the indexer with the new
 `--base-url` (rows are upserted in place) — no file moves needed.
+
+## Perf bench (SLO-3)
+
+`scripts/perf/bench.ts` — the before/after stand for the hot paths. One command,
+one markdown table: for every case the first (cold) run and p50 / p95 / max of the
+warm runs, plus the buffers Postgres touched. Every perf task in the Linear
+project «Perf: лента, поиск, фото» is closed with a table from this script, not
+with "feels faster".
+
+```bash
+pnpm perf:bench                              # SQL layer, 5 runs per case
+pnpm perf:bench --runs 10                    # more samples
+pnpm perf:bench --http https://sloco.pp.ua   # also hit the gateway over HTTP
+pnpm perf:bench --only search,tile           # substring filter on case names
+pnpm perf:bench --out bench.md               # write the markdown too
+```
+
+Needs `SUPABASE_DB_URL` in `.env` (copy the line from `/opt/backend_sloco/.env`
+on the server; the file is gitignored). SQL timings are server-side via
+`EXPLAIN (ANALYZE, BUFFERS)`, HTTP timings are wall-clock from your machine.
+Cases live in `sqlCases()` / `httpCases()` — add one when a new hot path
+appears; keep `CAFE_KEYWORDS` in sync with `place-buckets.ts` by hand.

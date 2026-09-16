@@ -14,7 +14,8 @@
     "map:osm": "tsx scripts/integrations/osm/map.ts",
     "map:sloco": "tsx scripts/integrations/sloco/map.ts",
     "photos:upload": "tsx scripts/photos/upload-place-photos.ts",
-    "photos:index-sloco": "tsx scripts/photos/index-sloco-photos.ts"
+    "photos:index-sloco": "tsx scripts/photos/index-sloco-photos.ts",
+    "perf:bench": "tsx scripts/perf/bench.ts"
   },
   "keywords": [],
   "author": "",
