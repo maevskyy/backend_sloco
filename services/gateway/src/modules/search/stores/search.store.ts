@@ -1,35 +1,49 @@
-import { getSupabaseClient } from "../../../lib/supabase.js";
+import { getPgPool } from "../../../lib/pg.js";
 import { measureDependencyMetric } from "../../../observability/metrics.js";
 import type {
   SearchPlaceRow,
-  SearchPlacesQuery,
+  SearchStoreInput,
   SearchStoreContract
 } from "../common/search.types.js";
 
+// Direct Postgres, not PostgREST: search is latency-sensitive (fires per
+// keystroke burst) and the HTTP hop through the Supabase API added a measured
+// ~100ms + cold spikes on every request (TASKS_48). Same pattern as the map
+// tile store.
 export class SearchStore implements SearchStoreContract {
-  async searchPlaces(query: SearchPlacesQuery): Promise<SearchPlaceRow[]> {
-    const { data, error } = await measureDependencyMetric(
+  async searchPlaces(input: SearchStoreInput): Promise<SearchPlaceRow[]> {
+    const result = await measureDependencyMetric(
       {
-        dependency: "supabase",
+        dependency: "postgres",
         operation: "rpc",
         name: "search_places"
       },
       async () =>
-        getSupabaseClient().rpc("search_places", {
-          q: query.q,
-          user_lat: query.lat ?? null,
-          user_lng: query.lng ?? null,
-          user_city: query.city ?? null,
-          user_country: query.country ?? null,
-          result_limit: query.limit
-        }),
-      (result) => result.data?.length
+        getPgPool().query<SearchPlaceRow>(
+          `select * from public.search_places(
+             q => $1,
+             user_lat => $2,
+             user_lng => $3,
+             user_city => $4,
+             user_country => $5,
+             result_limit => $6,
+             category_keywords => $7,
+             radius_meters => $8
+           )`,
+          [
+            input.q,
+            input.lat,
+            input.lng,
+            input.city,
+            input.country,
+            input.limit,
+            input.categoryKeywords,
+            input.radiusMeters
+          ]
+        ),
+      (queryResult) => queryResult.rowCount ?? undefined
     );
 
-    if (error) {
-      throw error;
-    }
-
-    return (data ?? []) as unknown as SearchPlaceRow[];
+    return result.rows;
   }
 }

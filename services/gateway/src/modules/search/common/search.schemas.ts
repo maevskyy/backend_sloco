@@ -1,11 +1,14 @@
 import { z } from "zod";
+import { placeBucketsQuerySchema } from "../../places/index.js";
 
 const coordinateSchema = z.coerce.number().finite();
 const optionalContextSchema = z.string().trim().min(1).max(100).optional();
 
 export const searchPlacesQuerySchema = z
   .object({
-    q: z.string().trim().min(2).max(100),
+    q: z.string().trim().min(2).max(100).optional(),
+    category: placeBucketsQuerySchema,
+    radiusMeters: z.coerce.number().int().min(1).max(50_000).optional(),
     lat: coordinateSchema.optional(),
     lng: coordinateSchema.optional(),
     city: optionalContextSchema,
@@ -15,6 +18,10 @@ export const searchPlacesQuerySchema = z
   .refine((query) => (query.lat === undefined) === (query.lng === undefined), {
     message: "lat and lng must be sent together",
     path: ["lat"]
+  })
+  .refine((query) => query.q !== undefined || query.category !== undefined, {
+    message: "either q or category is required",
+    path: ["q"]
   });
 
 export const searchPrimaryPhotoSchema = z.object({

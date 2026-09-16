@@ -57,9 +57,11 @@ function createSavedPlacesService(
 describe("search places service", () => {
   it("calls the store and maps rows", async () => {
     const store: SearchStoreContract = {
-      async searchPlaces(query) {
-        expect(query.q).toBe("coffee");
-        expect(query.limit).toBe(20);
+      async searchPlaces(input) {
+        expect(input.q).toBe("coffee");
+        expect(input.limit).toBe(20);
+        expect(input.categoryKeywords).toBeNull();
+        expect(input.radiusMeters).toBeNull();
         return [
           searchRow({
             id: 42,
@@ -89,6 +91,34 @@ describe("search places service", () => {
         }
       ]
     });
+  });
+
+  it("flattens category buckets into keywords for browse mode", async () => {
+    const store: SearchStoreContract = {
+      async searchPlaces(input) {
+        expect(input.q).toBeNull();
+        expect(input.radiusMeters).toBe(1500);
+        expect(input.categoryKeywords).toEqual(
+          expect.arrayContaining(["bar", "pub", "winery"])
+        );
+        expect(input.categoryKeywords).not.toEqual(
+          expect.arrayContaining(["restaurant"])
+        );
+        return [searchRow({ match_reason: "category" })];
+      }
+    };
+    const service = createSearchPlacesService(store);
+
+    const result = await service({
+      category: ["bar"],
+      radiusMeters: 1500,
+      lat: 44.43,
+      lng: 26.1,
+      limit: 20
+    });
+
+    expect(result.query).toBe("");
+    expect(result.places[0]?.matchReason).toBe("category");
   });
 
   it("enriches search results with saved state", async () => {

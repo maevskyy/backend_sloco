@@ -25,6 +25,20 @@ manual Supabase imports.
   - Generated canonical `public.places` import CSV.
   - Source: `pnpm map:osm dumps/bucharest_cafes.csv --out dumps/osm_bucharest_places.csv`.
 
+- `price_level_backfill.csv`
+  - `source_id,price_level` pairs (2 959 rows) for the TASKS_44 backfill, path B —
+    used only if `places.raw->>'price_level'` turns out empty in prod.
+  - Source: the `sloco_ai` catalog's categorical `price_level`
+    (inexpensive/moderate/expensive/very_expensive → 1/2/3/4, Google semantics).
+
+- `place_details_delta.csv`
+  - Address / hours / phone / website / price delta keyed by `cid` (20 054 rows, ~5 MB)
+    for the TASKS_47 staging import; 100% of prod CIDs covered.
+  - Source: `pnpm details:dataforseo <bucharest places.jsonl> <tbilisi places.jsonl>
+    --out dumps/place_details_delta.csv` over the raw DataForSEO scrape on Kirill's SSD
+    (`/Volumes/Extreme SSD/sloco/SLOCO/data_new/data/dataforseo/`). Regenerable — commit
+    or keep local at Kirill's discretion (largest file in this folder).
+
 ## Rules
 
 - Small sample/import CSVs can be committed if they are useful for rebuilding

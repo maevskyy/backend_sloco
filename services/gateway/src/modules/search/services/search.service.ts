@@ -1,3 +1,4 @@
+import { bucketsToKeywords } from "../../places/index.js";
 import { mapSearchRowToResult } from "../common/search.mappers.js";
 import type {
   SearchPlaceResult,
@@ -14,10 +15,21 @@ export function createSearchPlacesService(
   store: SearchStoreContract = new SearchStore()
 ): SearchPlacesService {
   return async (query) => {
-    const rows = await store.searchPlaces(query);
+    const rows = await store.searchPlaces({
+      q: query.q ?? null,
+      lat: query.lat ?? null,
+      lng: query.lng ?? null,
+      city: query.city ?? null,
+      country: query.country ?? null,
+      limit: query.limit,
+      categoryKeywords: query.category ? bucketsToKeywords(query.category) : null,
+      radiusMeters: query.radiusMeters ?? null
+    });
 
     return {
-      query: query.q,
+      // Browse mode (category-only) has no q; the response field stays a
+      // string for the existing client decoder.
+      query: query.q ?? "",
       places: rows.map(mapSearchRowToResult)
     };
   };
