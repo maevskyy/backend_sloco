@@ -1,0 +1,19 @@
+{
+  "version": "v1_2026-08",
+  "weights": {
+    "route_click": 2.0,
+    "share": 1.5,
+    "save_favourite": 1.2,
+    "like": 1.0,
+    "onboarding_card_like": 0.8,
+    "external_click": 0.6,
+    "save_want_to_go": 0.55,
+    "card_open": 0.15,
+    "photo_swipe": 0.03,
+    "impression": 0.0,
+    "unsave_want_to_go": -0.3,
+    "unsave_favourite": -0.8,
+    "dislike": -1.5,
+    "hide": -1.8
+  }
+}

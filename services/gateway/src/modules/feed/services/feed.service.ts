@@ -1,4 +1,6 @@
 import { createHash } from "node:crypto";
+import { bucketsToKeywords, matchesBucketKeywords } from "../../places/index.js";
+import { eventValueWeights } from "../../../config/event-value-weights.js";
 import { recommendationClient } from "../../../lib/recommendation-client.js";
 import {
   reactionsService,
@@ -12,20 +14,27 @@ import type {
   FeedInputSummary,
   FeedPersonalizationStatus,
   FeedPlaceCard,
+  FeedPlaceRow,
+  FeedPlacesQuery,
   FeedPlacesResult,
   FeedPlacesService,
   FeedRecommendationClient,
   FeedRecommendationResponse,
   FeedUserSignals,
-  FeedStoreContract
+  FeedStoreContract,
+  RecServedStoreContract
 } from "../common/feed.types.js";
 import { FeedStore } from "../stores/feed.store.js";
+import { RecServedStore } from "../stores/rec-served.store.js";
 
 export type { FeedPlacesService } from "../common/feed.types.js";
 
 const CACHE_TTL_MS = 10 * 60 * 1000;
 const MAX_CACHE_ENTRIES = 500;
-const FEED_SNAPSHOT_SIZE = 100;
+// 200 = the ceiling everything downstream is provisioned for: migration 016 caps
+// both feed RPCs at 200 and the rec-service RECOMMEND_MAX_LIMIT defaults to 200.
+// Deeper needs those raised too (TASKS_43).
+const FEED_SNAPSHOT_SIZE = 200;
 const FALLBACK_ALGORITHM_VERSION = "fallback_visibility_v1";
 
 type CachedRecommendation = {
@@ -89,7 +98,8 @@ export function createFeedPlacesService(
   client: FeedRecommendationClient = recommendationClient,
   savedService: SavedPlacesService = savedPlacesService,
   cache = new FeedRecommendationCache(),
-  reactionsServiceOverride: ReactionsService = reactionsService
+  reactionsServiceOverride: ReactionsService = reactionsService,
+  recServedStore: RecServedStoreContract = new RecServedStore()
 ): FeedPlacesService {
   return async ({ query, user }) => {
     const generatedAt = Date.now();
@@ -135,6 +145,7 @@ export function createFeedPlacesService(
       cacheStatus = query.debug ? "bypass" : "miss";
 
       try {
+        const recStartedAt = Date.now();
         const response = await client.personalizedPlaces({
           user_id: user.id,
           favourites_place_ids: signals.favouritesPlaceIds,
@@ -144,6 +155,16 @@ export function createFeedPlacesService(
           limit: FEED_SNAPSHOT_SIZE,
           exclude_input_places: true,
           debug: query.debug
+        });
+
+        // Serving receipt (event-log spec 2.0): one write per FRESH snapshot —
+        // cache hits reuse the already-logged request_id. Fire-and-forget so
+        // logging never blocks or fails the feed.
+        persistServingLog(recServedStore, response, {
+          userId: user.id,
+          city: query.city ?? null,
+          debug: query.debug,
+          latencyMs: Date.now() - recStartedAt
         });
 
         cachedOrFresh = query.debug
@@ -202,11 +223,33 @@ export function createFeedPlacesService(
     const recommendationBySourceId = new Map(
       recommendations.map((item) => [item.sourceId, item])
     );
-    const snapshot = rows.map((row, index) =>
+    // Snapshot position for telemetry (0-based, event-log spec 2.1). Falls back
+    // to rank-1 when an older rec-service does not send position yet.
+    const positionBySourceId = new Map(
+      cachedOrFresh.response.recommendations.map((item) => [
+        item.place_id,
+        item.position ?? item.rank - 1
+      ])
+    );
+    // The rec engine is not passed city or category, so the personalized path
+    // filters the hydrated rows here. Seeds/clusters stay global (likes from
+    // other cities still teach taste). A filtered personalized feed can be
+    // shallower than the snapshot. The fallback path filters inside the RPC
+    // instead, keeping full depth.
+    const filteredRows = applyFeedCuts(rows, query);
+    const snapshot = filteredRows.map((row, index) =>
       mapFeedRowToCard(row, {
         status: "personalized",
-        recommendation: recommendationBySourceId.get(row.source_id),
-        rank: index + 1
+        // Under a category or city cut the recommender's rank has gaps; rank
+        // turns positional so offset windows stay contiguous.
+        recommendation:
+          query.category || query.city
+            ? undefined
+            : recommendationBySourceId.get(row.source_id),
+        rank: index + 1,
+        // position survives every cut and sort: it identifies the card inside
+        // the logged snapshot, not its place on the current page.
+        position: positionBySourceId.get(row.source_id) ?? null
       })
     );
 
@@ -227,14 +270,17 @@ export function createFeedPlacesService(
       });
     }
 
-    const places = snapshot.slice(query.offset, query.offset + query.limit);
+    const ordered = applySort(snapshot, query.sort);
+    const places = ordered.slice(query.offset, query.offset + query.limit);
 
     return {
       feed: {
         personalizationStatus: "personalized",
         cacheStatus,
+        sort: query.sort,
         algorithmVersion: cachedOrFresh.response.algorithm_version,
         embeddingRunId: cachedOrFresh.response.embedding_run_id,
+        requestId: cachedOrFresh.response.request_id ?? null,
         generatedAt: toIso(cachedOrFresh.cachedAt),
         expiresAt: query.debug ? null : toIso(cachedOrFresh.expiresAt)
       },
@@ -267,7 +313,8 @@ async function fallbackFeed(input: {
 }): Promise<FeedPlacesResult> {
   const rows = await input.store.fallbackFeedPlaces(
     input.query,
-    FEED_SNAPSHOT_SIZE
+    FEED_SNAPSHOT_SIZE,
+    input.query.category ? bucketsToKeywords(input.query.category) : null
   );
   const snapshot = rows
     .filter((row) => !input.excludedSourceIds.has(row.source_id))
@@ -277,7 +324,7 @@ async function fallbackFeed(input: {
           rank: index + 1
         })
       );
-  const places = snapshot.slice(
+  const places = applySort(snapshot, input.query.sort).slice(
     input.query.offset,
     input.query.offset + input.query.limit
   );
@@ -286,8 +333,13 @@ async function fallbackFeed(input: {
     feed: {
       personalizationStatus: input.status,
       cacheStatus: input.cacheStatus,
+      sort: input.query.sort,
       algorithmVersion: FALLBACK_ALGORITHM_VERSION,
       embeddingRunId: null,
+      // Fallback feeds are not recommender servings: no receipt row is written,
+      // so telemetry events from them carry request_id null (an expected,
+      // monitored share — event-log spec "not MVP" table).
+      requestId: null,
       generatedAt: toIso(input.generatedAt),
       expiresAt: null
     },
@@ -330,6 +382,116 @@ function markPlaceAsUnsignedUserState(place: FeedPlaceCard): FeedPlaceCard {
     isSaved: false,
     reaction: null
   };
+}
+
+// sort=distance re-orders the whole snapshot BEFORE the offset slice, so offset
+// windows continue the distance ordering. Array.prototype.sort is stable, so
+// equal distances keep their relevance order; rank becomes positional over the
+// sorted snapshot (the client treats rank as positional — FEED_SORT_SPEC).
+// Validation guarantees lat/lng, so distanceMeters is set on every row; nulls
+// would sort last as a safety net.
+function applyFeedCuts(
+  rows: FeedPlaceRow[],
+  query: FeedPlacesQuery
+): FeedPlaceRow[] {
+  const categoryKeywords = query.category
+    ? bucketsToKeywords(query.category)
+    : null;
+  return rows.filter((row) => {
+    if (
+      categoryKeywords &&
+      !matchesBucketKeywords(categoryKeywords, [row.category, row.primary_type])
+    ) {
+      return false;
+    }
+    if (query.city && !citiesMatch(row.city, query.city)) {
+      return false;
+    }
+    return true;
+  });
+}
+
+// Twin of `lower(public.f_unaccent(...))` used by feed_fallback_places.
+// "Bucuresti" does not match "Bucharest" — unknown spellings stay empty.
+function citiesMatch(placeCity: string, asked: string): boolean {
+  return foldCity(placeCity) === foldCity(asked);
+}
+
+function foldCity(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/\p{M}/gu, "")
+    .trim()
+    .toLowerCase();
+}
+
+function applySort(
+  snapshot: FeedPlaceCard[],
+  sort: FeedPlacesQuery["sort"]
+): FeedPlaceCard[] {
+  if (sort !== "distance") {
+    return snapshot;
+  }
+
+  return [...snapshot]
+    .sort(
+      (a, b) =>
+        (a.distanceMeters ?? Number.POSITIVE_INFINITY) -
+        (b.distanceMeters ?? Number.POSITIVE_INFINITY)
+    )
+    .map((card, index) => ({ ...card, rank: index + 1 }));
+}
+
+// The write is fire-and-forget with ONE retry; a second failure is logged and
+// the receipt is lost — acceptable per spec 2.0 ("потеря единичных записей
+// допустима"). The serialized object is exactly what the client received.
+function persistServingLog(
+  recServedStore: RecServedStoreContract,
+  response: FeedRecommendationResponse,
+  request: {
+    userId: string;
+    city: string | null;
+    debug: boolean;
+    latencyMs: number;
+  }
+) {
+  const requestId = response.request_id;
+
+  // An older rec-service (deploy skew) sends no request_id — nothing to log.
+  if (!requestId) {
+    return;
+  }
+
+  const write = {
+    requestId,
+    userId: request.userId,
+    surface: "feed",
+    city: request.city,
+    algorithmVersion: response.algorithm_version,
+    weightsPreset: response.weights_preset ?? null,
+    valueWeightsVersion: eventValueWeights.version,
+    configOverrides: request.debug ? { debug: true } : {},
+    profilesCount: response.input_summary.profiles_count ?? null,
+    fallbackUsed: response.fallback_used ?? false,
+    latencyMs: request.latencyMs,
+    items: response.recommendations.map((item) => ({
+      position: item.position ?? item.rank - 1,
+      placeId: item.place_id,
+      profileId: item.profile_id ?? null,
+      score: item.score,
+      scoreComponents: item.score_components ?? null
+    }))
+  };
+
+  void recServedStore
+    .insertServing(write)
+    .catch(() => recServedStore.insertServing(write))
+    .catch((error) => {
+      console.error(
+        `rec_served write failed twice, serving lost: ${write.requestId}`,
+        error
+      );
+    });
 }
 
 function hasSignals(signals: FeedUserSignals) {

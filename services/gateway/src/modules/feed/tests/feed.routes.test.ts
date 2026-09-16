@@ -33,6 +33,7 @@ function feedPlace(overrides: Partial<FeedPlaceCard> = {}): FeedPlaceCard {
     mapVisibilityScore: 91,
     matchScore: 94,
     rank: 1,
+    position: 0,
     whyRecommended: "Because this matches places you saved.",
     blurb: "Calm specialty coffee spot.",
     tags: ["quiet", "coffee"],
@@ -48,14 +49,17 @@ function feedService(): FeedPlacesService {
   return async ({ query, user }) => {
     expect(query.limit).toBe(20);
     expect(query.offset).toBe(0);
+    expect(query.sort).toBe("relevance");
     expect(query.debug).toBe(false);
 
     return {
       feed: {
         personalizationStatus: user ? "personalized" : "anonymous_fallback",
         cacheStatus: "not_applicable",
+        sort: query.sort,
         algorithmVersion: "test",
         embeddingRunId: null,
+        requestId: null,
         generatedAt: "2026-06-01T10:00:00.000Z",
         expiresAt: null
       },
@@ -128,8 +132,10 @@ describe("feed routes", () => {
           feed: {
             personalizationStatus: "anonymous_fallback",
             cacheStatus: "not_applicable",
+            sort: query.sort,
             algorithmVersion: "test",
             embeddingRunId: null,
+            requestId: null,
             generatedAt: "2026-06-01T10:00:00.000Z",
             expiresAt: null
           },
@@ -201,6 +207,123 @@ describe("feed routes", () => {
     await app.close();
 
     expect(response.statusCode).toBe(400);
+  });
+
+  it("returns 400 for an unknown category value", async () => {
+    const app = await buildApp();
+
+    const response = await app.inject({
+      method: "GET",
+      url: `${VersionedAppRoute.feedPlaces}?category=nightlife`
+    });
+
+    await app.close();
+
+    expect(response.statusCode).toBe(400);
+  });
+
+  it("parses CSV category values and passes them to the service", async () => {
+    const app = await buildApp({
+      feedPlacesService: async ({ query }) => {
+        expect(query.category).toEqual(["bar", "cafe"]);
+
+        return {
+          feed: {
+            personalizationStatus: "anonymous_fallback",
+            cacheStatus: "not_applicable",
+            sort: query.sort,
+            algorithmVersion: "test",
+            embeddingRunId: null,
+            requestId: null,
+            generatedAt: "2026-06-01T10:00:00.000Z",
+            expiresAt: null
+          },
+          inputSummary: {
+            favouritesCount: 0,
+            wantToGoCount: 0,
+            validInputCount: 0,
+            invalidPlaceIds: []
+          },
+          places: [feedPlace()]
+        };
+      }
+    });
+
+    const response = await app.inject({
+      method: "GET",
+      url: `${VersionedAppRoute.feedPlaces}?category=bar,cafe`
+    });
+
+    await app.close();
+
+    expect(response.statusCode).toBe(200);
+  });
+
+  it("returns 400 for an unknown sort value", async () => {
+    const app = await buildApp();
+
+    const response = await app.inject({
+      method: "GET",
+      url: `${VersionedAppRoute.feedPlaces}?sort=nearest&lat=44.43&lng=26.1`
+    });
+
+    await app.close();
+
+    expect(response.statusCode).toBe(400);
+  });
+
+  it("returns 400 for sort=distance without coordinates", async () => {
+    const app = await buildApp();
+
+    const response = await app.inject({
+      method: "GET",
+      url: `${VersionedAppRoute.feedPlaces}?sort=distance`
+    });
+
+    await app.close();
+
+    expect(response.statusCode).toBe(400);
+  });
+
+  it("passes sort=distance through and echoes it in the meta", async () => {
+    const app = await buildApp({
+      feedPlacesService: async ({ query }) => {
+        expect(query.sort).toBe("distance");
+        expect(query.lat).toBe(44.43);
+        expect(query.lng).toBe(26.1);
+
+        return {
+          feed: {
+            personalizationStatus: "anonymous_fallback",
+            cacheStatus: "not_applicable",
+            sort: query.sort,
+            algorithmVersion: "test",
+            embeddingRunId: null,
+            requestId: null,
+            generatedAt: "2026-06-01T10:00:00.000Z",
+            expiresAt: null
+          },
+          inputSummary: {
+            favouritesCount: 0,
+            wantToGoCount: 0,
+            validInputCount: 0,
+            invalidPlaceIds: []
+          },
+          places: [feedPlace({ distanceMeters: 120 })]
+        };
+      }
+    });
+
+    const response = await app.inject({
+      method: "GET",
+      url: `${VersionedAppRoute.feedPlaces}?sort=distance&lat=44.43&lng=26.1`
+    });
+
+    await app.close();
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json().feed.sort).toBe("distance");
+    expect(response.json().places[0].distanceMeters).toBe(120);
   });
 
   it("does not expose unversioned feed routes", async () => {

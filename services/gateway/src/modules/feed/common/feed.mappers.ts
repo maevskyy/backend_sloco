@@ -9,6 +9,9 @@ type FeedMapContext = {
   status: FeedPersonalizationStatus;
   recommendation?: FeedRecommendationSeed;
   rank: number;
+  // Snapshot position for telemetry (kept separate from `recommendation`, which
+  // category/city cuts drop to make rank positional). Null on fallback feeds.
+  position?: number | null;
 };
 
 export function mapFeedRowToCard(
@@ -32,6 +35,7 @@ export function mapFeedRowToCard(
     mapVisibilityScore: Number(row.map_visibility_score ?? 0),
     matchScore: getMatchScore(row, context.recommendation),
     rank: getRank(context),
+    position: context.position ?? null,
     whyRecommended: getWhyRecommended(row, context.status),
     blurb: getBlurb(row),
     tags: getTags(row),
