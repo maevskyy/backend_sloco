@@ -117,12 +117,40 @@ With `embedding_recommender_v1`, if no valid input place has an embedding the
 result is empty (no cold-start signal). `location_recommender_v4` instead falls
 back to a quality-ranked list for cold-start users.
 
+`location_recommender_v4` also scores a **direct-image (photo) channel** when
+`DIRECT_IMAGE_EMBEDDINGS_NPY_PATH` + `DIRECT_IMAGE_METADATA_PATH` point at a place
+embedding set (OpenCLIP ViT-B/32). The production set is rsync'd to the host and
+mounted at `artifacts_external/` (see `docker-compose.yml`); it is not in git — for a
+local run copy it from the server (SLO-19). It only contributes
+under `RECOMMENDER_WEIGHTS_PRESET=text_direct` (photo weight 0.50, the research
+default), so the flag and the two paths always travel together — the startup log
+prints `v4 direct-image coverage: N/M` and WARNs when nothing joined the catalog.
+See `docs/TASKS_7_direct_image_openclip.md`.
+
 `dislike_place_ids` and `hide_place_ids` are accepted by the wire contract for
 both algorithms. In `location_recommender_v4`, both are hard-excluded from the
 candidate pool before scoring and their counts are echoed in
 `input_summary.dislike_count` / `input_summary.hide_count`. In the legacy
 `embedding_recommender_v1`, the fields are accepted so the contract stays stable,
 but real exclusion is not implemented there yet.
+
+The response also carries a **serving receipt** (event-log spec, `docs/TASKS_8_serving_receipt.md`):
+top-level `request_id` (uuid per serving), `weights_preset`, `fallback_used`,
+`input_summary.profiles_count`, and per item `position` (0-based), `profile_id`
+and the full `score_components` (always present — the gateway persists them into
+`rec_served_items`; the flat `similarity` stays debug-only). This service still
+never touches a database: the gateway does the writing.
+
+## Event-log export script
+
+`scripts/export_event_log.py` (ships in this image because pandas/pyarrow live
+here; psycopg is a dependency ONLY for it) exports one UTC day of
+`events_raw` / `rec_served(+items)` / labeled impressions to parquet. With
+`--retention-days N` it then deletes exported days older than N — parquet is the
+archive, Postgres only buffers (only days whose files exist in `--out` are
+deleted; `identity_links` is never touched). It is run by a host cron via
+`docker compose run` — cron line in
+`../gateway/docs/tasks/TASKS_52_EVENT_LOG_RETENTION.md`.
 
 Manual smoke:
 

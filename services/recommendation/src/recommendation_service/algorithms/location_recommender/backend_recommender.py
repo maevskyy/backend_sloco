@@ -92,6 +92,43 @@ TUNED_WEIGHTS_V1 = {
 }
 
 DEFAULT_WEIGHTS = TEXT_DIRECT_WEIGHTS
+
+# Per-profile channel-weight groups (2026-07-02 spec; research rung 1 "per-category weight
+# table", adapted to GROUP rules because a niche taste spans several primary_types — the vegan
+# persona's dominant single type is Cafe, tied with Vegan restaurant). A profile whose seeds
+# hit `min_share` of a group's types scores with that group's weights; otherwise the base
+# weights apply bit-for-bit.
+WEIGHT_GROUPS = [
+    {
+        "name": "diet_niche",
+        "types": {"Vegan restaurant", "Vegetarian restaurant", "Health food restaurant",
+                  "Juice shop", "Raw food restaurant", "Salad shop"},
+        "min_share": 0.35,
+        "weights": {
+            "semantic_similarity": 0.40, "visual_similarity": 0.00,
+            "direct_image_similarity": 0.38, "tag_overlap": 0.10,
+            "axis_similarity": 0.05, "quality_score": 0.04, "price_match": 0.03,
+        },
+    },
+]
+
+
+def _resolve_profile_weights(
+    group: pd.DataFrame, base_weights: dict[str, float]
+) -> tuple[dict[str, float], str]:
+    """Return the first matching per-profile weight group, else the base weights unchanged."""
+    types = group.get("primary_type")
+    if types is None:
+        return base_weights, ""
+    clean = [t for t in (str(v).strip() for v in types) if t and t.lower() != "nan"]
+    if not clean:
+        return base_weights, ""
+    n = float(len(clean))
+    for wg in WEIGHT_GROUPS:
+        share = sum(1 for t in clean if t in wg["types"]) / n
+        if share >= float(wg["min_share"]):
+            return dict(wg["weights"]), str(wg["name"])
+    return base_weights, ""
 MISSING_VISUAL_POLICIES = {"redistribute", "light_penalty", "zero", "exclude"}
 HUBNESS_METHODS = {"csls", "none"}
 PROFILE_QUOTA_MODES = {"weighted", "global"}
@@ -254,6 +291,9 @@ class RecommenderConfig:
     # Enabled inside the Stage-1 per-category weight profiles, where honest
     # weight==influence is required for the per-category overrides to mean what they say.
     calibrate_components: bool = False
+    # Per-profile weight groups (2026-07-02 spec): resolve WEIGHT_GROUPS per seed profile;
+    # False -> base weights everywhere (exact pre-2026-07-02 behavior).
+    weight_groups_enabled: bool = True
     # Stage-1.5 calibrated re-rank (Steck, RecSys 2018): greedy post-rank that makes
     # the final list's category mix match the user's favourite-category mix, trading
     # relevance against KL(favourite_dist || list_dist). lambda 0 = off (default);
@@ -309,9 +349,18 @@ class RecommenderConfig:
     # used DIRECTLY as an absolute fraction (it dominates — it is not a multiplier of the adaptive base).
     cross_theme_inject_mode: str = "off"             # "off" | "auto" | "manual"
     cross_theme_inject_frac: float = 0.15            # manual ABSOLUTE fraction (the slider value)
-    cross_theme_inject_max: float = 0.20             # adaptive (auto-mode) ceiling
+    cross_theme_inject_max: float = 0.10             # adaptive (auto-mode) ceiling; was 0.20
     cross_theme_vibe_floor: float = 0.45             # min vibe_fit to inject (relevance gate)
     cross_theme_vibe_weights: tuple = (0.5, 0.5)     # (axis_similarity, tag_overlap) — balanced
+    # Visible-window size for the injection quota AND interleave slots; 0 = use `limit` (old
+    # behavior). The dashboard passes the user's Top-N here whenever it overrides `limit` to the
+    # FULL pool (collab mode / hide-repulsion / engine alpha>0) so `frac` stays "fraction of MY
+    # list" and injected places stay inside what the user actually sees (2026-07-02 fix).
+    cross_theme_inject_window: int = 0
+    # Focus damper (2026-07-02 spec): AUTO injection is multiplied by (1 - focus), where focus
+    # ramps on KL(shrunk seed category mix || pool mix) — how niche the seed taste is.
+    inject_focus_kl_min: float = 0.3
+    inject_focus_kl_ref: float = 1.2
     # Appropriateness denylist — a HARD categorical gate applied BEFORE the vibe-fit floor.
     # vibe_fit captures MOOD, not suitability (a "calm casino" scores high on the calm axes), so
     # gambling / adult venues need a block that no vibe score can override. Matched (case-insensitive)
@@ -491,6 +540,70 @@ def _calibrate_similarity(values: np.ndarray, method: str) -> np.ndarray:
     if method == "percentile":
         return _percentile_norm(values)
     return _minmax_norm(values)
+
+
+def interleave_into_window(base: pd.DataFrame, picks: pd.DataFrame, window: int | None = None) -> pd.DataFrame:
+    """Insert ``picks`` rows into ``base`` at evenly-spaced slots INSIDE the top ``window`` rows.
+
+    The stride is computed over the visible window (user's Top-N), falling back to the whole
+    frame when ``window`` is None/0 — NOT over the full frame length. With a 20k full-pool frame
+    a total-length stride parks every pick below the fold (the 2026-07-02 cross-theme visibility
+    bug). Preserves the order of both inputs; applies no length cap (callers slice).
+    """
+    if picks.empty:
+        return base.reset_index(drop=True)
+    total = len(base) + len(picks)
+    eff_window = int(window) if window and int(window) > 0 else total
+    eff_window = min(eff_window, total)
+    stride = max(2, eff_window // (len(picks) + 1))
+    rows = [base.iloc[i] for i in range(len(base))]
+    for j in range(len(picks)):
+        rows.insert(min((j + 1) * stride, len(rows)), picks.iloc[j])
+    return pd.DataFrame(rows).reset_index(drop=True)
+
+
+def _clean_types(values) -> list[str]:
+    if values is None:
+        return []
+    return [t for t in (str(v).strip() for v in values) if t and t.lower() != "nan"]
+
+
+def taste_target_distribution(seed_types, pool_types, prior_k: float) -> dict[str, float]:
+    """Shrunk taste target: p~(cat) = (n·p_fav + k·p_pool)/(n+k); {} when either side is empty."""
+    seeds, pool = _clean_types(seed_types), _clean_types(pool_types)
+    if not seeds or not pool:
+        return {}
+    n, k = float(len(seeds)), float(prior_k)
+    p_fav = pd.Series(seeds).value_counts(normalize=True)
+    p_pool = pd.Series(pool).value_counts(normalize=True)
+    cats = set(p_fav.index) | set(p_pool.index)
+    return {c: (n * float(p_fav.get(c, 0.0)) + k * float(p_pool.get(c, 0.0))) / (n + k) for c in cats}
+
+
+def taste_window_kl(target: dict[str, float], window_types, alpha: float = 0.01) -> float:
+    """KL(target || smoothed window mix), or 0.0 when the target/window is empty."""
+    types = _clean_types(window_types)
+    if not target or not types:
+        return 0.0
+    q = pd.Series(types).value_counts(normalize=True)
+    kl = 0.0
+    for cat, p in target.items():
+        if p <= 0:
+            continue
+        q_smooth = (1.0 - alpha) * float(q.get(cat, 0.0)) + alpha * p
+        kl += p * math.log(p / max(q_smooth, 1e-12))
+    return float(kl)
+
+
+def inject_focus_factor(seed_types, pool_types, kl_min: float, kl_ref: float,
+                        prior_k: float = 5.0) -> float:
+    """How focused/niche the seed taste is vs the pool, in [0,1] (2026-07-02 spec)."""
+    target = taste_target_distribution(seed_types, pool_types, prior_k)
+    if not target:
+        return 0.0
+    kl = taste_window_kl(target, pool_types)
+    span = max(float(kl_ref) - float(kl_min), 1e-9)
+    return float(np.clip((kl - float(kl_min)) / span, 0.0, 1.0))
 
 
 # Component value columns already on the percentile [0,1] scale (calibrated upstream
@@ -1634,6 +1747,11 @@ class LocationRecommender:
         # --- experiment knobs (seed_aggregation handled above): adaptive direct
         # weight + raw-cosine fusion. Both leave the default path byte-identical.
         effective_weights = dict(cfg.weights)
+        weight_group = ""
+        if getattr(cfg, "weight_groups_enabled", True):
+            # Per-profile override (2026-07-02): a diet-niche profile scores text-heavy; a
+            # multi-interest user's other profiles keep the base weights untouched.
+            effective_weights, weight_group = _resolve_profile_weights(group, effective_weights)
         direct_weight_multiplier = 1.0
         if cfg.adaptive_direct_weight and direct_image_enabled:
             direct_weight_multiplier = self._direct_weight_multiplier(group, cfg)
@@ -1708,6 +1826,7 @@ class LocationRecommender:
                 scored, cfg.context_time, cfg.context_weather
             )
         scored["visual_weight_active"] = score_weights.get("visual_similarity", 0.0)
+        scored["profile_weight_group"] = weight_group
         scored["direct_image_weight_active"] = score_weights.get("direct_image_similarity", 0.0)
         scored = scored.drop(columns=["_visual_in_blend", "_direct_in_blend", "_text_adjusted"])
         return scored
@@ -2279,8 +2398,11 @@ class LocationRecommender:
         best minority-theme candidates by vibe_fit (axis_similarity + tag_overlap — the
         category-AGNOSTIC components, NOT the type-dominated embedding), gates them by a relevance
         floor, and interleaves K of them at lower-but-visible slots. Magnitude:
-        off->0, auto->max*(1-balance) (balance = normalised theme entropy of the seeds),
-        manual->cross_theme_inject_frac used DIRECTLY (absolute, dominates the adaptive base).
+        off->0, auto->max*(1-balance)*(1-focus) (balance = theme entropy; focus = niche-ness
+        of the seed categories vs the pool, inject_focus_kl_min/ref),
+        manual->cross_theme_inject_frac used DIRECTLY. Quota k = frac * WINDOW
+        (cross_theme_inject_window, 0 -> limit) and interleave slots stay inside that window —
+        full-pool safe (2026-07-02).
         Spec: docs/superpowers/specs/2026-06-28-cross-theme-injection-design.md."""
         mode = getattr(cfg, "cross_theme_inject_mode", "off")
         if (mode not in ("auto", "manual") or cfg.theme_group_filter
@@ -2291,20 +2413,26 @@ class LocationRecommender:
         if counts.empty:
             return merged
         dominant = counts.index[0]
+        pool = pd.concat(profile_scored, ignore_index=True)
+        pool = pool.sort_values("score", ascending=False).drop_duplicates("place_id", keep="first")
+        focus = 0.0
         if mode == "auto":
             p = (counts / counts.sum()).to_numpy(dtype=float)
             balance = 0.0 if len(p) <= 1 else float(-(p * np.log(p)).sum() / np.log(len(p)))
-            frac = float(cfg.cross_theme_inject_max) * (1.0 - balance)
-        else:  # manual: slider value used DIRECTLY as the absolute fraction
+            if "primary_type" in seed_df.columns and "primary_type" in pool.columns:
+                focus = inject_focus_factor(
+                    seed_df["primary_type"], pool["primary_type"],
+                    kl_min=float(cfg.inject_focus_kl_min), kl_ref=float(cfg.inject_focus_kl_ref),
+                )
+            frac = float(cfg.cross_theme_inject_max) * (1.0 - balance) * (1.0 - focus)
+        else:  # manual: slider value used DIRECTLY as the absolute fraction (damper NOT applied)
             frac = min(max(float(cfg.cross_theme_inject_frac), 0.0), 1.0)
-        k = int(round(frac * limit))
+        window = int(getattr(cfg, "cross_theme_inject_window", 0) or 0)
+        window = min(window, limit) if window > 0 else limit
+        k = int(round(frac * window))
         if k <= 0:
             return merged
-        pool = pd.concat(profile_scored, ignore_index=True)
-        pool = pool.sort_values("score", ascending=False).drop_duplicates("place_id", keep="first")
-        in_merged = set(merged["place_id"])
-        minority = pool[(pool["theme_group"].astype(str) != dominant)
-                        & (~pool["place_id"].isin(in_merged))].copy()
+        minority = pool[pool["theme_group"].astype(str) != dominant].copy()
         if minority.empty:
             return merged
         minority = self._drop_inject_denylisted(minority, cfg)   # appropriateness gate (before vibe-fit)
@@ -2316,17 +2444,22 @@ class LocationRecommender:
         minority = minority[minority["vibe_fit"] >= float(cfg.cross_theme_vibe_floor)]
         if minority.empty:
             return merged
-        picks = minority.sort_values("vibe_fit", ascending=False).head(k).copy()
+        # Research rec 2 ("rank survivors by vibe-fit blended with the existing quality term"):
+        # equal-vibe candidates order by quality; 0.15 keeps vibe_fit dominant.
+        quality = (pd.to_numeric(minority["quality_score"], errors="coerce").fillna(0.0)
+                   if "quality_score" in minority.columns else 0.0)
+        minority["inject_utility"] = minority["vibe_fit"] + 0.15 * quality
+        picks = minority.sort_values("inject_utility", ascending=False).head(k).copy()
         picks["injected"] = True
         picks["inject_reason"] = "cross_theme_vibe"
+        picks["inject_focus"] = focus
         base = merged.head(limit).copy()
+        # The full-pool ranking already contains the chosen minority rows. Remove them before
+        # re-inserting so the window-safe path remains duplicate-free.
+        base = base[~base["place_id"].isin(set(picks["place_id"]))].copy()
         if "injected" not in base.columns:
             base["injected"] = False
-        rows = [base.iloc[i] for i in range(len(base))]
-        stride = max(2, limit // (len(picks) + 1))
-        for j in range(len(picks)):
-            rows.insert(min((j + 1) * stride, len(rows)), picks.iloc[j])
-        return pd.DataFrame(rows).head(limit).reset_index(drop=True)
+        return interleave_into_window(base, picks, window).head(limit).reset_index(drop=True)
 
     def _drop_inject_denylisted(self, cand: pd.DataFrame, cfg: RecommenderConfig) -> pd.DataFrame:
         """Hard appropriateness gate for cross-theme injection: drop never-injectable places
@@ -2573,6 +2706,7 @@ class LocationRecommender:
                 "rank": rank,
                 "place_id": row["place_id"],
                 "profile_id": profile_id_value,
+                "profile_weight_group": str(row.get("profile_weight_group", "") or ""),
                 "score": _round_float(row.get("score")),
                 "score_components": {
                     "similarity": _round_float(row.get("similarity")),

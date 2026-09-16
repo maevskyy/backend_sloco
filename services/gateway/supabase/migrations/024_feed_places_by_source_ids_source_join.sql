@@ -1,9 +1,8 @@
 -- SLO-7: feed_places_by_source_ids() joins places on (source, source_id), not on
 -- source_id alone.
 --
--- Numbering: 017–023 live in the database (applied from the `dev` branch,
--- 2026-08-11 → 08-30) and are not yet in this tree; 024 continues the sequence
--- the database is actually at.
+-- Numbering: 017–023 were applied from the `dev` branch (2026-08-11 → 08-30) and
+-- ported into this tree on 2026-09-16; 024 continues the sequence the database is at.
 --
 -- WARNING: DROPS AND RECREATES public.feed_places_by_source_ids — THE SIGNATURE
 -- GAINS A DEFAULTED PARAMETER, SO CREATE OR REPLACE CANNOT BE USED. NO TABLE,

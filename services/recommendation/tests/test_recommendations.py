@@ -78,7 +78,11 @@ def test_recommendations_are_deterministic(client: TestClient) -> None:
 
     assert first.status_code == 200
     assert second.status_code == 200
-    assert first.json() == second.json()
+    first_data = first.json()
+    second_data = second.json()
+    # The serving id is minted per request — everything else is deterministic.
+    assert first_data.pop("request_id") != second_data.pop("request_id")
+    assert first_data == second_data
 
 
 def test_limit_is_capped_by_settings(client: TestClient) -> None:
@@ -99,4 +103,24 @@ def test_debug_false_hides_similarity(client: TestClient) -> None:
 
     assert response.status_code == 200
     assert response.json()["recommendations"][0]["similarity"] is None
+
+
+def test_serving_receipt_fields_on_legacy_algorithm(client: TestClient) -> None:
+    response = client.post(
+        "/v1/recommendations/personalized",
+        json={"favourites_place_ids": ["place_1"], "limit": 3},
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["request_id"]
+    assert data["weights_preset"] is None
+    assert data["fallback_used"] is False
+    assert data["input_summary"]["profiles_count"] == 0
+    for item in data["recommendations"]:
+        # position is 0-based (event-log spec 2.1); rank stays 1-based.
+        assert item["position"] == item["rank"] - 1
+        assert item["profile_id"] is None
+        # score_components is present WITHOUT debug — the gateway logs it.
+        assert "similarity" in item["score_components"]
 

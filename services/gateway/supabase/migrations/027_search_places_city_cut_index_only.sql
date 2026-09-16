@@ -1,8 +1,8 @@
 -- SLO-4: search_places() cuts by city, selects candidates index-only, hydrates
 -- after LIMIT.
 --
--- Numbering: 017–023 live in the database (applied from the `dev` branch) and
--- are not yet in this tree; 024–027 continue the sequence the database is at.
+-- Numbering: 017–023 were applied from the `dev` branch and ported into this tree
+-- on 2026-09-16; 024–027 continue the sequence the database is at.
 --
 -- Non-destructive: one covering index that supersedes places_feed_candidates_idx
 -- (same leading key, superset of INCLUDE columns — feed_fallback_places from 026

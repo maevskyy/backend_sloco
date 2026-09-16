@@ -1,7 +1,7 @@
 -- SLO-5: feed_fallback_places() stops scanning and hydrating the whole catalog.
 --
--- Numbering: 017–023 live in the database (applied from the `dev` branch) and
--- are not yet in this tree; 024/025 continue the sequence the database is at.
+-- Numbering: 017–023 were applied from the `dev` branch and ported into this tree
+-- on 2026-09-16; 024/025 continue the sequence the database is at.
 --
 -- Non-destructive: one new expression index + CREATE OR REPLACE of the function
 -- body with the SAME six-argument signature migration 021 gave it. No table,

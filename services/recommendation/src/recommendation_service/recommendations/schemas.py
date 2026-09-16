@@ -1,3 +1,5 @@
+from typing import Any
+
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -24,6 +26,7 @@ class InputSummary(BaseModel):
     valid_input_count: int
     invalid_place_ids: list[str]
     candidate_count: int
+    profiles_count: int = 0
 
 
 class RecommendationItem(BaseModel):
@@ -31,15 +34,25 @@ class RecommendationItem(BaseModel):
 
     rank: int
     place_id: str
+    # Serving-receipt fields (event-log spec 2.1): position is 0-based; the app
+    # echoes request_id + position back inside telemetry events.
+    position: int
+    profile_id: int | None = None
     score: float
     similarity: float | None = None
+    # Full score breakdown as scored at serve time — always present, not only in
+    # debug mode. The gateway persists it into rec_served_items.
+    score_components: dict[str, Any] | None = None
 
 
 class PersonalizedResponse(BaseModel):
     model_config = ConfigDict(frozen=True)
 
     user_id: str | None
+    request_id: str
     algorithm_version: str
     embedding_run_id: str
+    weights_preset: str | None = None
+    fallback_used: bool = False
     input_summary: InputSummary
     recommendations: list[RecommendationItem]

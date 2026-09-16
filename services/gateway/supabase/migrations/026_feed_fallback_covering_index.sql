@@ -1,7 +1,7 @@
 -- SLO-5, step 3: the candidate scan of feed_fallback_places() becomes index-only.
 --
--- Numbering: 017–023 live in the database (applied from the `dev` branch) and
--- are not yet in this tree; 024–026 continue the sequence the database is at.
+-- Numbering: 017–023 were applied from the `dev` branch and ported into this tree
+-- on 2026-09-16; 024–026 continue the sequence the database is at.
 --
 -- Non-destructive: one covering index, DROP of the single-column expression
 -- index 025 created (superseded — same leading key), CREATE OR REPLACE of the
