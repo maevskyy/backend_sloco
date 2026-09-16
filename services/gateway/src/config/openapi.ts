@@ -43,6 +43,8 @@ type RouteDefinition = {
   body?: string;
   query?: string;
   ok: string;
+  /** Success status code for `ok` (default 200; e.g. 202 for async intake). */
+  okStatus?: number;
 };
 
 /**
@@ -67,7 +69,7 @@ export function makeDefineRoute(config: {
       ...(route.query ? { querystring: { $ref: `${route.query}#` } } : {}),
       ...(route.body ? { body: { $ref: `${route.body}#` } } : {}),
       response: {
-        200: { $ref: `${route.ok}#` },
+        [route.okStatus ?? 200]: { $ref: `${route.ok}#` },
         ...config.errorResponses
       }
     } as const;

@@ -23,6 +23,10 @@ import {
 } from "./modules/map/index.js";
 import { registerMeModule, type MeService } from "./modules/me/index.js";
 import {
+  registerOnboardingModule,
+  type OnboardingService
+} from "./modules/onboarding/index.js";
+import {
   registerPlacesModule,
   type PlaceDetailsService
 } from "./modules/places/index.js";
@@ -42,6 +46,14 @@ import {
   registerFeedModule,
   type FeedPlacesService
 } from "./modules/feed/index.js";
+import {
+  registerCitiesModule,
+  type CitiesService
+} from "./modules/cities/index.js";
+import {
+  registerEventsModule,
+  type EventsServiceContract
+} from "./modules/events/index.js";
 import type { AuthService } from "./modules/auth/auth.service.js";
 import type { CacheStore } from "./lib/cache/cache-store.js";
 
@@ -51,12 +63,15 @@ type AppOptions = {
   mapTileService?: MapTileService;
   authService?: AuthService;
   meService?: MeService;
+  onboardingService?: OnboardingService;
   reactionsService?: ReactionsService;
   savedPlacesService?: SavedPlacesService;
   placeDetailsService?: PlaceDetailsService;
   cacheStore?: CacheStore;
   searchPlacesService?: SearchPlacesService;
   feedPlacesService?: FeedPlacesService;
+  citiesService?: CitiesService;
+  eventsService?: EventsServiceContract;
 };
 
 export async function buildApp(options: AppOptions = {}) {
@@ -99,6 +114,12 @@ export async function buildApp(options: AppOptions = {}) {
     savedPlacesService: options.savedPlacesService
   });
 
+  await app.register(registerOnboardingModule, {
+    prefix: API_PREFIX,
+    authService: options.authService,
+    onboardingService: options.onboardingService
+  });
+
   await app.register(registerReactionsModule, {
     prefix: API_PREFIX,
     authService: options.authService,
@@ -133,6 +154,17 @@ export async function buildApp(options: AppOptions = {}) {
     authService: options.authService,
     savedPlacesService: options.savedPlacesService,
     reactionsService: options.reactionsService
+  });
+
+  await app.register(registerCitiesModule, {
+    prefix: API_PREFIX,
+    citiesService: options.citiesService
+  });
+
+  await app.register(registerEventsModule, {
+    prefix: API_PREFIX,
+    authService: options.authService,
+    eventsService: options.eventsService
   });
 
   await app.register(registerMapModule, {
