@@ -21,6 +21,12 @@ export const savePlaceBodySchema = z.object({
   collectionIds: z.array(z.string().uuid()).optional()
 });
 
+// The save picker writes the WHOLE membership at once. An empty array is valid and
+// means "unsave" — that is what an emptied picker means (TASKS_54).
+export const setPlaceCollectionsBodySchema = z.object({
+  collectionIds: z.array(z.string().uuid())
+});
+
 export const createSavedCollectionBodySchema = z.object({
   name: z.string().trim().min(1).max(80),
   colorHex: z
@@ -98,6 +104,12 @@ export const savedCollectionSchema = z.object({
   previewPlaces: z.array(savedPlaceSummarySchema),
   createdAt: z.string(),
   updatedAt: z.string(),
+  slug: z
+    .string()
+    .nullable()
+    .describe(
+      "System list identity: \"saved\" | \"favorites\" | \"been\". Null for user-created lists. System lists exist for every user, cannot be deleted, and clients hide them from \"My lists\" while pinning them to the top of the save picker."
+    ),
   isDefault: z.boolean(),
   sortOrder: z.number().int()
 });
@@ -140,6 +152,14 @@ export const unsavePlaceResponseSchema = z.object({
   placeId: z.number().int(),
   isSaved: z.literal(false),
   collectionIds: z.array(z.string().uuid()).max(0)
+});
+
+// One shape for both outcomes of the picker write: isSaved says which happened.
+export const placeCollectionsResponseSchema = z.object({
+  placeId: z.number().int(),
+  isSaved: z.boolean(),
+  collectionIds: z.array(z.string().uuid()),
+  savedAt: z.string().nullable()
 });
 
 export const savedCollectionResponseSchema = z.object({
@@ -212,6 +232,12 @@ savedPlacesSchemaRegistry.add(savePlaceResponseSchema, {
 savedPlacesSchemaRegistry.add(unsavePlaceResponseSchema, {
   id: "UnsavePlaceResponse"
 });
+savedPlacesSchemaRegistry.add(setPlaceCollectionsBodySchema, {
+  id: "SetPlaceCollectionsBody"
+});
+savedPlacesSchemaRegistry.add(placeCollectionsResponseSchema, {
+  id: "PlaceCollectionsResponse"
+});
 savedPlacesSchemaRegistry.add(savedCollectionResponseSchema, {
   id: "SavedCollectionResponse"
 });
@@ -233,6 +259,10 @@ export type SavedCollectionPlaceParams = z.infer<
   typeof savedCollectionPlaceParamsSchema
 >;
 export type SavePlaceBody = z.infer<typeof savePlaceBodySchema>;
+
+export type SetPlaceCollectionsBody = z.infer<
+  typeof setPlaceCollectionsBodySchema
+>;
 export type CreateSavedCollectionBody = z.infer<
   typeof createSavedCollectionBodySchema
 >;

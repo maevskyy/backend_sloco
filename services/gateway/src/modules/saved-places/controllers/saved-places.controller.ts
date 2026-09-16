@@ -50,6 +50,9 @@ export class SavedPlacesController {
       this.getCollectionDetail.bind(this));
     app.post(AppRoute.MeSavedPlaces, docsRoute(openApi.savePlaceRouteSchema),
       this.savePlace.bind(this));
+    app.put(AppRoute.MeSavedPlaceCollections,
+      docsRoute(openApi.setPlaceCollectionsRouteSchema),
+      this.setPlaceCollections.bind(this));
     app.delete(AppRoute.MeSavedPlace, docsRoute(openApi.unsavePlaceRouteSchema),
       this.unsavePlace.bind(this));
     app.post(AppRoute.MeSavedCollections,
@@ -112,6 +115,38 @@ export class SavedPlacesController {
       });
 
       return result;
+    });
+  }
+
+  private async setPlaceCollections(
+    request: FastifyRequest,
+    reply: FastifyReply
+  ) {
+    return this.withUser(request, reply, async (user) => {
+      const { placeId } = schemas.savedPlaceParamsSchema.parse(request.params);
+      const body = schemas.setPlaceCollectionsBodySchema.parse(request.body);
+      const result = await this.service.setPlaceCollections(
+        user.id,
+        placeId,
+        body.collectionIds
+      );
+
+      this.logSavedPlaceResponse(
+        request,
+        VersionedAppRoute.meSavedPlaceCollections,
+        {
+          placeId,
+          isSaved: result.isSaved,
+          collectionCount: result.collectionIds.length
+        }
+      );
+
+      return {
+        placeId: result.placeId,
+        isSaved: result.isSaved,
+        collectionIds: result.collectionIds,
+        savedAt: "savedAt" in result ? result.savedAt : null
+      };
     });
   }
 

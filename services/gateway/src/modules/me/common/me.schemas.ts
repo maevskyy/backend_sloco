@@ -10,7 +10,10 @@ export const meUserSchema = z.object({
 export const meProfileSchema = z.object({
   userId: z.string().uuid(),
   displayName: z.string().nullable(),
-  onboardingStatus: z.string()
+  // `not_started` is the row default; the only writer is
+  // POST /v1/onboarding/complete (TASKS_38). The DB column stays free text;
+  // this enum IS the API contract.
+  onboardingStatus: z.enum(["not_started", "completed", "skipped"])
 });
 
 export const meResponseSchema = z.object({
