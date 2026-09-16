@@ -51,6 +51,7 @@ type CaseReport = {
 // sends them to the RPCs. Keep in sync by hand — the script must stay standalone.
 const BUCHAREST = { lat: 44.4268, lng: 26.1025, city: "Bucharest", country: "Romania" };
 const TBILISI = { lat: 41.7151, lng: 44.8271, city: "Tbilisi", country: "Georgia" };
+const BERLIN = { lat: 52.52, lng: 13.405, city: "Berlin", country: "Germany" };
 const CAFE_KEYWORDS = [
   "cafe",
   "coffee",
@@ -118,16 +119,18 @@ async function sqlCases(client: pg.Client): Promise<SqlCase[]> {
   const bucTile = tileFor(BUCHAREST.lat, BUCHAREST.lng, 13);
   const tbiTile = tileFor(TBILISI.lat, TBILISI.lng, 13);
 
-  const search = (q: string | null, keywords: string[] | null) => ({
+  const search = (q: string | null, keywords: string[] | null, at = BUCHAREST) => ({
     sql: `select * from public.search_places(
             q => $1, user_lat => $2, user_lng => $3, user_city => $4, user_country => $5,
             result_limit => $6, category_keywords => $7, radius_meters => $8)`,
-    params: [q, BUCHAREST.lat, BUCHAREST.lng, BUCHAREST.city, BUCHAREST.country, 20, keywords, null]
+    params: [q, at.lat, at.lng, at.city, at.country, 20, keywords, null]
   });
 
   return [
     { name: "search_places cafe @Bucharest", ...search("cafe", null) },
     { name: "search_places pizza @Bucharest", ...search("pizza", null) },
+    // Berlin is the biggest city slice (37.8k rows): worst case for a per-city scan.
+    { name: "search_places cafe @Berlin", ...search("cafe", null, BERLIN) },
     { name: "search_places browse cafe-bucket @Bucharest", ...search(null, CAFE_KEYWORDS) },
     {
       name: "feed_fallback_places Bucharest limit 200",
@@ -232,6 +235,10 @@ async function httpCases(client: pg.Client): Promise<HttpCase[]> {
     {
       name: "GET /v1/search/places?q=cafe @Bucharest",
       path: `/v1/search/places?${q({ q: "cafe", lat: BUCHAREST.lat, lng: BUCHAREST.lng, city: BUCHAREST.city, country: BUCHAREST.country })}`
+    },
+    {
+      name: "GET /v1/search/places?q=cafe @Berlin",
+      path: `/v1/search/places?${q({ q: "cafe", lat: BERLIN.lat, lng: BERLIN.lng, city: BERLIN.city, country: BERLIN.country })}`
     },
     { name: "GET /v1/cities", path: `/v1/cities` },
     { name: `GET /v1/map/tiles/${t.z}/${t.x}/${t.y}.mvt`, path: `/v1/map/tiles/${t.z}/${t.x}/${t.y}.mvt` },
