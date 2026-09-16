@@ -24,6 +24,20 @@ const bboxes = [
     swLng: 25.9,
     neLat: 44.6,
     neLng: 26.3
+  },
+  {
+    name: "berlin_center",
+    swLat: 52.48,
+    swLng: 13.33,
+    neLat: 52.56,
+    neLng: 13.48
+  },
+  {
+    name: "tbilisi_center",
+    swLat: 41.68,
+    swLng: 44.75,
+    neLat: 41.74,
+    neLng: 44.85
   }
 ];
 

@@ -23,7 +23,31 @@ node gen-tiles.mjs > tiles.csv
 npx artillery@^2 run -t https://sloco.pp.ua tiles.yml
 ```
 
-## What It Hits
+## API hot paths — `hot-paths.yml`
+
+The throughput baseline for the whole read API as the app uses it, anonymous:
+app open (`/v1/cities` + feed page 1 + page 2), a category pill, search as typed
+(`queries.csv` mixes 2–3 letter prefixes with words), map tiles for three cities,
+place details (`places.csv`). Phases are a staircase — 2, 5, 10, 20, 30 arrivals/s,
+60 s each — so the timeline in the report shows the rate at which p95 and 5xx take
+off. No `ensure` gate: this file measures, it does not assert.
+
+```bash
+make load-hot BASE_URL=https://sloco.pp.ua          # run + print the markdown report
+cd load && node report.mjs out/hot-paths.json       # re-render a saved run
+```
+
+Results are kept in `docs/perf/` (`2026-09-16-load-baseline.md` is the first one:
+ceiling ≈ 5 arrivals/s, pinned by the gateway's `pg` pool of 5). Re-run it after any
+change to pool sizes, instance counts or the routes above and add the new file next to
+it — same scenario, same steps, comparable numbers.
+
+The signed-in personalized feed is not in the mix: it needs a bearer token. To add it,
+put a token into the environment and give the feed requests
+`headers: { authorization: "Bearer {{ $env.SLOCO_BEARER }}" }` in a copy of the
+`app-open` scenario.
+
+## What It Hits (`map-places.yml`, `tiles.yml`)
 
 - `GET /v1/map/places` — the hot path. Each virtual user draws a different bbox + zoom
   from `viewports.csv`, so we exercise spatial queries across viewports, not one

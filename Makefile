@@ -1,4 +1,4 @@
-.PHONY: up up-all down logs ps build pull config load load-tiles load-tiles-record
+.PHONY: up up-all down logs ps build pull config load load-tiles load-tiles-record load-hot
 
 BASE_URL ?= http://127.0.0.1:3000
 
@@ -34,3 +34,7 @@ load-tiles:
 
 load-tiles-record:
 	cd load && node gen-tiles.mjs > tiles.csv && npx artillery@^2 run --record --key $$ARTILLERY_CLOUD_API_KEY -t $(BASE_URL) tiles.yml
+
+# Throughput baseline for the API hot paths (docs/perf/2026-09-16-load-baseline.md).
+load-hot:
+	cd load && node gen-tiles.mjs > tiles.csv && mkdir -p out && npx artillery@^2 run -t $(BASE_URL) --output out/hot-paths.json hot-paths.yml && node report.mjs out/hot-paths.json

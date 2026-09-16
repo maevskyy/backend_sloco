@@ -1,0 +1,107 @@
+# Throughput baseline for the API hot paths as the app uses them (SLO-27).
+#
+# One "arrival" is one virtual user running one of the scenarios below; a
+# scenario is 1–3 requests, so the request rate is ~1.7× the arrival rate.
+# Phases are a staircase, not a flat load: the per-window timeline in the
+# report shows at which rate p95 climbs and 5xx appear. That is the number
+# horizontal scaling has to move.
+#
+# Anonymous only. The personalized feed (signed-in user, recommender in the
+# loop) is not covered — it needs a bearer token; see README.
+#
+# Generate the tile payload first:  node gen-tiles.mjs > tiles.csv
+# Run:                              npm run hot -- -t https://sloco.pp.ua
+# Report:                           node report.mjs out/hot-paths.json
+config:
+  target: "http://127.0.0.1:3000"
+  http:
+    # The gateway itself gives up at ~8 s (authenticator statement_timeout);
+    # anything slower than this is a failure we want counted, not hidden.
+    timeout: 15
+  plugins:
+    metrics-by-endpoint:
+      useOnlyRequestNames: true
+  payload:
+    - path: "cities.csv"
+      fields: [city, country, lat, lng]
+      order: random
+      skipHeader: true
+    - path: "queries.csv"
+      fields: [q]
+      order: random
+      skipHeader: true
+    - path: "buckets.csv"
+      fields: [bucket]
+      order: random
+      skipHeader: true
+    - path: "places.csv"
+      fields: [placeId, placeCity]
+      order: random
+      skipHeader: true
+    - path: "tiles.csv"
+      fields: [z, x, y, bbox]
+      order: random
+      skipHeader: true
+  phases:
+    - name: warmup-2
+      duration: 30
+      arrivalRate: 2
+    - name: step-5
+      duration: 60
+      arrivalRate: 5
+    - name: step-10
+      duration: 60
+      arrivalRate: 10
+    - name: step-20
+      duration: 60
+      arrivalRate: 20
+    - name: step-30
+      duration: 60
+      arrivalRate: 30
+
+scenarios:
+  # App open: cities list, first feed page, scroll to page two.
+  - name: app-open
+    weight: 3
+    flow:
+      - get:
+          name: "GET /v1/cities"
+          url: "/v1/cities"
+      - get:
+          name: "GET /v1/feed/places city"
+          url: "/v1/feed/places?limit=20&lat={{ lat }}&lng={{ lng }}&city={{ city }}&country={{ country }}"
+      - get:
+          name: "GET /v1/feed/places city offset=20"
+          url: "/v1/feed/places?limit=20&offset=20&lat={{ lat }}&lng={{ lng }}&city={{ city }}&country={{ country }}"
+
+  # Category pill on the feed.
+  - name: pill
+    weight: 2
+    flow:
+      - get:
+          name: "GET /v1/feed/places city+category"
+          url: "/v1/feed/places?limit=20&lat={{ lat }}&lng={{ lng }}&city={{ city }}&country={{ country }}&category={{ bucket }}"
+
+  # Search as typed: queries.csv mixes 2–3 letter prefixes with full words.
+  - name: search
+    weight: 3
+    flow:
+      - get:
+          name: "GET /v1/search/places"
+          url: "/v1/search/places?q={{ q }}&lat={{ lat }}&lng={{ lng }}&city={{ city }}&country={{ country }}"
+
+  # Map pan: vector tiles (200 or 204 — empty tiles are valid).
+  - name: map
+    weight: 3
+    flow:
+      - get:
+          name: "GET /v1/map/tiles"
+          url: "/v1/map/tiles/{{ z }}/{{ x }}/{{ y }}.mvt?v=1"
+
+  # Card tap.
+  - name: details
+    weight: 2
+    flow:
+      - get:
+          name: "GET /v1/places/:id"
+          url: "/v1/places/{{ placeId }}"
