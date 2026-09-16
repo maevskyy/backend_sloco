@@ -1,6 +1,52 @@
 # TASKS 38: Onboarding — `POST /v1/onboarding/complete`
 
-**Status: Planned (awaiting approval).**
+**Status: DONE** — shipped and verified in production 2026-08-12.
+
+Anonymous checks: `POST /v1/onboarding/complete` → 401 without a token and with a bad one;
+the path, the `Onboarding` tag and all three components are in the OpenAPI document;
+`MeProfile.onboardingStatus` publishes `enum: [not_started, completed, skipped]`.
+
+Authenticated end-to-end (real Bearer):
+
+```
+POST /v1/onboarding/complete {"pickedPlaceIds":[4096,9139,5032],"status":"completed"}
+GET  /v1/me → profile.onboardingStatus == "completed"
+GET  /v1/feed/places (same user) → personalizationStatus == "personalized"
+                                   algorithmVersion == "location_recommender_v4_more_direct"
+```
+
+That last line is the point of the whole task: the picks became favourites and the user
+landed on the personalized feed in the same session — which also closed the separate iOS
+ask `RECOMMENDER_STATUS`. Both specs are now in `messages-to-backend-dev/done/`.
+
+Built exactly as planned below (177/177 tests, build/lint/typecheck clean; 11 new tests).
+
+Implementation notes vs the plan:
+
+- **The status write is an upsert, not an update.** The profiles row is normally created
+  by `GET /v1/me`, but the current iOS build never calls it — a plain `update` would
+  silently write to zero rows. `upsert({user_id, onboarding_status}, onConflict user_id)`
+  covers both cases; `/v1/me`'s own default-upsert only sends `user_id`, so it can never
+  clobber a written status.
+- Picks are deduped; saves run before the status write, so a mid-way failure leaves the
+  status unset and the whole call safely retryable. `PlaceNotFoundError` per pick is
+  skipped (counted out of `savedCount`), any other error propagates as 500.
+- The addendum shipped too: `MeProfile.onboardingStatus` is now
+  `z.enum(["not_started", "completed", "skipped"])` in the contract (DB stays free text).
+- Contract doc: `docs/FRONTEND_ONBOARDING_API.md`. No migration needed.
+
+> **Addendum (2026-08-11):** iOS ask
+> `frontend_new/messages-to-backend-dev/done/ONBOARDING_STATUS_WRITE.md` lands on this
+> task — it needs exactly one writable, enumerated onboarding state readable via `GET /v1/me`
+> on any device. Two additions to the scope below:
+> (1) document the vocabulary in the contract — `MeProfile.onboardingStatus` becomes
+> `z.enum(["not_started", "completed", "skipped"])` in `me.schemas.ts` (safe: `not_started`
+> is the only value in the wild — the column has never had a writer; this endpoint stays the
+> single one);
+> (2) after ship, answer/close the iOS spec file — the client then deletes its
+> `isNewlyCreatedAccount()` stopgap and branches on `== "completed"`.
+> The DB stays free-text (the Out Of Scope note below is unchanged — the enum lives in the
+> API contract, not a CHECK constraint).
 
 Part **1 of 5** of the onboarding feature (data-team handoff `2026-08-01`). This is
 the **independent, ship-now** piece: it has **no dependency** on the recommendation

@@ -10,12 +10,28 @@ This folder documents the backend monorepo as a multi-service system.
   score.
 - `DEPLOYMENT.md` - production deploy workflow, secrets, server layout, and
   rollback.
+- `ENVIRONMENTS.md` - prod vs dev component matrix, environment rules, and the
+  Supabase-for-dev decision.
 - `tasks/` - backend-platform task plans and migration history.
 - `tasks/TASKS_2_BACKEND_MONOREPO_CONSOLIDATION.md` - consolidate the three backend
   repos into one monorepo, with path-filtered CI, stack-owning deploy, one secret
   contour, and a load-testing harness.
 - `tasks/TASKS_3_OBSERVABILITY_TOPLEVEL.md` - move Grafana/Prometheus/Loki config to a
   top-level `observability/` directory with dashboards grouped by `app/`/`infra/`.
+
+## Cross-Service Working Docs
+
+Root-level docs that span both services (they are not service docs and not task plans):
+
+- `../ios-asks-implementation-plan.md` - the 2026-08 round of iOS asks: spec-vs-code
+  comparison, per-ask plan, and the ship ritual. All nine asks are shipped; kept as the
+  record of what was decided and why.
+- `../recommender-config-audit.md` - recommendation-service configuration audit
+  (algorithm/artifact pairing). P0 items resolved 2026-08-11.
+- `../user-reactions-spec.md` - the cross-service user-reactions contract (gateway
+  `TASKS_34`/`35` + recommendation `TASKS_3`).
+- `audit/2026-09/` - the dev → main review (migrations & DB, recommender, infra, gateway
+  by module) and `perf/` - the single-request bench and load-test results it produced.
 
 ## TBD Thinking Docs
 

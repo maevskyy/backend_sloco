@@ -13,13 +13,18 @@ boundaries, use the root docs:
 ## Service Folders
 
 ```text
-src/        Gateway application code
-docs/       Gateway API docs, decisions, and historical task plans
-supabase/   database migrations owned by the Gateway
-grafana/    dashboard JSON and provisioning files
-dumps/      small Gateway import/sample files
-scripts/    offline Gateway ETL and import scripts
+src/                 Gateway application code
+docs/                Gateway API docs, decisions, and historical task plans
+supabase/migrations/ database migrations owned by the Gateway
+supabase/rollback/   undo scripts for migrations that replace RPC signatures
+grafana/             dashboard JSON and provisioning files
+dumps/               small Gateway import/sample files
+scripts/             offline Gateway ETL and import scripts
 ```
+
+`supabase/rollback/` holds hand-written undo scripts, one per risky migration —
+see its `README.md` for when a migration needs one and the rules a rollback
+follows. They are never run as part of the migration sequence.
 
 Infrastructure that belongs to the whole backend stack lives at repo root:
 
