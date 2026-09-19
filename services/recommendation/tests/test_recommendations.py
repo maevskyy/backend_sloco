@@ -124,3 +124,47 @@ def test_serving_receipt_fields_on_legacy_algorithm(client: TestClient) -> None:
         # score_components is present WITHOUT debug — the gateway logs it.
         assert "similarity" in item["score_components"]
 
+
+
+def test_recommend_runs_one_at_a_time_per_process(client: TestClient) -> None:
+    # recommend() is GIL-bound pandas work: several in flight only slow each
+    # other down (SLO-39). The slot semaphore must keep it to one at a time.
+    import threading
+    import time
+    from concurrent.futures import ThreadPoolExecutor
+
+    recommender = client.app.state.recommender
+    original = recommender.recommend
+    lock = threading.Lock()
+    in_flight = 0
+    peak = 0
+
+    def slow_recommend(**kwargs):  # type: ignore[no-untyped-def]
+        nonlocal in_flight, peak
+        with lock:
+            in_flight += 1
+            peak = max(peak, in_flight)
+        try:
+            time.sleep(0.05)
+            return original(**kwargs)
+        finally:
+            with lock:
+                in_flight -= 1
+
+    recommender.recommend = slow_recommend  # type: ignore[method-assign]
+    try:
+        with ThreadPoolExecutor(max_workers=4) as pool:
+            responses = list(
+                pool.map(
+                    lambda _: client.post(
+                        "/v1/recommendations/personalized",
+                        json={"favourites_place_ids": ["place_1"], "limit": 3},
+                    ),
+                    range(4),
+                )
+            )
+    finally:
+        recommender.recommend = original  # type: ignore[method-assign]
+
+    assert all(response.status_code == 200 for response in responses)
+    assert peak == 1

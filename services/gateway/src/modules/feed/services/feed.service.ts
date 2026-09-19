@@ -45,6 +45,12 @@ type CachedRecommendation = {
 
 export class FeedRecommendationCache {
   private readonly entries = new Map<string, CachedRecommendation>();
+  // Single-flight: misses on the same key that arrive while a recommender call
+  // is already running wait for that call instead of starting their own. The
+  // app fires one feed request per pill at login (7 at once, same signals →
+  // same key); without this every pill made its own 1–10 s recommender call
+  // and all of them timed out together (SLO-38).
+  private readonly inflight = new Map<string, Promise<CachedRecommendation>>();
 
   constructor(
     private readonly ttlMs = CACHE_TTL_MS,
@@ -76,6 +82,30 @@ export class FeedRecommendationCache {
     this.entries.set(key, entry);
     this.trim();
     return entry;
+  }
+
+  /**
+   * Returns the entry for `key`, calling `loader` once per burst: concurrent
+   * callers share the same pending call and its result (or its failure — a
+   * rejected leader rejects every waiter, and the next call retries).
+   */
+  async load(
+    key: string,
+    loader: () => Promise<FeedRecommendationResponse>,
+    now = Date.now()
+  ) {
+    const pending = this.inflight.get(key);
+
+    if (pending) return pending;
+
+    const request = loader()
+      .then((response) => this.set(key, response, now))
+      .finally(() => {
+        this.inflight.delete(key);
+      });
+
+    this.inflight.set(key, request);
+    return request;
   }
 
   clear() {
@@ -144,7 +174,7 @@ export function createFeedPlacesService(
     if (!cachedOrFresh) {
       cacheStatus = query.debug ? "bypass" : "miss";
 
-      try {
+      const requestFresh = async () => {
         const recStartedAt = Date.now();
         const response = await client.personalizedPlaces({
           user_id: user.id,
@@ -158,8 +188,8 @@ export function createFeedPlacesService(
         });
 
         // Serving receipt (event-log spec 2.0): one write per FRESH snapshot —
-        // cache hits reuse the already-logged request_id. Fire-and-forget so
-        // logging never blocks or fails the feed.
+        // cache hits and single-flight waiters reuse the already-logged
+        // request_id. Fire-and-forget so logging never blocks or fails the feed.
         persistServingLog(recServedStore, response, {
           userId: user.id,
           city: query.city ?? null,
@@ -167,13 +197,18 @@ export function createFeedPlacesService(
           latencyMs: Date.now() - recStartedAt
         });
 
+        return response;
+      };
+
+      try {
+        // debug bypasses the cache, so it bypasses the shared call too.
         cachedOrFresh = query.debug
           ? {
-              response,
+              response: await requestFresh(),
               cachedAt: generatedAt,
               expiresAt: generatedAt
             }
-          : cache.set(cacheKey, response, generatedAt);
+          : await cache.load(cacheKey, requestFresh, generatedAt);
       } catch {
         return fallbackFeed({
           store,

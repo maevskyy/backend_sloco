@@ -270,6 +270,114 @@ describe("feed places service", () => {
     expect(second.feed.cacheStatus).toBe("hit");
   });
 
+  it("shares one recommender call across a burst of identical requests", async () => {
+    // Login fires one feed request per pill (7 at once) with the same signals.
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const { client, calls } = createClient();
+    const gatedClient: FeedRecommendationClient = {
+      async personalizedPlaces(request) {
+        await gate;
+        return client.personalizedPlaces(request);
+      }
+    };
+    const service = createFeedPlacesService(
+      createStore(),
+      gatedClient,
+      createSavedService(),
+      new FeedRecommendationCache(),
+      createReactionsService()
+    );
+    const user = { id: "user-1", email: "user@example.com" };
+    const pills = [
+      "cafe",
+      "food",
+      "bar",
+      "culture",
+      "nature",
+      "shopping",
+      "leisure"
+    ] as const;
+
+    const burst = Promise.all(
+      pills.map((category) =>
+        service({
+          query: {
+            limit: 20,
+            offset: 0,
+            sort: "relevance" as const,
+            debug: false,
+            category: [category]
+          },
+          user
+        })
+      )
+    );
+    release();
+    const results = await burst;
+
+    expect(calls()).toBe(1);
+    for (const result of results) {
+      expect(result.feed.cacheStatus).toBe("miss");
+      expect(result.feed.personalizationStatus).not.toBe(
+        "recommendation_service_fallback"
+      );
+    }
+
+    const next = await service({
+      query: { limit: 20, offset: 0, sort: "relevance" as const, debug: false },
+      user
+    });
+    expect(calls()).toBe(1);
+    expect(next.feed.cacheStatus).toBe("hit");
+  });
+
+  it("fails the whole burst together when the shared call fails, then retries", async () => {
+    let callCount = 0;
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const { client } = createClient();
+    const flakyClient: FeedRecommendationClient = {
+      async personalizedPlaces(request) {
+        callCount += 1;
+        await gate;
+        if (callCount === 1) throw new Error("timeout");
+        return client.personalizedPlaces(request);
+      }
+    };
+    const service = createFeedPlacesService(
+      createStore(),
+      flakyClient,
+      createSavedService(),
+      new FeedRecommendationCache(),
+      createReactionsService()
+    );
+    const input = {
+      query: { limit: 20, offset: 0, sort: "relevance" as const, debug: false },
+      user: { id: "user-1", email: "user@example.com" }
+    };
+
+    const burst = Promise.all([service(input), service(input), service(input)]);
+    release();
+    const results = await burst;
+
+    expect(callCount).toBe(1);
+    for (const result of results) {
+      expect(result.feed.personalizationStatus).toBe(
+        "recommendation_service_fallback"
+      );
+    }
+
+    const retried = await service(input);
+    expect(callCount).toBe(2);
+    expect(retried.feed.personalizationStatus).toBe("personalized");
+    expect(retried.feed.cacheStatus).toBe("miss");
+  });
+
   it("falls back for anonymous users", async () => {
     const service = createFeedPlacesService(
       createStore(),

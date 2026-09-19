@@ -217,6 +217,10 @@ jobs:
 
             RECOMMENDATION_APP_ENV=production
             RECOMMENDATION_LOG_LEVEL=info
+            # uvicorn worker processes. recommend() is GIL-bound, so this is the
+            # number of recommendations computed in parallel; each worker holds its
+            # own copy of the artifacts (~2.6 GB) — 4 of 12 cores, ~10 GB of 64 (SLO-39).
+            RECOMMENDATION_WORKERS=4
 
             REDIS_URL=redis://redis:6379/0
 

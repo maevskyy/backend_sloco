@@ -31,5 +31,6 @@ async def personalized_recommendations(
         cast(PersonalizedRecommender, recommender),
         payload,
         get_settings(),
+        slots=request.app.state.recommend_slots,
     )
 

@@ -18,6 +18,7 @@ from recommendation_service.logging import configure_logging
 from recommendation_service.recommendations.router import (
     router as recommendations_router,
 )
+from recommendation_service.recommendations.service import create_recommend_slots
 
 logger = logging.getLogger(__name__)
 
@@ -101,6 +102,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         algorithm_version = ALGORITHM_VERSION
 
     app.state.recommender = recommender
+    app.state.recommend_slots = create_recommend_slots(settings)
     registry.register(
         AlgorithmDescriptor(
             name=algorithm_version,

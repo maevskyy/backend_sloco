@@ -46,6 +46,18 @@ class Settings(BaseSettings):
         ge=1,
         le=1000,
     )
+    # recommend() is pandas work under the GIL (measured on prod 2026-09-16:
+    # one call 1.6 s; 7 in flight in one process → 12.5 s EACH, and the BLAS
+    # thread count changes nothing). Threads only interleave, so requests past
+    # this limit wait their turn and the first ones finish on time instead of
+    # everyone timing out together. Parallel capacity comes from uvicorn worker
+    # processes (WEB_CONCURRENCY in compose), not from raising this (SLO-39).
+    recommend_concurrency: int = Field(
+        default=1,
+        alias="RECOMMEND_CONCURRENCY",
+        ge=1,
+        le=64,
+    )
     favorites_weight: float = Field(default=1.0, alias="FAVORITES_WEIGHT", gt=0)
     want_to_go_weight: float = Field(default=0.55, alias="WANT_TO_GO_WEIGHT", gt=0)
     recommender_algorithm: Literal[

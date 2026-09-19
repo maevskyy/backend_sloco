@@ -1,3 +1,4 @@
+import asyncio
 from uuid import uuid4
 
 from starlette.concurrency import run_in_threadpool
@@ -12,10 +13,16 @@ from recommendation_service.recommendations.schemas import (
 )
 
 
+def create_recommend_slots(settings: Settings) -> asyncio.Semaphore:
+    """One semaphore per process; see Settings.recommend_concurrency."""
+    return asyncio.Semaphore(settings.recommend_concurrency)
+
+
 async def recommend_personalized(
     recommender: PersonalizedRecommender,
     request: PersonalizedRequest,
     settings: Settings,
+    slots: asyncio.Semaphore,
 ) -> PersonalizedResponse:
     limit = (
         request.limit
@@ -23,15 +30,16 @@ async def recommend_personalized(
         else settings.recommend_default_limit
     )
     limit = min(limit, settings.recommend_max_limit)
-    result = await run_in_threadpool(
-        recommender.recommend,
-        favourites_place_ids=request.favourites_place_ids,
-        want_to_go_place_ids=request.want_to_go_place_ids,
-        dislike_place_ids=request.dislike_place_ids,
-        hide_place_ids=request.hide_place_ids,
-        limit=limit,
-        exclude_input_places=request.exclude_input_places,
-    )
+    async with slots:
+        result = await run_in_threadpool(
+            recommender.recommend,
+            favourites_place_ids=request.favourites_place_ids,
+            want_to_go_place_ids=request.want_to_go_place_ids,
+            dislike_place_ids=request.dislike_place_ids,
+            hide_place_ids=request.hide_place_ids,
+            limit=limit,
+            exclude_input_places=request.exclude_input_places,
+        )
 
     recommendations = [
         RecommendationItem(

@@ -45,6 +45,11 @@ services:
       PORT: 8000
       LOG_LEVEL: ${RECOMMENDATION_LOG_LEVEL:-info}
       SERVICE_NAME: recommendation-service
+      # Parallelism = processes, not threads: recommend() is pandas work under
+      # the GIL, so one process serves one request at a time (RECOMMEND_CONCURRENCY,
+      # default 1) and uvicorn reads WEB_CONCURRENCY as its --workers count. Each
+      # worker loads the artifacts itself: ~2.6 GB RAM and ~10 s at start (SLO-39).
+      WEB_CONCURRENCY: ${RECOMMENDATION_WORKERS:-4}
       # Algorithm selection (defaults mirror config.py = legacy behavior).
       RECOMMENDER_ALGORITHM: ${RECOMMENDER_ALGORITHM:-embedding_recommender_v1}
       EMBEDDINGS_NPY_PATH: ${EMBEDDINGS_NPY_PATH:-artifacts/location_embeddings_20260531T173837Z.npy}
@@ -75,7 +80,8 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
-      start_period: 20s
+      # 4 workers × ~10 s artifact load, in parallel on a warm disk cache.
+      start_period: 60s
     networks:
       - sloco_net
     logging:
