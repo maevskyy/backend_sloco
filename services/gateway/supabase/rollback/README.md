@@ -45,3 +45,6 @@ Rules:
   candidates). Restores the body that was live before it (dumped from prod, the
   `dev` migration-`020`/`021`-era version); `places_city_candidates_idx` stays because
   `feed_fallback_places` uses it.
+- `2026-10-03_029_rollback.sql` — undoes `029` (`map_tile` z≥18 cap 25, no score
+  floor). Recreates `map_tile_min_score` from migration `014`, then restores the
+  `map_tile` body from `017`. Deploy afterwards with `MAP_TILE_VERSION=5`, not 3.

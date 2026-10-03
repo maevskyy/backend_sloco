@@ -41,7 +41,9 @@ https://sloco.pp.ua/v1/map/tiles/{z}/{x}/{y}.mvt?v={DATA_VERSION}
 
 **Density is capped server-side** (since 2026-08-11, `v=2`): each tile carries at most
 the top **N places by `mapVisibilityScore`** — 6 up to z12, 10 at z13–z15, 15 at z16,
-25 at z17, uncapped from z18. Draw what the tile contains; do not thin on the client.
+25 from z17 up (since `v=4`, 2026-10; before that z18+ was uncapped with a score floor
+of 56, which dropped places on the z17 → z18 step). Draw what the tile contains; do not
+thin on the client.
 Measured after the change: a z13 tile over Bucharest went 119 → 10 features, Tbilisi
 235 → 10. Zooming in only ever reveals more places, never fewer, and
 `mapVisibilityScore` stays in the tile for collision priority.

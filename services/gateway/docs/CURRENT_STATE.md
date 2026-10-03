@@ -129,7 +129,7 @@ Telemetry events table: public.events_raw (append-only, dedupe by event_id)
 Identity stitching table: public.identity_links (anon_id -> user_id)
 Serving receipt tables: public.rec_served + public.rec_served_items (score_components at serve time)
 Map pin RPC: public.map_places_in_bbox(sw_lat, sw_lng, ne_lat, ne_lng, result_limit)
-Map tile RPC: public.map_tile(z, x, y) (MVT bytea; min-score floor via map_tile_min_score(z))
+Map tile RPC: public.map_tile(z, x, y) (MVT bytea; per-tile top-N cap by map_visibility_score)
 Place detail RPC: public.place_details_by_id(place_id)
 Search RPC: public.search_places(q, user_lat, user_lng, user_city, user_country, result_limit)
 Feed hydration RPC: public.feed_places_by_source_ids(source_ids, user_lat, user_lng, result_limit)
@@ -155,7 +155,7 @@ Reactions
 (`favorite|dislike|hide`) seed the personalization signals, hard-exclude
 disliked/hidden places, and are echoed on feed cards and place details.
 Map tiles are capped per tile by `mapVisibilityScore` (6/10/15/25 by zoom band,
-uncapped from z18).
+25 from z17 up — migration `029`), so zooming in only ever adds places.
 Place details carry address, opening hours, phone, website, price level and the
 Google Maps URI (imported 2026-08-11 from the raw scrape; `businessStatus` is
 still empty — absent at the source).

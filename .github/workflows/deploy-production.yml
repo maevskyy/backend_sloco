@@ -213,7 +213,9 @@ jobs:
             # v3 = Berlin + sights/shopping/things_to_do landed in public.places
             # (58,427 rows). Tiles are built on demand and cached for 7 days, so
             # without this bump the map would keep serving pre-Berlin tiles.
-            MAP_TILE_VERSION=3
+            # v4 = z>=18 capped at 25 with no score floor (migration 029, SLO-47):
+            # zooming z17 -> z18 no longer drops places. Apply 029 BEFORE deploying.
+            MAP_TILE_VERSION=4
 
             RECOMMENDATION_APP_ENV=production
             RECOMMENDATION_LOG_LEVEL=info
