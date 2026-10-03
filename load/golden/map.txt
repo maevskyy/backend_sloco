@@ -1,0 +1,15 @@
+# Map pins by bbox, golden diff. One line per row of load/viewports.csv (Bucharest).
+GET /v1/map/places?swLat=44.4200&swLng=26.0800&neLat=44.4500&neLng=26.1200&zoom=13
+GET /v1/map/places?swLat=44.4250&swLng=26.0850&neLat=44.4400&neLng=26.1050&zoom=15
+GET /v1/map/places?swLat=44.4100&swLng=26.0600&neLat=44.4600&neLng=26.1400&zoom=12
+GET /v1/map/places?swLat=44.4300&swLng=26.0950&neLat=44.4380&neLng=26.1080&zoom=16
+GET /v1/map/places?swLat=44.4000&swLng=26.0400&neLat=44.4800&neLng=26.1800&zoom=11
+GET /v1/map/places?swLat=44.4350&swLng=26.1000&neLat=44.4450&neLng=26.1150&zoom=14
+GET /v1/map/places?swLat=44.4280&swLng=26.0900&neLat=44.4320&neLng=26.0980&zoom=17
+GET /v1/map/places?swLat=44.3900&swLng=26.0200&neLat=44.4900&neLng=26.2000&zoom=10
+GET /v1/map/places?swLat=44.4150&swLng=26.0700&neLat=44.4550&neLng=26.1300&zoom=13
+GET /v1/map/places?swLat=44.4320&swLng=26.1020&neLat=44.4400&neLng=26.1120&zoom=15
+
+# MVT tiles (load/tiles.csv): binary, compared by length + sha256
+GET /v1/map/tiles/10/585/370.mvt?v=1
+GET /v1/map/tiles/13/4685/2960.mvt?v=1

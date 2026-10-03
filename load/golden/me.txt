@@ -1,0 +1,5 @@
+# Signed-in reads, golden diff. Every line needs $SLOCO_BEARER (a test user's token).
+AUTH GET /v1/me
+AUTH GET /v1/me/saved
+AUTH GET /v1/me/saved/ids
+AUTH GET /v1/me/reactions

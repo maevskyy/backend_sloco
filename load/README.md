@@ -66,6 +66,35 @@ node load/prod-session.mjs session.log --shapes    # breakdown only
 so pick a quiet window and note who was tapping. First run: 2026-09-16 19:47–19:50 UTC,
 64 requests — findings and follow-ups in Linear SLO-37.
 
+## Same API before and after — `golden-diff.mjs`
+
+Not a load test: a contract check for changes that should be invisible to the app
+(SLO-49 moved every store from supabase-js/PostgREST to a direct `pg` pool — numbers
+that used to come back as JSON numbers can silently turn into strings, timestamps into
+another format). The script sends the same GET list to two gateways, one request at a
+time, and compares status codes and JSON bodies deeply and type-strictly: `4.5` vs
+`"4.5"` is a difference, missing key vs `null` is a difference, array order counts, key
+order does not. MVT tiles are compared by length + sha256. Exit code 1 on any difference.
+
+```bash
+node load/golden-diff.mjs --a https://sloco.pp.ua --b http://127.0.0.1:3000 --requests load/golden/places.txt
+node load/golden-diff.mjs --a https://sloco.pp.ua --b http://127.0.0.1:3000 --requests load/golden/feed-places.txt --self-check
+SLOCO_BEARER=… node load/golden-diff.mjs --a https://sloco.pp.ua --b http://127.0.0.1:3000 --requests load/golden/me.txt
+```
+
+Request lists live in `load/golden/` (`feed-places.txt`, `places.txt`, `map.txt`,
+`me.txt`): one `GET /v1/...` per line, `#` comments, a leading `AUTH` adds
+`Authorization: Bearer $SLOCO_BEARER` (`--bearer-env` to use another variable) — use a
+test user's token. Only GET/HEAD are accepted, so a list can never write.
+
+Feed meta `generatedAt`, `expiresAt`, `requestId`, `cacheStatus` are ignored by default:
+they change per call or depend on each gateway's own cache. `--ignore k1,k2` adds keys
+(any depth), `--no-default-ignore` drops the defaults. DB timestamps (`savedAt`,
+`createdAt`, …) are compared on purpose. `--self-check` first calls A twice per request
+and lists paths that differ between identical calls (ranking ties, clocks); those show
+up as `flaky` in the A-vs-B pass and don't fail it. Both gateways must point at the same
+database, or every ranking difference will be data, not code.
+
 ## What It Hits (`map-places.yml`, `tiles.yml`)
 
 - `GET /v1/map/places` — the hot path. Each virtual user draws a different bbox + zoom

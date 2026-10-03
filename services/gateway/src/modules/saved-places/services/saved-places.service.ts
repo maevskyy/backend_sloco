@@ -71,8 +71,11 @@ export class SavedPlacesServiceImpl implements SavedPlacesServiceContract {
   ) {
     await this.assertPlaceExists(input.placeId);
     const collectionIds = await this.resolveCollectionIds(userId, input);
-    const savedAt = await this.store.savePlace(userId, input.placeId);
-    await this.store.addPlaceToCollections(userId, input.placeId, collectionIds);
+    const savedAt = await this.store.savePlaceWithCollections(
+      userId,
+      input.placeId,
+      { add: collectionIds, remove: [] }
+    );
 
     return { placeId: input.placeId, isSaved: true as const, collectionIds, savedAt };
   }
@@ -109,9 +112,10 @@ export class SavedPlacesServiceImpl implements SavedPlacesServiceContract {
     const toAdd = wanted.filter((id) => !currentSet.has(id));
     const toRemove = current.filter((id) => !wanted.includes(id));
 
-    const savedAt = await this.store.savePlace(userId, placeId);
-    await this.store.addPlaceToCollections(userId, placeId, toAdd);
-    await this.store.removePlaceFromCollections(userId, placeId, toRemove);
+    const savedAt = await this.store.savePlaceWithCollections(userId, placeId, {
+      add: toAdd,
+      remove: toRemove
+    });
 
     return {
       placeId,
@@ -125,8 +129,7 @@ export class SavedPlacesServiceImpl implements SavedPlacesServiceContract {
     await this.assertPlaceExists(placeId);
     // Leaving `saved_places` must also leave every list, or the place would keep
     // showing up in Favorites / Been there while the bookmark reads "not saved".
-    const memberships = await this.store.listPlaceCollectionIds(userId, placeId);
-    await this.store.removePlaceFromCollections(userId, placeId, memberships);
+    // store.unsavePlace drops both in one transaction.
     await this.store.unsavePlace(userId, placeId);
 
     return { placeId, isSaved: false as const, collectionIds: [] as [] };
@@ -180,8 +183,10 @@ export class SavedPlacesServiceImpl implements SavedPlacesServiceContract {
   ) {
     await this.assertCollectionExists(userId, collectionId);
     await this.assertPlaceExists(placeId);
-    const savedAt = await this.store.savePlace(userId, placeId);
-    await this.store.addPlaceToCollections(userId, placeId, [collectionId]);
+    const savedAt = await this.store.savePlaceWithCollections(userId, placeId, {
+      add: [collectionId],
+      remove: []
+    });
 
     return {
       placeId,

@@ -1,4 +1,4 @@
-import { getPgPool } from "../../../lib/pg.js";
+import { getDb, type Db } from "../../../lib/db.js";
 import { measureDependencyMetric } from "../../../observability/metrics.js";
 import type {
   SearchPlaceRow,
@@ -11,6 +11,8 @@ import type {
 // ~100ms + cold spikes on every request (TASKS_48). Same pattern as the map
 // tile store.
 export class SearchStore implements SearchStoreContract {
+  constructor(private readonly db: Db = getDb()) {}
+
   async searchPlaces(input: SearchStoreInput): Promise<SearchPlaceRow[]> {
     const result = await measureDependencyMetric(
       {
@@ -19,7 +21,7 @@ export class SearchStore implements SearchStoreContract {
         name: "search_places"
       },
       async () =>
-        getPgPool().query<SearchPlaceRow>(
+        this.db.query<SearchPlaceRow>(
           `select * from public.search_places(
              q => $1,
              user_lat => $2,

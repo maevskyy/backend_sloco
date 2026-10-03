@@ -33,9 +33,9 @@ saved-places/
   saved-places.module.ts    composition root: builds the controller, wires deps
   controllers/              HTTP layer
   services/                 business logic / orchestration
-  stores/                   data access (Supabase) — the only layer that talks to the DB
+  stores/                   data access (direct Postgres via `Db`) — the only layer that talks to the DB
   common/                   types, errors, mappers, schemas, openapi
-  tests/                    service + controller tests
+  tests/                    service + controller + store tests
 ```
 
 ## Layers and the dependency rule
@@ -50,10 +50,17 @@ never import outer ones.
   Shared glue lives in `src/http/` (`docsRoute`, `handleCommonError`,
   `createAuthGuard`, `logResponseSummary`).
 - **services/** — business logic and orchestration. Pure of HTTP (`Fastify*`) and
-  of SQL/Supabase. Talks to the store through the `SavedPlacesStoreContract`
+  of SQL. Talks to the store through the `SavedPlacesStoreContract`
   interface, never the concrete class.
-- **stores/** — the only layer that touches Supabase. No business rules; it returns
-  rows / mapped summaries. Raw rows are shaped by `common/saved-places.mappers.ts`.
+- **stores/** — the only layer that touches the database. `SavedPlacesStore` takes
+  the injected `Db` (`src/lib/db.ts`, one pg pool per process, passed in by the
+  module from `buildApp`) and runs parameterized SQL through `db.query`. Writes
+  that touch several tables go through `db.transaction(async (tx) => ...)` with
+  every statement on `tx` — all or nothing. Expected duplicates are handled with
+  `ON CONFLICT`, not by catching 23505 (a failed statement aborts the
+  transaction). No supabase-js here: it is kept only for Auth. No business
+  rules; it returns rows / mapped summaries. Raw rows are shaped by
+  `common/saved-places.mappers.ts`.
 - **common/** — shared, dependency-free building blocks (see below).
 
 ## Dependency injection & contracts
@@ -103,7 +110,8 @@ never import outer ones.
 - Live in `tests/`. Unit-test the service with a fake `SavedPlacesStoreContract`;
   test the controller by building the app and injecting a fake service / auth
   (no module mocking). Controller tests assert serialized response shapes, so they
-  catch schema/serialization regressions.
+  catch schema/serialization regressions. Store tests pass a fake `Db` and assert
+  the SQL / transaction boundaries.
 
 ## Adding an endpoint (checklist)
 

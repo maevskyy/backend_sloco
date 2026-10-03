@@ -58,9 +58,56 @@ https://grafana.sloco.pp.ua
 ```
 
 Do not commit real secrets. `SUPABASE_SERVICE_ROLE_KEY` must stay server-side.
-`SUPABASE_DB_URL` is the pooled Postgres connection string used by the gateway for
-binary vector tiles (`/v1/map/tiles/...mvt`); use the Supabase pooler connection
-string, not a public API URL.
+`SUPABASE_DB_URL` is the pooled Postgres connection string through which the
+gateway does ALL its database access — every store, every RPC (one direct `pg`
+pool, `src/lib/db.ts`, SLO-49). Use the Supabase pooler (Supavisor) connection
+string in transaction mode, not a public API URL. `SUPABASE_URL` +
+`SUPABASE_SERVICE_ROLE_KEY` are now used only for Supabase Auth (token checks).
+
+The pool is tuned by env vars rendered into `.env` by the workflow (defaults in
+`services/gateway/src/config/env.ts`, same values in `docker-compose.yml`):
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `PG_POOL_MAX` | `20` | connections per gateway process |
+| `PG_POOL_CONNECTION_TIMEOUT_MS` | `2000` | max wait for a free connection; past it → 503 + `Retry-After` |
+| `PG_POOL_IDLE_TIMEOUT_MS` | `30000` | idle connection is closed after this |
+| `PG_QUERY_TIMEOUT_MS` | `8000` | query deadline (PostgREST's old `statement_timeout`); past it → 503 + `Retry-After` |
+
+`PG_QUERY_TIMEOUT_MS` is a client-side deadline for single statements: the
+gateway stops waiting and drops the connection, but the statement keeps running
+on the server and holds a pooler server connection until it ends. Only
+`db.transaction()` also sets a server-side `statement_timeout` (`SET LOCAL`).
+The gateway does not send `statement_timeout` as a startup parameter:
+Supavisor in transaction mode would not apply it, and a pooler that rejects
+unknown startup parameters would fail every connection. The real server-side
+cap for single statements is the `statement_timeout` of the `SUPABASE_DB_URL`
+role (instance default 120 s, `docs/audit/2026-09/01-migrations-and-db.md`).
+Check it before a deploy, through the same URL:
+
+```sql
+show statement_timeout;
+```
+
+To cap it, set the timeout on the role (role config, not a migration). This
+affects every session of that role, Studio and `psql` included, so prefer a
+dedicated gateway role:
+
+```sql
+alter role <role from SUPABASE_DB_URL> set statement_timeout = '8s';
+```
+
+Connection budget: `gateway instances × PG_POOL_MAX` + every other client on the
+same pooler (export cron, `psql`, Studio) must stay below the Supabase pooler
+limit (`max_connections` 60 on the current plan, see
+`docs/perf/2026-09-16-load-baseline.md`). Raise `PG_POOL_MAX` or add instances
+only within that sum.
+
+Every `db.query` holds one pool client while it runs, so a request's peak
+client count is its widest `Promise.all` over the DB. Keep fan-outs fixed and
+small: the feed merges its signal reads into one statement, and the saved-places
+store folds the per-list reads of `GET /v1/me/saved` and the collection page
+into one statement, however many lists the user has.
 
 ## Deploy Flow
 

@@ -1,7 +1,4 @@
-import {
-  getSupabaseClient,
-  hasPostgresErrorCode
-} from "../../../lib/supabase.js";
+import { getDb, type Db, type DbExecutor } from "../../../lib/db.js";
 import { measureDependencyMetric } from "../../../observability/metrics.js";
 import {
   mapCollectionPlaceRow,
@@ -12,8 +9,16 @@ import type {
   SavedCollectionRow,
   SavedPlaceRow,
   SavedPlaceState,
-  SavedPlacesStoreContract
+  SavedPlacesStoreContract,
+  SavedPlaceSummary
 } from "../common/saved-places.types.js";
+
+// Direct Postgres (SLO-49), same pool as every other store. RLS is enabled on
+// saved_places / saved_collections / saved_collection_places with no policies;
+// like events_raw (TASKS_51) the direct pool's role is not subject to it, so
+// ownership is enforced by the user_id filter in every statement below.
+// Multi-statement writes run in ONE transaction: a failure part-way leaves the
+// user's bookmarks and lists exactly as they were.
 
 // The three SYSTEM lists every user gets (TASKS_54). They are auto-created, cannot
 // be deleted, are hidden from "My lists" by the client and are pinned to the top of
@@ -27,34 +32,24 @@ const SYSTEM_COLLECTIONS = [
 
 export const SYSTEM_COLLECTION_SLUGS = SYSTEM_COLLECTIONS.map((item) => item.slug);
 
-const PLACE_COLUMNS = [
-  "id",
-  "source",
-  "source_id",
-  "name",
-  "country",
-  "city",
-  "category",
-  "latitude",
-  "longitude",
-  "rating",
-  "price_level",
-  "attributes"
-].join(",");
-
-const SAVED_PLACE_COLUMNS = [
-  "created_at",
-  "last_viewed_at",
-  `places!inner(${PLACE_COLUMNS})`
-].join(",");
-
-const COLLECTION_PLACE_COLUMNS = [
-  "collection_id",
-  "place_id",
-  "sort_order",
-  "created_at",
-  `places!inner(${PLACE_COLUMNS})`
-].join(",");
+// The former PostgREST embed `places!inner(...)`: an inner JOIN whose place
+// columns are folded into one `places` object, built by Postgres' own JSON
+// encoder exactly like PostgREST did (numbers stay numbers, attributes stays
+// the jsonb object), so the mappers see the shape they always saw.
+const PLACE_JSON = `json_build_object(
+  'id', p.id,
+  'source', p.source,
+  'source_id', p.source_id,
+  'name', p.name,
+  'country', p.country,
+  'city', p.city,
+  'category', p.category,
+  'latitude', p.latitude,
+  'longitude', p.longitude,
+  'rating', p.rating,
+  'price_level', p.price_level,
+  'attributes', p.attributes
+)`;
 
 function measureSavedPlacesDependency<T>(
   operation: string,
@@ -64,7 +59,7 @@ function measureSavedPlacesDependency<T>(
 ) {
   return measureDependencyMetric(
     {
-      dependency: "supabase",
+      dependency: "postgres",
       operation,
       name
     },
@@ -73,22 +68,37 @@ function measureSavedPlacesDependency<T>(
   );
 }
 
+// PostgREST `.single()` semantics: anything but exactly one row is an error.
+function singleRow<T>(rows: T[], what: string): T {
+  if (rows.length !== 1) {
+    throw new Error(`${what}: expected exactly one row, got ${rows.length}`);
+  }
+
+  return rows[0] as T;
+}
+
+// listCollectionPlaces calls for one user in one tick, pending a single query.
+type CollectionPlacesBatch = {
+  collectionIds: Set<string>;
+  placesById: Promise<Map<string, SavedPlaceSummary[]>>;
+};
+
 export class SavedPlacesStore implements SavedPlacesStoreContract {
+  private readonly collectionPlacesBatches = new Map<string, CollectionPlacesBatch>();
+
+  constructor(private readonly db: Db = getDb()) {}
+
   async placeExists(placeId: number) {
-    const { data, error } = await measureSavedPlacesDependency(
+    const result = await measureSavedPlacesDependency(
       "select",
       "places_exists",
       async () =>
-        getSupabaseClient()
-          .from("places")
-          .select("id")
-          .eq("id", placeId)
-          .maybeSingle()
+        this.db.query("select 1 from public.places where id = $1 limit 1", [
+          placeId
+        ])
     );
 
-    if (error) throw error;
-
-    return data !== null;
+    return result.rows.length > 0;
   }
 
   /**
@@ -96,88 +106,107 @@ export class SavedPlacesStore implements SavedPlacesStoreContract {
    * them by slug. Idempotent, and safe against a user who already created a list
    * under a system NAME: that row is adopted (its slug is filled in) instead of
    * colliding with `unique (user_id, name)`.
+   *
+   * The common case (all three exist) is one read and no transaction. Missing
+   * lists are written in ONE transaction; a concurrent request creating the same
+   * lists is absorbed by `on conflict do nothing` + a read-back (a caught 23505
+   * would abort the transaction).
    */
   async ensureSystemCollections(userId: string) {
-    const existing = await this.listCollections(userId);
+    const existing = await selectCollections(this.db, userId);
     const bySlug = new Map<string, SavedCollectionRow>(
       existing
         .filter((row) => row.slug !== null)
         .map((row) => [row.slug as string, row])
     );
 
-    for (const system of SYSTEM_COLLECTIONS) {
-      if (bySlug.has(system.slug)) continue;
+    if (SYSTEM_COLLECTIONS.every((system) => bySlug.has(system.slug))) {
+      return bySlug;
+    }
 
-      const sameName = existing.find(
-        (row) => row.slug === null && row.name === system.name
-      );
+    return this.db.transaction(async (tx) => {
+      for (const system of SYSTEM_COLLECTIONS) {
+        if (bySlug.has(system.slug)) continue;
 
-      if (sameName) {
-        const { data, error } = await measureSavedPlacesDependency(
-          "update",
-          "saved_collections_adopt_system",
-          async () =>
-            getSupabaseClient()
-              .from("saved_collections")
-              .update({ slug: system.slug })
-              .eq("id", sameName.id)
-              .eq("user_id", userId)
-              .select("*")
-              .single()
+        const sameName = existing.find(
+          (row) => row.slug === null && row.name === system.name
         );
 
-        if (error) throw error;
-        bySlug.set(system.slug, data as SavedCollectionRow);
-        continue;
-      }
+        if (sameName) {
+          const adopted = await measureSavedPlacesDependency(
+            "update",
+            "saved_collections_adopt_system",
+            async () =>
+              tx.query<SavedCollectionRow>(
+                `update public.saved_collections
+                    set slug = $3
+                  where id = $1
+                    and user_id = $2
+                  returning *`,
+                [sameName.id, userId, system.slug]
+              )
+          );
 
-      const { data, error } = await measureSavedPlacesDependency(
-        "insert",
-        "saved_collections_system",
-        async () =>
-          getSupabaseClient()
-            .from("saved_collections")
-            .insert({
-              user_id: userId,
-              name: system.name,
-              slug: system.slug,
-              color_hex: system.colorHex,
-              // The default flag has a partial unique index (one per user), so it is
-              // only claimed when the user has no default yet.
-              is_default:
+          bySlug.set(
+            system.slug,
+            singleRow(adopted.rows, "saved_collections_adopt_system")
+          );
+          continue;
+        }
+
+        const inserted = await measureSavedPlacesDependency(
+          "insert",
+          "saved_collections_system",
+          async () =>
+            tx.query<SavedCollectionRow>(
+              `insert into public.saved_collections (
+                 user_id, name, slug, color_hex, is_default, sort_order
+               )
+               values ($1, $2, $3, $4, $5, $6)
+               on conflict do nothing
+               returning *`,
+              [
+                userId,
+                system.name,
+                system.slug,
+                system.colorHex,
+                // The default flag has a partial unique index (one per user), so it
+                // is only claimed when the user has no default yet.
                 system.isDefault && !existing.some((row) => row.is_default),
-              sort_order: system.sortOrder
-            })
-            .select("*")
-            .single()
-      );
+                system.sortOrder
+              ]
+            )
+        );
 
-      if (!error) {
-        bySlug.set(system.slug, data as SavedCollectionRow);
-        continue;
-      }
+        const created = inserted.rows[0];
 
-      // Lost a race with a concurrent request: read back what the winner wrote.
-      if (!hasPostgresErrorCode(error, "23505")) throw error;
+        if (created) {
+          bySlug.set(system.slug, created);
+          continue;
+        }
 
-      const { data: raced, error: refetchError } =
-        await measureSavedPlacesDependency(
+        // Lost a race with a concurrent request: read back what the winner wrote.
+        const raced = await measureSavedPlacesDependency(
           "select",
           "saved_collections_system_refetch",
           async () =>
-            getSupabaseClient()
-              .from("saved_collections")
-              .select("*")
-              .eq("user_id", userId)
-              .eq("slug", system.slug)
-              .single()
+            tx.query<SavedCollectionRow>(
+              `select *
+                 from public.saved_collections
+                where user_id = $1
+                  and slug = $2`,
+              [userId, system.slug]
+            )
         );
 
-      if (refetchError) throw refetchError;
-      bySlug.set(system.slug, raced as SavedCollectionRow);
-    }
+        bySlug.set(
+          system.slug,
+          singleRow(raced.rows, "saved_collections_system_refetch")
+        );
+      }
 
-    return bySlug;
+      return bySlug;
+    });
   }
 
   async ensureDefaultCollection(userId: string) {
@@ -187,39 +216,38 @@ export class SavedPlacesStore implements SavedPlacesStoreContract {
     if (fallback) return fallback;
 
     // Only reachable if someone cleared the slug by hand.
-    const { data, error } = await measureSavedPlacesDependency(
+    const result = await measureSavedPlacesDependency(
       "select",
       "saved_collections_default",
       async () =>
-        getSupabaseClient()
-          .from("saved_collections")
-          .select("*")
-          .eq("user_id", userId)
-          .eq("is_default", true)
-          .single()
+        this.db.query<SavedCollectionRow>(
+          `select *
+             from public.saved_collections
+            where user_id = $1
+              and is_default = true`,
+          [userId]
+        )
     );
 
-    if (error) throw error;
-
-    return data as SavedCollectionRow;
+    return singleRow(result.rows, "saved_collections_default");
   }
 
   /** Membership of one place across the user's lists. */
   async listPlaceCollectionIds(userId: string, placeId: number) {
-    const { data, error } = await measureSavedPlacesDependency(
+    const result = await measureSavedPlacesDependency(
       "select",
       "saved_collection_places_of_place",
       async () =>
-        getSupabaseClient()
-          .from("saved_collection_places")
-          .select("collection_id")
-          .eq("user_id", userId)
-          .eq("place_id", placeId)
+        this.db.query<{ collection_id: string }>(
+          `select collection_id
+             from public.saved_collection_places
+            where user_id = $1
+              and place_id = $2`,
+          [userId, placeId]
+        )
     );
 
-    if (error) throw error;
-
-    return (data ?? []).map((row) => (row as { collection_id: string }).collection_id);
+    return result.rows.map((row) => row.collection_id);
   }
 
   async removePlaceFromCollections(
@@ -227,104 +255,67 @@ export class SavedPlacesStore implements SavedPlacesStoreContract {
     placeId: number,
     collectionIds: string[]
   ) {
-    if (collectionIds.length === 0) return;
-
-    const { error } = await measureSavedPlacesDependency(
-      "delete",
-      "saved_collection_places_remove_many",
-      async () =>
-        getSupabaseClient()
-          .from("saved_collection_places")
-          .delete()
-          .eq("user_id", userId)
-          .eq("place_id", placeId)
-          .in("collection_id", collectionIds),
-      () => collectionIds.length
-    );
-
-    if (error) throw error;
+    await deletePlaceFromCollections(this.db, userId, placeId, collectionIds);
   }
 
   async listCollections(userId: string) {
-    const { data, error } = await measureSavedPlacesDependency(
-      "select",
-      "saved_collections_list",
-      async () =>
-        getSupabaseClient()
-          .from("saved_collections")
-          .select("*")
-          .eq("user_id", userId)
-          .order("sort_order", { ascending: true })
-          .order("created_at", { ascending: true }),
-      (result) => result.data?.length
-    );
-
-    if (error) throw error;
-
-    return (data ?? []) as SavedCollectionRow[];
+    return selectCollections(this.db, userId);
   }
 
   async getCollectionsByIds(userId: string, collectionIds: string[]) {
     if (collectionIds.length === 0) return [];
 
-    const { data, error } = await measureSavedPlacesDependency(
+    const result = await measureSavedPlacesDependency(
       "select",
       "saved_collections_by_ids",
       async () =>
-        getSupabaseClient()
-          .from("saved_collections")
-          .select("*")
-          .eq("user_id", userId)
-          .in("id", collectionIds),
-      (result) => result.data?.length
+        this.db.query<SavedCollectionRow>(
+          `select *
+             from public.saved_collections
+            where user_id = $1
+              and id = any($2::uuid[])`,
+          [userId, collectionIds]
+        ),
+      (queryResult) => queryResult.rowCount ?? undefined
     );
 
-    if (error) throw error;
-
-    return (data ?? []) as SavedCollectionRow[];
+    return result.rows;
   }
 
   async getCollection(userId: string, collectionId: string) {
-    const { data, error } = await measureSavedPlacesDependency(
+    const result = await measureSavedPlacesDependency(
       "select",
       "saved_collections_get",
       async () =>
-        getSupabaseClient()
-          .from("saved_collections")
-          .select("*")
-          .eq("user_id", userId)
-          .eq("id", collectionId)
-          .maybeSingle()
+        this.db.query<SavedCollectionRow>(
+          `select *
+             from public.saved_collections
+            where user_id = $1
+              and id = $2`,
+          [userId, collectionId]
+        )
     );
 
-    if (error) throw error;
-
-    return (data as SavedCollectionRow | null) ?? null;
+    return result.rows[0] ?? null;
   }
 
   async createCollection(
     userId: string,
     input: { name: string; colorHex?: string }
   ) {
-    const { data, error } = await measureSavedPlacesDependency(
+    const result = await measureSavedPlacesDependency(
       "insert",
       "saved_collections_create",
       async () =>
-        getSupabaseClient()
-          .from("saved_collections")
-          .insert({
-            user_id: userId,
-            name: input.name,
-            color_hex: input.colorHex ?? null,
-            is_default: false
-          })
-          .select("*")
-          .single()
+        this.db.query<SavedCollectionRow>(
+          `insert into public.saved_collections (user_id, name, color_hex, is_default)
+           values ($1, $2, $3, false)
+           returning *`,
+          [userId, input.name, input.colorHex ?? null]
+        )
     );
 
-    if (error) throw error;
-
-    return data as SavedCollectionRow;
+    return singleRow(result.rows, "saved_collections_create");
   }
 
   async updateCollection(
@@ -332,88 +323,85 @@ export class SavedPlacesStore implements SavedPlacesStoreContract {
     collectionId: string,
     input: { name?: string; colorHex?: string | null; sortOrder?: number }
   ) {
-    const update = buildCollectionUpdate(input);
-    const { data, error } = await measureSavedPlacesDependency(
+    const { assignments, values } = buildCollectionUpdate(input);
+    const result = await measureSavedPlacesDependency(
       "update",
       "saved_collections_update",
       async () =>
-        getSupabaseClient()
-          .from("saved_collections")
-          .update(update)
-          .eq("user_id", userId)
-          .eq("id", collectionId)
-          .select("*")
-          .maybeSingle()
+        this.db.query<SavedCollectionRow>(
+          `update public.saved_collections
+              set ${assignments}
+            where user_id = $1
+              and id = $2
+            returning *`,
+          [userId, collectionId, ...values]
+        )
     );
 
-    if (error) throw error;
-
-    return (data as SavedCollectionRow | null) ?? null;
+    return result.rows[0] ?? null;
   }
 
+  // Memberships go with the list: saved_collection_places.collection_id is
+  // `on delete cascade`, so this one statement is atomic on its own.
   async deleteCollection(userId: string, collectionId: string) {
-    const { error } = await measureSavedPlacesDependency(
+    await measureSavedPlacesDependency(
       "delete",
       "saved_collections_delete",
       async () =>
-        getSupabaseClient()
-          .from("saved_collections")
-          .delete()
-          .eq("user_id", userId)
-          .eq("id", collectionId)
+        this.db.query(
+          `delete from public.saved_collections
+            where user_id = $1
+              and id = $2`,
+          [userId, collectionId]
+        )
     );
-
-    if (error) throw error;
   }
 
   async savePlace(userId: string, placeId: number) {
-    const { data, error } = await measureSavedPlacesDependency(
-      "upsert",
-      "saved_places_save",
-      async () =>
-        getSupabaseClient()
-          .from("saved_places")
-          .upsert(
-            { user_id: userId, place_id: placeId },
-            { onConflict: "user_id,place_id", ignoreDuplicates: true }
-          )
-          .select("created_at")
-          .maybeSingle()
-    );
-
-    if (error) throw error;
-    if (data?.created_at) return data.created_at as string;
-
-    return this.getSavedAt(userId, placeId);
+    return upsertSavedPlace(this.db, userId, placeId);
   }
 
+  /** Drops the place from every list and from saved_places, in one transaction. */
   async unsavePlace(userId: string, placeId: number) {
-    const client = getSupabaseClient();
-    const { error: membershipsError } = await measureSavedPlacesDependency(
-      "delete",
-      "saved_collection_places_unsave_memberships",
-      async () =>
-        client
-          .from("saved_collection_places")
-          .delete()
-          .eq("user_id", userId)
-          .eq("place_id", placeId)
-    );
+    await this.db.transaction(async (tx) => {
+      await measureSavedPlacesDependency(
+        "delete",
+        "saved_collection_places_unsave_memberships",
+        async () =>
+          tx.query(
+            `delete from public.saved_collection_places
+              where user_id = $1
+                and place_id = $2`,
+            [userId, placeId]
+          )
+      );
 
-    if (membershipsError) throw membershipsError;
+      await measureSavedPlacesDependency(
+        "delete",
+        "saved_places_unsave",
+        async () =>
+          tx.query(
+            `delete from public.saved_places
+              where user_id = $1
+                and place_id = $2`,
+            [userId, placeId]
+          )
+      );
+    });
+  }
 
-    const { error } = await measureSavedPlacesDependency(
-      "delete",
-      "saved_places_unsave",
-      async () =>
-        client
-          .from("saved_places")
-          .delete()
-          .eq("user_id", userId)
-          .eq("place_id", placeId)
-    );
+  async savePlaceWithCollections(
+    userId: string,
+    placeId: number,
+    change: { add: string[]; remove: string[] }
+  ) {
+    return this.db.transaction(async (tx) => {
+      const savedAt = await upsertSavedPlace(tx, userId, placeId);
+      await insertPlaceIntoCollections(tx, userId, placeId, change.add);
+      await deletePlaceFromCollections(tx, userId, placeId, change.remove);
 
-    if (error) throw error;
+      return savedAt;
+    });
   }
 
   async addPlaceToCollections(
@@ -421,26 +409,7 @@ export class SavedPlacesStore implements SavedPlacesStoreContract {
     placeId: number,
     collectionIds: string[]
   ) {
-    if (collectionIds.length === 0) return;
-
-    const { error } = await measureSavedPlacesDependency(
-      "upsert",
-      "saved_collection_places_add",
-      async () =>
-        getSupabaseClient()
-          .from("saved_collection_places")
-          .upsert(
-            collectionIds.map((collectionId) => ({
-              collection_id: collectionId,
-              user_id: userId,
-              place_id: placeId
-            })),
-            { onConflict: "collection_id,place_id", ignoreDuplicates: true }
-          ),
-      () => collectionIds.length
-    );
-
-    if (error) throw error;
+    await insertPlaceIntoCollections(this.db, userId, placeId, collectionIds);
   }
 
   async removePlaceFromCollection(
@@ -448,120 +417,161 @@ export class SavedPlacesStore implements SavedPlacesStoreContract {
     collectionId: string,
     placeId: number
   ) {
-    const { error } = await measureSavedPlacesDependency(
+    await measureSavedPlacesDependency(
       "delete",
       "saved_collection_places_remove",
       async () =>
-        getSupabaseClient()
-          .from("saved_collection_places")
-          .delete()
-          .eq("user_id", userId)
-          .eq("collection_id", collectionId)
-          .eq("place_id", placeId)
+        this.db.query(
+          `delete from public.saved_collection_places
+            where user_id = $1
+              and collection_id = $2
+              and place_id = $3`,
+          [userId, collectionId, placeId]
+        )
     );
-
-    if (error) throw error;
   }
 
   async listSavedPlaces(userId: string, limit: number) {
-    const { data, error } = await measureSavedPlacesDependency(
+    const result = await measureSavedPlacesDependency(
       "select",
       "saved_places_list",
       async () =>
-        getSupabaseClient()
-          .from("saved_places")
-          .select(SAVED_PLACE_COLUMNS)
-          .eq("user_id", userId)
-          .order("created_at", { ascending: false })
-          .limit(limit),
-      (result) => result.data?.length
+        this.db.query<SavedPlaceRow>(
+          `select sp.created_at, sp.last_viewed_at, ${PLACE_JSON} as places
+             from public.saved_places sp
+             join public.places p on p.id = sp.place_id
+            where sp.user_id = $1
+            order by sp.created_at desc
+            limit $2`,
+          [userId, limit]
+        ),
+      (queryResult) => queryResult.rowCount ?? undefined
     );
 
-    if (error) throw error;
-
-    return ((data ?? []) as unknown as SavedPlaceRow[]).map(mapSavedPlaceRow);
+    return result.rows.map(mapSavedPlaceRow);
   }
 
   async countSavedPlaces(userId: string) {
-    const { count, error } = await measureSavedPlacesDependency(
+    const result = await measureSavedPlacesDependency(
       "select",
       "saved_places_count",
       async () =>
-        getSupabaseClient()
-          .from("saved_places")
-          .select("*", { count: "exact", head: true })
-          .eq("user_id", userId),
-      (result) => result.count ?? undefined
+        this.db.query<{ count: number }>(
+          `select count(*) as count
+             from public.saved_places
+            where user_id = $1`,
+          [userId]
+        ),
+      (queryResult) => queryResult.rows[0]?.count
     );
 
-    if (error) throw error;
-
-    return count ?? 0;
+    return result.rows[0]?.count ?? 0;
   }
 
   async listSavedPlaceIds(userId: string) {
-    const { data, error } = await measureSavedPlacesDependency(
+    const result = await measureSavedPlacesDependency(
       "select",
       "saved_places_ids",
       async () =>
-        getSupabaseClient()
-          .from("saved_places")
-          .select("place_id")
-          .eq("user_id", userId)
-          .order("created_at", { ascending: false }),
-      (result) => result.data?.length
+        this.db.query<{ place_id: number }>(
+          `select place_id
+             from public.saved_places
+            where user_id = $1
+            order by created_at desc`,
+          [userId]
+        ),
+      (queryResult) => queryResult.rowCount ?? undefined
     );
 
-    if (error) throw error;
-
-    return ((data ?? []) as unknown as { place_id: number }[]).map(
-      (row) => row.place_id
-    );
+    return result.rows.map((row) => row.place_id);
   }
 
-  async listCollectionPlaces(userId: string, collectionId: string) {
-    const { data, error } = await measureSavedPlacesDependency(
+  // The dashboard and the collection page ask for every list's places at once
+  // (service buildCollections, Promise.all over the user's lists — no cap on
+  // their number). One statement per list would hold one pool client per list.
+  // Calls for the same user made in the same tick are folded into ONE
+  // statement (`collection_id = any($2)`) and split per list here; each caller
+  // gets exactly the rows, in the order, it would have got alone.
+  listCollectionPlaces(
+    userId: string,
+    collectionId: string
+  ): Promise<SavedPlaceSummary[]> {
+    let batch = this.collectionPlacesBatches.get(userId);
+
+    if (!batch) {
+      const collectionIds = new Set<string>();
+      // Runs as a microtask: after every synchronous caller of this tick has
+      // added its id, before any I/O.
+      const placesById = Promise.resolve().then(() => {
+        this.collectionPlacesBatches.delete(userId);
+        return this.fetchCollectionPlaces(userId, [...collectionIds]);
+      });
+      batch = { collectionIds, placesById };
+      this.collectionPlacesBatches.set(userId, batch);
+    }
+
+    batch.collectionIds.add(collectionId);
+
+    return batch.placesById.then((placesById) => [
+      ...(placesById.get(collectionId) ?? [])
+    ]);
+  }
+
+  private async fetchCollectionPlaces(userId: string, collectionIds: string[]) {
+    const result = await measureSavedPlacesDependency(
       "select",
       "saved_collection_places_list",
       async () =>
-        getSupabaseClient()
-          .from("saved_collection_places")
-          .select(COLLECTION_PLACE_COLUMNS)
-          .eq("user_id", userId)
-          .eq("collection_id", collectionId)
-          .order("sort_order", { ascending: true })
-          .order("created_at", { ascending: true }),
-      (result) => result.data?.length
+        this.db.query<SavedCollectionPlaceRow>(
+          `select scp.collection_id,
+                  scp.place_id,
+                  scp.sort_order,
+                  scp.created_at,
+                  ${PLACE_JSON} as places
+             from public.saved_collection_places scp
+             join public.places p on p.id = scp.place_id
+            where scp.user_id = $1
+              and scp.collection_id = any($2::uuid[])
+            order by scp.sort_order asc, scp.created_at asc`,
+          [userId, collectionIds]
+        ),
+      (queryResult) => queryResult.rowCount ?? undefined
     );
 
-    if (error) throw error;
+    const placesById = new Map<string, SavedPlaceSummary[]>();
 
-    return ((data ?? []) as unknown as SavedCollectionPlaceRow[]).map(
-      mapCollectionPlaceRow
-    );
+    for (const row of result.rows) {
+      const places = placesById.get(row.collection_id) ?? [];
+      places.push(mapCollectionPlaceRow(row));
+      placesById.set(row.collection_id, places);
+    }
+
+    return placesById;
   }
 
+  // One set-based UPDATE (atomic by itself) instead of one call per place:
+  // placeIds[i] gets sort_order i, as before.
   async reorderCollectionPlaces(
     userId: string,
     collectionId: string,
     placeIds: number[]
   ) {
-    await Promise.all(
-      placeIds.map(async (placeId, sortOrder) => {
-        const { error } = await measureSavedPlacesDependency(
-          "update",
-          "saved_collection_places_reorder",
-          async () =>
-            getSupabaseClient()
-              .from("saved_collection_places")
-              .update({ sort_order: sortOrder })
-              .eq("user_id", userId)
-              .eq("collection_id", collectionId)
-              .eq("place_id", placeId)
-        );
+    if (placeIds.length === 0) return;
 
-        if (error) throw error;
-      })
+    await measureSavedPlacesDependency(
+      "update",
+      "saved_collection_places_reorder",
+      async () =>
+        this.db.query(
+          `update public.saved_collection_places as scp
+              set sort_order = (ordered.position - 1)::integer
+             from unnest($3::bigint[]) with ordinality as ordered(place_id, position)
+            where scp.user_id = $1
+              and scp.collection_id = $2
+              and scp.place_id = ordered.place_id`,
+          [userId, collectionId, placeIds]
+        ),
+      () => placeIds.length
     );
   }
 
@@ -569,22 +579,21 @@ export class SavedPlacesStore implements SavedPlacesStoreContract {
     if (placeIds.length === 0) return new Map<number, SavedPlaceState>();
 
     const states = await this.getSavedPlaceRows(userId, placeIds);
-    const client = getSupabaseClient();
-    const { data, error } = await measureSavedPlacesDependency(
+    const result = await measureSavedPlacesDependency(
       "select",
       "saved_collection_places_states",
       async () =>
-        client
-          .from("saved_collection_places")
-          .select("place_id, collection_id")
-          .eq("user_id", userId)
-          .in("place_id", placeIds),
-      (result) => result.data?.length
+        this.db.query<SavedMembershipRow>(
+          `select place_id, collection_id
+             from public.saved_collection_places
+            where user_id = $1
+              and place_id = any($2::bigint[])`,
+          [userId, placeIds]
+        ),
+      (queryResult) => queryResult.rowCount ?? undefined
     );
 
-    if (error) throw error;
-
-    for (const row of (data ?? []) as unknown as SavedMembershipRow[]) {
+    for (const row of result.rows) {
       const existing =
         states.get(row.place_id) ?? ({ isSaved: false, collectionIds: [] });
 
@@ -595,44 +604,23 @@ export class SavedPlacesStore implements SavedPlacesStoreContract {
     return states;
   }
 
-  private async getSavedAt(userId: string, placeId: number) {
-    const { data, error } = await measureSavedPlacesDependency(
-      "select",
-      "saved_places_created_at",
-      async () =>
-        getSupabaseClient()
-          .from("saved_places")
-          .select("created_at")
-          .eq("user_id", userId)
-          .eq("place_id", placeId)
-          .single()
-    );
-
-    if (error) throw error;
-
-    return data.created_at as string;
-  }
-
   private async getSavedPlaceRows(userId: string, placeIds: number[]) {
-    const { data, error } = await measureSavedPlacesDependency(
+    const result = await measureSavedPlacesDependency(
       "select",
       "saved_places_states",
       async () =>
-        getSupabaseClient()
-          .from("saved_places")
-          .select("place_id")
-          .eq("user_id", userId)
-          .in("place_id", placeIds),
-      (result) => result.data?.length
+        this.db.query<{ place_id: number }>(
+          `select place_id
+             from public.saved_places
+            where user_id = $1
+              and place_id = any($2::bigint[])`,
+          [userId, placeIds]
+        ),
+      (queryResult) => queryResult.rowCount ?? undefined
     );
 
-    if (error) throw error;
-
     return new Map<number, SavedPlaceState>(
-      ((data ?? []) as unknown as { place_id: number }[]).map((row) => [
-        row.place_id,
-        { isSaved: true, collectionIds: [] }
-      ])
+      result.rows.map((row) => [row.place_id, { isSaved: true, collectionIds: [] }])
     );
   }
 }
@@ -642,18 +630,138 @@ type SavedMembershipRow = {
   collection_id: string;
 };
 
+// Statement helpers shared by the single-call methods (outer Db) and the
+// transactional ones (tx) — same SQL, same metric names either way.
+
+async function selectCollections(executor: DbExecutor, userId: string) {
+  const result = await measureSavedPlacesDependency(
+    "select",
+    "saved_collections_list",
+    async () =>
+      executor.query<SavedCollectionRow>(
+        `select *
+           from public.saved_collections
+          where user_id = $1
+          order by sort_order asc, created_at asc`,
+        [userId]
+      ),
+    (queryResult) => queryResult.rowCount ?? undefined
+  );
+
+  return result.rows;
+}
+
+// Insert-or-keep (the old upsert with ignoreDuplicates): a re-save keeps the
+// original created_at, which is then read back.
+async function upsertSavedPlace(
+  executor: DbExecutor,
+  userId: string,
+  placeId: number
+) {
+  const inserted = await measureSavedPlacesDependency(
+    "upsert",
+    "saved_places_save",
+    async () =>
+      executor.query<{ created_at: string }>(
+        `insert into public.saved_places (user_id, place_id)
+         values ($1, $2)
+         on conflict (user_id, place_id) do nothing
+         returning created_at`,
+        [userId, placeId]
+      )
+  );
+
+  const createdAt = inserted.rows[0]?.created_at;
+  if (createdAt) return createdAt;
+
+  const existing = await measureSavedPlacesDependency(
+    "select",
+    "saved_places_created_at",
+    async () =>
+      executor.query<{ created_at: string }>(
+        `select created_at
+           from public.saved_places
+          where user_id = $1
+            and place_id = $2`,
+        [userId, placeId]
+      )
+  );
+
+  return singleRow(existing.rows, "saved_places_created_at").created_at;
+}
+
+async function insertPlaceIntoCollections(
+  executor: DbExecutor,
+  userId: string,
+  placeId: number,
+  collectionIds: string[]
+) {
+  if (collectionIds.length === 0) return;
+
+  await measureSavedPlacesDependency(
+    "upsert",
+    "saved_collection_places_add",
+    async () =>
+      executor.query(
+        `insert into public.saved_collection_places (collection_id, user_id, place_id)
+         select unnest($1::uuid[]), $2::uuid, $3::bigint
+         on conflict (collection_id, place_id) do nothing`,
+        [collectionIds, userId, placeId]
+      ),
+    () => collectionIds.length
+  );
+}
+
+async function deletePlaceFromCollections(
+  executor: DbExecutor,
+  userId: string,
+  placeId: number,
+  collectionIds: string[]
+) {
+  if (collectionIds.length === 0) return;
+
+  await measureSavedPlacesDependency(
+    "delete",
+    "saved_collection_places_remove_many",
+    async () =>
+      executor.query(
+        `delete from public.saved_collection_places
+          where user_id = $1
+            and place_id = $2
+            and collection_id = any($3::uuid[])`,
+        [userId, placeId, collectionIds]
+      ),
+    () => collectionIds.length
+  );
+}
+
+// SET list from fixed column names only; values are parameters from $3 on
+// ($1/$2 are user_id and id in the WHERE clause).
 function buildCollectionUpdate(input: {
   name?: string;
   colorHex?: string | null;
   sortOrder?: number;
 }) {
-  const update: Record<string, unknown> = {
-    updated_at: new Date().toISOString()
+  const columns: string[] = ["updated_at"];
+  const values: unknown[] = [new Date().toISOString()];
+
+  if (input.name !== undefined) {
+    columns.push("name");
+    values.push(input.name);
+  }
+  if (input.colorHex !== undefined) {
+    columns.push("color_hex");
+    values.push(input.colorHex);
+  }
+  if (input.sortOrder !== undefined) {
+    columns.push("sort_order");
+    values.push(input.sortOrder);
+  }
+
+  return {
+    assignments: columns
+      .map((column, index) => `${column} = $${index + 3}`)
+      .join(", "),
+    values
   };
-
-  if (input.name !== undefined) update.name = input.name;
-  if (input.colorHex !== undefined) update.color_hex = input.colorHex;
-  if (input.sortOrder !== undefined) update.sort_order = input.sortOrder;
-
-  return update;
 }

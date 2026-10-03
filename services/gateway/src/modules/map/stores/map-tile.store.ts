@@ -1,4 +1,4 @@
-import { getPgPool } from "../../../lib/pg.js";
+import { getDb, type Db } from "../../../lib/db.js";
 import { measureDependencyMetric } from "../../../observability/metrics.js";
 import type {
   MapTileParams,
@@ -10,6 +10,8 @@ type MapTileRow = {
 };
 
 export class MapTileStore implements MapTileStoreContract {
+  constructor(private readonly db: Db = getDb()) {}
+
   async getTile(params: MapTileParams): Promise<Buffer> {
     const result = await measureDependencyMetric(
       {
@@ -18,7 +20,7 @@ export class MapTileStore implements MapTileStoreContract {
         name: "map_tile"
       },
       async () =>
-        getPgPool().query<MapTileRow>(
+        this.db.query<MapTileRow>(
           "select public.map_tile($1, $2, $3) as tile",
           [params.z, params.x, params.y]
         ),

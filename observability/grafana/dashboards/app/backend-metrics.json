@@ -207,13 +207,13 @@
             "uid": "loki"
           },
           "editorMode": "code",
-          "expr": "avg_over_time({service=\"backend\"} | json | eventType = \"metric\" | metricType = \"dependency\" | dependency = \"supabase\" | unwrap durationMs [$__range])",
-          "legendFormat": "Supabase avg",
+          "expr": "avg_over_time({service=\"backend\"} | json | eventType = \"metric\" | metricType = \"dependency\" | dependency =~ \"postgres|supabase\" | unwrap durationMs [$__range])",
+          "legendFormat": "DB avg",
           "queryType": "range",
           "refId": "A"
         }
       ],
-      "title": "Supabase Avg",
+      "title": "DB Avg",
       "type": "stat"
     },
     {
@@ -272,13 +272,13 @@
             "uid": "loki"
           },
           "editorMode": "code",
-          "expr": "quantile_over_time(0.95, {service=\"backend\"} | json | eventType = \"metric\" | metricType = \"dependency\" | dependency = \"supabase\" | unwrap durationMs [$__range])",
-          "legendFormat": "Supabase p95",
+          "expr": "quantile_over_time(0.95, {service=\"backend\"} | json | eventType = \"metric\" | metricType = \"dependency\" | dependency =~ \"postgres|supabase\" | unwrap durationMs [$__range])",
+          "legendFormat": "DB p95",
           "queryType": "range",
           "refId": "A"
         }
       ],
-      "title": "Supabase P95",
+      "title": "DB P95",
       "type": "stat"
     },
     {
@@ -540,8 +540,8 @@
             "uid": "loki"
           },
           "editorMode": "code",
-          "expr": "avg_over_time({service=\"backend\"} | json | eventType = \"metric\" | metricType = \"dependency\" | dependency = \"supabase\" | unwrap durationMs [$__auto])",
-          "legendFormat": "Supabase avg",
+          "expr": "avg_over_time({service=\"backend\"} | json | eventType = \"metric\" | metricType = \"dependency\" | dependency =~ \"postgres|supabase\" | unwrap durationMs [$__auto])",
+          "legendFormat": "DB avg",
           "queryType": "range",
           "refId": "A"
         },
@@ -551,13 +551,13 @@
             "uid": "loki"
           },
           "editorMode": "code",
-          "expr": "quantile_over_time(0.95, {service=\"backend\"} | json | eventType = \"metric\" | metricType = \"dependency\" | dependency = \"supabase\" | unwrap durationMs [$__auto])",
-          "legendFormat": "Supabase p95",
+          "expr": "quantile_over_time(0.95, {service=\"backend\"} | json | eventType = \"metric\" | metricType = \"dependency\" | dependency =~ \"postgres|supabase\" | unwrap durationMs [$__auto])",
+          "legendFormat": "DB p95",
           "queryType": "range",
           "refId": "B"
         }
       ],
-      "title": "Supabase Duration",
+      "title": "DB Duration",
       "type": "timeseries"
     },
     {
@@ -744,12 +744,12 @@
             "uid": "loki"
           },
           "editorMode": "code",
-          "expr": "{service=\"backend\"} | json | eventType = \"metric\" | metricType = \"dependency\" | dependency = \"supabase\" | line_format \"SUPABASE {{.operation}} {{.name}} duration={{.durationMs}}ms success={{.success}} rows={{.rowsCount}} path={{.path}} req={{.requestId}}\"",
+          "expr": "{service=\"backend\"} | json | eventType = \"metric\" | metricType = \"dependency\" | dependency =~ \"postgres|supabase\" | line_format \"{{.dependency}} {{.operation}} {{.name}} duration={{.durationMs}}ms success={{.success}} rows={{.rowsCount}} path={{.path}} req={{.requestId}}\"",
           "queryType": "range",
           "refId": "A"
         }
       ],
-      "title": "Supabase Dependency Metrics",
+      "title": "DB Dependency Metrics",
       "type": "logs"
     },
     {
@@ -831,12 +831,12 @@
             "uid": "loki"
           },
           "editorMode": "code",
-          "expr": "{service=\"backend\"} | json | eventType = \"metric\" | metricType = \"dependency\" | dependency = \"supabase\" | durationMs > 1000 | line_format \"SLOW SUPABASE {{.operation}} {{.name}} duration={{.durationMs}}ms success={{.success}} rows={{.rowsCount}} path={{.path}} req={{.requestId}}\"",
+          "expr": "{service=\"backend\"} | json | eventType = \"metric\" | metricType = \"dependency\" | dependency =~ \"postgres|supabase\" | durationMs > 1000 | line_format \"SLOW {{.dependency}} {{.operation}} {{.name}} duration={{.durationMs}}ms success={{.success}} rows={{.rowsCount}} path={{.path}} req={{.requestId}}\"",
           "queryType": "range",
           "refId": "A"
         }
       ],
-      "title": "Slow Supabase Calls > 1000ms",
+      "title": "Slow DB Calls > 1000ms",
       "type": "logs"
     },
     {

@@ -1,4 +1,4 @@
-import { getSupabaseClient } from "../../../lib/supabase.js";
+import { getDb, type Db } from "../../../lib/db.js";
 import { measureDependencyMetric } from "../../../observability/metrics.js";
 import type {
   FeedPlaceRow,
@@ -9,39 +9,35 @@ import type {
 
 const WANT_TO_GO_COLLECTION_NAME = "want to go";
 
-type SavedSignalPlace = {
-  source_id: string | null;
-};
-
+// Signal rows come back flat: the PostgREST embeds (places!inner(source_id),
+// saved_collections!inner(...)) are plain inner JOINs now. Timestamps are
+// to_json-format strings (json_agg output), so localeCompare still orders them.
 type SavedSignalRow = {
   place_id: number;
   created_at: string;
-  places: SavedSignalPlace | SavedSignalPlace[] | null;
+  source_id: string | null;
 };
 
 type SavedCollectionSignalRow = {
   place_id: number;
   sort_order: number;
   created_at: string;
-  places: SavedSignalPlace | SavedSignalPlace[] | null;
-  saved_collections:
-    | {
-        name: string;
-        slug: string | null;
-        is_default: boolean;
-      }
-    | {
-        name: string;
-        slug: string | null;
-        is_default: boolean;
-      }[]
-    | null;
+  source_id: string | null;
+  collection_name: string;
+  collection_slug: string | null;
+  collection_is_default: boolean;
 };
 
 type ReactionSignalRow = {
   source_id: string;
   reaction: "favorite" | "dislike" | "hide";
   updated_at: string;
+};
+
+type SignalSetsRow = {
+  saved: SavedSignalRow[];
+  collections: SavedCollectionSignalRow[];
+  reactions: ReactionSignalRow[];
 };
 
 function measureFeedDependency<T>(
@@ -52,7 +48,7 @@ function measureFeedDependency<T>(
 ) {
   return measureDependencyMetric(
     {
-      dependency: "supabase",
+      dependency: "postgres",
       operation,
       name
     },
@@ -62,26 +58,25 @@ function measureFeedDependency<T>(
 }
 
 export class FeedStore implements FeedStoreContract {
+  constructor(private readonly db: Db = getDb()) {}
+
   async getUserSignals(userId: string): Promise<FeedUserSignals> {
-    const [savedRows, collectionRows, reactionRows] = await Promise.all([
-      this.getSavedPlaceRows(userId),
-      this.getSavedCollectionPlaceRows(userId),
-      this.getReactionRows(userId)
-    ]);
+    const { savedRows, collectionRows, reactionRows } =
+      await this.getSignalRows(userId);
 
     const allSaved = dedupe(
       savedRows
         .sort((a, b) => b.created_at.localeCompare(a.created_at))
-        .map((row) => normalizePlaceRecord(row.places)?.source_id)
+        .map((row) => row.source_id)
     );
     const wantToGo = dedupe(
       collectionRows
-        .filter((row) => isWantToGoCollection(row.saved_collections))
+        .filter((row) => isWantToGoCollection(row))
         .sort(
           (a, b) =>
             a.sort_order - b.sort_order || a.created_at.localeCompare(b.created_at)
         )
-        .map((row) => normalizePlaceRecord(row.places)?.source_id)
+        .map((row) => row.source_id)
     );
     const wantToGoSet = new Set(wantToGo);
     const explicitFavorites = dedupe(
@@ -108,14 +103,14 @@ export class FeedStore implements FeedStoreContract {
     const beenOnly = new Set(
       dedupe(
         collectionRows
-          .filter((row) => collectionSlugOf(row.saved_collections) === "been")
-          .map((row) => normalizePlaceRecord(row.places)?.source_id)
+          .filter((row) => row.collection_slug === "been")
+          .map((row) => row.source_id)
       ).filter(
         (sourceId) =>
           !collectionRows.some(
             (row) =>
-              collectionSlugOf(row.saved_collections) !== "been" &&
-              normalizePlaceRecord(row.places)?.source_id === sourceId
+              row.collection_slug !== "been" &&
+              row.source_id === sourceId
           )
       )
     );
@@ -142,22 +137,23 @@ export class FeedStore implements FeedStoreContract {
   ): Promise<FeedPlaceRow[]> {
     if (sourceIds.length === 0) return [];
 
-    const { data, error } = await measureFeedDependency(
+    const result = await measureFeedDependency(
       "rpc",
       "feed_places_by_source_ids",
       async () =>
-        getSupabaseClient().rpc("feed_places_by_source_ids", {
-          source_ids: sourceIds,
-          user_lat: query.lat ?? null,
-          user_lng: query.lng ?? null,
-          result_limit: limit
-        }),
-      (result) => result.data?.length
+        this.db.query<FeedPlaceRow>(
+          `select * from public.feed_places_by_source_ids(
+             source_ids => $1,
+             user_lat => $2,
+             user_lng => $3,
+             result_limit => $4
+           )`,
+          [sourceIds, query.lat ?? null, query.lng ?? null, limit]
+        ),
+      (queryResult) => queryResult.rowCount ?? undefined
     );
 
-    if (error) throw error;
-
-    return (data ?? []) as unknown as FeedPlaceRow[];
+    return result.rows;
   }
 
   async fallbackFeedPlaces(
@@ -165,120 +161,125 @@ export class FeedStore implements FeedStoreContract {
     limit: number,
     categoryKeywords: string[] | null
   ): Promise<FeedPlaceRow[]> {
-    const { data, error } = await measureFeedDependency(
+    const result = await measureFeedDependency(
       "rpc",
       "feed_fallback_places",
       async () =>
-        getSupabaseClient().rpc("feed_fallback_places", {
-          user_lat: query.lat ?? null,
-          user_lng: query.lng ?? null,
-          user_city: query.city ?? null,
-          user_country: query.country ?? null,
-          result_limit: limit,
-          category_keywords: categoryKeywords
-        }),
-      (result) => result.data?.length
+        this.db.query<FeedPlaceRow>(
+          `select * from public.feed_fallback_places(
+             user_lat => $1,
+             user_lng => $2,
+             user_city => $3,
+             user_country => $4,
+             result_limit => $5,
+             category_keywords => $6
+           )`,
+          [
+            query.lat ?? null,
+            query.lng ?? null,
+            query.city ?? null,
+            query.country ?? null,
+            limit,
+            categoryKeywords
+          ]
+        ),
+      (queryResult) => queryResult.rowCount ?? undefined
     );
 
-    if (error) throw error;
-
-    return (data ?? []) as unknown as FeedPlaceRow[];
+    return result.rows;
   }
 
-  private async getSavedPlaceRows(userId: string) {
-    const { data, error } = await measureFeedDependency(
+  // All three signal sets in ONE statement on one pooled client: run as three
+  // parallel queries they took 3 of PG_POOL_MAX clients per feed request, and
+  // the app fires one feed request per pill at login. Each set is a json array
+  // (json_agg); json renders timestamptz in to_json format, so the rows match
+  // what the per-pool parsers return for plain columns.
+  private async getSignalRows(userId: string) {
+    const result = await measureFeedDependency(
       "select",
-      "feed_saved_signal_places",
+      "feed_user_signals",
       async () =>
-        getSupabaseClient()
-          .from("saved_places")
-          .select("place_id, created_at, places!inner(source_id)")
-          .eq("user_id", userId)
-          .order("created_at", { ascending: false }),
-      (result) => result.data?.length
+        this.db.query<SignalSetsRow>(
+          `select
+             (
+               select coalesce(
+                 json_agg(
+                   json_build_object(
+                     'place_id', sp.place_id,
+                     'created_at', sp.created_at,
+                     'source_id', p.source_id
+                   )
+                   order by sp.created_at desc
+                 ),
+                 '[]'::json
+               )
+               from public.saved_places sp
+               join public.places p on p.id = sp.place_id
+               where sp.user_id = $1
+             ) as saved,
+             (
+               select coalesce(
+                 json_agg(
+                   json_build_object(
+                     'place_id', scp.place_id,
+                     'sort_order', scp.sort_order,
+                     'created_at', scp.created_at,
+                     'source_id', p.source_id,
+                     'collection_name', sc.name,
+                     'collection_slug', sc.slug,
+                     'collection_is_default', sc.is_default
+                   )
+                 ),
+                 '[]'::json
+               )
+               from public.saved_collection_places scp
+               join public.places p on p.id = scp.place_id
+               join public.saved_collections sc on sc.id = scp.collection_id
+               where scp.user_id = $1
+             ) as collections,
+             (
+               select coalesce(
+                 json_agg(
+                   json_build_object(
+                     'source_id', pr.source_id,
+                     'reaction', pr.reaction,
+                     'updated_at', pr.updated_at
+                   )
+                 ),
+                 '[]'::json
+               )
+               from public.place_reactions pr
+               where pr.user_id = $1
+             ) as reactions`,
+          [userId]
+        ),
+      (queryResult) => {
+        const row = queryResult.rows[0];
+        return row
+          ? row.saved.length + row.collections.length + row.reactions.length
+          : undefined;
+      }
     );
 
-    if (error) throw error;
+    const row = result.rows[0];
 
-    return (data ?? []) as unknown as SavedSignalRow[];
+    return {
+      savedRows: row?.saved ?? [],
+      collectionRows: row?.collections ?? [],
+      reactionRows: row?.reactions ?? []
+    };
   }
-
-  private async getSavedCollectionPlaceRows(userId: string) {
-    const { data, error } = await measureFeedDependency(
-      "select",
-      "feed_saved_collection_signal_places",
-      async () =>
-        getSupabaseClient()
-          .from("saved_collection_places")
-          .select(
-            [
-              "place_id",
-              "sort_order",
-              "created_at",
-              "places!inner(source_id)",
-              "saved_collections!inner(name,slug,is_default)"
-            ].join(",")
-          )
-          .eq("user_id", userId),
-      (result) => result.data?.length
-    );
-
-    if (error) throw error;
-
-    return (data ?? []) as unknown as SavedCollectionSignalRow[];
-  }
-
-  private async getReactionRows(userId: string) {
-    const { data, error } = await measureFeedDependency(
-      "select",
-      "feed_reaction_signal_places",
-      async () =>
-        getSupabaseClient()
-          .from("place_reactions")
-          .select("source_id,reaction,updated_at")
-          .eq("user_id", userId),
-      (result) => result.data?.length
-    );
-
-    if (error) throw error;
-
-    return (data ?? []) as unknown as ReactionSignalRow[];
-  }
-}
-
-function normalizePlaceRecord(
-  place: SavedSignalPlace | SavedSignalPlace[] | null
-) {
-  return Array.isArray(place) ? place[0] : place;
-}
-
-function normalizeCollectionRecord(
-  collection: SavedCollectionSignalRow["saved_collections"]
-) {
-  return Array.isArray(collection) ? collection[0] : collection;
-}
-
-function collectionSlugOf(
-  collection: SavedCollectionSignalRow["saved_collections"]
-) {
-  return normalizeCollectionRecord(collection)?.slug ?? null;
 }
 
 // The quick-save bucket — the list a save with no explicit choice lands in. It is
 // the system "saved" list since TASKS_54, was the default collection before that,
 // and was literally named "Want to go" before TASKS_53; all three are accepted so
 // old rows keep their meaning.
-function isWantToGoCollection(
-  collection: SavedCollectionSignalRow["saved_collections"]
-) {
-  const normalized = normalizeCollectionRecord(collection);
-
-  if (!normalized) return false;
-
+function isWantToGoCollection(row: SavedCollectionSignalRow) {
   return (
-    normalized.slug === "saved" ||
-    normalized.is_default ||
-    normalized.name.trim().toLowerCase() === WANT_TO_GO_COLLECTION_NAME
+    row.collection_slug === "saved" ||
+    row.collection_is_default ||
+    row.collection_name.trim().toLowerCase() === WANT_TO_GO_COLLECTION_NAME
   );
 }
 

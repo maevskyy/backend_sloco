@@ -1,4 +1,5 @@
 import type { FastifyInstance } from "fastify";
+import type { Db } from "../../lib/db.js";
 import { supabaseAuthService, type AuthService } from "../auth/auth.service.js";
 import { FeedController } from "./controllers/feed.controller.js";
 import {
@@ -13,6 +14,8 @@ import {
   createFeedPlacesService,
   getFeedPlaces
 } from "./services/feed.service.js";
+import { FeedStore } from "./stores/feed.store.js";
+import { RecServedStore } from "./stores/rec-served.store.js";
 import type { FeedPlacesService } from "./common/feed.types.js";
 
 export type FeedModuleOptions = {
@@ -20,6 +23,8 @@ export type FeedModuleOptions = {
   authService?: AuthService;
   savedPlacesService?: SavedPlacesService;
   reactionsService?: ReactionsService;
+  // Shared direct-Postgres pool; stores fall back to getDb() without it.
+  db?: Db;
 };
 
 export async function registerFeedModule(
@@ -29,11 +34,12 @@ export async function registerFeedModule(
   const feedPlacesService =
     options.feedPlacesService ??
     createFeedPlacesService(
-      undefined,
+      new FeedStore(options.db),
       undefined,
       options.savedPlacesService ?? savedPlacesService,
       undefined,
-      options.reactionsService ?? reactionsService
+      options.reactionsService ?? reactionsService,
+      new RecServedStore(options.db)
     );
   const controller = new FeedController(
     feedPlacesService ?? getFeedPlaces,

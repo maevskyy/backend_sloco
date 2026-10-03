@@ -116,6 +116,17 @@ export type SavedPlacesStoreContract = {
   ): Promise<SavedCollectionRow | null>;
   deleteCollection(userId: string, collectionId: string): Promise<void>;
   savePlace(userId: string, placeId: number): Promise<string>;
+  /**
+   * Atomic save + membership change: bookmark the place (keeping an existing
+   * saved_at), add it to `add`, drop it from `remove` — all or nothing.
+   * Resolves to saved_at.
+   */
+  savePlaceWithCollections(
+    userId: string,
+    placeId: number,
+    change: { add: string[]; remove: string[] }
+  ): Promise<string>;
+  /** Drops the place from every list and from saved_places, all or nothing. */
   unsavePlace(userId: string, placeId: number): Promise<void>;
   addPlaceToCollections(
     userId: string,

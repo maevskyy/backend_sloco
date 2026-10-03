@@ -15,7 +15,7 @@ that recommends places based on taste, lifestyle, and favorite-place patterns.
 - TypeScript
 - Fastify
 - Zod
-- Supabase Postgres
+- Supabase Postgres (direct `pg` pool) + Supabase Auth
 - Redis
 - Docker
 - GitHub Actions
@@ -69,7 +69,7 @@ src/modules/<feature>/
   <feature>.module.ts       composition root / dependency wiring
   controllers/              Fastify HTTP layer
   services/                 business logic / orchestration
-  stores/                   Supabase/data access
+  stores/                   data access through the injected `Db`
   common/                   types, errors, mappers, schemas, openapi
   tests/                    controller/service/store tests
 ```
@@ -86,8 +86,14 @@ Layer rules:
 
 - dependencies point inward: `controller -> service -> store`;
 - controllers parse HTTP input, call services, map domain errors to HTTP;
-- services contain business logic and depend on store contracts, not Supabase;
-- stores are the only layer that talks to Supabase/database APIs;
+- services contain business logic and depend on store contracts, not the database;
+- stores are the only layer that talks to the database: they take the `Db`
+  (`src/lib/db.ts`) via constructor and run parameterized SQL / RPC calls
+  through `db.query` (`select * from public.fn(arg => $1)`); multi-statement
+  writes go through `db.transaction(async (tx) => ...)`, every statement on
+  `tx`. The module gets `db` from `buildApp` options — one pool per process;
+- do not use supabase-js (PostgREST) for data: it is kept only for Supabase
+  Auth (`modules/auth`). See `docs/DECISIONS.md` (one DB transport);
 - `index.ts` is the public import surface for other modules;
 - prefer constructor injection for collaborators;
 - keep request/response schemas in `common/<feature>.schemas.ts`;
@@ -97,7 +103,8 @@ Layer rules:
 Shared code is split by responsibility — there is no `shared/` or `utils/`
 bucket:
 
-- `src/lib/` — infrastructure adapters only (Supabase client, future clients);
+- `src/lib/` — infrastructure adapters only (`db.ts` Postgres pool + `Db`
+  seam, `supabase.ts` Auth-only client, recommendation client, cache);
 - `src/config/` — app wiring (env, logger, routes, swagger), plus the
   `openapi.ts` zod→component generator and `http-schemas.ts` shared error schemas;
 - `src/http/` — Fastify glue every controller reuses (`docsRoute`,
@@ -210,7 +217,13 @@ Map endpoint payloads should stay lightweight; full place details live behind
 
 ## Database
 
-Supabase is the managed Postgres provider.
+Supabase is the managed Postgres provider. The gateway reaches it only through
+the Supavisor pooler (`SUPABASE_DB_URL`, transaction mode) with one `pg` pool
+per process; pool size and deadlines are the `PG_POOL_*` / `PG_QUERY_TIMEOUT_MS`
+env vars (`../../docs/DEPLOYMENT.md`). A pool wait or query past its deadline
+answers 503 + `Retry-After`. Rows come back with the same value types PostgREST
+returned (numeric/int8 → number, timestamps → to_json strings;
+`src/lib/pg-type-parsers.ts`).
 
 Current serving tables:
 

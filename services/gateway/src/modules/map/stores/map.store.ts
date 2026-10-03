@@ -1,4 +1,4 @@
-import { getSupabaseClient } from "../../../lib/supabase.js";
+import { getDb, type Db } from "../../../lib/db.js";
 import { measureDependencyMetric } from "../../../observability/metrics.js";
 import type {
   MapPlacesQuery,
@@ -7,33 +7,43 @@ import type {
 } from "../common/map.types.js";
 
 export class MapStore implements MapStoreContract {
+  constructor(private readonly db: Db = getDb()) {}
+
+  // bigint id and numeric scores come back as JSON numbers via the pool's
+  // type parsers, same as the PostgREST response did.
   async placesInBbox(
     query: MapPlacesQuery,
     minScore: number,
     resultLimit: number
   ): Promise<PlaceRow[]> {
-    const { data, error } = await measureDependencyMetric(
+    const result = await measureDependencyMetric(
       {
-        dependency: "supabase",
+        dependency: "postgres",
         operation: "rpc",
         name: "map_places_in_bbox"
       },
       async () =>
-        getSupabaseClient().rpc("map_places_in_bbox", {
-          sw_lat: query.swLat,
-          sw_lng: query.swLng,
-          ne_lat: query.neLat,
-          ne_lng: query.neLng,
-          min_score: minScore,
-          result_limit: resultLimit
-        }),
-      (result) => result.data?.length
+        this.db.query<PlaceRow>(
+          `select * from public.map_places_in_bbox(
+             sw_lat => $1,
+             sw_lng => $2,
+             ne_lat => $3,
+             ne_lng => $4,
+             min_score => $5,
+             result_limit => $6
+           )`,
+          [
+            query.swLat,
+            query.swLng,
+            query.neLat,
+            query.neLng,
+            minScore,
+            resultLimit
+          ]
+        ),
+      (queryResult) => queryResult.rowCount ?? undefined
     );
 
-    if (error) {
-      throw error;
-    }
-
-    return (data ?? []) as unknown as PlaceRow[];
+    return result.rows;
   }
 }

@@ -1,0 +1,33 @@
+# Feed, golden diff (load/golden-diff.mjs). Coordinates from load/cities.csv,
+# categories from load/buckets.csv. Anonymous unless the line starts with AUTH.
+
+# page 1 per city
+GET /v1/feed/places?limit=20&lat=44.4268&lng=26.1025&city=Bucharest&country=Romania
+GET /v1/feed/places?limit=20&lat=52.5200&lng=13.4050&city=Berlin&country=Germany
+GET /v1/feed/places?limit=20&lat=41.7151&lng=44.8271&city=Tbilisi&country=Georgia
+
+# page 2
+GET /v1/feed/places?limit=20&offset=20&lat=44.4268&lng=26.1025&city=Bucharest&country=Romania
+GET /v1/feed/places?limit=20&offset=20&lat=52.5200&lng=13.4050&city=Berlin&country=Germany
+GET /v1/feed/places?limit=20&offset=20&lat=41.7151&lng=44.8271&city=Tbilisi&country=Georgia
+
+# category pills, Bucharest (all buckets) + a couple elsewhere
+GET /v1/feed/places?limit=20&lat=44.4268&lng=26.1025&city=Bucharest&country=Romania&category=cafe
+GET /v1/feed/places?limit=20&lat=44.4268&lng=26.1025&city=Bucharest&country=Romania&category=food
+GET /v1/feed/places?limit=20&lat=44.4268&lng=26.1025&city=Bucharest&country=Romania&category=bar
+GET /v1/feed/places?limit=20&lat=44.4268&lng=26.1025&city=Bucharest&country=Romania&category=culture
+GET /v1/feed/places?limit=20&lat=44.4268&lng=26.1025&city=Bucharest&country=Romania&category=nature
+GET /v1/feed/places?limit=20&lat=44.4268&lng=26.1025&city=Bucharest&country=Romania&category=shopping
+GET /v1/feed/places?limit=20&lat=44.4268&lng=26.1025&city=Bucharest&country=Romania&category=leisure
+GET /v1/feed/places?limit=20&lat=52.5200&lng=13.4050&city=Berlin&country=Germany&category=cafe
+GET /v1/feed/places?limit=20&lat=41.7151&lng=44.8271&city=Tbilisi&country=Georgia&category=food
+
+# sort by distance, no city cut
+GET /v1/feed/places?limit=20&lat=44.4268&lng=26.1025&sort=distance
+
+# validation error shape
+GET /v1/feed/places?lat=44.4268
+
+# signed in (needs $SLOCO_BEARER)
+AUTH GET /v1/feed/places?limit=20&lat=44.4268&lng=26.1025&city=Bucharest&country=Romania
+AUTH GET /v1/feed/places?limit=20&lat=44.4268&lng=26.1025&city=Bucharest&country=Romania&category=cafe

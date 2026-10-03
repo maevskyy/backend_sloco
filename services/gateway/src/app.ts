@@ -7,6 +7,8 @@ import {
 } from "./config/logger.js";
 import { API_PREFIX } from "./config/routes.js";
 import { registerSwaggerDocs } from "./config/swagger.js";
+import { sendDbUnavailable } from "./http/errors.js";
+import { closeDb, getDb, onDbPoolError, type Db } from "./lib/db.js";
 import {
   enterRequestMetricContext,
   logHttpRequestMetric
@@ -58,6 +60,7 @@ import type { AuthService } from "./modules/auth/auth.service.js";
 import type { CacheStore } from "./lib/cache/cache-store.js";
 
 type AppOptions = {
+  db?: Db;
   supabaseHealthCheck?: () => Promise<void>;
   mapPlacesService?: MapPlacesService;
   mapTileService?: MapTileService;
@@ -78,6 +81,31 @@ export async function buildApp(options: AppOptions = {}) {
   const loggerConfig = createLoggerConfig(env.NODE_ENV);
   const app = Fastify({
     ...loggerConfig
+  });
+
+  // One direct-Postgres pool per process (SLO-49), handed to every module.
+  // getDb() is the same instance module-level default singletons resolve to,
+  // so no second pool can appear; it connects lazily on the first query.
+  const db = options.db ?? getDb();
+
+  if (!options.db) {
+    onDbPoolError((error) => {
+      app.log.error({ err: error }, "postgres pool idle client error");
+    });
+    app.addHook("onClose", async () => {
+      await closeDb();
+    });
+  }
+
+  // Errors that escape a controller's try/catch: database saturation still
+  // answers 503 + Retry-After; everything else goes to Fastify's default
+  // handler unchanged. Set before modules register so they inherit it.
+  app.setErrorHandler((error, request, reply) => {
+    if (sendDbUnavailable(request, reply, error)) {
+      return;
+    }
+
+    reply.send(error);
   });
 
   app.addHook("onRequest", async (request) => {
@@ -104,11 +132,13 @@ export async function buildApp(options: AppOptions = {}) {
 
   await app.register(registerHealthModule, {
     prefix: API_PREFIX,
+    db,
     supabaseHealthCheck: options.supabaseHealthCheck
   });
 
   await app.register(registerMeModule, {
     prefix: API_PREFIX,
+    db,
     authService: options.authService,
     meService: options.meService,
     savedPlacesService: options.savedPlacesService
@@ -116,24 +146,28 @@ export async function buildApp(options: AppOptions = {}) {
 
   await app.register(registerOnboardingModule, {
     prefix: API_PREFIX,
+    db,
     authService: options.authService,
     onboardingService: options.onboardingService
   });
 
   await app.register(registerReactionsModule, {
     prefix: API_PREFIX,
+    db,
     authService: options.authService,
     reactionsService: options.reactionsService
   });
 
   await app.register(registerSavedPlacesModule, {
     prefix: API_PREFIX,
+    db,
     authService: options.authService,
     savedPlacesService: options.savedPlacesService
   });
 
   await app.register(registerPlacesModule, {
     prefix: API_PREFIX,
+    db,
     authService: options.authService,
     savedPlacesService: options.savedPlacesService,
     reactionsService: options.reactionsService,
@@ -143,6 +177,7 @@ export async function buildApp(options: AppOptions = {}) {
 
   await app.register(registerSearchModule, {
     prefix: API_PREFIX,
+    db,
     searchPlacesService: options.searchPlacesService,
     authService: options.authService,
     savedPlacesService: options.savedPlacesService
@@ -150,6 +185,7 @@ export async function buildApp(options: AppOptions = {}) {
 
   await app.register(registerFeedModule, {
     prefix: API_PREFIX,
+    db,
     feedPlacesService: options.feedPlacesService,
     authService: options.authService,
     savedPlacesService: options.savedPlacesService,
@@ -158,17 +194,20 @@ export async function buildApp(options: AppOptions = {}) {
 
   await app.register(registerCitiesModule, {
     prefix: API_PREFIX,
+    db,
     citiesService: options.citiesService
   });
 
   await app.register(registerEventsModule, {
     prefix: API_PREFIX,
+    db,
     authService: options.authService,
     eventsService: options.eventsService
   });
 
   await app.register(registerMapModule, {
     prefix: API_PREFIX,
+    db,
     mapPlacesService: options.mapPlacesService,
     mapTileService: options.mapTileService,
     authService: options.authService,

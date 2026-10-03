@@ -14,13 +14,18 @@ public internet
   -> recommendation-service container (services/recommendation, Python/FastAPI)
 
 Gateway also talks to:
-  -> Supabase managed Postgres / Auth / Storage
+  -> Supabase managed Postgres: ALL queries and RPCs over one direct pg pool
+     (SUPABASE_DB_URL, Supavisor pooler, transaction mode; src/lib/db.ts)
+  -> Supabase Auth: access-token checks only, via supabase-js (HTTPS)
   -> Redis over sloco_net for hot read cache
 
 Observability:
   -> Alloy host agent
   -> local Loki / Prometheus / Grafana stack
 ```
+
+The gateway does not use PostgREST: one transport for data, so every call has a
+deadline (pool wait, query timeout → 503) and no extra HTTP hop (SLO-49).
 
 Supabase remains managed outside the host. The Hetzner box should be replaceable:
 runtime state is either in Docker named volumes for infra tools or in managed
@@ -30,7 +35,7 @@ services.
 
 ```text
 services/
-  gateway/          public API Gateway, Fastify, Supabase stores, OpenAPI
+  gateway/          public API Gateway, Fastify, Postgres stores, OpenAPI
   recommendation/   private recommendation runtime, FastAPI
 
 observability/      monitoring stack config (own concern)

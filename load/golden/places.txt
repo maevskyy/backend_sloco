@@ -1,0 +1,12 @@
+# Place details, golden diff. Ids from load/places.csv (2 Bucharest, 1 Berlin, 2 Tbilisi).
+GET /v1/places/5021
+GET /v1/places/9259
+GET /v1/places/239010
+GET /v1/places/1672
+GET /v1/places/279551
+
+# not found: status + error shape
+GET /v1/places/999999999
+
+# signed in: isSaved / savedCollectionIds / reaction (needs $SLOCO_BEARER)
+AUTH GET /v1/places/5021

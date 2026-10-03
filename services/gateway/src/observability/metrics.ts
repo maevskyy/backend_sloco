@@ -21,7 +21,7 @@ type RequestMetricContext = {
 };
 
 type DependencyMetricInput = {
-  dependency: "supabase" | "ml-service" | "storage" | string;
+  dependency: "postgres" | "supabase" | "ml-service" | "storage" | string;
   operation: "auth" | "delete" | "http" | "insert" | "rpc" | "select" | "update" | "upsert" | string;
   name: string;
   rowsCount?: number;

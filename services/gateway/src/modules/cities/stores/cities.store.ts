@@ -1,8 +1,10 @@
-import { getPgPool } from "../../../lib/pg.js";
+import { getDb, type Db } from "../../../lib/db.js";
 import { measureDependencyMetric } from "../../../observability/metrics.js";
 import type { CatalogCityRow, CitiesStoreContract } from "../common/cities.types.js";
 
 export class CitiesStore implements CitiesStoreContract {
+  constructor(private readonly db: Db = getDb()) {}
+
   async listCatalogCities(): Promise<CatalogCityRow[]> {
     const result = await measureDependencyMetric(
       {
@@ -11,7 +13,7 @@ export class CitiesStore implements CitiesStoreContract {
         name: "catalog_cities"
       },
       async () =>
-        getPgPool().query<CatalogCityRow>(
+        this.db.query<CatalogCityRow>(
           `select
              p.city as name,
              p.country,

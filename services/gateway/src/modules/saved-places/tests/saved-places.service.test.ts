@@ -82,6 +82,9 @@ function createRepository(
     async savePlace() {
       return savedAt;
     },
+    async savePlaceWithCollections() {
+      return savedAt;
+    },
     async unsavePlace() {},
     async addPlaceToCollections() {},
     async removePlaceFromCollection() {},
@@ -163,8 +166,9 @@ describe("saved places service", () => {
     let capturedCollectionIds: string[] = [];
     const service = createSavedPlacesService(
       createRepository({
-        async addPlaceToCollections(_userId, _placeId, collectionIds) {
-          capturedCollectionIds = collectionIds;
+        async savePlaceWithCollections(_userId, _placeId, change) {
+          capturedCollectionIds = change.add;
+          return savedAt;
         }
       })
     );

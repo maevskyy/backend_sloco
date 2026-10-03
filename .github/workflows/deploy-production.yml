@@ -205,6 +205,13 @@ jobs:
             SUPABASE_URL=${SUPABASE_URL}
             SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
             SUPABASE_DB_URL=${SUPABASE_DB_URL}
+            # Direct Postgres pool (SLO-32): every DB call goes through it. A wait
+            # for a free client past 2 s or a query past 8 s (PostgREST's old
+            # statement_timeout) answers 503 + Retry-After instead of hanging.
+            PG_POOL_MAX=20
+            PG_POOL_CONNECTION_TIMEOUT_MS=2000
+            PG_POOL_IDLE_TIMEOUT_MS=30000
+            PG_QUERY_TIMEOUT_MS=8000
             RECOMMENDATION_SERVICE_URL=http://recommendation-service:8000
             PLACE_CACHE_TTL_SECONDS=3600
             MAP_TILE_CACHE_TTL_SECONDS=604800

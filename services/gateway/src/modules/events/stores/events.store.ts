@@ -1,4 +1,4 @@
-import { getPgPool } from "../../../lib/pg.js";
+import { getDb, type Db } from "../../../lib/db.js";
 import { measureDependencyMetric } from "../../../observability/metrics.js";
 import type { EventRow, EventsStoreContract } from "../common/events.types.js";
 
@@ -7,6 +7,8 @@ import type { EventRow, EventsStoreContract } from "../common/events.types.js";
 // round trip and never exceeds parameter limits. server_ts is stamped by the
 // database at insert time (spec Part 1 rule 6).
 export class EventsStore implements EventsStoreContract {
+  constructor(private readonly db: Db = getDb()) {}
+
   async insertEvents(rows: EventRow[]): Promise<number> {
     if (rows.length === 0) {
       return 0;
@@ -19,7 +21,7 @@ export class EventsStore implements EventsStoreContract {
         name: "events_raw_insert"
       },
       async () =>
-        getPgPool().query(
+        this.db.query(
           `insert into public.events_raw (
              event_id, event_type, known_type, user_id, anon_id, session_id,
              surface, request_id, position, place_id, client_ts, server_ts,
@@ -64,7 +66,7 @@ export class EventsStore implements EventsStoreContract {
         name: "identity_links_insert"
       },
       async () =>
-        getPgPool().query(
+        this.db.query(
           `insert into public.identity_links (anon_id, user_id)
            select distinct unnest($1::text[]), $2
            on conflict (anon_id, user_id) do nothing`,

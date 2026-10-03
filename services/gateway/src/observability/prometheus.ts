@@ -1,9 +1,11 @@
 import {
   Counter,
+  Gauge,
   Histogram,
   Registry,
   collectDefaultMetrics
 } from "prom-client";
+import { getDbPoolStats } from "../lib/db.js";
 
 // Real Prometheus metrics for load testing. Lives alongside the Loki log metrics
 // (metrics.ts): logs stay for detailed traces, Prometheus gives accurate
@@ -46,6 +48,36 @@ const cacheEventsTotal = new Counter({
   help: "Cache events by status (hit/miss/set/error/bypass).",
   labelNames: ["cache", "status"],
   registers: [metricsRegistry]
+});
+
+// Direct Postgres pool (src/lib/db.ts), read on every scrape. waiting > 0 for
+// long means PG_POOL_MAX is the bottleneck; requests start getting 503 once a
+// wait exceeds PG_POOL_CONNECTION_TIMEOUT_MS.
+new Gauge({
+  name: "pg_pool_clients",
+  help: "Postgres pool clients, idle and checked out.",
+  registers: [metricsRegistry],
+  collect() {
+    this.set(getDbPoolStats().total);
+  }
+});
+
+new Gauge({
+  name: "pg_pool_idle_clients",
+  help: "Postgres pool clients idle and ready to hand out.",
+  registers: [metricsRegistry],
+  collect() {
+    this.set(getDbPoolStats().idle);
+  }
+});
+
+new Gauge({
+  name: "pg_pool_waiting_requests",
+  help: "Queries queued waiting for a Postgres pool client.",
+  registers: [metricsRegistry],
+  collect() {
+    this.set(getDbPoolStats().waiting);
+  }
 });
 
 export function observeHttpRequest(

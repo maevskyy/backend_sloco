@@ -1,4 +1,4 @@
-import { getPgPool } from "../../../lib/pg.js";
+import { getDb, type Db } from "../../../lib/db.js";
 import { measureDependencyMetric } from "../../../observability/metrics.js";
 import type {
   RecServedStoreContract,
@@ -11,6 +11,8 @@ import type {
 // parameter (same pattern as the events_raw insert). ON CONFLICT DO NOTHING
 // makes the retry after a failure idempotent.
 export class RecServedStore implements RecServedStoreContract {
+  constructor(private readonly db: Db = getDb()) {}
+
   async insertServing(write: RecServedWrite): Promise<void> {
     const items = write.items.map((item) => ({
       position: item.position,
@@ -27,7 +29,7 @@ export class RecServedStore implements RecServedStoreContract {
         name: "rec_served_insert"
       },
       async () =>
-        getPgPool().query(
+        this.db.query(
           `with serving as (
              insert into public.rec_served (
                request_id, user_id, server_ts, surface, city,
