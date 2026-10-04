@@ -75,6 +75,12 @@ GET /v1/places/:placeId
 GET /v1/search/places?q=...&category=...&radiusMeters=...&lat=...&lng=...
 GET /v1/feed/places?limit=...&offset=...&lat=...&lng=...&sort=...&category=...&city=...&debug=...
 GET /v1/cities
+GET /v1/walks/config?city=...&lang=...
+POST /v1/walks/plan?lang=...&geometry=...
+POST /v1/walks/schedule?lang=...&geometry=...
+POST /v1/walks/insert?lang=...&geometry=...
+GET /v1/walks/places/search?q=...&city=...&lat=...&lon=...&limit=...&includeClosed=...&lang=...
+GET /v1/walks/places/:sourceId?city=...&lang=...
 GET /v1/swagger/docs
 GET /v1/swagger/openapi.json
 ```
@@ -113,6 +119,14 @@ Human docs for telemetry intake:
 
 ```text
 docs/FRONTEND_EVENTS_API.md
+```
+
+Human docs for the walk planner (`/v1/walks/*`, proxied to the private
+`walk-planner` service; not deployed to prod until SLO-68 — there it answers
+503 `walk_planner_unavailable`):
+
+```text
+docs/FRONTEND_WALKS_API.md
 ```
 
 ## Active Database
@@ -215,7 +229,7 @@ controller -> service -> store
 
 `src/modules/saved-places/` is the reference implementation. All product modules
 (`map`, `me`, `health`, `saved-places`, `places`, `search`, `feed`, `reactions`,
-`events`) use this shape; `auth` stays a shared service (no HTTP) with its
+`events`, `walks`) use this shape; `auth` stays a shared service (no HTTP) with its
 Supabase call isolated in a store.
 
 Shared code is split by responsibility: `src/lib/` (infrastructure adapters),

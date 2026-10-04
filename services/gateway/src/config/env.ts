@@ -22,6 +22,8 @@ const envSchema = z.object({
   // Same as PostgREST's authenticator statement_timeout (8 s).
   PG_QUERY_TIMEOUT_MS: z.coerce.number().int().positive().default(8000),
   RECOMMENDATION_SERVICE_URL: optionalNonEmptyString(z.string().url()),
+  // Private walk-planner service (SLO-67); unset → /v1/walks/* answer 503.
+  WALK_PLANNER_URL: optionalNonEmptyString(z.string().url()),
   REDIS_URL: optionalNonEmptyString(z.string().url()),
   PLACE_CACHE_TTL_SECONDS: z.coerce.number().int().min(0).default(3600),
   MAP_TILE_CACHE_TTL_SECONDS: z.coerce.number().int().min(0).default(604800),

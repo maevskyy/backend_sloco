@@ -24,7 +24,8 @@ that recommends places based on taste, lifestyle, and favorite-place patterns.
 
 The public API boundary is this Gateway service. Recommendation runtime work
 lives in `../recommendation` and is called over the private Docker network by
-HTTP. Do not add Kafka, RabbitMQ, or heavier service infrastructure unless it is
+HTTP; so is the walk planner (`../walk-planner`, research-owned and vendored
+unchanged — module `walks`, client `src/lib/walk-planner-client.ts`). Do not add Kafka, RabbitMQ, or heavier service infrastructure unless it is
 explicitly planned.
 
 The backend-wide repository root is two levels up from here. Cross-service
@@ -104,7 +105,8 @@ Shared code is split by responsibility — there is no `shared/` or `utils/`
 bucket:
 
 - `src/lib/` — infrastructure adapters only (`db.ts` Postgres pool + `Db`
-  seam, `supabase.ts` Auth-only client, recommendation client, cache);
+  seam, `supabase.ts` Auth-only client, recommendation and walk-planner
+  clients, cache);
 - `src/config/` — app wiring (env, logger, routes, swagger), plus the
   `openapi.ts` zod→component generator and `http-schemas.ts` shared error schemas;
 - `src/http/` — Fastify glue every controller reuses (`docsRoute`,
@@ -198,6 +200,10 @@ GET /v1/me/reactions
 PUT /v1/me/places/:placeId/reaction
 DELETE /v1/me/places/:placeId/reaction
 POST /v1/onboarding/complete
+GET /v1/walks/config
+POST /v1/walks/plan | /v1/walks/schedule | /v1/walks/insert
+GET /v1/walks/places/search
+GET /v1/walks/places/:sourceId
 ```
 
 Contract docs:
@@ -210,6 +216,7 @@ docs/FRONTEND_SEARCH_API.md
 docs/FRONTEND_FEED_API.md
 docs/FRONTEND_ONBOARDING_API.md
 docs/FRONTEND_CITIES_API.md
+docs/FRONTEND_WALKS_API.md
 ```
 
 Map endpoint payloads should stay lightweight; full place details live behind

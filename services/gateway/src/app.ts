@@ -56,6 +56,10 @@ import {
   registerEventsModule,
   type EventsServiceContract
 } from "./modules/events/index.js";
+import {
+  registerWalksModule,
+  type WalksService
+} from "./modules/walks/index.js";
 import type { AuthService } from "./modules/auth/auth.service.js";
 import type { CacheStore } from "./lib/cache/cache-store.js";
 
@@ -75,6 +79,7 @@ type AppOptions = {
   feedPlacesService?: FeedPlacesService;
   citiesService?: CitiesService;
   eventsService?: EventsServiceContract;
+  walksService?: WalksService;
 };
 
 export async function buildApp(options: AppOptions = {}) {
@@ -203,6 +208,13 @@ export async function buildApp(options: AppOptions = {}) {
     db,
     authService: options.authService,
     eventsService: options.eventsService
+  });
+
+  await app.register(registerWalksModule, {
+    prefix: API_PREFIX,
+    db,
+    authService: options.authService,
+    walksService: options.walksService
   });
 
   await app.register(registerMapModule, {

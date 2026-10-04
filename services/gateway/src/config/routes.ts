@@ -25,6 +25,12 @@ export enum AppRoute {
   FeedPlaces = "/feed/places",
   Cities = "/cities",
   Events = "/events",
+  WalksConfig = "/walks/config",
+  WalksPlan = "/walks/plan",
+  WalksSchedule = "/walks/schedule",
+  WalksInsert = "/walks/insert",
+  WalksPlacesSearch = "/walks/places/search",
+  WalksPlace = "/walks/places/:sourceId",
   SwaggerDocs = "/swagger/docs",
   SwaggerOpenApiJson = "/swagger/openapi.json"
 }
@@ -54,6 +60,12 @@ export const VersionedAppRoute = {
   feedPlaces: `${API_PREFIX}${AppRoute.FeedPlaces}`,
   cities: `${API_PREFIX}${AppRoute.Cities}`,
   events: `${API_PREFIX}${AppRoute.Events}`,
+  walksConfig: `${API_PREFIX}${AppRoute.WalksConfig}`,
+  walksPlan: `${API_PREFIX}${AppRoute.WalksPlan}`,
+  walksSchedule: `${API_PREFIX}${AppRoute.WalksSchedule}`,
+  walksInsert: `${API_PREFIX}${AppRoute.WalksInsert}`,
+  walksPlacesSearch: `${API_PREFIX}${AppRoute.WalksPlacesSearch}`,
+  walksPlace: `${API_PREFIX}${AppRoute.WalksPlace}`,
   swaggerDocs: `${API_PREFIX}${AppRoute.SwaggerDocs}`,
   swaggerOpenApiJson: `${API_PREFIX}${AppRoute.SwaggerOpenApiJson}`
 } as const;

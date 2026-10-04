@@ -12,6 +12,7 @@ import { placesComponentSchemas } from "../modules/places/index.js";
 import { reactionsComponentSchemas } from "../modules/reactions/index.js";
 import { savedPlacesComponentSchemas } from "../modules/saved-places/index.js";
 import { searchComponentSchemas } from "../modules/search/index.js";
+import { walksComponentSchemas } from "../modules/walks/index.js";
 import { httpErrorComponentSchemas } from "./http-schemas.js";
 import { VersionedAppRoute } from "./routes.js";
 
@@ -65,6 +66,10 @@ export async function registerSwaggerDocs(app: FastifyInstance) {
   }
 
   for (const schema of eventsComponentSchemas) {
+    app.addSchema(schema);
+  }
+
+  for (const schema of walksComponentSchemas) {
     app.addSchema(schema);
   }
 
@@ -144,6 +149,11 @@ export async function registerSwaggerDocs(app: FastifyInstance) {
         {
           name: "Events",
           description: "Append-only telemetry event intake."
+        },
+        {
+          name: "Walks",
+          description:
+            "Walk planner: timed walking routes through real places, edits, walk place search and screen."
         }
       ]
     }

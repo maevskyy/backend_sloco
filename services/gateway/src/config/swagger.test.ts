@@ -62,6 +62,18 @@ describe("swagger docs", () => {
     ).toBeDefined();
     expect(openApi.paths[VersionedAppRoute.searchPlaces]).toBeDefined();
     expect(openApi.paths[VersionedAppRoute.cities]).toBeDefined();
+    expect(openApi.paths[VersionedAppRoute.walksConfig]).toBeDefined();
+    expect(openApi.paths[VersionedAppRoute.walksPlan]).toBeDefined();
+    expect(openApi.paths[VersionedAppRoute.walksSchedule]).toBeDefined();
+    expect(openApi.paths[VersionedAppRoute.walksInsert]).toBeDefined();
+    expect(openApi.paths[VersionedAppRoute.walksPlacesSearch]).toBeDefined();
+    expect(
+      openApi.paths[
+        VersionedAppRoute.walksPlace.replace(":sourceId", "{sourceId}")
+      ]
+    ).toBeDefined();
+    expect(openApi.components.schemas.WalksPlanResponse).toBeDefined();
+    expect(openApi.components.schemas.WalkErrorResponse).toBeDefined();
     expect(openApi.components.schemas.CitiesResponse).toBeDefined();
     expect(openApi.components.schemas.CatalogCity).toBeDefined();
     expect(openApi.components.securitySchemes.bearerAuth).toBeDefined();

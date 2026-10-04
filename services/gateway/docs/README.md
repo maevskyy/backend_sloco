@@ -94,6 +94,11 @@ start at the monorepo root:
   FRONTEND_EVENTS_API.md
   ```
 
+- Frontend walk planner contract (`/v1/walks/*`):
+  ```text
+  FRONTEND_WALKS_API.md
+  ```
+
 Current note:
 
 - Markdown API docs are usage docs.

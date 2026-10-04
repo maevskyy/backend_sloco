@@ -4,6 +4,8 @@ services:
       context: ./services/gateway
       dockerfile: Dockerfile
     image: sloco-backend:local
+    environment:
+      WALK_PLANNER_URL: http://walk-planner:8000
 
   recommendation-service:
     build:

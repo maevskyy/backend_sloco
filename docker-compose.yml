@@ -17,6 +17,9 @@ services:
       PG_POOL_IDLE_TIMEOUT_MS: ${PG_POOL_IDLE_TIMEOUT_MS:-30000}
       PG_QUERY_TIMEOUT_MS: ${PG_QUERY_TIMEOUT_MS:-8000}
       RECOMMENDATION_SERVICE_URL: ${RECOMMENDATION_SERVICE_URL:-http://recommendation-service:8000}
+      # Empty until the walk-planner rollout (SLO-68): /v1/walks/* answer 503
+      # walk_planner_unavailable at once instead of retrying a missing host.
+      WALK_PLANNER_URL: ${WALK_PLANNER_URL:-}
       REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
       PLACE_CACHE_TTL_SECONDS: ${PLACE_CACHE_TTL_SECONDS:-3600}
       MAP_TILE_CACHE_TTL_SECONDS: ${MAP_TILE_CACHE_TTL_SECONDS:-604800}
