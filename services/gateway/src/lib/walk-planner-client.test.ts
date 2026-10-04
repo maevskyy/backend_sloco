@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import {
   createWalkPlannerClient,
+  WalkPlannerBusyError,
   WalkPlannerTimeoutError,
   WalkPlannerUnavailableError
 } from "./walk-planner-client.js";
@@ -185,6 +186,56 @@ describe("walk-planner client", () => {
 
     expect((await client.searchPlaces({ q: "a" })).status).toBe(503);
     expect(sleeps).toEqual([]);
+  });
+
+  describe("gateway slots for plan / schedule / insert", () => {
+    // Plan-like calls hang until released; search answers at once.
+    function slotHarness(queueWaitMs: number) {
+      const pending: Array<() => void> = [];
+      const fetchFake = (async (url: URL) => {
+        if (!url.pathname.endsWith("/search")) {
+          await new Promise<void>((resolve) => pending.push(resolve));
+        }
+        return new Response("{}", { status: 200 });
+      }) as unknown as typeof fetch;
+      const client = createWalkPlannerClient({
+        baseUrl: BASE_URL,
+        fetch: fetchFake,
+        maxConcurrent: 1,
+        queueWaitMs
+      });
+      const releaseNext = async () => {
+        while (pending.length === 0) {
+          await new Promise((resolve) => setTimeout(resolve, 1));
+        }
+        pending.shift()?.();
+      };
+      return { client, releaseNext };
+    }
+
+    it("reports busy when no slot frees up within the wait; search does not queue", async () => {
+      const { client, releaseNext } = slotHarness(20);
+      const first = client.plan({}, {});
+
+      await expect(client.insert({}, {})).rejects.toBeInstanceOf(
+        WalkPlannerBusyError
+      );
+      expect((await client.searchPlaces({ q: "a" })).status).toBe(200);
+
+      await releaseNext();
+      expect((await first).status).toBe(200);
+    });
+
+    it("hands a freed slot to the waiting call", async () => {
+      const { client, releaseNext } = slotHarness(5_000);
+      const first = client.plan({}, {});
+      const queued = client.schedule({}, {});
+
+      await releaseNext();
+      expect((await first).status).toBe(200);
+      await releaseNext();
+      expect((await queued).status).toBe(200);
+    });
   });
 
   it("is unavailable when WALK_PLANNER_URL is not set", async () => {

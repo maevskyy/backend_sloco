@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import { buildApp } from "../../../app.js";
 import { VersionedAppRoute } from "../../../config/routes.js";
 import {
+  WalkPlannerBusyError,
   WalkPlannerTimeoutError,
   WalkPlannerUnavailableError,
   type WalkPlannerClient,
@@ -11,7 +12,11 @@ import {
 } from "../../../lib/walk-planner-client.js";
 import type { AuthService, AuthenticatedUser } from "../../auth/auth.service.js";
 import { WalksServiceImpl } from "../services/walks.service.js";
-import type { WalksService } from "../index.js";
+import {
+  createWalkRateLimiters,
+  WALK_RATE_LIMITS,
+  type WalksService
+} from "../index.js";
 
 const user: AuthenticatedUser = {
   id: "0f70a78a-05f8-45da-81b5-a435fdadf16c",
@@ -173,6 +178,79 @@ describe("walks routes", () => {
 
     expect(response.statusCode).toBe(504);
     expect(response.json().error.code).toBe("walk_planner_timeout");
+  });
+
+  it("answers 503 busy when the gateway queue is full", async () => {
+    const response = await inject(
+      fakeService({
+        async plan() {
+          throw new WalkPlannerBusyError("plan");
+        }
+      }),
+      { method: "POST", url: VersionedAppRoute.walksPlan, payload: {} }
+    );
+
+    expect(response.statusCode).toBe(503);
+    expect(response.headers["retry-after"]).toBe("2");
+    expect(response.json().error.code).toBe("busy");
+  });
+
+  it("rate-limits per user, and per client IP (X-Real-IP) for anonymous calls", async () => {
+    const app = await buildApp({
+      authService,
+      walksService: fakeService({
+        async plan() {
+          return { status: 200, body: {} };
+        }
+      }),
+      walkRateLimiters: createWalkRateLimiters({
+        ...WALK_RATE_LIMITS,
+        plan: [{ limit: 1, windowMs: 60_000 }]
+      })
+    });
+    const plan = (headers: Record<string, string>) =>
+      app.inject({ method: "POST", url: VersionedAppRoute.walksPlan, headers, payload: {} });
+
+    const first = await plan({ "x-real-ip": "1.1.1.1" });
+    const second = await plan({ "x-real-ip": "1.1.1.1" });
+    const otherIp = await plan({ "x-real-ip": "2.2.2.2" });
+    const user = await plan({ "x-real-ip": "1.1.1.1", authorization: "Bearer valid-token" });
+
+    await app.close();
+
+    expect([first.statusCode, second.statusCode, otherIp.statusCode, user.statusCode]).toEqual([
+      200, 429, 200, 200
+    ]);
+    expect(second.headers["retry-after"]).toBe("60");
+    expect(second.json()).toEqual({
+      error: {
+        code: "rate_limited",
+        message: "Слишком много запросов. Попробуйте чуть позже.",
+        params: { retry_after_s: 60 }
+      }
+    });
+  });
+
+  it("does not rate-limit config", async () => {
+    const app = await buildApp({
+      authService,
+      walksService: fakeService({
+        async config() {
+          return { status: 200, body: {} };
+        }
+      }),
+      walkRateLimiters: createWalkRateLimiters({
+        plan: [{ limit: 0, windowMs: 60_000 }],
+        edit: [{ limit: 0, windowMs: 60_000 }],
+        search: [{ limit: 0, windowMs: 60_000 }],
+        place: [{ limit: 0, windowMs: 60_000 }]
+      })
+    });
+
+    const response = await app.inject({ method: "GET", url: VersionedAppRoute.walksConfig });
+    await app.close();
+
+    expect(response.statusCode).toBe(200);
   });
 
   it("refuses a non-object body and bad query types with 400", async () => {

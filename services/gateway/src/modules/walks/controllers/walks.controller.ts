@@ -10,8 +10,13 @@ import {
   LogMessagePrefix,
   logResponseSummary
 } from "../../../http/response-log.js";
+import {
+  FixedWindowRateLimiter,
+  type RateLimitRule
+} from "../../../http/rate-limiter.js";
 import { docsRoute } from "../../../http/route.js";
 import {
+  WalkPlannerBusyError,
   WalkPlannerTimeoutError,
   WalkPlannerUnavailableError
 } from "../../../lib/walk-planner-client.js";
@@ -40,6 +45,40 @@ import type {
 
 // The container refuses connections ~5–10 s during a restart or bundle switch.
 const UNAVAILABLE_RETRY_AFTER_SECONDS = "5";
+// Same pause the service asks for with its own 503 busy.
+const BUSY_RETRY_AFTER_SECONDS = "2";
+
+export type WalkRateBucket = "plan" | "edit" | "search" | "place";
+
+// Per user id, or per client IP for anonymous calls (INTEGRATION.md §3.6). A
+// plan costs 0.4–5 s of a core; every drag or stepper change of an edit is a
+// call (the app debounces); search is typed (debounced ~300 ms). Config is
+// cached and unlimited.
+export const WALK_RATE_LIMITS: Record<WalkRateBucket, RateLimitRule[]> = {
+  plan: [
+    { limit: 6, windowMs: 60_000 },
+    { limit: 60, windowMs: 3_600_000 }
+  ],
+  edit: [{ limit: 60, windowMs: 60_000 }],
+  search: [{ limit: 60, windowMs: 60_000 }],
+  place: [{ limit: 120, windowMs: 60_000 }]
+};
+
+export type WalkRateLimiters = Record<
+  WalkRateBucket,
+  Pick<FixedWindowRateLimiter, "check">
+>;
+
+export function createWalkRateLimiters(
+  limits: Record<WalkRateBucket, RateLimitRule[]> = WALK_RATE_LIMITS
+): WalkRateLimiters {
+  return {
+    plan: new FixedWindowRateLimiter(limits.plan),
+    edit: new FixedWindowRateLimiter(limits.edit),
+    search: new FixedWindowRateLimiter(limits.search),
+    place: new FixedWindowRateLimiter(limits.place)
+  };
+}
 
 const GATEWAY_ERROR_TEXT = {
   walk_planner_unavailable: {
@@ -49,6 +88,14 @@ const GATEWAY_ERROR_TEXT = {
   walk_planner_timeout: {
     ru: "Сервис маршрутов не ответил вовремя. Попробуйте ещё раз.",
     en: "The walk planner did not answer in time. Try again."
+  },
+  busy: {
+    ru: "Сервис маршрутов сейчас занят. Попробуйте через пару секунд.",
+    en: "The walk planner is busy. Try again in a few seconds."
+  },
+  rate_limited: {
+    ru: "Слишком много запросов. Попробуйте чуть позже.",
+    en: "Too many requests. Try again a little later."
   }
 } as const;
 
@@ -61,7 +108,8 @@ export class WalksController {
 
   constructor(
     private readonly service: WalksServiceContract,
-    authService: AuthService
+    authService: AuthService,
+    private readonly limiters: WalkRateLimiters = createWalkRateLimiters()
   ) {
     this.authGuard = createAuthGuard(authService);
   }
@@ -100,7 +148,7 @@ export class WalksController {
   }
 
   private config(request: FastifyRequest, reply: FastifyReply) {
-    return this.handle(request, reply, VersionedAppRoute.walksConfig, async () =>
+    return this.handle(request, reply, VersionedAppRoute.walksConfig, null, async () =>
       this.service.config(
         walksConfigQuerySchema.parse(request.query),
         context(request)
@@ -113,6 +161,7 @@ export class WalksController {
       request,
       reply,
       VersionedAppRoute.walksPlan,
+      "plan",
       async (userId) =>
         this.service.plan(
           {
@@ -130,6 +179,7 @@ export class WalksController {
       request,
       reply,
       VersionedAppRoute.walksSchedule,
+      "edit",
       async () =>
         this.service.schedule(
           {
@@ -142,7 +192,7 @@ export class WalksController {
   }
 
   private insert(request: FastifyRequest, reply: FastifyReply) {
-    return this.handle(request, reply, VersionedAppRoute.walksInsert, async () =>
+    return this.handle(request, reply, VersionedAppRoute.walksInsert, "edit", async () =>
       this.service.insert(
         {
           body: walksBodySchema.parse(request.body),
@@ -158,6 +208,7 @@ export class WalksController {
       request,
       reply,
       VersionedAppRoute.walksPlacesSearch,
+      "search",
       async () =>
         this.service.searchPlaces(
           walksSearchQuerySchema.parse(request.query),
@@ -167,7 +218,7 @@ export class WalksController {
   }
 
   private place(request: FastifyRequest, reply: FastifyReply) {
-    return this.handle(request, reply, VersionedAppRoute.walksPlace, async () =>
+    return this.handle(request, reply, VersionedAppRoute.walksPlace, "place", async () =>
       this.service.place(
         {
           sourceId: walksPlaceParamsSchema.parse(request.params).sourceId,
@@ -183,6 +234,7 @@ export class WalksController {
     request: FastifyRequest,
     reply: FastifyReply,
     route: string,
+    bucket: WalkRateBucket | null,
     call: (userId: string | null) => Promise<WalksReply>
   ) {
     const user = await this.authGuard.optionalUser(request);
@@ -192,6 +244,20 @@ export class WalksController {
     }
 
     reply.header("X-Request-Id", request.id);
+
+    if (bucket) {
+      const decision = this.limiters[bucket].check(
+        user ? `user:${user.id}` : `ip:${clientIp(request)}`
+      );
+
+      if (!decision.allowed) {
+        request.log.warn({ bucket }, "walks rate limit hit");
+        reply.header("Retry-After", String(decision.retryAfterSeconds));
+        return sendGatewayError(request, reply, 429, "rate_limited", {
+          retry_after_s: decision.retryAfterSeconds
+        });
+      }
+    }
 
     try {
       const result = await call(user?.id ?? null);
@@ -215,6 +281,12 @@ export class WalksController {
         return sendGatewayError(request, reply, 503, "walk_planner_unavailable");
       }
 
+      if (error instanceof WalkPlannerBusyError) {
+        request.log.warn({ err: error }, "walk-planner gateway queue full");
+        reply.header("Retry-After", BUSY_RETRY_AFTER_SECONDS);
+        return sendGatewayError(request, reply, 503, "busy");
+      }
+
       if (error instanceof WalkPlannerTimeoutError) {
         request.log.warn({ err: error }, "walk-planner timed out");
         return sendGatewayError(request, reply, 504, "walk_planner_timeout");
@@ -223,6 +295,13 @@ export class WalksController {
       return handleCommonError(request, reply, error, "Invalid walk request");
     }
   }
+}
+
+// Nginx sets X-Real-IP to the peer it saw (and overwrites a client's own); the
+// gateway port is loopback-only, so the header cannot come from anyone else.
+function clientIp(request: FastifyRequest) {
+  const realIp = request.headers["x-real-ip"];
+  return (typeof realIp === "string" && realIp) || request.ip;
 }
 
 function context(request: FastifyRequest): WalksCallContext {
@@ -251,12 +330,13 @@ function sendGatewayError(
   request: FastifyRequest,
   reply: FastifyReply,
   status: number,
-  code: GatewayErrorCode
+  code: GatewayErrorCode,
+  params: Record<string, unknown> = {}
 ) {
   const lang = requestLang(request);
 
   return reply.code(status).send({
-    error: { code, message: GATEWAY_ERROR_TEXT[code][lang], params: {} }
+    error: { code, message: GATEWAY_ERROR_TEXT[code][lang], params }
   });
 }
 

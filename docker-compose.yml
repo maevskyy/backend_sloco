@@ -20,6 +20,7 @@ services:
       # Empty until the walk-planner rollout (SLO-68): /v1/walks/* answer 503
       # walk_planner_unavailable at once instead of retrying a missing host.
       WALK_PLANNER_URL: ${WALK_PLANNER_URL:-}
+      WALK_PLANNER_MAX_CONCURRENT: ${WALK_PLANNER_MAX_CONCURRENT:-4}
       REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
       PLACE_CACHE_TTL_SECONDS: ${PLACE_CACHE_TTL_SECONDS:-3600}
       MAP_TILE_CACHE_TTL_SECONDS: ${MAP_TILE_CACHE_TTL_SECONDS:-604800}
@@ -113,10 +114,15 @@ services:
       # One immutable bundle directory per city, named by its bundle_id;
       # switching data = change WALK_BUNDLE_ID + `up -d walk-planner`.
       WALK_BUNDLE_DIR: /bundles/${WALK_BUNDLE_ID:-bucharest-20261002-d68a311e}
-      # Empty = no street router: every leg is a straight-line estimate and
-      # the response says so. osrm-foot and the ORS key arrive with SLO-68.
+      # Street routing chain: OSRM (osrm-foot, profile walk-osrm) → ORS cloud →
+      # straight-line estimate; every leg says which one it was. Empty router
+      # URL / key = that link is skipped. Plans stay correct without either.
       WALK_ROUTER_URL: ${WALK_ROUTER_URL:-}
       ORS_API_KEY: ${ORS_API_KEY:-}
+      # Per worker (× WALK_PLANNER_WORKERS must stay under the key's plan:
+      # the free one is 40/min, 2,000/day).
+      ORS_MAX_PER_MIN: ${ORS_MAX_PER_MIN:-17}
+      ORS_MAX_PER_DAY: ${ORS_MAX_PER_DAY:-900}
       PHOTO_BASE_URL: ${PHOTO_BASE_URL:-}
       WALK_DEFAULT_LANG: ${WALK_DEFAULT_LANG:-ru}
       ENVIRONMENT: ${WALK_PLANNER_ENVIRONMENT:-production}
@@ -151,6 +157,56 @@ services:
           memory: ${WALK_PLANNER_MEM_LIMIT:-3g}
     # healthcheck: from the image (GET /v1/health/ready). Ready ~2 s after
     # start; the 503 not_ready window covers bundle verification + warm-up.
+    networks:
+      - sloco_net
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Self-hosted foot router for walk-planner (SLO-68), its own profile: it
+  # needs a dataset built on the host first (services/walk-planner/deploy/osrm/
+  # prepare_osrm.sh → /opt/osrm/current). Then WALK_ROUTER_URL=http://osrm-foot:5000.
+  osrm-foot:
+    # Pinned: the dataset must be built by the same OSRM version that serves
+    # it (prepare_osrm.sh uses this exact tag; change both together).
+    image: ghcr.io/project-osrm/osrm-backend:v26.10.0-debian
+    profiles:
+      - walk-osrm
+    command: ["osrm-routed", "--algorithm", "mld", "/data/region.osrm"]
+    restart: unless-stopped
+    init: true
+    volumes:
+      # `current` is a symlink to datasets/<id>, resolved when the container is
+      # created: after prepare_osrm.sh switches it, recreate the container.
+      # Long syntax, so a missing symlink fails instead of becoming an empty dir.
+      - type: bind
+        source: ${OSRM_HOST_DIR:-/opt/osrm}/current
+        target: /data
+        read_only: true
+        bind:
+          create_host_path: false
+    expose:
+      - "5000"
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    deploy:
+      resources:
+        limits:
+          cpus: "${OSRM_CPUS:-1}"
+          # All of Romania ~1 GB to serve; the Bucharest clip far less.
+          memory: ${OSRM_MEM_LIMIT:-2g}
+    # The image has bash but no curl: plain HTTP/1.0 over /dev/tcp.
+    healthcheck:
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/5000 && printf 'GET /nearest/v1/foot/26.1025,44.4355 HTTP/1.0\\r\\n\\r\\n' >&3 && grep -q '\"Ok\"' <&3"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
     networks:
       - sloco_net
     logging:

@@ -16,6 +16,7 @@ on:
           - all
           - gateway
           - recommender
+          - walk-planner
       ref:
         description: "Branch, tag, or commit SHA to deploy"
         required: true
@@ -35,6 +36,7 @@ permissions:
 env:
   GATEWAY_IMAGE: ghcr.io/maevskyy/backend_sloco
   RECOMMENDER_IMAGE: ghcr.io/maevskyy/recommender_sloco
+  WALK_PLANNER_IMAGE: ghcr.io/maevskyy/walk_planner_sloco
 
 jobs:
   # Gate: run the same checks as CI on the exact ref being deployed, so a manual
@@ -90,6 +92,31 @@ jobs:
           poetry run mypy src
           poetry run pytest
 
+      # --- Walk planner (Python, vendored from the research repo) ---
+      # Same checks as its own CI (services/walk-planner/deploy/ci): the
+      # hash-pinned locks the image is built from, offline tests (real-data
+      # tests skip), generated docs current.
+      - name: Setup Python (walk-planner)
+        if: ${{ inputs.service == 'walk-planner' || inputs.service == 'all' }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Walk planner checks
+        if: ${{ inputs.service == 'walk-planner' || inputs.service == 'all' }}
+        working-directory: services/walk-planner
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+          WALK_ROUTER_URL: ""
+          ORS_API_KEY: ""
+          WALK_ROUTE_CACHE_REDIS_URL: ""
+        run: |
+          python -m pip install --require-hashes --only-binary=:all: \
+            -r deploy/requirements.lock -r deploy/requirements-test.lock
+          python -m pip check
+          python -m pytest -q
+          python tools/export_openapi.py --check
+          python tools/export_messages.py --check
+
   build:
     name: Build & push images
     needs: verify
@@ -133,6 +160,20 @@ jobs:
             ${{ env.RECOMMENDER_IMAGE }}:${{ steps.sha.outputs.short_sha }}
             ${{ env.RECOMMENDER_IMAGE }}:prod-latest
 
+      # GIT_SHA labels the image and is echoed by GET /v1/meta.
+      - name: Build & push walk-planner
+        if: ${{ inputs.service == 'walk-planner' || inputs.service == 'all' }}
+        uses: docker/build-push-action@v6
+        with:
+          context: ./services/walk-planner
+          file: ./services/walk-planner/deploy/Dockerfile
+          build-args: |
+            GIT_SHA=${{ steps.sha.outputs.short_sha }}
+          push: true
+          tags: |
+            ${{ env.WALK_PLANNER_IMAGE }}:${{ steps.sha.outputs.short_sha }}
+            ${{ env.WALK_PLANNER_IMAGE }}:prod-latest
+
   deploy:
     name: Ship stack & converge
     needs: build
@@ -143,14 +184,16 @@ jobs:
         with:
           ref: ${{ inputs.ref }}
 
-      # 1. Ship compose + deploy configs + grafana provisioning to the server.
+      # 1. Ship compose + deploy configs + grafana provisioning to the server,
+      #    plus walk-planner's host scripts (OSRM dataset, bundle checks) and
+      #    its golden acceptance data, which the image does not carry.
       - name: Sync stack files to server
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
-          source: "docker-compose.yml,deploy/**,observability/**"
+          source: "docker-compose.yml,deploy/**,observability/**,services/walk-planner/deploy/**,services/walk-planner/golden/scenarios.json,services/walk-planner/golden/expected/**"
           target: "/opt/backend_sloco"
           overwrite: true
 
@@ -163,6 +206,7 @@ jobs:
           WITH_OBS: ${{ inputs.with_observability }}
           GATEWAY_IMAGE: ${{ env.GATEWAY_IMAGE }}
           RECOMMENDER_IMAGE: ${{ env.RECOMMENDER_IMAGE }}
+          WALK_PLANNER_IMAGE: ${{ env.WALK_PLANNER_IMAGE }}
           GHCR_USERNAME: ${{ secrets.GHCR_USERNAME }}
           GHCR_READ_TOKEN: ${{ secrets.GHCR_READ_TOKEN }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -173,11 +217,21 @@ jobs:
           GF_SERVER_ROOT_URL: ${{ secrets.GF_SERVER_ROOT_URL }}
           # Repository Variable (not a secret): set to location_recommender_v4 to enable v4.
           RECOMMENDER_ALGORITHM: ${{ vars.RECOMMENDER_ALGORITHM }}
+          # Walk planner switches are Repository Variables, so every later
+          # deploy keeps them (SLO-68): WALK_PLANNER_ENABLED=true serves
+          # /v1/walks/*; WALK_OSRM_ENABLED=true adds street routing (needs the
+          # OSRM dataset on the host); WALK_BUNDLE_ID picks the data bundle;
+          # WALK_PHOTO_BASE_URL makes card photo URLs absolute.
+          WALK_PLANNER_ENABLED: ${{ vars.WALK_PLANNER_ENABLED }}
+          WALK_OSRM_ENABLED: ${{ vars.WALK_OSRM_ENABLED }}
+          WALK_BUNDLE_ID: ${{ vars.WALK_BUNDLE_ID }}
+          WALK_PHOTO_BASE_URL: ${{ vars.WALK_PHOTO_BASE_URL }}
+          ORS_API_KEY: ${{ secrets.ORS_API_KEY }}
         with:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
-          envs: SERVICE,SHORT_SHA,WITH_OBS,GATEWAY_IMAGE,RECOMMENDER_IMAGE,GHCR_USERNAME,GHCR_READ_TOKEN,SUPABASE_URL,SUPABASE_SERVICE_ROLE_KEY,SUPABASE_DB_URL,GF_SECURITY_ADMIN_USER,GF_SECURITY_ADMIN_PASSWORD,GF_SERVER_ROOT_URL,RECOMMENDER_ALGORITHM
+          envs: SERVICE,SHORT_SHA,WITH_OBS,GATEWAY_IMAGE,RECOMMENDER_IMAGE,WALK_PLANNER_IMAGE,GHCR_USERNAME,GHCR_READ_TOKEN,SUPABASE_URL,SUPABASE_SERVICE_ROLE_KEY,SUPABASE_DB_URL,GF_SECURITY_ADMIN_USER,GF_SECURITY_ADMIN_PASSWORD,GF_SERVER_ROOT_URL,RECOMMENDER_ALGORITHM,WALK_PLANNER_ENABLED,WALK_OSRM_ENABLED,WALK_BUNDLE_ID,WALK_PHOTO_BASE_URL,ORS_API_KEY
           script: |
             set -euo pipefail
             cd /opt/backend_sloco
@@ -185,8 +239,10 @@ jobs:
             # Preserve current image tags for services we are NOT deploying.
             CUR_BACKEND="$(grep -E '^BACKEND_IMAGE=' .env 2>/dev/null | cut -d= -f2- || true)"
             CUR_REC="$(grep -E '^RECOMMENDATION_SERVICE_IMAGE=' .env 2>/dev/null | cut -d= -f2- || true)"
+            CUR_WALK="$(grep -E '^WALK_PLANNER_IMAGE=' .env 2>/dev/null | cut -d= -f2- || true)"
             BACKEND_IMAGE_TAG="${CUR_BACKEND:-${GATEWAY_IMAGE}:prod-latest}"
             REC_IMAGE_TAG="${CUR_REC:-${RECOMMENDER_IMAGE}:prod-latest}"
+            WALK_IMAGE_TAG="${CUR_WALK:-${WALK_PLANNER_IMAGE}:prod-latest}"
 
             if [ "$SERVICE" = "gateway" ] || [ "$SERVICE" = "all" ]; then
               BACKEND_IMAGE_TAG="${GATEWAY_IMAGE}:${SHORT_SHA}"
@@ -194,12 +250,16 @@ jobs:
             if [ "$SERVICE" = "recommender" ] || [ "$SERVICE" = "all" ]; then
               REC_IMAGE_TAG="${RECOMMENDER_IMAGE}:${SHORT_SHA}"
             fi
+            if [ "$SERVICE" = "walk-planner" ] || [ "$SERVICE" = "all" ]; then
+              WALK_IMAGE_TAG="${WALK_PLANNER_IMAGE}:${SHORT_SHA}"
+            fi
 
             # Render .env from secrets (single source of truth, idempotent).
             umask 077
             cat > .env <<EOF
             BACKEND_IMAGE=${BACKEND_IMAGE_TAG}
             RECOMMENDATION_SERVICE_IMAGE=${REC_IMAGE_TAG}
+            WALK_PLANNER_IMAGE=${WALK_IMAGE_TAG}
 
             NODE_ENV=production
             SUPABASE_URL=${SUPABASE_URL}
@@ -265,6 +325,33 @@ jobs:
             EOF
             fi
 
+            # Walk planner (SLO-68): off unless the WALK_PLANNER_ENABLED repo
+            # Variable is "true". Off = the gateway answers /v1/walks/* with 503
+            # walk_planner_unavailable and the containers are removed below.
+            PROFILE=""
+            if [ "${WALK_PLANNER_ENABLED:-}" = "true" ]; then
+              PROFILE="$PROFILE --profile walk-planner"
+              cat >> .env <<EOF
+
+            WALK_PLANNER_URL=http://walk-planner:8000
+            # Immutable bundle dirs synced out of band (sync_bundle.sh), mounted read-only.
+            WALK_BUNDLES_HOST_DIR=/opt/sloco-data/walk/bundles
+            WALK_BUNDLE_ID=${WALK_BUNDLE_ID:-bucharest-20261002-d68a311e}
+            WALK_PLANNER_WORKERS=2
+            # = WALK_PLANNER_WORKERS x the service's WALK_MAX_CONCURRENT_PLANS (2).
+            WALK_PLANNER_MAX_CONCURRENT=4
+            PHOTO_BASE_URL=${WALK_PHOTO_BASE_URL:-}
+            ORS_API_KEY=${ORS_API_KEY:-}
+            EOF
+              if [ "${WALK_OSRM_ENABLED:-}" = "true" ]; then
+                PROFILE="$PROFILE --profile walk-osrm"
+                cat >> .env <<EOF
+            WALK_ROUTER_URL=http://osrm-foot:5000
+            OSRM_HOST_DIR=/opt/osrm
+            EOF
+              fi
+            fi
+
             # Observability (Grafana/Loki/Prometheus) is opt-in via with_observability.
             if [ "$WITH_OBS" = "true" ]; then
               cat >> .env <<EOF
@@ -291,13 +378,38 @@ jobs:
             fi
 
             # Converge. Observability profile only when explicitly requested.
-            PROFILE=""
             if [ "$WITH_OBS" = "true" ]; then
-              PROFILE="--profile observability"
+              PROFILE="$PROFILE --profile observability"
             fi
             docker compose $PROFILE pull
             docker compose $PROFILE up -d
+            # A switched-off walk planner / OSRM must not keep running from an
+            # earlier deploy (`up` leaves services of inactive profiles alone).
+            if [ "${WALK_PLANNER_ENABLED:-}" != "true" ]; then
+              docker compose --profile walk-planner --profile walk-osrm rm -sf walk-planner osrm-foot || true
+            elif [ "${WALK_OSRM_ENABLED:-}" != "true" ]; then
+              docker compose --profile walk-osrm rm -sf osrm-foot || true
+            fi
             docker image prune -f
+
+            # Health gate on the walk planner, seen from the gateway container
+            # (same network path as real calls). Ready ~5–6 s after start.
+            if [ "${WALK_PLANNER_ENABLED:-}" = "true" ]; then
+              walk_ready=0
+              for attempt in $(seq 1 24); do
+                if docker compose exec -T backend node -e "fetch('http://walk-planner:8000/v1/health/ready').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"; then
+                  walk_ready=1
+                  break
+                fi
+                echo "walk-planner not ready yet. Attempt ${attempt}/24"
+                sleep 5
+              done
+              if [ "$walk_ready" != "1" ]; then
+                docker compose --profile walk-planner ps
+                docker compose --profile walk-planner logs --tail=100 walk-planner
+                exit 1
+              fi
+            fi
 
             # Health gate on the gateway.
             for attempt in $(seq 1 12); do

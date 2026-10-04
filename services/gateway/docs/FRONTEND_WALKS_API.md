@@ -114,7 +114,8 @@ Branch on `code`; treat an unknown code by its HTTP status. The ones the screens
 | 422 | `place_closed_forever` | Disable "Add" |
 | 404 | `unknown_place` | "This place isn't available for walks" |
 | 409 | `catalog_changed` | Place data updated — plan again with the same form |
-| 503 | `busy` (`Retry-After: 2`) | The gateway already retried; offer "try again" |
+| 503 | `busy` (`Retry-After: 2`) | The planner is at capacity; the gateway already queued/retried. Offer "try again" |
+| 429 | `rate_limited` (`Retry-After`, `params.retry_after_s`) | Gateway: too many calls from this user / IP — plan 6/min and 60/h, schedule + insert 60/min, search 60/min, place 120/min |
 | 503 | `walk_planner_unavailable` (`Retry-After: 5`) | Gateway: the planner is down or restarting |
 | 504 | `walk_planner_timeout` | Gateway: no answer in time (plan 20 s, edits 10 s, others 5 s) |
 
@@ -134,4 +135,8 @@ dates only (the service accepts past dates too). Details: INTEGRATION.md §4.1.
 
 Never cache a plan, schedule or insert response across users: they depend on the user's
 saved places and start location. Config changes only with a service redeploy
-(`versions.catalog`).
+(`versions.catalog`). The gateway itself caches config (10 min) and the place screen
+(1 h) across users; plans and edits never.
+
+Debounce edits (drag, stepper) and search (~300 ms, from 2 characters): every call
+counts against the limits above.

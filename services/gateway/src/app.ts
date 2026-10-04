@@ -58,6 +58,7 @@ import {
 } from "./modules/events/index.js";
 import {
   registerWalksModule,
+  type WalkRateLimiters,
   type WalksService
 } from "./modules/walks/index.js";
 import type { AuthService } from "./modules/auth/auth.service.js";
@@ -80,6 +81,7 @@ type AppOptions = {
   citiesService?: CitiesService;
   eventsService?: EventsServiceContract;
   walksService?: WalksService;
+  walkRateLimiters?: WalkRateLimiters;
 };
 
 export async function buildApp(options: AppOptions = {}) {
@@ -214,7 +216,9 @@ export async function buildApp(options: AppOptions = {}) {
     prefix: API_PREFIX,
     db,
     authService: options.authService,
-    walksService: options.walksService
+    walksService: options.walksService,
+    cacheStore: options.cacheStore,
+    walkRateLimiters: options.walkRateLimiters
   });
 
   await app.register(registerMapModule, {

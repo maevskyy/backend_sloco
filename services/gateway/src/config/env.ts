@@ -24,6 +24,9 @@ const envSchema = z.object({
   RECOMMENDATION_SERVICE_URL: optionalNonEmptyString(z.string().url()),
   // Private walk-planner service (SLO-67); unset → /v1/walks/* answer 503.
   WALK_PLANNER_URL: optionalNonEmptyString(z.string().url()),
+  // Plans / edits in flight per gateway process = the service's load guard
+  // (its WEB_CONCURRENCY × WALK_MAX_CONCURRENT_PLANS, 2 × 2 by default).
+  WALK_PLANNER_MAX_CONCURRENT: z.coerce.number().int().min(1).default(4),
   REDIS_URL: optionalNonEmptyString(z.string().url()),
   PLACE_CACHE_TTL_SECONDS: z.coerce.number().int().min(0).default(3600),
   MAP_TILE_CACHE_TTL_SECONDS: z.coerce.number().int().min(0).default(604800),

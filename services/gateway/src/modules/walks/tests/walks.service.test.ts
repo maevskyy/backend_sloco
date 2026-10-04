@@ -215,6 +215,45 @@ describe("walks service", () => {
     });
   });
 
+  it("caches config and the place screen across users, only 200 answers", async () => {
+    const memory = new Map<string, unknown>();
+    const cacheStore = {
+      kind: "redis" as const,
+      async get<T>(key: string) {
+        return (memory.get(key) as T | undefined) ?? null;
+      },
+      async set<T>(key: string, value: T) {
+        memory.set(key, value);
+      },
+      getBuffer: async () => null,
+      setBuffer: async () => undefined,
+      del: async () => undefined,
+      delByPrefix: async () => undefined
+    };
+    let status = 404;
+    const calls: string[] = [];
+    const client = {
+      ...fakeClient(planReply).client,
+      place: async (sourceId: string) => {
+        calls.push(sourceId);
+        return status === 200
+          ? { status, body: { place_id: sourceId } }
+          : { status, body: { error: { code: "unknown_place", message: "", params: {} } } };
+      }
+    };
+    const service = new WalksServiceImpl(client, fakeStore({ "111": 9 }).store, noSignals, cacheStore);
+    const ask = () => service.place({ sourceId: "111", query: { lang: "en" } });
+
+    expect((await ask()).status).toBe(404);
+    expect(memory.size).toBe(0);
+
+    status = 200;
+    expect((await ask()).body).toEqual({ sourceId: "111", placeId: 9 });
+    expect(await ask()).toEqual({ status: 200, body: { sourceId: "111", placeId: 9 } });
+    expect(calls).toEqual(["111", "111"]);
+    expect([...memory.keys()]).toEqual(["walks:v1:place:111:_:en"]);
+  });
+
   it("passes service errors through without a database lookup", async () => {
     const { client } = fakeClient({
       status: 503,

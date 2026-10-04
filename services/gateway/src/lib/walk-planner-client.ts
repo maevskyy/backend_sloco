@@ -1,5 +1,6 @@
 import { env } from "../config/env.js";
 import { measureDependencyMetric } from "../observability/metrics.js";
+import { Semaphore } from "./semaphore.js";
 
 // HTTP client of the private walk-planner service (services/walk-planner,
 // SLO-67). It is a transport: it does not interpret walk payloads, it returns
@@ -12,6 +13,11 @@ import { measureDependencyMetric } from "../observability/metrics.js";
 // after the request went out — only on a refused connection or a 503 that says
 // "not started" (busy / not_ready). Edits, search, place and config are pure
 // functions and may be re-sent once.
+//
+// Plan, schedule and insert also pass a gateway-side semaphore sized like the
+// service's load guard (WEB_CONCURRENCY × WALK_MAX_CONCURRENT_PLANS = 2 × 2):
+// a burst waits here up to 5 s for a slot instead of making the service answer
+// 503 busy round trips (INTEGRATION.md §3.6). Past the wait: WalkPlannerBusyError.
 
 export type WalkPlannerOperation =
   | "config"
@@ -78,6 +84,14 @@ export class WalkPlannerUnavailableError extends Error {
   }
 }
 
+/** No gateway-side slot for a plan / edit freed up within the queue wait. */
+export class WalkPlannerBusyError extends Error {
+  constructor(readonly operation: WalkPlannerOperation) {
+    super(`walk-planner ${operation}: no free slot`);
+    this.name = "WalkPlannerBusyError";
+  }
+}
+
 /** The call's deadline passed before the service answered. */
 export class WalkPlannerTimeoutError extends Error {
   constructor(
@@ -95,17 +109,19 @@ type CallPolicy = {
   resendable: boolean;
   // Retries of 503 busy (each after Retry-After + jitter, within the deadline).
   busyRetries: number;
+  // Counts against the service's load guard → takes a semaphore slot.
+  guarded: boolean;
 };
 
 // A plan is 0.3–4 s of CPU (6.5 s when two share a worker) plus up to 6 s of
 // street routing; an edit is milliseconds plus the same routing budget.
 const CALL_POLICY: Record<WalkPlannerOperation, CallPolicy> = {
-  plan: { timeoutMs: 20_000, resendable: false, busyRetries: 2 },
-  schedule: { timeoutMs: 10_000, resendable: true, busyRetries: 1 },
-  insert: { timeoutMs: 10_000, resendable: true, busyRetries: 1 },
-  config: { timeoutMs: 5_000, resendable: true, busyRetries: 1 },
-  search: { timeoutMs: 5_000, resendable: true, busyRetries: 1 },
-  place: { timeoutMs: 5_000, resendable: true, busyRetries: 1 }
+  plan: { timeoutMs: 20_000, resendable: false, busyRetries: 2, guarded: true },
+  schedule: { timeoutMs: 10_000, resendable: true, busyRetries: 1, guarded: true },
+  insert: { timeoutMs: 10_000, resendable: true, busyRetries: 1, guarded: true },
+  config: { timeoutMs: 5_000, resendable: true, busyRetries: 1, guarded: false },
+  search: { timeoutMs: 5_000, resendable: true, busyRetries: 1, guarded: false },
+  place: { timeoutMs: 5_000, resendable: true, busyRetries: 1, guarded: false }
 };
 
 // The container refuses connections for ~5–10 s during a restart or a bundle
@@ -113,6 +129,7 @@ const CALL_POLICY: Record<WalkPlannerOperation, CallPolicy> = {
 const REFUSED_RETRY_DELAY_MS = 2_000;
 const BUSY_JITTER_MS = 500;
 const DEFAULT_RETRY_AFTER_SECONDS = 2;
+const QUEUE_WAIT_MS = 5_000;
 
 export type WalkPlannerClientOptions = {
   baseUrl?: string;
@@ -120,6 +137,9 @@ export type WalkPlannerClientOptions = {
   sleep?: (ms: number) => Promise<void>;
   now?: () => number;
   random?: () => number;
+  // Gateway-side slots for plan / schedule / insert, and how long one waits.
+  maxConcurrent?: number;
+  queueWaitMs?: number;
 };
 
 export function createWalkPlannerClient(
@@ -133,6 +153,10 @@ export function createWalkPlannerClient(
     now: options.now ?? Date.now,
     random: options.random ?? Math.random
   };
+  const guard = new Semaphore(
+    options.maxConcurrent ?? env.WALK_PLANNER_MAX_CONCURRENT
+  );
+  const queueWaitMs = options.queueWaitMs ?? QUEUE_WAIT_MS;
 
   const call = (
     operation: WalkPlannerOperation,
@@ -148,14 +172,29 @@ export function createWalkPlannerClient(
         operation: "http",
         name: `walks_${operation}`
       },
-      () =>
-        callWithPolicy(transport, baseUrl, operation, {
+      async () => {
+        const httpCall = {
           method,
           path,
           query,
           body,
           requestId: context?.requestId
-        })
+        };
+
+        if (!CALL_POLICY[operation].guarded) {
+          return callWithPolicy(transport, baseUrl, operation, httpCall);
+        }
+
+        if (!(await guard.acquire(queueWaitMs))) {
+          throw new WalkPlannerBusyError(operation);
+        }
+
+        try {
+          return await callWithPolicy(transport, baseUrl, operation, httpCall);
+        } finally {
+          guard.release();
+        }
+      }
     );
 
   return {

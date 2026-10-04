@@ -51,6 +51,12 @@ GF_SECURITY_ADMIN_PASSWORD
 GF_SERVER_ROOT_URL
 ```
 
+Optional, used only when the walk planner is on (see [Walk Planner](#walk-planner)):
+
+```text
+ORS_API_KEY        production OpenRouteService key (fallback street router)
+```
+
 `GF_SERVER_ROOT_URL` should be:
 
 ```text
@@ -119,11 +125,13 @@ Manual workflow:
 
 Inputs:
 
-- `service=all` builds and deploys gateway + recommender.
+- `service=all` builds and deploys gateway + recommender + walk-planner.
 - `service=gateway` builds/deploys only the Gateway image and preserves the
-  current recommender image tag.
+  current recommender and walk-planner image tags.
 - `service=recommender` builds/deploys only the recommendation image and
-  preserves the current Gateway image tag.
+  preserves the other image tags.
+- `service=walk-planner` builds/deploys only the walk-planner image. It runs only
+  when the `WALK_PLANNER_ENABLED` variable is `true` (see [Walk Planner](#walk-planner)).
 - `ref` is the branch, tag, or commit SHA to deploy.
 - `with_observability=true` also converges Loki, Prometheus, and Grafana. Leave it
   off for normal app-only deploys.
@@ -168,6 +176,90 @@ Nginx -> 127.0.0.1:3001 Grafana
 
 Redis is a normal service, not a profile-only optional dependency. The
 observability services are converged when `with_observability=true`.
+
+## Walk Planner
+
+`walk-planner` (`services/walk-planner/`, vendored unchanged from the research
+repo) plans walking routes; the gateway serves it as `/v1/walks/*`. It is off by
+default and switched by **Repository Variables**, so every later deploy keeps the
+state:
+
+| Variable | Value | Effect |
+|---|---|---|
+| `WALK_PLANNER_ENABLED` | `true` | profile `walk-planner` up; gateway gets `WALK_PLANNER_URL=http://walk-planner:8000`. Anything else: gateway answers 503 `walk_planner_unavailable`, the containers are removed |
+| `WALK_OSRM_ENABLED` | `true` | profile `walk-osrm` up (`osrm-foot`), `WALK_ROUTER_URL=http://osrm-foot:5000`. Off: legs come from ORS (if `ORS_API_KEY`) or a straight-line estimate, and every response says so |
+| `WALK_BUNDLE_ID` | e.g. `bucharest-20261002-d68a311e` | data bundle to serve (default: that one) |
+| `WALK_PHOTO_BASE_URL` | e.g. `https://sloco.pp.ua/walk-media` | absolute card photo URLs; empty = `url: null`, key only |
+
+Runtime: `walk-planner` 2 uvicorn workers, limit 2 CPU / 3 GB (~0.9 GB idle);
+`osrm-foot` 1 CPU / 2 GB. The gateway queues at most `WALK_PLANNER_MAX_CONCURRENT`
+(4 = 2 workers × the service's 2) plans/edits at once and rate-limits per user/IP.
+
+### Host preparation (once, before enabling)
+
+The service reference is `services/walk-planner/docs/DEPLOY.md`; the steps here
+are the parts this stack needs. Run them as the deploy user on the server.
+
+```bash
+sudo install -d -m 755 -o "$USER" /opt/sloco-data/walk /opt/sloco-data/walk/bundles /opt/osrm
+df -h /opt && free -h        # bundle ~60 MB each; OSRM ~1 GB (clip); photos 31.4 GB
+```
+
+1. **Bundle.** From the machine that holds it (60 MB, checked by sha256, published
+   atomically, never overwritten):
+
+   ```bash
+   SLOCO_SSH=<user>@<server> services/walk-planner/deploy/sync_bundle.sh <path>/bucharest-20261002-d68a311e --validate
+   ```
+
+   Done when `/opt/sloco-data/walk/bundles/<bundle_id>/manifest.json` exists.
+2. **OSRM dataset** (only for `WALK_OSRM_ENABLED`). Every deploy syncs the
+   walk-planner host scripts to `/opt/backend_sloco/services/walk-planner/deploy/`;
+   idempotent, re-run monthly:
+
+   ```bash
+   /opt/backend_sloco/services/walk-planner/deploy/osrm/prepare_osrm.sh --bbox 25.80,44.20,26.40,44.70   # Bucharest clip
+   ```
+
+   Done when the log shows `canary ok` and `readlink /opt/osrm/current` names a dataset.
+   After a later re-run that switched the dataset, recreate `osrm-foot`
+   (`docker compose --profile walk-osrm up -d --force-recreate osrm-foot`).
+3. **GHCR package.** The first `service=walk-planner` run creates
+   `ghcr.io/maevskyy/walk_planner_sloco`. New packages are private: make it public
+   like the others, or keep `GHCR_READ_TOKEN` valid.
+
+### Enabling, in order
+
+1. Run the workflow with `service=walk-planner` (builds the image) while
+   `WALK_PLANNER_ENABLED` is still unset — nothing starts yet.
+2. Set `WALK_PLANNER_ENABLED=true` (OSRM still off) and deploy `service=gateway`.
+   The deploy waits until the gateway container reaches `walk-planner` ready.
+3. Acceptance on the server — the research side's recorded scenarios replayed
+   against the running container. They expect no street routing and no photo
+   URLs, so run it before step 4 and with `WALK_PHOTO_BASE_URL` unset. The image
+   carries no golden data; the deploy syncs it next to the compose file:
+
+   ```bash
+   cd /opt/backend_sloco
+   docker run --rm --network backend_sloco_sloco_net \
+     -v /opt/backend_sloco/services/walk-planner/golden:/golden:ro \
+     "$(grep ^WALK_PLANNER_IMAGE= .env | cut -d= -f2-)" \
+     python -m walk_planner golden run --url http://walk-planner:8000 \
+       --scenarios /golden/scenarios.json --expected-root /golden/expected
+   ```
+
+   Must print `26 scenarios: 26 pass` (~25 s; it sends ~100 plans and edits).
+4. Set `WALK_OSRM_ENABLED=true` (and `WALK_PHOTO_BASE_URL` once photos are served),
+   deploy again; plans now report `routing: "streets"`.
+
+### Rollback
+
+- Switch off: unset `WALK_PLANNER_ENABLED` (or `WALK_OSRM_ENABLED`) and deploy
+  `service=gateway` — the containers are removed, `/v1/walks/*` answers 503.
+- Previous image: deploy `service=walk-planner` with the previous `ref`.
+- Previous data: set `WALK_BUNDLE_ID` back and deploy; bundles stay on disk.
+- Previous OSRM dataset: `services/walk-planner/deploy/osrm/prepare_osrm.sh --rollback`,
+  then recreate `osrm-foot`.
 
 ## Nginx And HTTPS
 

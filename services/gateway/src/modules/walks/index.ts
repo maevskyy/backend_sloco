@@ -4,6 +4,12 @@ export {
   WalksServiceImpl
 } from "./services/walks.service.js";
 export { WalksStore } from "./stores/walks.store.js";
+export {
+  createWalkRateLimiters,
+  WALK_RATE_LIMITS,
+  type WalkRateBucket,
+  type WalkRateLimiters
+} from "./controllers/walks.controller.js";
 export { toCamel, toSnake } from "./common/walks.keys.js";
 export type {
   WalksReply,

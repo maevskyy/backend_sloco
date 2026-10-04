@@ -1,3 +1,7 @@
+import { performance } from "node:perf_hooks";
+import type { CacheStore } from "../../../lib/cache/cache-store.js";
+import { NoopCacheStore } from "../../../lib/cache/noop-cache-store.js";
+import { logCacheMetric } from "../../../observability/metrics.js";
 import {
   walkPlannerClient,
   type WalkPlannerClient,
@@ -32,6 +36,14 @@ const SERVER_OWNED_PLAN_KEYS = [
   "debug"
 ];
 
+// Shared across users: neither depends on who asks. Config changes only with
+// a service redeploy (new bundle or version) and a card's placeId only when
+// places rows are added, so a stale entry lives at most one TTL after that.
+// Plans and edits are never cached: they depend on favourites and location.
+const CACHE_PREFIX = "walks:v1";
+const CONFIG_CACHE_TTL_SECONDS = 600;
+const PLACE_CACHE_TTL_SECONDS = 3600;
+
 type JsonObject = Record<string, unknown>;
 
 // Where a camelCase response carries the stops and cards that get `placeId`
@@ -42,12 +54,21 @@ export class WalksServiceImpl implements WalksServiceContract {
   constructor(
     private readonly client: WalkPlannerClient,
     private readonly store: WalksStoreContract,
-    private readonly signals: WalksSignalsSource
+    private readonly signals: WalksSignalsSource,
+    private readonly cacheStore: CacheStore = new NoopCacheStore()
   ) {}
 
   async config(query: WalksConfigQuery, context?: WalksCallContext) {
-    const reply = await this.client.config(serviceQuery(query), context);
-    return this.toApp(reply, () => []);
+    return this.cached(
+      "config",
+      cacheKey("config", query.city, query.lang),
+      CONFIG_CACHE_TTL_SECONDS,
+      async () =>
+        this.toApp(
+          await this.client.config(serviceQuery(query), context),
+          () => []
+        )
+    );
   }
 
   async plan(
@@ -110,12 +131,65 @@ export class WalksServiceImpl implements WalksServiceContract {
     input: { sourceId: string; query: WalksPlaceQuery },
     context?: WalksCallContext
   ) {
-    const reply = await this.client.place(
-      input.sourceId,
-      serviceQuery(input.query),
-      context
+    return this.cached(
+      "place",
+      cacheKey("place", input.sourceId, input.query.city, input.query.lang),
+      PLACE_CACHE_TTL_SECONDS,
+      async () =>
+        this.toApp(
+          await this.client.place(
+            input.sourceId,
+            serviceQuery(input.query),
+            context
+          ),
+          (camel) => [camel]
+        )
     );
-    return this.toApp(reply, (camel) => [camel]);
+  }
+
+  // Cache-aside for a 200 answer only; a cache failure never fails the call.
+  private async cached(
+    name: string,
+    key: string,
+    ttlSeconds: number,
+    produce: () => Promise<WalksReply>
+  ): Promise<WalksReply> {
+    const cacheName = `walks_${name}`;
+
+    if (this.cacheStore.kind === "noop") {
+      logCache(cacheName, "bypass", 0);
+      return produce();
+    }
+
+    let startedAt = performance.now();
+
+    try {
+      const body = await this.cacheStore.get<unknown>(key);
+
+      if (body !== null) {
+        logCache(cacheName, "hit", elapsedMs(startedAt));
+        return { status: 200, body };
+      }
+
+      logCache(cacheName, "miss", elapsedMs(startedAt));
+    } catch {
+      logCache(cacheName, "error", elapsedMs(startedAt));
+    }
+
+    const reply = await produce();
+
+    if (reply.status === 200) {
+      startedAt = performance.now();
+
+      try {
+        await this.cacheStore.set(key, reply.body, ttlSeconds);
+        logCache(cacheName, "set", elapsedMs(startedAt));
+      } catch {
+        logCache(cacheName, "error", elapsedMs(startedAt));
+      }
+    }
+
+    return reply;
   }
 
   private async personalIds(userId: string) {
@@ -172,9 +246,27 @@ export class WalksServiceImpl implements WalksServiceContract {
 export function createWalksService(
   store: WalksStoreContract,
   signals: WalksSignalsSource,
+  cacheStore?: CacheStore,
   client: WalkPlannerClient = walkPlannerClient
 ) {
-  return new WalksServiceImpl(client, store, signals);
+  return new WalksServiceImpl(client, store, signals, cacheStore);
+}
+
+// Absent options become "_" so `?lang=` and no lang share one entry.
+function cacheKey(kind: string, ...parts: Array<string | undefined>) {
+  return [CACHE_PREFIX, kind, ...parts.map((part) => part?.toLowerCase() ?? "_")].join(":");
+}
+
+function logCache(
+  cacheName: string,
+  cacheStatus: "bypass" | "error" | "hit" | "miss" | "set",
+  durationMs: number
+) {
+  logCacheMetric({ cacheName, cacheStatus, durationMs, keyPrefix: CACHE_PREFIX });
+}
+
+function elapsedMs(startedAt: number) {
+  return Math.round(performance.now() - startedAt);
 }
 
 function editCards(camel: JsonObject) {
