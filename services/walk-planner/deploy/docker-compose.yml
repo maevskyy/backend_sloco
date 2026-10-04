@@ -1,0 +1,163 @@
+# Walk Planner stack: walk-planner (FastAPI, :8000) + osrm-foot (self-hosted OSRM, foot profile, MLD)
+# [+ redis leg cache, profile "cache"]. Internal services: no auth, so nothing is published beyond loopback.
+#
+# Run (from services/walk_planner on the server):
+#   docker compose --env-file /opt/sloco-data/walk/walk.env -f deploy/docker-compose.yml up -d --build
+#   docker compose --env-file /opt/sloco-data/walk/walk.env -f deploy/docker-compose.yml --profile cache up -d
+#   curl -fsS http://127.0.0.1:18600/v1/health/ready ; curl -fsS http://127.0.0.1:18600/v1/meta
+#   Before the first OSRM dataset exists, start only the planner: `... up -d walk-planner`. It then routes
+#   through ORS or the straight-line estimate, and says so in every response.
+# The SAME walk.env (template: deploy/env.example; chmod 600) feeds both the ${...} interpolation below
+# (--env-file) and the container environment (env_file:). Forgetting --env-file fails loudly, because
+# WALK_BUNDLE_ID is required.
+#
+# One-time host setup (dirs must be world-traversable: the planner runs as uid 10001):
+#   sudo install -d -m 755 -o "$USER" /opt/sloco-data/walk /opt/sloco-data/walk/bundles /opt/osrm
+#   install -m 600 deploy/env.example /opt/sloco-data/walk/walk.env      # then edit it
+#   deploy/sync_bundle.sh <bundle dir>              # from the laptop: bundle -> /opt/sloco-data/walk/bundles/<id>/
+#   deploy/osrm/prepare_osrm.sh --compose-file deploy/docker-compose.yml --compose-env /opt/sloco-data/walk/walk.env
+# Release: build/tag the image (WALK_PLANNER_TAG), sync the bundle, set WALK_BUNDLE_ID, `up -d walk-planner`.
+# Rollback: previous WALK_PLANNER_TAG / WALK_BUNDLE_ID, `up -d walk-planner`; OSRM: prepare_osrm.sh --rollback.
+#
+# Precedence trap: a key under `environment:` beats the same key from env_file. That is why those entries are
+# ${...} interpolations of walk.env itself. Keep secrets (ORS_API_KEY, a password-bearing
+# WALK_ROUTE_CACHE_REDIS_URL) ONLY in walk.env and never list them under environment:.
+# `docker compose config` prints the merged environment INCLUDING those secrets: do not paste its output.
+#
+# Merging into backend_sloco's compose (the gateway calls http://walk-planner:8000):
+#   1. Copy the walk-planner and osrm-foot services (plus the x-logging anchor) into the backend compose file.
+#      They join its default network, so the gateway resolves `walk-planner`. Set
+#      WALK_PLANNER_URL=http://walk-planner:8000 on the gateway, with a timeout >= 15 s for POST /v1/walks/plan
+#      (the routing budget alone is WALK_ROUTING_DEADLINE_S = 6 s).
+#   2. Replace `build:` with the pinned image (registry tag), and keep the absolute host paths.
+#   3. Use the backend's Redis instead of the `cache` profile: WALK_ROUTE_CACHE_REDIS_URL=redis://<redis>:6379/5
+#      (a database of its own; the leg cache needs about 256 MB at most).
+#   4. DELETE the copied `environment:` block of walk-planner: in the backend file its ${...} would be
+#      interpolated from the BACKEND's env and override walk.env. Keep `env_file: walk.env` and put every
+#      WALK_* value there instead, incl. WALK_BUNDLE_DIR=/bundles/<bundle_id> and an explicit WALK_ROUTER_URL
+#      (http://osrm-foot:5000, or empty to disable OSRM). See docs/DEPLOY.md section 4.2.
+#   Alternative: keep this file standalone and attach only walk-planner to the backend's network:
+#     networks:   {default: {}, backend: {external: true, name: <backend network from `docker network ls`>}}
+#     services.walk-planner.networks: [default, backend]
+#   Never publish osrm-foot or redis ports: neither has authentication.
+
+name: sloco-walk
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "5"
+
+services:
+  walk-planner:
+    build:
+      context: ..                        # services/walk_planner (filtered by its .dockerignore)
+      dockerfile: deploy/Dockerfile
+      args:
+        GIT_SHA: ${GIT_SHA:-unknown}
+    image: ${WALK_PLANNER_IMAGE:-sloco-walk-planner}:${WALK_PLANNER_TAG:-local}
+    restart: unless-stopped
+    init: true
+    env_file:
+      - path: ${WALK_ENV_FILE:-/opt/sloco-data/walk/walk.env}   # secrets + tunables (chmod 600)
+        required: true                                          # long syntax needs Compose >= 2.24
+    environment:
+      # Bundles are immutable directories named by bundle_id; switching = change WALK_BUNDLE_ID + `up -d`.
+      WALK_BUNDLE_DIR: /bundles/${WALK_BUNDLE_ID:?set WALK_BUNDLE_ID in walk.env and pass it with --env-file}
+      # Unset -> the osrm-foot service below; set it EMPTY in walk.env to disable OSRM (ORS/estimate only).
+      WALK_ROUTER_URL: ${WALK_ROUTER_URL-http://osrm-foot:5000}
+      PHOTO_BASE_URL: ${PHOTO_BASE_URL:-}
+      ENVIRONMENT: ${ENVIRONMENT:-production}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      WEB_CONCURRENCY: ${WEB_CONCURRENCY:-2}
+    volumes:
+      # Long syntax: a missing host dir must fail loudly, not be auto-created empty (short-syntax default).
+      - type: bind
+        source: ${WALK_BUNDLES_HOST_DIR:-/opt/sloco-data/walk/bundles}
+        target: /bundles
+        read_only: true
+        bind:
+          create_host_path: false
+    ports:
+      # Loopback only, for curl/smoke tests on the host. Drop it when the gateway shares the Docker network.
+      - "127.0.0.1:${WALK_PLANNER_HOST_PORT:-18600}:8000"
+    # No depends_on osrm-foot: routing falls back (OSRM -> ORS -> estimate) and every plan reports its quality.
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    stop_grace_period: 30s               # > UVICORN_TIMEOUT_GRACEFUL_SHUTDOWN (20 s, image default)
+    deploy:
+      resources:
+        limits:
+          # Memory (measured, image + Bucharest bundle, WEB_CONCURRENCY=2; details in deploy/env.example):
+          # ~0.5 GB RSS per worker idle, ~0.6-0.7 GB at the load guard's 2 plans at once (bursts of 24-hour
+          # plans), up to ~1.1-1.3 GB per worker without it; supervisor ~0.13 GB. 3 GB = 2 workers x 1.3 GB +
+          # supervisor + headroom: the worst case fits even if WALK_MAX_CONCURRENT_PLANS is raised. Scale the
+          # limit with WEB_CONCURRENCY (~1.3 GB per worker) and the CPUs with it (one busy core per worker).
+          cpus: "${WALK_PLANNER_CPUS:-2}"
+          memory: ${WALK_PLANNER_MEM_LIMIT:-3g}
+    logging: *logging
+    # healthcheck: inherited from the image (GET /v1/health/ready, 60 s start period).
+
+  osrm-foot:
+    # Pinned: data must be built by the same OSRM version that serves it (deploy/osrm/prepare_osrm.sh uses
+    # this exact tag; change both together). A plain "v26.10.0" tag does not exist; "latest" is master.
+    image: ghcr.io/project-osrm/osrm-backend:v26.10.0-debian
+    command: ["osrm-routed", "--algorithm", "mld", "/data/region.osrm"]
+    restart: unless-stopped
+    init: true
+    volumes:
+      # `current` is a symlink to datasets/<id>, resolved when the container is created: after prepare_osrm.sh
+      # switches it, the container must be recreated (the script does that with --compose-file). Long syntax
+      # with create_host_path: false, because the short syntax would turn a missing symlink into an empty
+      # root-owned directory (OSRM fails, and the symlink can no longer be switched).
+      - type: bind
+        source: ${OSRM_HOST_DIR:-/opt/osrm}/current
+        target: /data
+        read_only: true
+        bind:
+          create_host_path: false
+    expose: ["5000"]
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    deploy:
+      resources:
+        limits:
+          cpus: "${OSRM_CPUS:-1}"
+          memory: ${OSRM_MEM_LIMIT:-2g}   # Romania foot ~1 GB to serve (estimate); a --bbox clip needs far less
+    # The image has bash but no curl/wget: plain HTTP/1.0 over bash's /dev/tcp.
+    healthcheck:
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/5000 && printf 'GET /nearest/v1/foot/26.1025,44.4355 HTTP/1.0\\r\\n\\r\\n' >&3 && grep -q '\"Ok\"' <&3"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    logging: *logging
+
+  redis:
+    # Optional L2 leg cache shared by all workers (`--profile cache`); then set in walk.env:
+    #   WALK_ROUTE_CACHE_REDIS_URL=redis://redis:6379/5
+    # Pure cache: no persistence, LRU-evicted, never published.
+    image: redis:7.4.11-alpine
+    profiles: ["cache"]
+    command: ["redis-server", "--save", "", "--appendonly", "no", "--maxmemory", "256mb", "--maxmemory-policy", "allkeys-lru"]
+    restart: unless-stopped
+    expose: ["6379"]
+    security_opt: ["no-new-privileges:true"]
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 320m
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+    logging: *logging

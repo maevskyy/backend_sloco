@@ -1,0 +1,270 @@
+{
+ "scenario": {
+  "id": "S18_must_evening_bar",
+  "city": "Bucharest",
+  "date": "2026-10-03",
+  "start_time": "09:00",
+  "end_time": "23:00",
+  "end_day_offset": 0,
+  "shape": "loop",
+  "start": "city_center",
+  "style": "max",
+  "slots": [
+   {"activity": "coffee", "dwell_min": null},
+   {"activity": "food", "dwell_min": null},
+   {"activity": "bar", "dwell_min": null}
+  ],
+  "must_visit_place_ids": ["104526001739669038"],
+  "variants": 3,
+  "radius_km": 2.5,
+  "fill_window": false,
+  "known_hours_only": false,
+  "top_k": 8,
+  "edits": []
+ },
+ "inputs_resolved": {
+  "start": [44.440287, 26.097708],
+  "center": [44.440287, 26.097708],
+  "start_exact": ["44.4402865461307", "26.097708464099995"],
+  "center_exact": ["44.4402865461307", "26.097708464099995"],
+  "t_start": "09:00",
+  "t0": 7740,
+  "budget_min": 840,
+  "end_abs": 1380,
+  "next_day": false,
+  "end_label_ru": "23:00",
+  "slot_labels": ["Кофе", "Еда / ресторан", "Бар / напитки"],
+  "style_label": "Максимум мест",
+  "dwell_by_slot": {},
+  "must_ids": ["104526001739669038"],
+  "seed_ids": []
+ },
+ "error": null,
+ "notes": [],
+ "search_km": 2.5,
+ "area": [44.440287, 26.097708],
+ "request": {"mode": "slots", "n_slots": 3, "start": [44.440287, 26.097708], "shape": "loop", "style": "max", "time_budget_min": 840.0, "fit_budget": true, "start_week_min": 7740.0, "max_wait_min": 30.0, "fill_window": false, "walk_weight": null, "max_leg_min": 45.0, "interest_weight": null, "max_stops": null, "provider": "walk_planner.RoutingProvider(walk_kmh=4.5, detour=1.35)", "n_candidates": 47, "n_must_visit": 1, "n_variants_requested": 3},
+ "candidates": {
+  "slot": [
+   ["9279824186385889317", 0, 0.86082, 30.0, false, "coffee", "book_store"],
+   ["2318666985071623541", 0, 0.77581, 30.0, false, "coffee", "coffee_store"],
+   ["14169121335398956031", 0, 0.733931, 30.0, false, "coffee", "cafe"],
+   ["17733277001575791107", 0, 0.726842, 30.0, false, "coffee", "coffee_shop"],
+   ["3325034453752002666", 0, 0.717382, 30.0, false, "coffee", "dessert_shop"],
+   ["293391505644345885", 0, 0.705493, 75.0, false, "coffee", "restaurant"],
+   ["11793110354655099568", 0, 0.702627, 30.0, false, "coffee", "coffee_shop"],
+   ["5564669006134392295", 0, 0.700591, 30.0, false, "coffee", "ice_cream_shop"],
+   ["14916341928181875966", 0, 0.661895, 30.0, false, "coffee", "cafe"],
+   ["11489947113366215995", 0, 0.544183, 30.0, false, "coffee", "pastry_shop"],
+   ["9624769939333197734", 0, 0.485205, 30.0, false, "coffee", "cafe"],
+   ["16436840839806217903", 0, 0.453017, 30.0, false, "coffee", "cake_shop"],
+   ["284364362787826053", 0, 0.611125, 30.0, false, "coffee", "dessert_shop"],
+   ["10532099939513755931", 0, 0.509175, 30.0, false, "coffee", "coffee_shop"],
+   ["14636091576834155908", 0, 0.562754, 75.0, false, "coffee", "restaurant"],
+   ["15439727830362881762", 1, 0.87741, 75.0, false, "restaurant", "restaurant"],
+   ["14593284683301693268", 1, 0.85, 75.0, false, "restaurant", "romanian_restaurant"],
+   ["338092938835818764", 1, 0.810316, 75.0, false, "restaurant", "restaurant"],
+   ["17098114492056661983", 1, 0.796312, 75.0, false, "restaurant", "indian_restaurant"],
+   ["6438193657888648583", 1, 0.787452, 75.0, false, "restaurant", "restaurant"],
+   ["11525635674185778928", 1, 0.781715, 75.0, false, "restaurant", "brunch_restaurant"],
+   ["11670591507730148804", 1, 0.762408, 75.0, false, "restaurant", "italian_restaurant"],
+   ["16068592796011144749", 1, 0.758946, 75.0, false, "restaurant", "korean_barbecue_restaurant"],
+   ["6578908158205473452", 1, 0.560891, 75.0, false, "restaurant", "restaurant"],
+   ["8866774377161316252", 1, 0.637235, 75.0, false, "restaurant", "restaurant"],
+   ["6085466686473577591", 1, 0.555039, 75.0, false, "restaurant", "restaurant"],
+   ["14636091576834155908", 1, 0.562754, 75.0, false, "restaurant", "restaurant"],
+   ["888803041136561144", 1, 0.685463, 75.0, false, "restaurant", "restaurant"],
+   ["2820960308764140776", 1, 0.707145, 75.0, false, "restaurant", "restaurant"],
+   ["4739451140015138428", 1, 0.554918, 75.0, false, "restaurant", "restaurant"],
+   ["12491610463607191994", 1, 0.493656, 75.0, false, "restaurant", "restaurant"],
+   ["1089081205062269331", 2, 0.791898, 60.0, false, "bar", "brewpub"],
+   ["16068592796011144749", 2, 0.758946, 60.0, false, "bar", "korean_barbecue_restaurant"],
+   ["1390769669250269784", 2, 0.743297, 60.0, false, "bar", "brewpub"],
+   ["14803764456397557850", 2, 0.74023, 60.0, false, "bar", "barbecue_restaurant"],
+   ["14169121335398956031", 2, 0.733931, 30.0, false, "bar", "cafe"],
+   ["14109068131794040059", 2, 0.732668, 60.0, false, "bar", "brewpub"],
+   ["4348878151895877331", 2, 0.711991, 75.0, false, "bar", "restaurant"],
+   ["7054906404728782264", 2, 0.711106, 60.0, false, "bar", "comedy_club"],
+   ["7792430613398021346", 2, 0.575943, 60.0, false, "bar", "pub"],
+   ["6085466686473577591", 2, 0.555039, 75.0, false, "bar", "restaurant"],
+   ["12884893661919218190", 2, 0.614377, 60.0, false, "bar", "juice_shop"],
+   ["7662212186977233441", 2, 0.40482, 60.0, false, "bar", "bar"],
+   ["10398293682046258677", 2, 0.616103, 60.0, false, "bar", "gastropub"],
+   ["10825115157458193067", 2, 0.58981, 30.0, false, "bar", "cafe"],
+   ["14716704764002563473", 2, 0.587858, 75.0, false, "bar", "restaurant"],
+   ["10039533104628781535", 2, 0.613725, 60.0, false, "bar", "coffee_shop"]
+  ],
+  "extra": [],
+  "must": [
+   ["104526001739669038", -1, 0.0, 60.0, false, "food_drink", "wine_bar", true]
+  ]
+ },
+ "variants": [
+  {
+   "dropped": [],
+   "plan": {
+    "stops": [
+     {"order": 0, "place_id": "17733277001575791107", "name": "Camera din Față", "slot": 0, "theme": "coffee", "extra": false, "pinned": false, "interest": 0.726842, "dwell_min": 30.0, "arrival_min": 8.272831, "wait_min": 0.0, "depart_min": 38.272831, "hours_ok": true, "hours_label_ru": "сб 09:00–21:00"},
+     {"order": 1, "place_id": "104526001739669038", "name": "Mosto - Natural Wine Bar & Bistró", "slot": -1, "theme": "food_drink", "extra": false, "pinned": true, "interest": 0.0, "dwell_min": 60.0, "arrival_min": 47.944413, "wait_min": 0.0, "depart_min": 107.944413, "hours_ok": false, "hours_label_ru": "сб 18:30–23:00"},
+     {"order": 2, "place_id": "14593284683301693268", "name": "Caru' cu bere", "slot": 1, "theme": "restaurant", "extra": false, "pinned": false, "interest": 0.85, "dwell_min": 75.0, "arrival_min": 126.946687, "wait_min": 0.0, "depart_min": 201.946687, "hours_ok": true, "hours_label_ru": "сб 10:00–00:00"},
+     {"order": 3, "place_id": "16068592796011144749", "name": "Jeonjuu Korean BBQ", "slot": 2, "theme": "bar", "extra": false, "pinned": false, "interest": 0.758946, "dwell_min": 60.0, "arrival_min": 204.808761, "wait_min": 0.0, "depart_min": 264.808761, "hours_ok": true, "hours_label_ru": "сб 11:00–00:00"}
+    ],
+    "segments": [
+     {"from_order": -1, "to_order": 0, "walk_min": 8.272831, "distance_km": 0.620462, "n_geom": 2},
+     {"from_order": 0, "to_order": 1, "walk_min": 9.671582, "distance_km": 0.725369, "n_geom": 2},
+     {"from_order": 1, "to_order": 2, "walk_min": 19.002274, "distance_km": 1.425171, "n_geom": 2},
+     {"from_order": 2, "to_order": 3, "walk_min": 2.862074, "distance_km": 0.214656, "n_geom": 2},
+     {"from_order": 3, "to_order": -1, "walk_min": 18.812739, "distance_km": 1.410955, "n_geom": 2}
+    ],
+    "total_time_min": 283.6215,
+    "total_walk_min": 58.6215,
+    "total_dwell_min": 225.0,
+    "total_wait_min": 0.0,
+    "total_distance_km": 4.396613,
+    "over_budget": false,
+    "dropped_slots": [],
+    "note": ""
+   },
+   "render": {
+    "manual": false,
+    "variants_caption": "**Вариант 1**: 4 места · 4.4 км · до 13:44  ·  Вариант 2: 4 места · 2.2 км · до 13:14  ·  Вариант 3: 4 места · 5.0 км · до 13:52",
+    "metric_stops": "3 из 3 + 📍1",
+    "metric_finish_label": "Возвращение",
+    "metric_finish": "13:44",
+    "metric_delta": "+556 мин запаса",
+    "metric_walk": "4.4 км · 0:59",
+    "metric_window": "09:00–23:00",
+    "captions": [],
+    "warnings": ["⚠️ «Mosto - Natural Wine Bar & Bistró» — в 09:48 по графику закрыто (сб 18:30–23:00). Маршрут всё равно построен: оставьте, если знаете, что сегодня работает дольше."],
+    "infos": [],
+    "stop_lines": [
+     ["1. Camera din Față — Кофе", "09:08–09:38 · осмотр 30 мин", "🕒 сб 09:00–21:00"],
+     ["2. Mosto - Natural Wine Bar & Bistró — 📍 ваше место", "09:48–10:48 · осмотр 60 мин", "🕒 сб 18:30–23:00", "⚠️ по графику в это время может быть закрыто — маршрут построен как есть"],
+     ["3. Caru' cu bere — Еда / ресторан", "11:07–12:22 · осмотр 75 мин", "🕒 сб 10:00–00:00"],
+     ["4. Jeonjuu Korean BBQ — Бар / напитки", "12:25–13:25 · осмотр 60 мин", "🕒 сб 11:00–00:00"]
+    ]
+   },
+   "navigation": {
+    "google": ["https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440287,26.097708&destination=44.440287,26.097708&waypoints=44.444358,26.096715%7C44.441147,26.101771%7C44.432018,26.098121%7C44.430974,26.099489&waypoint_place_ids=ChIJtRiAGE7_sUARA3qHXnpBGfY%7CChIJgWl-Pxr_sUARLh58Q9hZcwE%7CChIJwXfea0D_sUARVKdY1hnDhco%7CChIJAQA87j__sUARLSalTgMc_94"],
+    "legs": [
+     {"from": "Старт", "to": "Camera din Față", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440287,26.097708&destination=44.444358,26.096715&destination_place_id=ChIJtRiAGE7_sUARA3qHXnpBGfY", "apple": "https://maps.apple.com/?saddr=44.440287,26.097708&daddr=44.444358,26.096715&dirflg=w"},
+     {"from": "Camera din Față", "to": "Mosto - Natural Wine Bar & Bistró", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.444358,26.096715&destination=44.441147,26.101771&destination_place_id=ChIJgWl-Pxr_sUARLh58Q9hZcwE&origin_place_id=ChIJtRiAGE7_sUARA3qHXnpBGfY", "apple": "https://maps.apple.com/?saddr=44.444358,26.096715&daddr=44.441147,26.101771&dirflg=w"},
+     {"from": "Mosto - Natural Wine Bar & Bistró", "to": "Caru' cu bere", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.441147,26.101771&destination=44.432018,26.098121&destination_place_id=ChIJwXfea0D_sUARVKdY1hnDhco&origin_place_id=ChIJgWl-Pxr_sUARLh58Q9hZcwE", "apple": "https://maps.apple.com/?saddr=44.441147,26.101771&daddr=44.432018,26.098121&dirflg=w"},
+     {"from": "Caru' cu bere", "to": "Jeonjuu Korean BBQ", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.432018,26.098121&destination=44.430974,26.099489&destination_place_id=ChIJAQA87j__sUARLSalTgMc_94&origin_place_id=ChIJwXfea0D_sUARVKdY1hnDhco", "apple": "https://maps.apple.com/?saddr=44.432018,26.098121&daddr=44.430974,26.099489&dirflg=w"},
+     {"from": "Jeonjuu Korean BBQ", "to": "Старт", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.430974,26.099489&destination=44.440287,26.097708&origin_place_id=ChIJAQA87j__sUARLSalTgMc_94", "apple": "https://maps.apple.com/?saddr=44.430974,26.099489&daddr=44.440287,26.097708&dirflg=w"}
+    ]
+   }
+  },
+  {
+   "dropped": [],
+   "plan": {
+    "stops": [
+     {"order": 0, "place_id": "104526001739669038", "name": "Mosto - Natural Wine Bar & Bistró", "slot": -1, "theme": "food_drink", "extra": false, "pinned": true, "interest": 0.0, "dwell_min": 60.0, "arrival_min": 6.055868, "wait_min": 0.0, "depart_min": 66.055868, "hours_ok": false, "hours_label_ru": "сб 18:30–23:00"},
+     {"order": 1, "place_id": "3325034453752002666", "name": "French Revolution Ateneul Român", "slot": 0, "theme": "coffee", "extra": false, "pinned": false, "interest": 0.717382, "dwell_min": 30.0, "arrival_min": 72.750453, "wait_min": 0.0, "depart_min": 102.750453, "hours_ok": true, "hours_label_ru": "сб 08:00–21:00"},
+     {"order": 2, "place_id": "11525635674185778928", "name": "Cookie Beacon Brunch", "slot": 1, "theme": "restaurant", "extra": false, "pinned": false, "interest": 0.781715, "dwell_min": 75.0, "arrival_min": 109.414984, "wait_min": 0.0, "depart_min": 184.414984, "hours_ok": true, "hours_label_ru": "сб 09:00–18:00"},
+     {"order": 3, "place_id": "12884893661919218190", "name": "Rio Juice", "slot": 2, "theme": "bar", "extra": false, "pinned": false, "interest": 0.614377, "dwell_min": 60.0, "arrival_min": 189.683621, "wait_min": 0.0, "depart_min": 249.683621, "hours_ok": true, "hours_label_ru": "сб 10:00–18:00"}
+    ],
+    "segments": [
+     {"from_order": -1, "to_order": 0, "walk_min": 6.055868, "distance_km": 0.45419, "n_geom": 2},
+     {"from_order": 0, "to_order": 1, "walk_min": 6.694586, "distance_km": 0.502094, "n_geom": 2},
+     {"from_order": 1, "to_order": 2, "walk_min": 6.664531, "distance_km": 0.49984, "n_geom": 2},
+     {"from_order": 2, "to_order": 3, "walk_min": 5.268636, "distance_km": 0.395148, "n_geom": 2},
+     {"from_order": 3, "to_order": -1, "walk_min": 4.653443, "distance_km": 0.349008, "n_geom": 2}
+    ],
+    "total_time_min": 254.337064,
+    "total_walk_min": 29.337064,
+    "total_dwell_min": 225.0,
+    "total_wait_min": 0.0,
+    "total_distance_km": 2.20028,
+    "over_budget": false,
+    "dropped_slots": [],
+    "note": ""
+   },
+   "render": {
+    "manual": false,
+    "variants_caption": "Вариант 1: 4 места · 4.4 км · до 13:44  ·  **Вариант 2**: 4 места · 2.2 км · до 13:14  ·  Вариант 3: 4 места · 5.0 км · до 13:52",
+    "metric_stops": "3 из 3 + 📍1",
+    "metric_finish_label": "Возвращение",
+    "metric_finish": "13:14",
+    "metric_delta": "+586 мин запаса",
+    "metric_walk": "2.2 км · 0:29",
+    "metric_window": "09:00–23:00",
+    "captions": [],
+    "warnings": ["⚠️ «Mosto - Natural Wine Bar & Bistró» — в 09:06 по графику закрыто (сб 18:30–23:00). Маршрут всё равно построен: оставьте, если знаете, что сегодня работает дольше."],
+    "infos": [],
+    "stop_lines": [
+     ["1. Mosto - Natural Wine Bar & Bistró — 📍 ваше место", "09:06–10:06 · осмотр 60 мин", "🕒 сб 18:30–23:00", "⚠️ по графику в это время может быть закрыто — маршрут построен как есть"],
+     ["2. French Revolution Ateneul Român — Кофе", "10:13–10:43 · осмотр 30 мин", "🕒 сб 08:00–21:00"],
+     ["3. Cookie Beacon Brunch — Еда / ресторан", "10:49–12:04 · осмотр 75 мин", "🕒 сб 09:00–18:00"],
+     ["4. Rio Juice — Бар / напитки", "12:10–13:10 · осмотр 60 мин", "🕒 сб 10:00–18:00"]
+    ]
+   },
+   "navigation": {
+    "google": ["https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440287,26.097708&destination=44.440287,26.097708&waypoints=44.441147,26.101771%7C44.441621,26.097134%7C44.444233,26.094241%7C44.441672,26.095093&waypoint_place_ids=ChIJgWl-Pxr_sUARLh58Q9hZcwE%7CChIJze7an0__sUARarjSCTjlJC4%7CChIJ71B-Bxf_sUAR8MZpipRI858%7CChIJb5mNtrH_sUARDopgt4RW0LI"],
+    "legs": [
+     {"from": "Старт", "to": "Mosto - Natural Wine Bar & Bistró", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440287,26.097708&destination=44.441147,26.101771&destination_place_id=ChIJgWl-Pxr_sUARLh58Q9hZcwE", "apple": "https://maps.apple.com/?saddr=44.440287,26.097708&daddr=44.441147,26.101771&dirflg=w"},
+     {"from": "Mosto - Natural Wine Bar & Bistró", "to": "French Revolution Ateneul Român", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.441147,26.101771&destination=44.441621,26.097134&destination_place_id=ChIJze7an0__sUARarjSCTjlJC4&origin_place_id=ChIJgWl-Pxr_sUARLh58Q9hZcwE", "apple": "https://maps.apple.com/?saddr=44.441147,26.101771&daddr=44.441621,26.097134&dirflg=w"},
+     {"from": "French Revolution Ateneul Român", "to": "Cookie Beacon Brunch", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.441621,26.097134&destination=44.444233,26.094241&destination_place_id=ChIJ71B-Bxf_sUAR8MZpipRI858&origin_place_id=ChIJze7an0__sUARarjSCTjlJC4", "apple": "https://maps.apple.com/?saddr=44.441621,26.097134&daddr=44.444233,26.094241&dirflg=w"},
+     {"from": "Cookie Beacon Brunch", "to": "Rio Juice", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.444233,26.094241&destination=44.441672,26.095093&destination_place_id=ChIJb5mNtrH_sUARDopgt4RW0LI&origin_place_id=ChIJ71B-Bxf_sUAR8MZpipRI858", "apple": "https://maps.apple.com/?saddr=44.444233,26.094241&daddr=44.441672,26.095093&dirflg=w"},
+     {"from": "Rio Juice", "to": "Старт", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.441672,26.095093&destination=44.440287,26.097708&origin_place_id=ChIJb5mNtrH_sUARDopgt4RW0LI", "apple": "https://maps.apple.com/?saddr=44.441672,26.095093&daddr=44.440287,26.097708&dirflg=w"}
+    ]
+   }
+  },
+  {
+   "dropped": [],
+   "plan": {
+    "stops": [
+     {"order": 0, "place_id": "5564669006134392295", "name": "Velocità", "slot": 0, "theme": "coffee", "extra": false, "pinned": false, "interest": 0.700591, "dwell_min": 30.0, "arrival_min": 8.537289, "wait_min": 0.0, "depart_min": 38.537289, "hours_ok": true, "hours_label_ru": "сб 09:00–00:00"},
+     {"order": 1, "place_id": "104526001739669038", "name": "Mosto - Natural Wine Bar & Bistró", "slot": -1, "theme": "food_drink", "extra": false, "pinned": true, "interest": 0.0, "dwell_min": 60.0, "arrival_min": 51.273032, "wait_min": 0.0, "depart_min": 111.273032, "hours_ok": false, "hours_label_ru": "сб 18:30–23:00"},
+     {"order": 2, "place_id": "15439727830362881762", "name": "Restaurant Hanu' lui Manuc", "slot": 1, "theme": "restaurant", "extra": false, "pinned": false, "interest": 0.87741, "dwell_min": 75.0, "arrival_min": 134.155827, "wait_min": 0.0, "depart_min": 209.155827, "hours_ok": true, "hours_label_ru": "сб 10:00–02:00"},
+     {"order": 3, "place_id": "14803764456397557850", "name": "City Grill Covaci", "slot": 2, "theme": "bar", "extra": false, "pinned": false, "interest": 0.74023, "dwell_min": 60.0, "arrival_min": 210.590183, "wait_min": 0.0, "depart_min": 270.590183, "hours_ok": true, "hours_label_ru": "сб 10:00–00:00"}
+    ],
+    "segments": [
+     {"from_order": -1, "to_order": 0, "walk_min": 8.537289, "distance_km": 0.640297, "n_geom": 2},
+     {"from_order": 0, "to_order": 1, "walk_min": 12.735743, "distance_km": 0.955181, "n_geom": 2},
+     {"from_order": 1, "to_order": 2, "walk_min": 22.882796, "distance_km": 1.71621, "n_geom": 2},
+     {"from_order": 2, "to_order": 3, "walk_min": 1.434355, "distance_km": 0.107577, "n_geom": 2},
+     {"from_order": 3, "to_order": -1, "walk_min": 20.986515, "distance_km": 1.573989, "n_geom": 2}
+    ],
+    "total_time_min": 291.576698,
+    "total_walk_min": 66.576698,
+    "total_dwell_min": 225.0,
+    "total_wait_min": 0.0,
+    "total_distance_km": 4.993252,
+    "over_budget": false,
+    "dropped_slots": [],
+    "note": ""
+   },
+   "render": {
+    "manual": false,
+    "variants_caption": "Вариант 1: 4 места · 4.4 км · до 13:44  ·  Вариант 2: 4 места · 2.2 км · до 13:14  ·  **Вариант 3**: 4 места · 5.0 км · до 13:52",
+    "metric_stops": "3 из 3 + 📍1",
+    "metric_finish_label": "Возвращение",
+    "metric_finish": "13:52",
+    "metric_delta": "+548 мин запаса",
+    "metric_walk": "5.0 км · 1:07",
+    "metric_window": "09:00–23:00",
+    "captions": [],
+    "warnings": ["⚠️ «Mosto - Natural Wine Bar & Bistró» — в 09:51 по графику закрыто (сб 18:30–23:00). Маршрут всё равно построен: оставьте, если знаете, что сегодня работает дольше."],
+    "infos": [],
+    "stop_lines": [
+     ["1. Velocità — Кофе", "09:09–09:39 · осмотр 30 мин", "🕒 сб 09:00–00:00"],
+     ["2. Mosto - Natural Wine Bar & Bistró — 📍 ваше место", "09:51–10:51 · осмотр 60 мин", "🕒 сб 18:30–23:00", "⚠️ по графику в это время может быть закрыто — маршрут построен как есть"],
+     ["3. Restaurant Hanu' lui Manuc — Еда / ресторан", "11:14–12:29 · осмотр 75 мин", "🕒 сб 10:00–02:00"],
+     ["4. City Grill Covaci — Бар / напитки", "12:31–13:31 · осмотр 60 мин", "🕒 сб 10:00–00:00"]
+    ]
+   },
+   "navigation": {
+    "google": ["https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440287,26.097708&destination=44.440287,26.097708&waypoints=44.443189,26.093331%7C44.441147,26.101771%7C44.429720,26.102305%7C44.430403,26.102611&waypoint_place_ids=ChIJvbCUA-T_sUAR5zVEa_qsOU0%7CChIJgWl-Pxr_sUARLh58Q9hZcwE%7CChIJtS8YJz7_sUAR4v59lajuRNY%7CChIJrWaUNz7_sUARWlAh4laJcc0"],
+    "legs": [
+     {"from": "Старт", "to": "Velocità", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440287,26.097708&destination=44.443189,26.093331&destination_place_id=ChIJvbCUA-T_sUAR5zVEa_qsOU0", "apple": "https://maps.apple.com/?saddr=44.440287,26.097708&daddr=44.443189,26.093331&dirflg=w"},
+     {"from": "Velocità", "to": "Mosto - Natural Wine Bar & Bistró", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.443189,26.093331&destination=44.441147,26.101771&destination_place_id=ChIJgWl-Pxr_sUARLh58Q9hZcwE&origin_place_id=ChIJvbCUA-T_sUAR5zVEa_qsOU0", "apple": "https://maps.apple.com/?saddr=44.443189,26.093331&daddr=44.441147,26.101771&dirflg=w"},
+     {"from": "Mosto - Natural Wine Bar & Bistró", "to": "Restaurant Hanu' lui Manuc", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.441147,26.101771&destination=44.429720,26.102305&destination_place_id=ChIJtS8YJz7_sUAR4v59lajuRNY&origin_place_id=ChIJgWl-Pxr_sUARLh58Q9hZcwE", "apple": "https://maps.apple.com/?saddr=44.441147,26.101771&daddr=44.429720,26.102305&dirflg=w"},
+     {"from": "Restaurant Hanu' lui Manuc", "to": "City Grill Covaci", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.429720,26.102305&destination=44.430403,26.102611&destination_place_id=ChIJrWaUNz7_sUARWlAh4laJcc0&origin_place_id=ChIJtS8YJz7_sUAR4v59lajuRNY", "apple": "https://maps.apple.com/?saddr=44.429720,26.102305&daddr=44.430403,26.102611&dirflg=w"},
+     {"from": "City Grill Covaci", "to": "Старт", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.430403,26.102611&destination=44.440287,26.097708&origin_place_id=ChIJrWaUNz7_sUARWlAh4laJcc0", "apple": "https://maps.apple.com/?saddr=44.430403,26.102611&daddr=44.440287,26.097708&dirflg=w"}
+    ]
+   }
+  }
+ ],
+ "edits": {}
+}

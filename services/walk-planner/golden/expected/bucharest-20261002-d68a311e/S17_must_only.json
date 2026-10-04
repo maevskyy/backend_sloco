@@ -1,0 +1,403 @@
+{
+ "format": "walk-golden/v1",
+ "scenario": {
+  "id": "S17_must_only",
+  "city": "Bucharest",
+  "date": "2026-10-03",
+  "start_time": "09:00",
+  "end_time": "19:00",
+  "end_day_offset": 0,
+  "shape": "one_way",
+  "start": "city_center",
+  "style": "max",
+  "slots": [],
+  "must_visit_place_ids": ["16044012576954065712", "10915586233752676659", "14169121335398956031"],
+  "variants": 3,
+  "radius_km": 2.5,
+  "fill_window": true,
+  "known_hours_only": false,
+  "top_k": 8,
+  "edits": []
+ },
+ "plan": {
+  "call": "POST /v1/walks/plan",
+  "options": {"lang": "ru", "geometry": "geojson"},
+  "body": {
+   "city": "Bucharest",
+   "date": "2026-10-03",
+   "start_time": "09:00",
+   "end_time": "19:00",
+   "end_day_offset": 0,
+   "shape": "one_way",
+   "start": "city_center",
+   "style": "max",
+   "slots": [],
+   "must_visit_place_ids": ["16044012576954065712", "10915586233752676659", "14169121335398956031"],
+   "variants": 3,
+   "radius_km": 2.5,
+   "fill_window": true,
+   "known_hours_only": false,
+   "top_k": 8
+  },
+  "status": 200,
+  "response": {
+   "plan_id": "84a7c4ae498b31444868a39f0bd497b828cbea45",
+   "versions": {
+    "api": "v1",
+    "algorithm": "1.0.0",
+    "catalog": "bucharest-20261002-d68a311e",
+    "interest": "walk_interest_v1",
+    "routing": null
+   },
+   "status": "ok",
+   "request": {
+    "city": "Bucharest",
+    "date": "2026-10-03",
+    "start_time": "09:00",
+    "end_time": "19:00",
+    "end_day_offset": 0,
+    "shape": "one_way",
+    "start": {"lat": 44.4402865461307, "lon": 26.097708464099995, "place_id": null},
+    "style": "max",
+    "slots": [],
+    "must_visit_place_ids": ["16044012576954065712", "10915586233752676659", "14169121335398956031"],
+    "favourite_place_ids": [],
+    "want_to_go_place_ids": [],
+    "personalization_strength": 0.5,
+    "variants": 3,
+    "radius_km": 2.5,
+    "fill_window": true,
+    "known_hours_only": false,
+    "top_k": 8,
+    "timezone": "Europe/Bucharest",
+    "weekday": 5,
+    "window_min": 600,
+    "window_start": "2026-10-03T09:00",
+    "window_end": "2026-10-03T19:00",
+    "search_radius_km": 2.5,
+    "catalog_version": "bucharest-20261002-d68a311e"
+   },
+   "personalization": {"mode": "popularity", "strength": 0.5, "favourites_used": [], "favourites_ignored": [], "profiles": 0},
+   "messages": [
+    {
+     "code": "fewer_variants",
+     "severity": "info",
+     "scope": "request",
+     "params": {"built": 1, "requested": 3},
+     "stop_index": null,
+     "text": "Разных маршрутов получилось 1 из 3: подходящих мест мало — расширьте радиус, окно или число кандидатов на слот."
+    }
+   ],
+   "variants": [
+    {
+     "index": 0,
+     "edited": false,
+     "summary": {
+      "stops_total": 3,
+      "slots_requested": 0,
+      "slots_filled": 0,
+      "on_the_way": 0,
+      "pinned": 3,
+      "dropped_slot_indices": [],
+      "finish_at": {"offset_min": 176.31527185496765, "local": "2026-10-03T11:56"},
+      "finish_kind": "finish",
+      "window_min": 600,
+      "total_min": 176.31527185496765,
+      "walk_min": 21.315271854967648,
+      "dwell_min": 155.0,
+      "wait_min": 0.0,
+      "distance_km": 1.5986453891225736,
+      "slack_min": 423.68472814503235,
+      "over_budget": false,
+      "routing": "estimate"
+     },
+     "messages": [
+      {
+       "code": "stop_hours_conflict",
+       "severity": "warning",
+       "scope": "stop",
+       "params": {
+        "reason": "closed_at_arrival",
+        "place_id": "16044012576954065712",
+        "name": "National Museum of Art",
+        "arrival_label": "09:03",
+        "departure_label": "10:33",
+        "hours_label": "сб 11:00–19:00",
+        "closed_all_day": false,
+        "hours_day": {
+         "weekday": 5,
+         "open_24h": false,
+         "closed_all_day": false,
+         "intervals": [{"open": "11:00", "close": "19:00", "close_day_offset": 0}],
+         "carryover_until": null
+        }
+       },
+       "stop_index": 0,
+       "text": "⚠️ «National Museum of Art» — в 09:03 по графику закрыто (сб 11:00–19:00). Маршрут всё равно построен: оставьте, если знаете, что сегодня работает дольше."
+      },
+      {
+       "code": "routing_estimate",
+       "severity": "info",
+       "scope": "variant",
+       "params": {"segments_estimated": 3, "segments_total": 3},
+       "stop_index": null,
+       "text": "Пешие отрезки посчитаны по прямой (оценка): 3 из 3 — по улицам путь может быть длиннее."
+      }
+     ],
+     "stops": [
+      {
+       "index": 0,
+       "number": 1,
+       "place_id": "16044012576954065712",
+       "name": "National Museum of Art",
+       "lat": 44.439366799999995,
+       "lon": 26.095874,
+       "kind": "pinned",
+       "slot_index": null,
+       "activity": null,
+       "arrival": {"offset_min": 3.2033324999610895, "local": "2026-10-03T09:03"},
+       "visit_start": {"offset_min": 3.2033324999610895, "local": "2026-10-03T09:03"},
+       "departure": {"offset_min": 93.20333249996109, "local": "2026-10-03T10:33"},
+       "dwell_min": 90.0,
+       "dwell_fixed": false,
+       "wait_min": 0.0,
+       "hours": {
+        "status": "closed_at_arrival",
+        "day": {
+         "weekday": 5,
+         "open_24h": false,
+         "closed_all_day": false,
+         "intervals": [{"open": "11:00", "close": "19:00", "close_day_offset": 0}],
+         "carryover_until": null
+        }
+       },
+       "business_status": "operational",
+       "interest": 0.0
+      },
+      {
+       "index": 1,
+       "number": 2,
+       "place_id": "14169121335398956031",
+       "name": "Origo",
+       "lat": 44.4332121,
+       "lon": 26.0953452,
+       "kind": "pinned",
+       "slot_index": null,
+       "activity": null,
+       "arrival": {"offset_min": 105.54519443396178, "local": "2026-10-03T10:46"},
+       "visit_start": {"offset_min": 105.54519443396178, "local": "2026-10-03T10:46"},
+       "departure": {"offset_min": 135.5451944339618, "local": "2026-10-03T11:16"},
+       "dwell_min": 30.0,
+       "dwell_fixed": false,
+       "wait_min": 0.0,
+       "hours": {
+        "status": "open",
+        "day": {
+         "weekday": 5,
+         "open_24h": false,
+         "closed_all_day": false,
+         "intervals": [{"open": "08:00", "close": "00:00", "close_day_offset": 1}],
+         "carryover_until": null
+        }
+       },
+       "business_status": "operational",
+       "interest": 0.0
+      },
+      {
+       "index": 2,
+       "number": 3,
+       "place_id": "10915586233752676659",
+       "name": "The Church of the \"Stavropoleos\" Monastery",
+       "lat": 44.4317929,
+       "lon": 26.098859299999997,
+       "kind": "pinned",
+       "slot_index": null,
+       "activity": null,
+       "arrival": {"offset_min": 141.31527185496768, "local": "2026-10-03T11:21"},
+       "visit_start": {"offset_min": 141.31527185496768, "local": "2026-10-03T11:21"},
+       "departure": {"offset_min": 176.31527185496768, "local": "2026-10-03T11:56"},
+       "dwell_min": 35.0,
+       "dwell_fixed": false,
+       "wait_min": 0.0,
+       "hours": {
+        "status": "open",
+        "day": {
+         "weekday": 5,
+         "open_24h": false,
+         "closed_all_day": false,
+         "intervals": [{"open": "08:00", "close": "19:00", "close_day_offset": 0}],
+         "carryover_until": null
+        }
+       },
+       "business_status": "operational",
+       "interest": 0.0
+      }
+     ],
+     "segments": [
+      {
+       "index": 0,
+       "from": {"kind": "start", "stop_index": null},
+       "to": {"kind": "stop", "stop_index": 0},
+       "walk_min": 3.2033324999610895,
+       "distance_m": 240,
+       "depart": {"offset_min": 0.0, "local": "2026-10-03T09:00"},
+       "arrive": {"offset_min": 3.2033324999610895, "local": "2026-10-03T09:03"},
+       "quality": "estimate",
+       "provider": "haversine",
+       "geometry": {"type": "LineString", "coordinates": [[26.097708464099995, 44.4402865461307], [26.095874, 44.439366799999995]]}
+      },
+      {
+       "index": 1,
+       "from": {"kind": "stop", "stop_index": 0},
+       "to": {"kind": "stop", "stop_index": 1},
+       "walk_min": 12.341861934000685,
+       "distance_m": 926,
+       "depart": {"offset_min": 93.20333249996109, "local": "2026-10-03T10:33"},
+       "arrive": {"offset_min": 105.54519443396178, "local": "2026-10-03T10:46"},
+       "quality": "estimate",
+       "provider": "haversine",
+       "geometry": {"type": "LineString", "coordinates": [[26.095874, 44.439366799999995], [26.0953452, 44.4332121]]}
+      },
+      {
+       "index": 2,
+       "from": {"kind": "stop", "stop_index": 1},
+       "to": {"kind": "stop", "stop_index": 2},
+       "walk_min": 5.7700774210058725,
+       "distance_m": 433,
+       "depart": {"offset_min": 135.5451944339618, "local": "2026-10-03T11:16"},
+       "arrive": {"offset_min": 141.31527185496768, "local": "2026-10-03T11:21"},
+       "quality": "estimate",
+       "provider": "haversine",
+       "geometry": {"type": "LineString", "coordinates": [[26.0953452, 44.4332121], [26.098859299999997, 44.4317929]]}
+      }
+     ],
+     "navigation": {
+      "google_parts": ["https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440287,26.097708&destination=44.431793,26.098859&destination_place_id=ChIJEZe8dkD_sUARM-n4qdjze5c&waypoints=44.439367,26.095874%7C44.433212,26.095345&waypoint_place_ids=ChIJb0jBokX_sUARMCM_FW_Ip94%7CChIJQbgapEH_sUAR__vch8jUosQ"],
+      "legs": [
+       {
+        "segment_index": 0,
+        "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440287,26.097708&destination=44.439367,26.095874&destination_place_id=ChIJb0jBokX_sUARMCM_FW_Ip94",
+        "apple": "https://maps.apple.com/?saddr=44.440287,26.097708&daddr=44.439367,26.095874&dirflg=w"
+       },
+       {
+        "segment_index": 1,
+        "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.439367,26.095874&destination=44.433212,26.095345&destination_place_id=ChIJQbgapEH_sUAR__vch8jUosQ&origin_place_id=ChIJb0jBokX_sUARMCM_FW_Ip94",
+        "apple": "https://maps.apple.com/?saddr=44.439367,26.095874&daddr=44.433212,26.095345&dirflg=w"
+       },
+       {
+        "segment_index": 2,
+        "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.433212,26.095345&destination=44.431793,26.098859&destination_place_id=ChIJEZe8dkD_sUARM-n4qdjze5c&origin_place_id=ChIJQbgapEH_sUAR__vch8jUosQ",
+        "apple": "https://maps.apple.com/?saddr=44.433212,26.095345&daddr=44.431793,26.098859&dirflg=w"
+       }
+      ]
+     },
+     "bbox": [26.0953452, 44.4317929, 26.098859299999997, 44.4402865461307],
+     "sequence": [
+      {
+       "place_id": "16044012576954065712",
+       "kind": "pinned",
+       "slot_index": null,
+       "activity": null,
+       "dwell_min": 90.0,
+       "dwell_fixed": false
+      },
+      {
+       "place_id": "14169121335398956031",
+       "kind": "pinned",
+       "slot_index": null,
+       "activity": null,
+       "dwell_min": 30.0,
+       "dwell_fixed": false
+      },
+      {
+       "place_id": "10915586233752676659",
+       "kind": "pinned",
+       "slot_index": null,
+       "activity": null,
+       "dwell_min": 35.0,
+       "dwell_fixed": false
+      }
+     ]
+    }
+   ],
+   "places": {
+    "16044012576954065712": {
+     "place_id": "16044012576954065712",
+     "name": "National Museum of Art",
+     "type_label": "national art museum in a former royal palace",
+     "primary_type": "art_museum",
+     "theme": "culture_sights",
+     "theme_group": "sights",
+     "rating": 4.6,
+     "rating_count": 10235,
+     "summary": "A grand former royal palace housing Romanian, European, Islamic and East Asian art, with medieval icons, modern masters, sculpture and ornate historic rooms.",
+     "summary_lang": "en",
+     "photos": [
+      {"key": "photos_cid/16044012576954065712/00_all.jpg", "url": null},
+      {"key": "photos_cid/16044012576954065712/01_all.jpg", "url": null},
+      {"key": "photos_cid/16044012576954065712/02_all.jpg", "url": null},
+      {"key": "photos_cid/16044012576954065712/03_all.jpg", "url": null}
+     ],
+     "google_maps_url": "https://www.google.com/maps?cid=16044012576954065712",
+     "google_place_id": "ChIJb0jBokX_sUARMCM_FW_Ip94",
+     "address": "Calea Victoriei 49-53, 010063 București, Romania",
+     "business_status": "operational",
+     "lat": 44.439366799999995,
+     "lon": 26.095874,
+     "price_level": null
+    },
+    "14169121335398956031": {
+     "place_id": "14169121335398956031",
+     "name": "Origo",
+     "type_label": "specialty coffee shop and cocktail bar",
+     "primary_type": "cafe",
+     "theme": "food_drink",
+     "theme_group": "food_drink",
+     "rating": 4.7,
+     "rating_count": 4846,
+     "summary": "Stylish specialty coffee shop by day and cocktail bar at night, known for expert brews, terrace seating, and a calm, modern interior.",
+     "summary_lang": "en",
+     "photos": [
+      {"key": "photos_cid/14169121335398956031/00_vibe.jpg", "url": null},
+      {"key": "photos_cid/14169121335398956031/01_vibe.jpg", "url": null},
+      {"key": "photos_cid/14169121335398956031/02_vibe.jpg", "url": null},
+      {"key": "photos_cid/14169121335398956031/04_vibe.jpg", "url": null}
+     ],
+     "google_maps_url": "https://www.google.com/maps?cid=14169121335398956031",
+     "google_place_id": "ChIJQbgapEH_sUAR__vch8jUosQ",
+     "address": "Strada Lipscani 9, București 050971",
+     "business_status": "operational",
+     "lat": 44.4332121,
+     "lon": 26.0953452,
+     "price_level": null
+    },
+    "10915586233752676659": {
+     "place_id": "10915586233752676659",
+     "name": "The Church of the \"Stavropoleos\" Monastery",
+     "type_label": "Brancovenesc Orthodox monastery church",
+     "primary_type": "historical_landmark",
+     "theme": "culture_sights",
+     "theme_group": "sights",
+     "rating": 4.8,
+     "rating_count": 5781,
+     "summary": "A tiny eighteenth-century Orthodox monastery church with ornate Brancovenesc carvings, vivid frescoes, a peaceful cloister and a serene courtyard in Bucharest Old Town.",
+     "summary_lang": "en",
+     "photos": [
+      {"key": "photos_cid/10915586233752676659/00_all.jpg", "url": null},
+      {"key": "photos_cid/10915586233752676659/03_all.jpg", "url": null},
+      {"key": "photos_cid/10915586233752676659/04_all.jpg", "url": null},
+      {"key": "photos_cid/10915586233752676659/06_all.jpg", "url": null}
+     ],
+     "google_maps_url": "https://www.google.com/maps?cid=10915586233752676659",
+     "google_place_id": "ChIJEZe8dkD_sUARM-n4qdjze5c",
+     "address": "Strada Stavropoleos 4, 030167 București",
+     "business_status": "operational",
+     "lat": 44.4317929,
+     "lon": 26.098859299999997,
+     "price_level": null
+    }
+   }
+  }
+ },
+ "edits": {}
+}

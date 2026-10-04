@@ -97,6 +97,65 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  # Walk Planner (SLO-67): plans timed walking routes; the gateway is its only
+  # client (it has no auth). Behind a profile until the prod rollout (SLO-68):
+  # the plain `compose pull && up -d` of the deploy must not touch it yet.
+  walk-planner:
+    image: ${WALK_PLANNER_IMAGE:-sloco-walk-planner:local}
+    profiles:
+      - walk-planner
+    restart: unless-stopped
+    init: true
+    environment:
+      # One immutable bundle directory per city, named by its bundle_id;
+      # switching data = change WALK_BUNDLE_ID + `up -d walk-planner`.
+      WALK_BUNDLE_DIR: /bundles/${WALK_BUNDLE_ID:-bucharest-20261002-d68a311e}
+      # Empty = no street router: every leg is a straight-line estimate and
+      # the response says so. osrm-foot and the ORS key arrive with SLO-68.
+      WALK_ROUTER_URL: ${WALK_ROUTER_URL:-}
+      ORS_API_KEY: ${ORS_API_KEY:-}
+      PHOTO_BASE_URL: ${PHOTO_BASE_URL:-}
+      WALK_DEFAULT_LANG: ${WALK_DEFAULT_LANG:-ru}
+      ENVIRONMENT: ${WALK_PLANNER_ENVIRONMENT:-production}
+      LOG_LEVEL: ${WALK_PLANNER_LOG_LEVEL:-INFO}
+      # ~0.6 GB RSS per worker steady, up to ~1.3 GB in bursts of 24-hour
+      # plans; one busy core per worker (services/walk-planner/deploy/env.example).
+      WEB_CONCURRENCY: ${WALK_PLANNER_WORKERS:-2}
+    volumes:
+      # Bundles are not in git or the image: synced to the host, mounted
+      # read-only. Long syntax, so a missing host dir fails loudly instead of
+      # being created empty.
+      - type: bind
+        source: ${WALK_BUNDLES_HOST_DIR:-/opt/sloco-data/walk/bundles}
+        target: /bundles
+        read_only: true
+        bind:
+          create_host_path: false
+    expose:
+      - "8000"
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    # > UVICORN_TIMEOUT_GRACEFUL_SHUTDOWN (20 s, image default).
+    stop_grace_period: 30s
+    deploy:
+      resources:
+        limits:
+          # 2 workers × 1.3 GB worst case + supervisor + headroom.
+          cpus: "${WALK_PLANNER_CPUS:-2}"
+          memory: ${WALK_PLANNER_MEM_LIMIT:-3g}
+    # healthcheck: from the image (GET /v1/health/ready). Ready ~2 s after
+    # start; the 503 not_ready window covers bundle verification + warm-up.
+    networks:
+      - sloco_net
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
   redis:
     image: redis:7-alpine
     restart: unless-stopped

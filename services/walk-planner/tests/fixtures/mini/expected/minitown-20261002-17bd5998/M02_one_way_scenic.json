@@ -1,0 +1,1366 @@
+{
+ "format": "walk-golden/v1",
+ "scenario": {
+  "id": "M02_one_way_scenic",
+  "city": "Minitown",
+  "date": "2026-10-03",
+  "start_time": "10:00",
+  "end_time": "14:00",
+  "end_day_offset": 0,
+  "shape": "one_way",
+  "start": {"lat": 44.425, "lon": 26.09},
+  "style": "scenic",
+  "slots": [
+   {"activity": "coffee", "dwell_min": 20},
+   {"activity": "sight", "dwell_min": null},
+   {"activity": "market", "dwell_min": null}
+  ],
+  "must_visit_place_ids": [],
+  "variants": 3,
+  "radius_km": 2.5,
+  "fill_window": true,
+  "known_hours_only": false,
+  "top_k": 8,
+  "edits": []
+ },
+ "plan": {
+  "call": "POST /v1/walks/plan",
+  "options": {"lang": "ru", "geometry": "geojson"},
+  "body": {
+   "city": "Minitown",
+   "date": "2026-10-03",
+   "start_time": "10:00",
+   "end_time": "14:00",
+   "end_day_offset": 0,
+   "shape": "one_way",
+   "start": {"lat": 44.425, "lon": 26.09},
+   "style": "scenic",
+   "slots": [
+    {"activity": "coffee", "dwell_min": 20},
+    {"activity": "sight", "dwell_min": null},
+    {"activity": "market", "dwell_min": null}
+   ],
+   "must_visit_place_ids": [],
+   "variants": 3,
+   "radius_km": 2.5,
+   "fill_window": true,
+   "known_hours_only": false,
+   "top_k": 8
+  },
+  "status": 200,
+  "response": {
+   "plan_id": "ff78fa87b4be47fc99038681cd1ca133d32a0b1f",
+   "versions": {
+    "api": "v1",
+    "algorithm": "1.0.0",
+    "catalog": "minitown-20261002-17bd5998",
+    "interest": "walk_interest_v1",
+    "routing": null
+   },
+   "status": "ok",
+   "request": {
+    "city": "Minitown",
+    "date": "2026-10-03",
+    "start_time": "10:00",
+    "end_time": "14:00",
+    "end_day_offset": 0,
+    "shape": "one_way",
+    "start": {"lat": 44.425, "lon": 26.09, "place_id": null},
+    "style": "scenic",
+    "slots": [
+     {"activity": "coffee", "dwell_min": 20},
+     {"activity": "sight", "dwell_min": null},
+     {"activity": "market", "dwell_min": null}
+    ],
+    "must_visit_place_ids": [],
+    "favourite_place_ids": [],
+    "want_to_go_place_ids": [],
+    "personalization_strength": 0.5,
+    "variants": 3,
+    "radius_km": 2.5,
+    "fill_window": true,
+    "known_hours_only": false,
+    "top_k": 8,
+    "timezone": "Europe/Bucharest",
+    "weekday": 5,
+    "window_min": 240,
+    "window_start": "2026-10-03T10:00",
+    "window_end": "2026-10-03T14:00",
+    "search_radius_km": 2.5,
+    "catalog_version": "minitown-20261002-17bd5998"
+   },
+   "personalization": {"mode": "popularity", "strength": 0.5, "favourites_used": [], "favourites_ignored": [], "profiles": 0},
+   "messages": [],
+   "variants": [
+    {
+     "index": 0,
+     "edited": false,
+     "summary": {
+      "stops_total": 5,
+      "slots_requested": 3,
+      "slots_filled": 3,
+      "on_the_way": 2,
+      "pinned": 0,
+      "dropped_slot_indices": [],
+      "finish_at": {"offset_min": 209.50079821069633, "local": "2026-10-03T13:30"},
+      "finish_kind": "finish",
+      "window_min": 240,
+      "total_min": 209.50079821069633,
+      "walk_min": 79.50079821069633,
+      "dwell_min": 130.0,
+      "wait_min": 0.0,
+      "distance_km": 5.962559865802226,
+      "slack_min": 30.49920178930367,
+      "over_budget": false,
+      "routing": "estimate"
+     },
+     "messages": [
+      {
+       "code": "extras_added",
+       "severity": "info",
+       "scope": "variant",
+       "params": {"count": 2, "style": "scenic", "window_start_label": "10:00", "window_end_label": "14:00"},
+       "stop_index": null,
+       "text": "Стиль «Живописный»: по пути добавлено мест — 2, чтобы занять окно 10:00–14:00. Только выбранные слоты — выключите «Добавлять места по пути»."
+      },
+      {
+       "code": "routing_estimate",
+       "severity": "info",
+       "scope": "variant",
+       "params": {"segments_estimated": 5, "segments_total": 5},
+       "stop_index": null,
+       "text": "Пешие отрезки посчитаны по прямой (оценка): 5 из 5 — по улицам путь может быть длиннее."
+      }
+     ],
+     "stops": [
+      {
+       "index": 0,
+       "number": 1,
+       "place_id": "18000000000000110866",
+       "name": "Rose Garden",
+       "lat": 44.419057,
+       "lon": 26.091672,
+       "kind": "on_the_way",
+       "slot_index": null,
+       "activity": "park",
+       "arrival": {"offset_min": 12.132732407240146, "local": "2026-10-03T10:12"},
+       "visit_start": {"offset_min": 12.132732407240146, "local": "2026-10-03T10:12"},
+       "departure": {"offset_min": 22.132732407240148, "local": "2026-10-03T10:22"},
+       "dwell_min": 10.0,
+       "dwell_fixed": false,
+       "wait_min": 0.0,
+       "hours": {
+        "status": "open",
+        "day": {"weekday": 5, "open_24h": true, "closed_all_day": false, "intervals": [], "carryover_until": null}
+       },
+       "business_status": "operational",
+       "interest": 0.6952013614960072
+      },
+      {
+       "index": 1,
+       "number": 2,
+       "place_id": "18000000000000142542",
+       "name": "Willow Park",
+       "lat": 44.42934,
+       "lon": 26.089007,
+       "kind": "on_the_way",
+       "slot_index": null,
+       "activity": "park",
+       "arrival": {"offset_min": 43.063850799476654, "local": "2026-10-03T10:43"},
+       "visit_start": {"offset_min": 43.063850799476654, "local": "2026-10-03T10:43"},
+       "departure": {"offset_min": 53.063850799476654, "local": "2026-10-03T10:53"},
+       "dwell_min": 10.0,
+       "dwell_fixed": false,
+       "wait_min": 0.0,
+       "hours": {
+        "status": "open",
+        "day": {"weekday": 5, "open_24h": true, "closed_all_day": false, "intervals": [], "carryover_until": null}
+       },
+       "business_status": "operational",
+       "interest": 0.8432913112079431
+      },
+      {
+       "index": 2,
+       "number": 3,
+       "place_id": "9100000000002618225",
+       "name": "Morning Cafe",
+       "lat": 44.429951,
+       "lon": 26.085197,
+       "kind": "slot",
+       "slot_index": 0,
+       "activity": "coffee",
+       "arrival": {"offset_min": 58.645112349252194, "local": "2026-10-03T10:59"},
+       "visit_start": {"offset_min": 58.645112349252194, "local": "2026-10-03T10:59"},
+       "departure": {"offset_min": 78.6451123492522, "local": "2026-10-03T11:19"},
+       "dwell_min": 20.0,
+       "dwell_fixed": true,
+       "wait_min": 0.0,
+       "hours": {
+        "status": "open",
+        "day": {
+         "weekday": 5,
+         "open_24h": false,
+         "closed_all_day": false,
+         "intervals": [{"open": "08:00", "close": "20:00", "close_day_offset": 0}],
+         "carryover_until": null
+        }
+       },
+       "business_status": "operational",
+       "interest": 0.7260090558559688
+      },
+      {
+       "index": 3,
+       "number": 4,
+       "place_id": "18000000000000047514",
+       "name": "Merchant House",
+       "lat": 44.432526,
+       "lon": 26.09048,
+       "kind": "slot",
+       "slot_index": 1,
+       "activity": "sight",
+       "arrival": {"offset_min": 87.78715868423936, "local": "2026-10-03T11:28"},
+       "visit_start": {"offset_min": 87.78715868423936, "local": "2026-10-03T11:28"},
+       "departure": {"offset_min": 157.78715868423936, "local": "2026-10-03T12:38"},
+       "dwell_min": 70.0,
+       "dwell_fixed": false,
+       "wait_min": 0.0,
+       "hours": {
+        "status": "open",
+        "day": {
+         "weekday": 5,
+         "open_24h": false,
+         "closed_all_day": false,
+         "intervals": [{"open": "10:00", "close": "18:00", "close_day_offset": 0}],
+         "carryover_until": null
+        }
+       },
+       "business_status": "operational",
+       "interest": 0.9398200000000001
+      },
+      {
+       "index": 4,
+       "number": 5,
+       "place_id": "9100000000002199309",
+       "name": "Union Square",
+       "lat": 44.439814,
+       "lon": 26.110184,
+       "kind": "slot",
+       "slot_index": 2,
+       "activity": "market",
+       "arrival": {"offset_min": 189.50079821069636, "local": "2026-10-03T13:10"},
+       "visit_start": {"offset_min": 189.50079821069636, "local": "2026-10-03T13:10"},
+       "departure": {"offset_min": 209.50079821069636, "local": "2026-10-03T13:30"},
+       "dwell_min": 20.0,
+       "dwell_fixed": false,
+       "wait_min": 0.0,
+       "hours": {
+        "status": "open",
+        "day": {
+         "weekday": 5,
+         "open_24h": false,
+         "closed_all_day": false,
+         "intervals": [{"open": "08:00", "close": "20:00", "close_day_offset": 0}],
+         "carryover_until": null
+        }
+       },
+       "business_status": "operational",
+       "interest": 0.7569807428040959
+      }
+     ],
+     "segments": [
+      {
+       "index": 0,
+       "from": {"kind": "start", "stop_index": null},
+       "to": {"kind": "stop", "stop_index": 0},
+       "walk_min": 12.132732407240146,
+       "distance_m": 910,
+       "depart": {"offset_min": 0.0, "local": "2026-10-03T10:00"},
+       "arrive": {"offset_min": 12.132732407240146, "local": "2026-10-03T10:12"},
+       "quality": "estimate",
+       "provider": "haversine",
+       "geometry": {"type": "LineString", "coordinates": [[26.09, 44.425], [26.091672, 44.419057]]}
+      },
+      {
+       "index": 1,
+       "from": {"kind": "stop", "stop_index": 0},
+       "to": {"kind": "stop", "stop_index": 1},
+       "walk_min": 20.931118392236503,
+       "distance_m": 1570,
+       "depart": {"offset_min": 22.132732407240148, "local": "2026-10-03T10:22"},
+       "arrive": {"offset_min": 43.063850799476654, "local": "2026-10-03T10:43"},
+       "quality": "estimate",
+       "provider": "haversine",
+       "geometry": {"type": "LineString", "coordinates": [[26.091672, 44.419057], [26.089007, 44.42934]]}
+      },
+      {
+       "index": 2,
+       "from": {"kind": "stop", "stop_index": 1},
+       "to": {"kind": "stop", "stop_index": 2},
+       "walk_min": 5.581261549775539,
+       "distance_m": 419,
+       "depart": {"offset_min": 53.063850799476654, "local": "2026-10-03T10:53"},
+       "arrive": {"offset_min": 58.645112349252194, "local": "2026-10-03T10:59"},
+       "quality": "estimate",
+       "provider": "haversine",
+       "geometry": {"type": "LineString", "coordinates": [[26.089007, 44.42934], [26.085197, 44.429951]]}
+      },
+      {
+       "index": 3,
+       "from": {"kind": "stop", "stop_index": 2},
+       "to": {"kind": "stop", "stop_index": 3},
+       "walk_min": 9.14204633498715,
+       "distance_m": 686,
+       "depart": {"offset_min": 78.6451123492522, "local": "2026-10-03T11:19"},
+       "arrive": {"offset_min": 87.78715868423936, "local": "2026-10-03T11:28"},
+       "quality": "estimate",
+       "provider": "haversine",
+       "geometry": {"type": "LineString", "coordinates": [[26.085197, 44.429951], [26.09048, 44.432526]]}
+      },
+      {
+       "index": 4,
+       "from": {"kind": "stop", "stop_index": 3},
+       "to": {"kind": "stop", "stop_index": 4},
+       "walk_min": 31.713639526457,
+       "distance_m": 2379,
+       "depart": {"offset_min": 157.78715868423936, "local": "2026-10-03T12:38"},
+       "arrive": {"offset_min": 189.50079821069636, "local": "2026-10-03T13:10"},
+       "quality": "estimate",
+       "provider": "haversine",
+       "geometry": {"type": "LineString", "coordinates": [[26.09048, 44.432526], [26.110184, 44.439814]]}
+      }
+     ],
+     "navigation": {
+      "google_parts": ["https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.425000,26.090000&destination=44.439814,26.110184&destination_place_id=ChIJmini0021xyz&waypoints=44.419057,26.091672%7C44.429340,26.089007%7C44.429951,26.085197%7C44.432526,26.090480&waypoint_place_ids=ChIJmini0014xyz%7CChIJmini0018xyz%7CChIJmini0025xyz%7CChIJmini0006xyz"],
+      "legs": [
+       {
+        "segment_index": 0,
+        "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.425000,26.090000&destination=44.419057,26.091672&destination_place_id=ChIJmini0014xyz",
+        "apple": "https://maps.apple.com/?saddr=44.425000,26.090000&daddr=44.419057,26.091672&dirflg=w"
+       },
+       {
+        "segment_index": 1,
+        "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.419057,26.091672&destination=44.429340,26.089007&destination_place_id=ChIJmini0018xyz&origin_place_id=ChIJmini0014xyz",
+        "apple": "https://maps.apple.com/?saddr=44.419057,26.091672&daddr=44.429340,26.089007&dirflg=w"
+       },
+       {
+        "segment_index": 2,
+        "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.429340,26.089007&destination=44.429951,26.085197&destination_place_id=ChIJmini0025xyz&origin_place_id=ChIJmini0018xyz",
+        "apple": "https://maps.apple.com/?saddr=44.429340,26.089007&daddr=44.429951,26.085197&dirflg=w"
+       },
+       {
+        "segment_index": 3,
+        "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.429951,26.085197&destination=44.432526,26.090480&destination_place_id=ChIJmini0006xyz&origin_place_id=ChIJmini0025xyz",
+        "apple": "https://maps.apple.com/?saddr=44.429951,26.085197&daddr=44.432526,26.090480&dirflg=w"
+       },
+       {
+        "segment_index": 4,
+        "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.432526,26.090480&destination=44.439814,26.110184&destination_place_id=ChIJmini0021xyz&origin_place_id=ChIJmini0006xyz",
+        "apple": "https://maps.apple.com/?saddr=44.432526,26.090480&daddr=44.439814,26.110184&dirflg=w"
+       }
+      ]
+     },
+     "bbox": [26.085197, 44.419057, 26.110184, 44.439814],
+     "sequence": [
+      {
+       "place_id": "18000000000000110866",
+       "kind": "on_the_way",
+       "slot_index": null,
+       "activity": "park",
+       "dwell_min": 10.0,
+       "dwell_fixed": false
+      },
+      {
+       "place_id": "18000000000000142542",
+       "kind": "on_the_way",
+       "slot_index": null,
+       "activity": "park",
+       "dwell_min": 10.0,
+       "dwell_fixed": false
+      },
+      {
+       "place_id": "9100000000002618225",
+       "kind": "slot",
+       "slot_index": 0,
+       "activity": "coffee",
+       "dwell_min": 20.0,
+       "dwell_fixed": true
+      },
+      {
+       "place_id": "18000000000000047514",
+       "kind": "slot",
+       "slot_index": 1,
+       "activity": "sight",
+       "dwell_min": 70.0,
+       "dwell_fixed": false
+      },
+      {
+       "place_id": "9100000000002199309",
+       "kind": "slot",
+       "slot_index": 2,
+       "activity": "market",
+       "dwell_min": 20.0,
+       "dwell_fixed": false
+      }
+     ]
+    },
+    {
+     "index": 1,
+     "edited": false,
+     "summary": {
+      "stops_total": 5,
+      "slots_requested": 3,
+      "slots_filled": 3,
+      "on_the_way": 2,
+      "pinned": 0,
+      "dropped_slot_indices": [],
+      "finish_at": {"offset_min": 209.80656902461166, "local": "2026-10-03T13:30"},
+      "finish_kind": "finish",
+      "window_min": 240,
+      "total_min": 209.80656902461166,
+      "walk_min": 79.80656902461166,
+      "dwell_min": 130.0,
+      "wait_min": 0.0,
+      "distance_km": 5.985492676845874,
+      "slack_min": 30.19343097538834,
+      "over_budget": false,
+      "routing": "estimate"
+     },
+     "messages": [
+      {
+       "code": "extras_added",
+       "severity": "info",
+       "scope": "variant",
+       "params": {"count": 2, "style": "scenic", "window_start_label": "10:00", "window_end_label": "14:00"},
+       "stop_index": null,
+       "text": "Стиль «Живописный»: по пути добавлено мест — 2, чтобы занять окно 10:00–14:00. Только выбранные слоты — выключите «Добавлять места по пути»."
+      },
+      {
+       "code": "routing_estimate",
+       "severity": "info",
+       "scope": "variant",
+       "params": {"segments_estimated": 5, "segments_total": 5},
+       "stop_index": null,
+       "text": "Пешие отрезки посчитаны по прямой (оценка): 5 из 5 — по улицам путь может быть длиннее."
+      }
+     ],
+     "stops": [
+      {
+       "index": 0,
+       "number": 1,
+       "place_id": "18000000000000221732",
+       "name": "Cafe Tei",
+       "lat": 44.419478,
+       "lon": 26.097221,
+       "kind": "slot",
+       "slot_index": 0,
+       "activity": "coffee",
+       "arrival": {"offset_min": 15.122961197906731, "local": "2026-10-03T10:15"},
+       "visit_start": {"offset_min": 15.122961197906731, "local": "2026-10-03T10:15"},
+       "departure": {"offset_min": 35.12296119790673, "local": "2026-10-03T10:35"},
+       "dwell_min": 20.0,
+       "dwell_fixed": true,
+       "wait_min": 0.0,
+       "hours": {
+        "status": "open",
+        "day": {
+         "weekday": 5,
+         "open_24h": false,
+         "closed_all_day": false,
+         "intervals": [{"open": "08:00", "close": "20:00", "close_day_offset": 0}],
+         "carryover_until": null
+        }
+       },
+       "business_status": "operational",
+       "interest": 0.798632273810544
+      },
+      {
+       "index": 1,
+       "number": 2,
+       "place_id": "9100000000000314187",
+       "name": "Museum of Maps",
+       "lat": 44.422864,
+       "lon": 26.096412,
+       "kind": "slot",
+       "slot_index": 1,
+       "activity": "sight",
+       "arrival": {"offset_min": 41.998043150712746, "local": "2026-10-03T10:42"},
+       "visit_start": {"offset_min": 41.998043150712746, "local": "2026-10-03T10:42"},
+       "departure": {"offset_min": 116.99804315071275, "local": "2026-10-03T11:57"},
+       "dwell_min": 75.0,
+       "dwell_fixed": false,
+       "wait_min": 0.0,
+       "hours": {
+        "status": "open",
+        "day": {
+         "weekday": 5,
+         "open_24h": false,
+         "closed_all_day": false,
+         "intervals": [{"open": "10:00", "close": "18:00", "close_day_offset": 0}],
+         "carryover_until": null
+        }
+       },
+       "business_status": "operational",
+       "interest": 0.9086110245294268
+      },
+      {
+       "index": 2,
+       "number": 3,
+       "place_id": "9100000000001570935",
+       "name": "Lake Promenade",
+       "lat": 44.420036,
+       "lon": 26.100174,
+       "kind": "on_the_way",
+       "slot_index": null,
+       "activity": "park",
+       "arrival": {"offset_min": 124.80568353480096, "local": "2026-10-03T12:05"},
+       "visit_start": {"offset_min": 124.80568353480096, "local": "2026-10-03T12:05"},
+       "departure": {"offset_min": 134.80568353480095, "local": "2026-10-03T12:15"},
+       "dwell_min": 10.0,
+       "dwell_fixed": false,
+       "wait_min": 0.0,
+       "hours": {
+        "status": "open",
+        "day": {"weekday": 5, "open_24h": true, "closed_all_day": false, "intervals": [], "carryover_until": null}
+       },
+       "business_status": "operational",
+       "interest": 0.45841855960065636
+      },
+      {
+       "index": 3,
+       "number": 4,
+       "place_id": "18000000000000174218",
+       "name": "Fountain Plaza",
+       "lat": 44.420831,
+       "lon": 26.11052,
+       "kind": "slot",
+       "slot_index": 2,
+       "activity": "market",
+       "arrival": {"offset_min": 149.68090697110185, "local": "2026-10-03T12:30"},
+       "visit_start": {"offset_min": 149.68090697110185, "local": "2026-10-03T12:30"},
+       "departure": {"offset_min": 164.68090697110185, "local": "2026-10-03T12:45"},
+       "dwell_min": 15.0,
+       "dwell_fixed": false,
+       "wait_min": 0.0,
+       "hours": {
+        "status": "open",
+        "day": {
+         "weekday": 5,
+         "open_24h": false,
+         "closed_all_day": false,
+         "intervals": [{"open": "08:00", "close": "20:00", "close_day_offset": 0}],
+         "carryover_until": null
+        }
+       },
+       "business_status": "operational",
+       "interest": 0.5397961698854356
+      },
+      {
+       "index": 4,
+       "number": 5,
+       "place_id": "9100000000001361477",
+       "name": "Central Park",
+       "lat": 44.438282,
+       "lon": 26.107919,
+       "kind": "on_the_way",
+       "slot_index": null,
+       "activity": "park",
+       "arrival": {"offset_min": 199.80656902461166, "local": "2026-10-03T13:20"},
+       "visit_start": {"offset_min": 199.80656902461166, "local": "2026-10-03T13:20"},
+       "departure": {"offset_min": 209.80656902461166, "local": "2026-10-03T13:30"},
+       "dwell_min": 10.0,
+       "dwell_fixed": false,
+       "wait_min": 0.0,
+       "hours": {
+        "status": "open",
+        "day": {"weekday": 5, "open_24h": true, "closed_all_day": false, "intervals": [], "carryover_until": null}
+       },
+       "business_status": "operational",
+       "interest": 0.5600124784738101
+      }
+     ],
+     "segments": [
+      {
+       "index": 0,
+       "from": {"kind": "start", "stop_index": null},
+       "to": {"kind": "stop", "stop_index": 0},
+       "walk_min": 15.122961197906731,
+       "distance_m": 1134,
+       "depart": {"offset_min": 0.0, "local": "2026-10-03T10:00"},
+       "arrive": {"offset_min": 15.122961197906731, "local": "2026-10-03T10:15"},
+       "quality": "estimate",
+       "provider": "haversine",
+       "geometry": {"type": "LineString", "coordinates": [[26.09, 44.425], [26.097221, 44.419478]]}
+      },
+      {
+       "index": 1,
+       "from": {"kind": "stop", "stop_index": 0},
+       "to": {"kind": "stop", "stop_index": 1},
+       "walk_min": 6.875081952806011,
+       "distance_m": 516,
+       "depart": {"offset_min": 35.12296119790673, "local": "2026-10-03T10:35"},
+       "arrive": {"offset_min": 41.998043150712746, "local": "2026-10-03T10:42"},
+       "quality": "estimate",
+       "provider": "haversine",
+       "geometry": {"type": "LineString", "coordinates": [[26.097221, 44.419478], [26.096412, 44.422864]]}
+      },
+      {
+       "index": 2,
+       "from": {"kind": "stop", "stop_index": 1},
+       "to": {"kind": "stop", "stop_index": 2},
+       "walk_min": 7.807640384088214,
+       "distance_m": 586,
+       "depart": {"offset_min": 116.99804315071275, "local": "2026-10-03T11:57"},
+       "arrive": {"offset_min": 124.80568353480096, "local": "2026-10-03T12:05"},
+       "quality": "estimate",
+       "provider": "haversine",
+       "geometry": {"type": "LineString", "coordinates": [[26.096412, 44.422864], [26.100174, 44.420036]]}
+      },
+      {
+       "index": 3,
+       "from": {"kind": "stop", "stop_index": 2},
+       "to": {"kind": "stop", "stop_index": 3},
+       "walk_min": 14.87522343630089,
+       "distance_m": 1116,
+       "depart": {"offset_min": 134.80568353480095, "local": "2026-10-03T12:15"},
+       "arrive": {"offset_min": 149.68090697110185, "local": "2026-10-03T12:30"},
+       "quality": "estimate",
+       "provider": "haversine",
+       "geometry": {"type": "LineString", "coordinates": [[26.100174, 44.420036], [26.11052, 44.420831]]}
+      },
+      {
+       "index": 4,
+       "from": {"kind": "stop", "stop_index": 3},
+       "to": {"kind": "stop", "stop_index": 4},
+       "walk_min": 35.125662053509814,
+       "distance_m": 2634,
+       "depart": {"offset_min": 164.68090697110185, "local": "2026-10-03T12:45"},
+       "arrive": {"offset_min": 199.80656902461166, "local": "2026-10-03T13:20"},
+       "quality": "estimate",
+       "provider": "haversine",
+       "geometry": {"type": "LineString", "coordinates": [[26.11052, 44.420831], [26.107919, 44.438282]]}
+      }
+     ],
+     "navigation": {
+      "google_parts": ["https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.425000,26.090000&destination=44.438282,26.107919&destination_place_id=ChIJmini0013xyz&waypoints=44.419478,26.097221%7C44.422864,26.096412%7C44.420036,26.100174%7C44.420831,26.110520&waypoint_place_ids=ChIJmini0028xyz%7CChIJmini0003xyz%7CChIJmini0015xyz%7CChIJmini0022xyz"],
+      "legs": [
+       {
+        "segment_index": 0,
+        "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.425000,26.090000&destination=44.419478,26.097221&destination_place_id=ChIJmini0028xyz",
+        "apple": "https://maps.apple.com/?saddr=44.425000,26.090000&daddr=44.419478,26.097221&dirflg=w"
+       },
+       {
+        "segment_index": 1,
+        "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.419478,26.097221&destination=44.422864,26.096412&destination_place_id=ChIJmini0003xyz&origin_place_id=ChIJmini0028xyz",
+        "apple": "https://maps.apple.com/?saddr=44.419478,26.097221&daddr=44.422864,26.096412&dirflg=w"
+       },
+       {
+        "segment_index": 2,
+        "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.422864,26.096412&destination=44.420036,26.100174&destination_place_id=ChIJmini0015xyz&origin_place_id=ChIJmini0003xyz",
+        "apple": "https://maps.apple.com/?saddr=44.422864,26.096412&daddr=44.420036,26.100174&dirflg=w"
+       },
+       {
+        "segment_index": 3,
+        "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.420036,26.100174&destination=44.420831,26.110520&destination_place_id=ChIJmini0022xyz&origin_place_id=ChIJmini0015xyz",
+        "apple": "https://maps.apple.com/?saddr=44.420036,26.100174&daddr=44.420831,26.110520&dirflg=w"
+       },
+       {
+        "segment_index": 4,
+        "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.420831,26.110520&destination=44.438282,26.107919&destination_place_id=ChIJmini0013xyz&origin_place_id=ChIJmini0022xyz",
+        "apple": "https://maps.apple.com/?saddr=44.420831,26.110520&daddr=44.438282,26.107919&dirflg=w"
+       }
+      ]
+     },
+     "bbox": [26.09, 44.419478, 26.11052, 44.438282],
+     "sequence": [
+      {
+       "place_id": "18000000000000221732",
+       "kind": "slot",
+       "slot_index": 0,
+       "activity": "coffee",
+       "dwell_min": 20.0,
+       "dwell_fixed": true
+      },
+      {
+       "place_id": "9100000000000314187",
+       "kind": "slot",
+       "slot_index": 1,
+       "activity": "sight",
+       "dwell_min": 75.0,
+       "dwell_fixed": false
+      },
+      {
+       "place_id": "9100000000001570935",
+       "kind": "on_the_way",
+       "slot_index": null,
+       "activity": "park",
+       "dwell_min": 10.0,
+       "dwell_fixed": false
+      },
+      {
+       "place_id": "18000000000000174218",
+       "kind": "slot",
+       "slot_index": 2,
+       "activity": "market",
+       "dwell_min": 15.0,
+       "dwell_fixed": false
+      },
+      {
+       "place_id": "9100000000001361477",
+       "kind": "on_the_way",
+       "slot_index": null,
+       "activity": "park",
+       "dwell_min": 10.0,
+       "dwell_fixed": false
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "edited": false,
+     "summary": {
+      "stops_total": 5,
+      "slots_requested": 3,
+      "slots_filled": 3,
+      "on_the_way": 2,
+      "pinned": 0,
+      "dropped_slot_indices": [],
+      "finish_at": {"offset_min": 212.25720764086856, "local": "2026-10-03T13:32"},
+      "finish_kind": "finish",
+      "window_min": 240,
+      "total_min": 212.25720764086856,
+      "walk_min": 117.25720764086856,
+      "dwell_min": 95.0,
+      "wait_min": 0.0,
+      "distance_km": 8.794290573065142,
+      "slack_min": 27.742792359131442,
+      "over_budget": false,
+      "routing": "estimate"
+     },
+     "messages": [
+      {
+       "code": "extras_added",
+       "severity": "info",
+       "scope": "variant",
+       "params": {"count": 2, "style": "scenic", "window_start_label": "10:00", "window_end_label": "14:00"},
+       "stop_index": null,
+       "text": "Стиль «Живописный»: по пути добавлено мест — 2, чтобы занять окно 10:00–14:00. Только выбранные слоты — выключите «Добавлять места по пути»."
+      },
+      {
+       "code": "routing_estimate",
+       "severity": "info",
+       "scope": "variant",
+       "params": {"segments_estimated": 5, "segments_total": 5},
+       "stop_index": null,
+       "text": "Пешие отрезки посчитаны по прямой (оценка): 5 из 5 — по улицам путь может быть длиннее."
+      }
+     ],
+     "stops": [
+      {
+       "index": 0,
+       "number": 1,
+       "place_id": "18000000000000237570",
+       "name": "Cafe Sky",
+       "lat": 44.418889,
+       "lon": 26.08679,
+       "kind": "slot",
+       "slot_index": 0,
+       "activity": "coffee",
+       "arrival": {"offset_min": 13.06364941941933, "local": "2026-10-03T10:13"},
+       "visit_start": {"offset_min": 13.06364941941933, "local": "2026-10-03T10:13"},
+       "departure": {"offset_min": 33.06364941941933, "local": "2026-10-03T10:33"},
+       "dwell_min": 20.0,
+       "dwell_fixed": true,
+       "wait_min": 0.0,
+       "hours": {
+        "status": "open",
+        "day": {
+         "weekday": 5,
+         "open_24h": false,
+         "closed_all_day": false,
+         "intervals": [{"open": "08:00", "close": "20:00", "close_day_offset": 0}],
+         "carryover_until": null
+        }
+       },
+       "business_status": "operational",
+       "interest": 0.7946541633451674
+      },
+      {
+       "index": 1,
+       "number": 2,
+       "place_id": "9100000000001152019",
+       "name": "Holy Trinity Church",
+       "lat": 44.419585,
+       "lon": 26.084033,
+       "kind": "slot",
+       "slot_index": 1,
+       "activity": "sight",
+       "arrival": {"offset_min": 37.24387743191001, "local": "2026-10-03T10:37"},
+       "visit_start": {"offset_min": 37.24387743191001, "local": "2026-10-03T10:37"},
+       "departure": {"offset_min": 62.24387743191001, "local": "2026-10-03T11:02"},
+       "dwell_min": 25.0,
+       "dwell_fixed": false,
+       "wait_min": 0.0,
+       "hours": {
+        "status": "open",
+        "day": {
+         "weekday": 5,
+         "open_24h": false,
+         "closed_all_day": false,
+         "intervals": [{"open": "08:00", "close": "19:00", "close_day_offset": 0}],
+         "carryover_until": null
+        }
+       },
+       "business_status": "operational",
+       "interest": 0.7878180177732227
+      },
+      {
+       "index": 2,
+       "number": 3,
+       "place_id": "18000000000000158380",
+       "name": "Old Market",
+       "lat": 44.426649,
+       "lon": 26.104334,
+       "kind": "slot",
+       "slot_index": 2,
+       "activity": "market",
+       "arrival": {"offset_min": 94.52439486560652, "local": "2026-10-03T11:35"},
+       "visit_start": {"offset_min": 94.52439486560652, "local": "2026-10-03T11:35"},
+       "departure": {"offset_min": 124.52439486560652, "local": "2026-10-03T12:05"},
+       "dwell_min": 30.0,
+       "dwell_fixed": false,
+       "wait_min": 0.0,
+       "hours": {"status": "unknown", "day": null},
+       "business_status": "operational",
+       "interest": 0.44516812576715314
+      },
+      {
+       "index": 3,
+       "number": 4,
+       "place_id": "9100000000001989851",
+       "name": "Reed Lake",
+       "lat": 44.44102,
+       "lon": 26.110001,
+       "kind": "on_the_way",
+       "slot_index": null,
+       "activity": "park",
+       "arrival": {"offset_min": 154.40665950997007, "local": "2026-10-03T12:34"},
+       "visit_start": {"offset_min": 154.40665950997007, "local": "2026-10-03T12:34"},
+       "departure": {"offset_min": 164.40665950997007, "local": "2026-10-03T12:44"},
+       "dwell_min": 10.0,
+       "dwell_fixed": false,
+       "wait_min": 0.0,
+       "hours": {"status": "unknown", "day": null},
+       "business_status": "operational",
+       "interest": 0.40185126806408694
+      },
+      {
+       "index": 4,
+       "number": 5,
+       "place_id": "9100000000001780393",
+       "name": "Botanical Garden",
+       "lat": 44.436323,
+       "lon": 26.084345,
+       "kind": "on_the_way",
+       "slot_index": null,
+       "activity": "park",
+       "arrival": {"offset_min": 202.2572076408686, "local": "2026-10-03T13:22"},
+       "visit_start": {"offset_min": 202.2572076408686, "local": "2026-10-03T13:22"},
+       "departure": {"offset_min": 212.2572076408686, "local": "2026-10-03T13:32"},
+       "dwell_min": 10.0,
+       "dwell_fixed": false,
+       "wait_min": 0.0,
+       "hours": {
+        "status": "open",
+        "day": {"weekday": 5, "open_24h": true, "closed_all_day": false, "intervals": [], "carryover_until": null}
+       },
+       "business_status": "operational",
+       "interest": 0.5232383709443311
+      }
+     ],
+     "segments": [
+      {
+       "index": 0,
+       "from": {"kind": "start", "stop_index": null},
+       "to": {"kind": "stop", "stop_index": 0},
+       "walk_min": 13.06364941941933,
+       "distance_m": 980,
+       "depart": {"offset_min": 0.0, "local": "2026-10-03T10:00"},
+       "arrive": {"offset_min": 13.06364941941933, "local": "2026-10-03T10:13"},
+       "quality": "estimate",
+       "provider": "haversine",
+       "geometry": {"type": "LineString", "coordinates": [[26.09, 44.425], [26.08679, 44.418889]]}
+      },
+      {
+       "index": 1,
+       "from": {"kind": "stop", "stop_index": 0},
+       "to": {"kind": "stop", "stop_index": 1},
+       "walk_min": 4.180228012490678,
+       "distance_m": 314,
+       "depart": {"offset_min": 33.06364941941933, "local": "2026-10-03T10:33"},
+       "arrive": {"offset_min": 37.24387743191001, "local": "2026-10-03T10:37"},
+       "quality": "estimate",
+       "provider": "haversine",
+       "geometry": {"type": "LineString", "coordinates": [[26.08679, 44.418889], [26.084033, 44.419585]]}
+      },
+      {
+       "index": 2,
+       "from": {"kind": "stop", "stop_index": 1},
+       "to": {"kind": "stop", "stop_index": 2},
+       "walk_min": 32.28051743369652,
+       "distance_m": 2421,
+       "depart": {"offset_min": 62.24387743191001, "local": "2026-10-03T11:02"},
+       "arrive": {"offset_min": 94.52439486560652, "local": "2026-10-03T11:35"},
+       "quality": "estimate",
+       "provider": "haversine",
+       "geometry": {"type": "LineString", "coordinates": [[26.084033, 44.419585], [26.104334, 44.426649]]}
+      },
+      {
+       "index": 3,
+       "from": {"kind": "stop", "stop_index": 2},
+       "to": {"kind": "stop", "stop_index": 3},
+       "walk_min": 29.882264644363534,
+       "distance_m": 2241,
+       "depart": {"offset_min": 124.52439486560652, "local": "2026-10-03T12:05"},
+       "arrive": {"offset_min": 154.40665950997007, "local": "2026-10-03T12:34"},
+       "quality": "estimate",
+       "provider": "haversine",
+       "geometry": {"type": "LineString", "coordinates": [[26.104334, 44.426649], [26.110001, 44.44102]]}
+      },
+      {
+       "index": 4,
+       "from": {"kind": "stop", "stop_index": 3},
+       "to": {"kind": "stop", "stop_index": 4},
+       "walk_min": 37.85054813089851,
+       "distance_m": 2839,
+       "depart": {"offset_min": 164.40665950997007, "local": "2026-10-03T12:44"},
+       "arrive": {"offset_min": 202.2572076408686, "local": "2026-10-03T13:22"},
+       "quality": "estimate",
+       "provider": "haversine",
+       "geometry": {"type": "LineString", "coordinates": [[26.110001, 44.44102], [26.084345, 44.436323]]}
+      }
+     ],
+     "navigation": {
+      "google_parts": ["https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.425000,26.090000&destination=44.436323,26.084345&destination_place_id=ChIJmini0017xyz&waypoints=44.418889,26.086790%7C44.419585,26.084033%7C44.426649,26.104334%7C44.441020,26.110001&waypoint_place_ids=ChIJmini0030xyz%7CChIJmini0011xyz%7CChIJmini0020xyz%7CChIJmini0019xyz"],
+      "legs": [
+       {
+        "segment_index": 0,
+        "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.425000,26.090000&destination=44.418889,26.086790&destination_place_id=ChIJmini0030xyz",
+        "apple": "https://maps.apple.com/?saddr=44.425000,26.090000&daddr=44.418889,26.086790&dirflg=w"
+       },
+       {
+        "segment_index": 1,
+        "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.418889,26.086790&destination=44.419585,26.084033&destination_place_id=ChIJmini0011xyz&origin_place_id=ChIJmini0030xyz",
+        "apple": "https://maps.apple.com/?saddr=44.418889,26.086790&daddr=44.419585,26.084033&dirflg=w"
+       },
+       {
+        "segment_index": 2,
+        "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.419585,26.084033&destination=44.426649,26.104334&destination_place_id=ChIJmini0020xyz&origin_place_id=ChIJmini0011xyz",
+        "apple": "https://maps.apple.com/?saddr=44.419585,26.084033&daddr=44.426649,26.104334&dirflg=w"
+       },
+       {
+        "segment_index": 3,
+        "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.426649,26.104334&destination=44.441020,26.110001&destination_place_id=ChIJmini0019xyz&origin_place_id=ChIJmini0020xyz",
+        "apple": "https://maps.apple.com/?saddr=44.426649,26.104334&daddr=44.441020,26.110001&dirflg=w"
+       },
+       {
+        "segment_index": 4,
+        "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.441020,26.110001&destination=44.436323,26.084345&destination_place_id=ChIJmini0017xyz&origin_place_id=ChIJmini0019xyz",
+        "apple": "https://maps.apple.com/?saddr=44.441020,26.110001&daddr=44.436323,26.084345&dirflg=w"
+       }
+      ]
+     },
+     "bbox": [26.084033, 44.418889, 26.110001, 44.44102],
+     "sequence": [
+      {
+       "place_id": "18000000000000237570",
+       "kind": "slot",
+       "slot_index": 0,
+       "activity": "coffee",
+       "dwell_min": 20.0,
+       "dwell_fixed": true
+      },
+      {
+       "place_id": "9100000000001152019",
+       "kind": "slot",
+       "slot_index": 1,
+       "activity": "sight",
+       "dwell_min": 25.0,
+       "dwell_fixed": false
+      },
+      {
+       "place_id": "18000000000000158380",
+       "kind": "slot",
+       "slot_index": 2,
+       "activity": "market",
+       "dwell_min": 30.0,
+       "dwell_fixed": false
+      },
+      {
+       "place_id": "9100000000001989851",
+       "kind": "on_the_way",
+       "slot_index": null,
+       "activity": "park",
+       "dwell_min": 10.0,
+       "dwell_fixed": false
+      },
+      {
+       "place_id": "9100000000001780393",
+       "kind": "on_the_way",
+       "slot_index": null,
+       "activity": "park",
+       "dwell_min": 10.0,
+       "dwell_fixed": false
+      }
+     ]
+    }
+   ],
+   "places": {
+    "18000000000000110866": {
+     "place_id": "18000000000000110866",
+     "name": "Rose Garden",
+     "type_label": "Botanical garden",
+     "primary_type": "garden",
+     "theme": "nature_outdoors",
+     "theme_group": "sights",
+     "rating": 4.4,
+     "rating_count": 2973,
+     "summary": "Botanical garden in Minitown, place 14.",
+     "summary_lang": "en",
+     "photos": [
+      {"key": "photos_cid/18000000000000110866/00_all.jpg", "url": null},
+      {"key": "photos_cid/18000000000000110866/02_all.jpg", "url": null},
+      {"key": "photos_cid/18000000000000110866/04_all.jpg", "url": null}
+     ],
+     "google_maps_url": "https://www.google.com/maps?cid=18000000000000110866",
+     "google_place_id": "ChIJmini0014xyz",
+     "address": "Strada Mini 15, Minitown",
+     "business_status": "operational",
+     "lat": 44.419057,
+     "lon": 26.091672,
+     "price_level": null
+    },
+    "18000000000000142542": {
+     "place_id": "18000000000000142542",
+     "name": "Willow Park",
+     "type_label": "Urban lake",
+     "primary_type": "lake",
+     "theme": "nature_outdoors",
+     "theme_group": "sights",
+     "rating": 4.5,
+     "rating_count": 15373,
+     "summary": "Urban lake in Minitown, place 18.",
+     "summary_lang": "en",
+     "photos": [
+      {"key": "photos_cid/18000000000000142542/00_vibe.jpg", "url": null},
+      {"key": "photos_cid/18000000000000142542/02_vibe.jpg", "url": null},
+      {"key": "photos_cid/18000000000000142542/04_vibe.jpg", "url": null}
+     ],
+     "google_maps_url": "https://www.google.com/maps?cid=18000000000000142542",
+     "google_place_id": "ChIJmini0018xyz",
+     "address": "Strada Mini 19, Minitown",
+     "business_status": "operational",
+     "lat": 44.42934,
+     "lon": 26.089007,
+     "price_level": null
+    },
+    "9100000000002618225": {
+     "place_id": "9100000000002618225",
+     "name": "Morning Cafe",
+     "type_label": "Specialty coffee shop",
+     "primary_type": "cafe",
+     "theme": "food_drink",
+     "theme_group": "food_drink",
+     "rating": 4.2,
+     "rating_count": 10489,
+     "summary": "Specialty coffee shop in Minitown, place 25.",
+     "summary_lang": "en",
+     "photos": [
+      {"key": "photos_cid/9100000000002618225/01_all.jpg", "url": null},
+      {"key": "photos_cid/9100000000002618225/03_all.jpg", "url": null}
+     ],
+     "google_maps_url": "https://www.google.com/maps?cid=9100000000002618225",
+     "google_place_id": "ChIJmini0025xyz",
+     "address": "Strada Mini 26, Minitown",
+     "business_status": "operational",
+     "lat": 44.429951,
+     "lon": 26.085197,
+     "price_level": "moderate"
+    },
+    "18000000000000047514": {
+     "place_id": "18000000000000047514",
+     "name": "Merchant House",
+     "type_label": "Historic landmark",
+     "primary_type": "historical_landmark",
+     "theme": "culture_sights",
+     "theme_group": "sights",
+     "rating": 4.8,
+     "rating_count": 16862,
+     "summary": "Historic landmark in Minitown, place 6.",
+     "summary_lang": "en",
+     "photos": [
+      {"key": "photos_cid/18000000000000047514/00_vibe.jpg", "url": null},
+      {"key": "photos_cid/18000000000000047514/02_vibe.jpg", "url": null},
+      {"key": "photos_cid/18000000000000047514/04_vibe.jpg", "url": null}
+     ],
+     "google_maps_url": "https://www.google.com/maps?cid=18000000000000047514",
+     "google_place_id": "ChIJmini0006xyz",
+     "address": "Strada Mini 7, Minitown",
+     "business_status": "operational",
+     "lat": 44.432526,
+     "lon": 26.09048,
+     "price_level": null
+    },
+    "9100000000002199309": {
+     "place_id": "9100000000002199309",
+     "name": "Union Square",
+     "type_label": "Town square",
+     "primary_type": "town_square",
+     "theme": "markets_walks",
+     "theme_group": "sights",
+     "rating": 4.3,
+     "rating_count": 10645,
+     "summary": "Town square in Minitown, place 21.",
+     "summary_lang": "en",
+     "photos": [
+      {"key": "photos_cid/9100000000002199309/01_vibe.jpg", "url": null},
+      {"key": "photos_cid/9100000000002199309/03_vibe.jpg", "url": null}
+     ],
+     "google_maps_url": "https://www.google.com/maps?cid=9100000000002199309",
+     "google_place_id": "ChIJmini0021xyz",
+     "address": "Strada Mini 22, Minitown",
+     "business_status": "operational",
+     "lat": 44.439814,
+     "lon": 26.110184,
+     "price_level": null
+    },
+    "18000000000000221732": {
+     "place_id": "18000000000000221732",
+     "name": "Cafe Tei",
+     "type_label": "Coffee roaster",
+     "primary_type": "coffee_shop",
+     "theme": "food_drink",
+     "theme_group": "food_drink",
+     "rating": 4.5,
+     "rating_count": 8265,
+     "summary": "Coffee roaster in Minitown, place 28.",
+     "summary_lang": "en",
+     "photos": [{"key": "photos_cid/18000000000000221732/00_all.jpg", "url": null}],
+     "google_maps_url": "https://www.google.com/maps?cid=18000000000000221732",
+     "google_place_id": "ChIJmini0028xyz",
+     "address": "Strada Mini 29, Minitown",
+     "business_status": "operational",
+     "lat": 44.419478,
+     "lon": 26.097221,
+     "price_level": "inexpensive"
+    },
+    "9100000000000314187": {
+     "place_id": "9100000000000314187",
+     "name": "Museum of Maps",
+     "type_label": "Art museum",
+     "primary_type": "museum",
+     "theme": "culture_sights",
+     "theme_group": "sights",
+     "rating": 4.9,
+     "rating_count": 7232,
+     "summary": "Art museum in Minitown, place 3.",
+     "summary_lang": "en",
+     "photos": [
+      {"key": "photos_cid/9100000000000314187/01_vibe.jpg", "url": null},
+      {"key": "photos_cid/9100000000000314187/03_vibe.jpg", "url": null},
+      {"key": "photos_cid/9100000000000314187/05_vibe.jpg", "url": null},
+      {"key": "photos_cid/9100000000000314187/07_vibe.jpg", "url": null}
+     ],
+     "google_maps_url": "https://www.google.com/maps?cid=9100000000000314187",
+     "google_place_id": "ChIJmini0003xyz",
+     "address": "Strada Mini 4, Minitown",
+     "business_status": "operational",
+     "lat": 44.422864,
+     "lon": 26.096412,
+     "price_level": null
+    },
+    "9100000000001570935": {
+     "place_id": "9100000000001570935",
+     "name": "Lake Promenade",
+     "type_label": "Urban lake",
+     "primary_type": "lake",
+     "theme": "nature_outdoors",
+     "theme_group": "sights",
+     "rating": 4.8,
+     "rating_count": 39,
+     "summary": "Urban lake in Minitown, place 15.",
+     "summary_lang": "en",
+     "photos": [
+      {"key": "photos_cid/9100000000001570935/01_vibe.jpg", "url": null},
+      {"key": "photos_cid/9100000000001570935/03_vibe.jpg", "url": null},
+      {"key": "photos_cid/9100000000001570935/05_vibe.jpg", "url": null},
+      {"key": "photos_cid/9100000000001570935/07_vibe.jpg", "url": null}
+     ],
+     "google_maps_url": "https://www.google.com/maps?cid=9100000000001570935",
+     "google_place_id": "ChIJmini0015xyz",
+     "address": "Strada Mini 16, Minitown",
+     "business_status": "operational",
+     "lat": 44.420036,
+     "lon": 26.100174,
+     "price_level": null
+    },
+    "18000000000000174218": {
+     "place_id": "18000000000000174218",
+     "name": "Fountain Plaza",
+     "type_label": "Pedestrian plaza",
+     "primary_type": "plaza",
+     "theme": "markets_walks",
+     "theme_group": "sights",
+     "rating": 4.3,
+     "rating_count": 509,
+     "summary": "Pedestrian plaza in Minitown, place 22.",
+     "summary_lang": "en",
+     "photos": [
+      {"key": "photos_cid/18000000000000174218/00_all.jpg", "url": null},
+      {"key": "photos_cid/18000000000000174218/02_all.jpg", "url": null},
+      {"key": "photos_cid/18000000000000174218/04_all.jpg", "url": null}
+     ],
+     "google_maps_url": "https://www.google.com/maps?cid=18000000000000174218",
+     "google_place_id": "ChIJmini0022xyz",
+     "address": "Strada Mini 23, Minitown",
+     "business_status": "operational",
+     "lat": 44.420831,
+     "lon": 26.11052,
+     "price_level": null
+    },
+    "9100000000001361477": {
+     "place_id": "9100000000001361477",
+     "name": "Central Park",
+     "type_label": "City park",
+     "primary_type": "park",
+     "theme": "nature_outdoors",
+     "theme_group": "sights",
+     "rating": 4.0,
+     "rating_count": 2365,
+     "summary": "City park in Minitown, place 13.",
+     "summary_lang": "en",
+     "photos": [
+      {"key": "photos_cid/9100000000001361477/01_all.jpg", "url": null},
+      {"key": "photos_cid/9100000000001361477/03_all.jpg", "url": null}
+     ],
+     "google_maps_url": "https://www.google.com/maps?cid=9100000000001361477",
+     "google_place_id": "ChIJmini0013xyz",
+     "address": "Strada Mini 14, Minitown",
+     "business_status": "operational",
+     "lat": 44.438282,
+     "lon": 26.107919,
+     "price_level": null
+    },
+    "18000000000000237570": {
+     "place_id": "18000000000000237570",
+     "name": "Cafe Sky",
+     "type_label": "Coffee roaster",
+     "primary_type": "coffee_shop",
+     "theme": "food_drink",
+     "theme_group": "food_drink",
+     "rating": 4.7,
+     "rating_count": 3422,
+     "summary": "Coffee roaster in Minitown, place 30.",
+     "summary_lang": "en",
+     "photos": [
+      {"key": "photos_cid/18000000000000237570/00_vibe.jpg", "url": null},
+      {"key": "photos_cid/18000000000000237570/02_vibe.jpg", "url": null},
+      {"key": "photos_cid/18000000000000237570/04_vibe.jpg", "url": null}
+     ],
+     "google_maps_url": "https://www.google.com/maps?cid=18000000000000237570",
+     "google_place_id": "ChIJmini0030xyz",
+     "address": "Strada Mini 31, Minitown",
+     "business_status": "operational",
+     "lat": 44.418889,
+     "lon": 26.08679,
+     "price_level": "expensive"
+    },
+    "9100000000001152019": {
+     "place_id": "9100000000001152019",
+     "name": "Holy Trinity Church",
+     "type_label": "Orthodox church",
+     "primary_type": "church",
+     "theme": "religious_sights",
+     "theme_group": "sights",
+     "rating": 4.5,
+     "rating_count": 7114,
+     "summary": "Orthodox church in Minitown, place 11.",
+     "summary_lang": "en",
+     "photos": [],
+     "google_maps_url": "https://www.google.com/maps?cid=9100000000001152019",
+     "google_place_id": "ChIJmini0011xyz",
+     "address": "Strada Mini 12, Minitown",
+     "business_status": "operational",
+     "lat": 44.419585,
+     "lon": 26.084033,
+     "price_level": null
+    },
+    "18000000000000158380": {
+     "place_id": "18000000000000158380",
+     "name": "Old Market",
+     "type_label": "Food market",
+     "primary_type": "market",
+     "theme": "markets_walks",
+     "theme_group": "sights",
+     "rating": 4.9,
+     "rating_count": 29,
+     "summary": "Food market in Minitown, place 20.",
+     "summary_lang": "en",
+     "photos": [{"key": "photos_cid/18000000000000158380/00_all.jpg", "url": null}],
+     "google_maps_url": "https://www.google.com/maps?cid=18000000000000158380",
+     "google_place_id": "ChIJmini0020xyz",
+     "address": "Strada Mini 21, Minitown",
+     "business_status": "operational",
+     "lat": 44.426649,
+     "lon": 26.104334,
+     "price_level": null
+    },
+    "9100000000001989851": {
+     "place_id": "9100000000001989851",
+     "name": "Reed Lake",
+     "type_label": "City park",
+     "primary_type": "park",
+     "theme": "nature_outdoors",
+     "theme_group": "sights",
+     "rating": 4.0,
+     "rating_count": 225,
+     "summary": "City park in Minitown, place 19.",
+     "summary_lang": "en",
+     "photos": [
+      {"key": "photos_cid/9100000000001989851/01_all.jpg", "url": null},
+      {"key": "photos_cid/9100000000001989851/03_all.jpg", "url": null},
+      {"key": "photos_cid/9100000000001989851/05_all.jpg", "url": null},
+      {"key": "photos_cid/9100000000001989851/07_all.jpg", "url": null}
+     ],
+     "google_maps_url": "https://www.google.com/maps?cid=9100000000001989851",
+     "google_place_id": "ChIJmini0019xyz",
+     "address": "Strada Mini 20, Minitown",
+     "business_status": "operational",
+     "lat": 44.44102,
+     "lon": 26.110001,
+     "price_level": null
+    },
+    "9100000000001780393": {
+     "place_id": "9100000000001780393",
+     "name": "Botanical Garden",
+     "type_label": "Botanical garden",
+     "primary_type": "garden",
+     "theme": "nature_outdoors",
+     "theme_group": "sights",
+     "rating": 4.9,
+     "rating_count": 61,
+     "summary": "Botanical garden in Minitown, place 17.",
+     "summary_lang": "en",
+     "photos": [],
+     "google_maps_url": "https://www.google.com/maps?cid=9100000000001780393",
+     "google_place_id": "ChIJmini0017xyz",
+     "address": "Strada Mini 18, Minitown",
+     "business_status": "operational",
+     "lat": 44.436323,
+     "lon": 26.084345,
+     "price_level": null
+    }
+   }
+  }
+ },
+ "edits": {}
+}

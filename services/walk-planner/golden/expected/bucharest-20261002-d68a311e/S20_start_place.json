@@ -1,0 +1,1545 @@
+{
+ "format": "walk-golden/v1",
+ "scenario": {
+  "id": "S20_start_place",
+  "city": "Bucharest",
+  "date": "2026-10-03",
+  "start_time": "10:00",
+  "end_time": "14:00",
+  "end_day_offset": 0,
+  "shape": "loop",
+  "start": {"place_id": "10915586233752676659"},
+  "style": "max",
+  "slots": [
+   {"activity": "sight", "dwell_min": null},
+   {"activity": "coffee", "dwell_min": null},
+   {"activity": "park", "dwell_min": null},
+   {"activity": "food", "dwell_min": null}
+  ],
+  "must_visit_place_ids": [],
+  "variants": 3,
+  "radius_km": 2.5,
+  "fill_window": true,
+  "known_hours_only": false,
+  "top_k": 8,
+  "edits": []
+ },
+ "plan": {
+  "call": "POST /v1/walks/plan",
+  "options": {"lang": "ru", "geometry": "geojson"},
+  "body": {
+   "city": "Bucharest",
+   "date": "2026-10-03",
+   "start_time": "10:00",
+   "end_time": "14:00",
+   "end_day_offset": 0,
+   "shape": "loop",
+   "start": {"place_id": "10915586233752676659"},
+   "style": "max",
+   "slots": [
+    {"activity": "sight", "dwell_min": null},
+    {"activity": "coffee", "dwell_min": null},
+    {"activity": "park", "dwell_min": null},
+    {"activity": "food", "dwell_min": null}
+   ],
+   "must_visit_place_ids": [],
+   "variants": 3,
+   "radius_km": 2.5,
+   "fill_window": true,
+   "known_hours_only": false,
+   "top_k": 8
+  },
+  "status": 200,
+  "response": {
+   "plan_id": "bed9a31b68c5a4eec1f54df5eb74df3ffba1e321",
+   "versions": {
+    "api": "v1",
+    "algorithm": "1.0.0",
+    "catalog": "bucharest-20261002-d68a311e",
+    "interest": "walk_interest_v1",
+    "routing": null
+   },
+   "status": "ok",
+   "request": {
+    "city": "Bucharest",
+    "date": "2026-10-03",
+    "start_time": "10:00",
+    "end_time": "14:00",
+    "end_day_offset": 0,
+    "shape": "loop",
+    "start": {"lat": 44.4317929, "lon": 26.098859299999997, "place_id": "10915586233752676659"},
+    "style": "max",
+    "slots": [
+     {"activity": "sight", "dwell_min": null},
+     {"activity": "coffee", "dwell_min": null},
+     {"activity": "park", "dwell_min": null},
+     {"activity": "food", "dwell_min": null}
+    ],
+    "must_visit_place_ids": [],
+    "favourite_place_ids": [],
+    "want_to_go_place_ids": [],
+    "personalization_strength": 0.5,
+    "variants": 3,
+    "radius_km": 2.5,
+    "fill_window": true,
+    "known_hours_only": false,
+    "top_k": 8,
+    "timezone": "Europe/Bucharest",
+    "weekday": 5,
+    "window_min": 240,
+    "window_start": "2026-10-03T10:00",
+    "window_end": "2026-10-03T14:00",
+    "search_radius_km": 1.3888888888888888,
+    "catalog_version": "bucharest-20261002-d68a311e"
+   },
+   "personalization": {"mode": "popularity", "strength": 0.5, "favourites_used": [], "favourites_ignored": [], "profiles": 0},
+   "messages": [
+    {
+     "code": "radius_shrunk",
+     "severity": "info",
+     "scope": "request",
+     "params": {
+      "radius_km": 2.5,
+      "search_radius_km": 1.3888888888888888,
+      "reason": "reach",
+      "dwell_total_min": 190.0,
+      "window_min": 240,
+      "window_start_label": "10:00",
+      "window_end_label": "14:00",
+      "anchor": "start",
+      "loop": true
+     },
+     "stop_index": null,
+     "text": "Радиус 2.5 км сужен до 1.4 км: за окно 10:00–14:00 дальше не успеть — ~190 мин уходит на сами места, и нужно вернуться к старту."
+    }
+   ],
+   "variants": [
+    {
+     "index": 0,
+     "edited": false,
+     "summary": {
+      "stops_total": 4,
+      "slots_requested": 4,
+      "slots_filled": 4,
+      "on_the_way": 0,
+      "pinned": 0,
+      "dropped_slot_indices": [],
+      "finish_at": {"offset_min": 222.34522907594314, "local": "2026-10-03T13:42"},
+      "finish_kind": "return",
+      "window_min": 240,
+      "total_min": 222.34522907594314,
+      "walk_min": 17.345229075943127,
+      "dwell_min": 205.0,
+      "wait_min": 0.0,
+      "distance_km": 1.3008921806957345,
+      "slack_min": 17.654770924056862,
+      "over_budget": false,
+      "routing": "estimate"
+     },
+     "messages": [
+      {
+       "code": "routing_estimate",
+       "severity": "info",
+       "scope": "variant",
+       "params": {"segments_estimated": 5, "segments_total": 5},
+       "stop_index": null,
+       "text": "Пешие отрезки посчитаны по прямой (оценка): 5 из 5 — по улицам путь может быть длиннее."
+      }
+     ],
+     "stops": [
+      {
+       "index": 0,
+       "number": 1,
+       "place_id": "10915586233752676659",
+       "name": "The Church of the \"Stavropoleos\" Monastery",
+       "lat": 44.4317929,
+       "lon": 26.098859299999997,
+       "kind": "slot",
+       "slot_index": 0,
+       "activity": "sight",
+       "arrival": {"offset_min": 0.0, "local": "2026-10-03T10:00"},
+       "visit_start": {"offset_min": 0.0, "local": "2026-10-03T10:00"},
+       "departure": {"offset_min": 35.0, "local": "2026-10-03T10:35"},
+       "dwell_min": 35.0,
+       "dwell_fixed": false,
+       "wait_min": 0.0,
+       "hours": {
+        "status": "open",
+        "day": {
+         "weekday": 5,
+         "open_24h": false,
+         "closed_all_day": false,
+         "intervals": [{"open": "08:00", "close": "19:00", "close_day_offset": 0}],
+         "carryover_until": null
+        }
+       },
+       "business_status": "operational",
+       "interest": 0.7748276196427674
+      },
+      {
+       "index": 1,
+       "number": 2,
+       "place_id": "3964556970519084671",
+       "name": "Arcade Cafe",
+       "lat": 44.430484899999996,
+       "lon": 26.100030399999998,
+       "kind": "slot",
+       "slot_index": 1,
+       "activity": "coffee",
+       "arrival": {"offset_min": 38.10732147431269, "local": "2026-10-03T10:38"},
+       "visit_start": {"offset_min": 38.10732147431269, "local": "2026-10-03T10:38"},
+       "departure": {"offset_min": 113.1073214743127, "local": "2026-10-03T11:53"},
+       "dwell_min": 75.0,
+       "dwell_fixed": false,
+       "wait_min": 0.0,
+       "hours": {
+        "status": "open",
+        "day": {
+         "weekday": 5,
+         "open_24h": false,
+         "closed_all_day": false,
+         "intervals": [{"open": "10:00", "close": "02:00", "close_day_offset": 1}],
+         "carryover_until": null
+        }
+       },
+       "business_status": "operational",
+       "interest": 0.5961486027532364
+      },
+      {
+       "index": 2,
+       "number": 3,
+       "place_id": "6888593115770266135",
+       "name": "Tribunalului Park",
+       "lat": 44.4277824,
+       "lon": 26.0985113,
+       "kind": "slot",
+       "slot_index": 2,
+       "activity": "park",
+       "arrival": {"offset_min": 118.93592402826765, "local": "2026-10-03T11:59"},
+       "visit_start": {"offset_min": 118.93592402826765, "local": "2026-10-03T11:59"},
+       "departure": {"offset_min": 138.93592402826766, "local": "2026-10-03T12:19"},
+       "dwell_min": 20.0,
+       "dwell_fixed": false,
+       "wait_min": 0.0,
+       "hours": {
+        "status": "open",
+        "day": {"weekday": 5, "open_24h": true, "closed_all_day": false, "intervals": [], "carryover_until": null}
+       },
+       "business_status": "operational",
+       "interest": 0.4077642597439859
+      },
+      {
+       "index": 3,
+       "number": 4,
+       "place_id": "16068592796011144749",
+       "name": "Jeonjuu Korean BBQ",
+       "lat": 44.430973699999996,
+       "lon": 26.0994894,
+       "kind": "slot",
+       "slot_index": 3,
+       "activity": "food",
+       "arrival": {"offset_min": 145.47454751738914, "local": "2026-10-03T12:25"},
+       "visit_start": {"offset_min": 145.47454751738914, "local": "2026-10-03T12:25"},
+       "departure": {"offset_min": 220.47454751738914, "local": "2026-10-03T13:40"},
+       "dwell_min": 75.0,
+       "dwell_fixed": false,
+       "wait_min": 0.0,
+       "hours": {
+        "status": "open",
+        "day": {
+         "weekday": 5,
+         "open_24h": false,
+         "closed_all_day": false,
+         "intervals": [{"open": "11:00", "close": "00:00", "close_day_offset": 1}],
+         "carryover_until": null
+        }
+       },
+       "business_status": "operational",
+       "interest": 0.7589461322082716
+      }
+     ],
+     "segments": [
+      {
+       "index": 0,
+       "from": {"kind": "start", "stop_index": null},
+       "to": {"kind": "stop", "stop_index": 0},
+       "walk_min": 0.0,
+       "distance_m": 0,
+       "depart": {"offset_min": 0.0, "local": "2026-10-03T10:00"},
+       "arrive": {"offset_min": 0.0, "local": "2026-10-03T10:00"},
+       "quality": "estimate",
+       "provider": "haversine",
+       "geometry": {"type": "LineString", "coordinates": [[26.098859299999997, 44.4317929], [26.098859299999997, 44.4317929]]}
+      },
+      {
+       "index": 1,
+       "from": {"kind": "stop", "stop_index": 0},
+       "to": {"kind": "stop", "stop_index": 1},
+       "walk_min": 3.10732147431269,
+       "distance_m": 233,
+       "depart": {"offset_min": 35.0, "local": "2026-10-03T10:35"},
+       "arrive": {"offset_min": 38.10732147431269, "local": "2026-10-03T10:38"},
+       "quality": "estimate",
+       "provider": "haversine",
+       "geometry": {
+        "type": "LineString",
+        "coordinates": [[26.098859299999997, 44.4317929], [26.100030399999998, 44.430484899999996]]
+       }
+      },
+      {
+       "index": 2,
+       "from": {"kind": "stop", "stop_index": 1},
+       "to": {"kind": "stop", "stop_index": 2},
+       "walk_min": 5.828602553954948,
+       "distance_m": 437,
+       "depart": {"offset_min": 113.1073214743127, "local": "2026-10-03T11:53"},
+       "arrive": {"offset_min": 118.93592402826765, "local": "2026-10-03T11:59"},
+       "quality": "estimate",
+       "provider": "haversine",
+       "geometry": {"type": "LineString", "coordinates": [[26.100030399999998, 44.430484899999996], [26.0985113, 44.4277824]]}
+      },
+      {
+       "index": 3,
+       "from": {"kind": "stop", "stop_index": 2},
+       "to": {"kind": "stop", "stop_index": 3},
+       "walk_min": 6.538623489121471,
+       "distance_m": 490,
+       "depart": {"offset_min": 138.93592402826766, "local": "2026-10-03T12:19"},
+       "arrive": {"offset_min": 145.47454751738914, "local": "2026-10-03T12:25"},
+       "quality": "estimate",
+       "provider": "haversine",
+       "geometry": {"type": "LineString", "coordinates": [[26.0985113, 44.4277824], [26.0994894, 44.430973699999996]]}
+      },
+      {
+       "index": 4,
+       "from": {"kind": "stop", "stop_index": 3},
+       "to": {"kind": "start", "stop_index": null},
+       "walk_min": 1.8706815585540177,
+       "distance_m": 140,
+       "depart": {"offset_min": 220.47454751738914, "local": "2026-10-03T13:40"},
+       "arrive": {"offset_min": 222.34522907594317, "local": "2026-10-03T13:42"},
+       "quality": "estimate",
+       "provider": "haversine",
+       "geometry": {"type": "LineString", "coordinates": [[26.0994894, 44.430973699999996], [26.098859299999997, 44.4317929]]}
+      }
+     ],
+     "navigation": {
+      "google_parts": ["https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.431793,26.098859&destination=44.431793,26.098859&waypoints=44.431793,26.098859%7C44.430485,26.100030%7C44.427782,26.098511%7C44.430974,26.099489&waypoint_place_ids=ChIJEZe8dkD_sUARM-n4qdjze5c%7CChIJiwrs2z__sUARf76WP4_vBDc%7CChIJYZWe_RT_sUARFyKwA_EymV8%7CChIJAQA87j__sUARLSalTgMc_94"],
+      "legs": [
+       {
+        "segment_index": 0,
+        "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.431793,26.098859&destination=44.431793,26.098859&destination_place_id=ChIJEZe8dkD_sUARM-n4qdjze5c",
+        "apple": "https://maps.apple.com/?saddr=44.431793,26.098859&daddr=44.431793,26.098859&dirflg=w"
+       },
+       {
+        "segment_index": 1,
+        "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.431793,26.098859&destination=44.430485,26.100030&destination_place_id=ChIJiwrs2z__sUARf76WP4_vBDc&origin_place_id=ChIJEZe8dkD_sUARM-n4qdjze5c",
+        "apple": "https://maps.apple.com/?saddr=44.431793,26.098859&daddr=44.430485,26.100030&dirflg=w"
+       },
+       {
+        "segment_index": 2,
+        "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.430485,26.100030&destination=44.427782,26.098511&destination_place_id=ChIJYZWe_RT_sUARFyKwA_EymV8&origin_place_id=ChIJiwrs2z__sUARf76WP4_vBDc",
+        "apple": "https://maps.apple.com/?saddr=44.430485,26.100030&daddr=44.427782,26.098511&dirflg=w"
+       },
+       {
+        "segment_index": 3,
+        "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.427782,26.098511&destination=44.430974,26.099489&destination_place_id=ChIJAQA87j__sUARLSalTgMc_94&origin_place_id=ChIJYZWe_RT_sUARFyKwA_EymV8",
+        "apple": "https://maps.apple.com/?saddr=44.427782,26.098511&daddr=44.430974,26.099489&dirflg=w"
+       },
+       {
+        "segment_index": 4,
+        "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.430974,26.099489&destination=44.431793,26.098859&origin_place_id=ChIJAQA87j__sUARLSalTgMc_94",
+        "apple": "https://maps.apple.com/?saddr=44.430974,26.099489&daddr=44.431793,26.098859&dirflg=w"
+       }
+      ]
+     },
+     "bbox": [26.0985113, 44.4277824, 26.100030399999998, 44.4317929],
+     "sequence": [
+      {
+       "place_id": "10915586233752676659",
+       "kind": "slot",
+       "slot_index": 0,
+       "activity": "sight",
+       "dwell_min": 35.0,
+       "dwell_fixed": false
+      },
+      {
+       "place_id": "3964556970519084671",
+       "kind": "slot",
+       "slot_index": 1,
+       "activity": "coffee",
+       "dwell_min": 75.0,
+       "dwell_fixed": false
+      },
+      {
+       "place_id": "6888593115770266135",
+       "kind": "slot",
+       "slot_index": 2,
+       "activity": "park",
+       "dwell_min": 20.0,
+       "dwell_fixed": false
+      },
+      {
+       "place_id": "16068592796011144749",
+       "kind": "slot",
+       "slot_index": 3,
+       "activity": "food",
+       "dwell_min": 75.0,
+       "dwell_fixed": false
+      }
+     ]
+    },
+    {
+     "index": 1,
+     "edited": false,
+     "summary": {
+      "stops_total": 8,
+      "slots_requested": 4,
+      "slots_filled": 4,
+      "on_the_way": 4,
+      "pinned": 0,
+      "dropped_slot_indices": [],
+      "finish_at": {"offset_min": 224.44417413116173, "local": "2026-10-03T13:44"},
+      "finish_kind": "return",
+      "window_min": 240,
+      "total_min": 224.44417413116173,
+      "walk_min": 34.444174131161745,
+      "dwell_min": 190.0,
+      "wait_min": 0.0,
+      "distance_km": 2.5833130598371303,
+      "slack_min": 15.55582586883827,
+      "over_budget": false,
+      "routing": "estimate"
+     },
+     "messages": [
+      {
+       "code": "extras_added",
+       "severity": "info",
+       "scope": "variant",
+       "params": {"count": 4, "style": "max", "window_start_label": "10:00", "window_end_label": "14:00"},
+       "stop_index": null,
+       "text": "Стиль «Максимум мест»: по пути добавлено мест — 4, чтобы занять окно 10:00–14:00. Только выбранные слоты — выключите «Добавлять места по пути»."
+      },
+      {
+       "code": "routing_estimate",
+       "severity": "info",
+       "scope": "variant",
+       "params": {"segments_estimated": 9, "segments_total": 9},
+       "stop_index": null,
+       "text": "Пешие отрезки посчитаны по прямой (оценка): 9 из 9 — по улицам путь может быть длиннее."
+      }
+     ],
+     "stops": [
+      {
+       "index": 0,
+       "number": 1,
+       "place_id": "16706857500134836515",
+       "name": "Palatul Pinacotecii",
+       "lat": 44.432075999999995,
+       "lon": 26.098898199999997,
+       "kind": "slot",
+       "slot_index": 0,
+       "activity": "sight",
+       "arrival": {"offset_min": 0.5693489790284724, "local": "2026-10-03T10:01"},
+       "visit_start": {"offset_min": 0.5693489790284724, "local": "2026-10-03T10:01"},
+       "departure": {"offset_min": 35.569348979028476, "local": "2026-10-03T10:36"},
+       "dwell_min": 35.0,
+       "dwell_fixed": false,
+       "wait_min": 0.0,
+       "hours": {
+        "status": "open",
+        "day": {"weekday": 5, "open_24h": true, "closed_all_day": false, "intervals": [], "carryover_until": null}
+       },
+       "business_status": "operational",
+       "interest": 0.530383537090477
+      },
+      {
+       "index": 1,
+       "number": 2,
+       "place_id": "9279824186385889317",
+       "name": "Cărturești Carusel",
+       "lat": 44.4319847,
+       "lon": 26.1016028,
+       "kind": "slot",
+       "slot_index": 1,
+       "activity": "coffee",
+       "arrival": {"offset_min": 39.439194262228064, "local": "2026-10-03T10:39"},
+       "visit_start": {"offset_min": 39.439194262228064, "local": "2026-10-03T10:39"},
+       "departure": {"offset_min": 69.43919426222806, "local": "2026-10-03T11:09"},
+       "dwell_min": 30.0,
+       "dwell_fixed": false,
+       "wait_min": 0.0,
+       "hours": {
+        "status": "open",
+        "day": {
+         "weekday": 5,
+         "open_24h": false,
+         "closed_all_day": false,
+         "intervals": [{"open": "10:00", "close": "22:00", "close_day_offset": 0}],
+         "carryover_until": null
+        }
+       },
+       "business_status": "operational",
+       "interest": 0.8608195714858302
+      },
+      {
+       "index": 2,
+       "number": 3,
+       "place_id": "4799452667097853425",
+       "name": "St. Anthony’s Church",
+       "lat": 44.430103599999995,
+       "lon": 26.1020425,
+       "kind": "on_the_way",
+       "slot_index": null,
+       "activity": "sight",
+       "arrival": {"offset_min": 73.25632636599875, "local": "2026-10-03T11:13"},
+       "visit_start": {"offset_min": 73.25632636599875, "local": "2026-10-03T11:13"},
+       "departure": {"offset_min": 83.25632636599875, "local": "2026-10-03T11:23"},
+       "dwell_min": 10.0,
+       "dwell_fixed": false,
+       "wait_min": 0.0,
+       "hours": {"status": "unknown", "day": null},
+       "business_status": "operational",
+       "interest": 0.7588876146537419
+      },
+      {
+       "index": 3,
+       "number": 4,
+       "place_id": "6194615972455793446",
+       "name": "The New \"Saint George\" Church",
+       "lat": 44.4324787,
+       "lon": 26.104558599999997,
+       "kind": "on_the_way",
+       "slot_index": null,
+       "activity": "sight",
+       "arrival": {"offset_min": 89.21710622736076, "local": "2026-10-03T11:29"},
+       "visit_start": {"offset_min": 89.21710622736076, "local": "2026-10-03T11:29"},
+       "departure": {"offset_min": 99.21710622736076, "local": "2026-10-03T11:39"},
+       "dwell_min": 10.0,
+       "dwell_fixed": false,
+       "wait_min": 0.0,
+       "hours": {
+        "status": "open",
+        "day": {
+         "weekday": 5,
+         "open_24h": false,
+         "closed_all_day": false,
+         "intervals": [{"open": "08:00", "close": "17:00", "close_day_offset": 0}],
+         "carryover_until": null
+        }
+       },
+       "business_status": "operational",
+       "interest": 0.7220350553899253
+      },
+      {
+       "index": 4,
+       "number": 5,
+       "place_id": "16102257020469288161",
+       "name": "Parcul TNB",
+       "lat": 44.436079,
+       "lon": 26.1028383,
+       "kind": "slot",
+       "slot_index": 2,
+       "activity": "park",
+       "arrival": {"offset_min": 106.83103432941604, "local": "2026-10-03T11:47"},
+       "visit_start": {"offset_min": 106.83103432941604, "local": "2026-10-03T11:47"},
+       "departure": {"offset_min": 116.83103432941604, "local": "2026-10-03T11:57"},
+       "dwell_min": 10.0,
+       "dwell_fixed": false,
+       "wait_min": 0.0,
+       "hours": {
+        "status": "open",
+        "day": {"weekday": 5, "open_24h": true, "closed_all_day": false, "intervals": [], "carryover_until": null}
+       },
+       "business_status": "operational",
+       "interest": 0.37512478094164076
+      },
+      {
+       "index": 5,
+       "number": 6,
+       "place_id": "15978145016794525298",
+       "name": "University Square",
+       "lat": 44.4347985,
+       "lon": 26.1011925,
+       "kind": "on_the_way",
+       "slot_index": null,
+       "activity": "sight",
+       "arrival": {"offset_min": 120.30969172105246, "local": "2026-10-03T12:00"},
+       "visit_start": {"offset_min": 120.30969172105246, "local": "2026-10-03T12:00"},
+       "departure": {"offset_min": 130.30969172105245, "local": "2026-10-03T12:10"},
+       "dwell_min": 10.0,
+       "dwell_fixed": false,
+       "wait_min": 0.0,
+       "hours": {
+        "status": "open",
+        "day": {"weekday": 5, "open_24h": true, "closed_all_day": false, "intervals": [], "carryover_until": null}
+       },
+       "business_status": "operational",
+       "interest": 0.7086538184871659
+      },
+      {
+       "index": 6,
+       "number": 7,
+       "place_id": "15791376739079194771",
+       "name": "Zlatari Church",
+       "lat": 44.432322299999996,
+       "lon": 26.0976529,
+       "kind": "on_the_way",
+       "slot_index": null,
+       "activity": "sight",
+       "arrival": {"offset_min": 137.39170695417414, "local": "2026-10-03T12:17"},
+       "visit_start": {"offset_min": 137.39170695417414, "local": "2026-10-03T12:17"},
+       "departure": {"offset_min": 147.39170695417414, "local": "2026-10-03T12:27"},
+       "dwell_min": 10.0,
+       "dwell_fixed": false,
+       "wait_min": 0.0,
+       "hours": {
+        "status": "open",
+        "day": {
+         "weekday": 5,
+         "open_24h": false,
+         "closed_all_day": false,
+         "intervals": [{"open": "08:00", "close": "20:00", "close_day_offset": 0}],
+         "carryover_until": null
+        }
+       },
+       "business_status": "operational",
+       "interest": 0.6939023573452108
+      },
+      {
+       "index": 7,
+       "number": 8,
+       "place_id": "14593284683301693268",
+       "name": "Caru' cu bere",
+       "lat": 44.4320175,
+       "lon": 26.0981207,
+       "kind": "slot",
+       "slot_index": 3,
+       "activity": "food",
+       "arrival": {"offset_min": 148.29680207341042, "local": "2026-10-03T12:28"},
+       "visit_start": {"offset_min": 148.29680207341042, "local": "2026-10-03T12:28"},
+       "departure": {"offset_min": 223.29680207341042, "local": "2026-10-03T13:43"},
+       "dwell_min": 75.0,
+       "dwell_fixed": false,
+       "wait_min": 0.0,
+       "hours": {
+        "status": "open",
+        "day": {
+         "weekday": 5,
+         "open_24h": false,
+         "closed_all_day": false,
+         "intervals": [{"open": "10:00", "close": "00:00", "close_day_offset": 1}],
+         "carryover_until": null
+        }
+       },
+       "business_status": "operational",
+       "interest": 0.85
+      }
+     ],
+     "segments": [
+      {
+       "index": 0,
+       "from": {"kind": "start", "stop_index": null},
+       "to": {"kind": "stop", "stop_index": 0},
+       "walk_min": 0.5693489790284724,
+       "distance_m": 43,
+       "depart": {"offset_min": 0.0, "local": "2026-10-03T10:00"},
+       "arrive": {"offset_min": 0.5693489790284724, "local": "2026-10-03T10:01"},
+       "quality": "estimate",
+       "provider": "haversine",
+       "geometry": {
+        "type": "LineString",
+        "coordinates": [[26.098859299999997, 44.4317929], [26.098898199999997, 44.432075999999995]]
+       }
+      },
+      {
+       "index": 1,
+       "from": {"kind": "stop", "stop_index": 0},
+       "to": {"kind": "stop", "stop_index": 1},
+       "walk_min": 3.869845283199588,
+       "distance_m": 290,
+       "depart": {"offset_min": 35.569348979028476, "local": "2026-10-03T10:36"},
+       "arrive": {"offset_min": 39.439194262228064, "local": "2026-10-03T10:39"},
+       "quality": "estimate",
+       "provider": "haversine",
+       "geometry": {"type": "LineString", "coordinates": [[26.098898199999997, 44.432075999999995], [26.1016028, 44.4319847]]}
+      },
+      {
+       "index": 2,
+       "from": {"kind": "stop", "stop_index": 1},
+       "to": {"kind": "stop", "stop_index": 2},
+       "walk_min": 3.8171321037706893,
+       "distance_m": 286,
+       "depart": {"offset_min": 69.43919426222806, "local": "2026-10-03T11:09"},
+       "arrive": {"offset_min": 73.25632636599875, "local": "2026-10-03T11:13"},
+       "quality": "estimate",
+       "provider": "haversine",
+       "geometry": {"type": "LineString", "coordinates": [[26.1016028, 44.4319847], [26.1020425, 44.430103599999995]]}
+      },
+      {
+       "index": 3,
+       "from": {"kind": "stop", "stop_index": 2},
+       "to": {"kind": "stop", "stop_index": 3},
+       "walk_min": 5.960779861362012,
+       "distance_m": 447,
+       "depart": {"offset_min": 83.25632636599875, "local": "2026-10-03T11:23"},
+       "arrive": {"offset_min": 89.21710622736076, "local": "2026-10-03T11:29"},
+       "quality": "estimate",
+       "provider": "haversine",
+       "geometry": {"type": "LineString", "coordinates": [[26.1020425, 44.430103599999995], [26.104558599999997, 44.4324787]]}
+      },
+      {
+       "index": 4,
+       "from": {"kind": "stop", "stop_index": 3},
+       "to": {"kind": "stop", "stop_index": 4},
+       "walk_min": 7.613928102055276,
+       "distance_m": 571,
+       "depart": {"offset_min": 99.21710622736076, "local": "2026-10-03T11:39"},
+       "arrive": {"offset_min": 106.83103432941604, "local": "2026-10-03T11:47"},
+       "quality": "estimate",
+       "provider": "haversine",
+       "geometry": {"type": "LineString", "coordinates": [[26.104558599999997, 44.4324787], [26.1028383, 44.436079]]}
+      },
+      {
+       "index": 5,
+       "from": {"kind": "stop", "stop_index": 4},
+       "to": {"kind": "stop", "stop_index": 5},
+       "walk_min": 3.4786573916364203,
+       "distance_m": 261,
+       "depart": {"offset_min": 116.83103432941604, "local": "2026-10-03T11:57"},
+       "arrive": {"offset_min": 120.30969172105246, "local": "2026-10-03T12:00"},
+       "quality": "estimate",
+       "provider": "haversine",
+       "geometry": {"type": "LineString", "coordinates": [[26.1028383, 44.436079], [26.1011925, 44.4347985]]}
+      },
+      {
+       "index": 6,
+       "from": {"kind": "stop", "stop_index": 5},
+       "to": {"kind": "stop", "stop_index": 6},
+       "walk_min": 7.082015233121686,
+       "distance_m": 531,
+       "depart": {"offset_min": 130.30969172105245, "local": "2026-10-03T12:10"},
+       "arrive": {"offset_min": 137.39170695417414, "local": "2026-10-03T12:17"},
+       "quality": "estimate",
+       "provider": "haversine",
+       "geometry": {"type": "LineString", "coordinates": [[26.1011925, 44.4347985], [26.0976529, 44.432322299999996]]}
+      },
+      {
+       "index": 7,
+       "from": {"kind": "stop", "stop_index": 6},
+       "to": {"kind": "stop", "stop_index": 7},
+       "walk_min": 0.9050951192362836,
+       "distance_m": 68,
+       "depart": {"offset_min": 147.39170695417414, "local": "2026-10-03T12:27"},
+       "arrive": {"offset_min": 148.29680207341042, "local": "2026-10-03T12:28"},
+       "quality": "estimate",
+       "provider": "haversine",
+       "geometry": {"type": "LineString", "coordinates": [[26.0976529, 44.432322299999996], [26.0981207, 44.4320175]]}
+      },
+      {
+       "index": 8,
+       "from": {"kind": "stop", "stop_index": 7},
+       "to": {"kind": "start", "stop_index": null},
+       "walk_min": 1.1473720577513093,
+       "distance_m": 86,
+       "depart": {"offset_min": 223.29680207341042, "local": "2026-10-03T13:43"},
+       "arrive": {"offset_min": 224.44417413116173, "local": "2026-10-03T13:44"},
+       "quality": "estimate",
+       "provider": "haversine",
+       "geometry": {"type": "LineString", "coordinates": [[26.0981207, 44.4320175], [26.098859299999997, 44.4317929]]}
+      }
+     ],
+     "navigation": {
+      "google_parts": ["https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.431793,26.098859&destination=44.431793,26.098859&waypoints=44.432076,26.098898%7C44.431985,26.101603%7C44.430104,26.102042%7C44.432479,26.104559%7C44.436079,26.102838%7C44.434798,26.101192%7C44.432322,26.097653%7C44.432018,26.098121&waypoint_place_ids=ChIJUTP7eED_sUARI4mbMGGu2uc%7CChIJhXfcoD__sUARJfibT-6OyIA%7CChIJRTfpMT7_sUAR8S2rqsUUm0I%7CChIJQVgE_T7_sUARJkMwDmiy91U%7CChIJgZ_kwvP_sUAR4ZwcW3K1dt8%7CChIJ_2p6Tkf_sUARci63pzzGvd0%7CChIJg8_HQkD_sUARk4guV3o9Jts%7CChIJwXfea0D_sUARVKdY1hnDhco"],
+      "legs": [
+       {
+        "segment_index": 0,
+        "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.431793,26.098859&destination=44.432076,26.098898&destination_place_id=ChIJUTP7eED_sUARI4mbMGGu2uc",
+        "apple": "https://maps.apple.com/?saddr=44.431793,26.098859&daddr=44.432076,26.098898&dirflg=w"
+       },
+       {
+        "segment_index": 1,
+        "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.432076,26.098898&destination=44.431985,26.101603&destination_place_id=ChIJhXfcoD__sUARJfibT-6OyIA&origin_place_id=ChIJUTP7eED_sUARI4mbMGGu2uc",
+        "apple": "https://maps.apple.com/?saddr=44.432076,26.098898&daddr=44.431985,26.101603&dirflg=w"
+       },
+       {
+        "segment_index": 2,
+        "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.431985,26.101603&destination=44.430104,26.102042&destination_place_id=ChIJRTfpMT7_sUAR8S2rqsUUm0I&origin_place_id=ChIJhXfcoD__sUARJfibT-6OyIA",
+        "apple": "https://maps.apple.com/?saddr=44.431985,26.101603&daddr=44.430104,26.102042&dirflg=w"
+       },
+       {
+        "segment_index": 3,
+        "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.430104,26.102042&destination=44.432479,26.104559&destination_place_id=ChIJQVgE_T7_sUARJkMwDmiy91U&origin_place_id=ChIJRTfpMT7_sUAR8S2rqsUUm0I",
+        "apple": "https://maps.apple.com/?saddr=44.430104,26.102042&daddr=44.432479,26.104559&dirflg=w"
+       },
+       {
+        "segment_index": 4,
+        "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.432479,26.104559&destination=44.436079,26.102838&destination_place_id=ChIJgZ_kwvP_sUAR4ZwcW3K1dt8&origin_place_id=ChIJQVgE_T7_sUARJkMwDmiy91U",
+        "apple": "https://maps.apple.com/?saddr=44.432479,26.104559&daddr=44.436079,26.102838&dirflg=w"
+       },
+       {
+        "segment_index": 5,
+        "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.436079,26.102838&destination=44.434798,26.101192&destination_place_id=ChIJ_2p6Tkf_sUARci63pzzGvd0&origin_place_id=ChIJgZ_kwvP_sUAR4ZwcW3K1dt8",
+        "apple": "https://maps.apple.com/?saddr=44.436079,26.102838&daddr=44.434798,26.101192&dirflg=w"
+       },
+       {
+        "segment_index": 6,
+        "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.434798,26.101192&destination=44.432322,26.097653&destination_place_id=ChIJg8_HQkD_sUARk4guV3o9Jts&origin_place_id=ChIJ_2p6Tkf_sUARci63pzzGvd0",
+        "apple": "https://maps.apple.com/?saddr=44.434798,26.101192&daddr=44.432322,26.097653&dirflg=w"
+       },
+       {
+        "segment_index": 7,
+        "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.432322,26.097653&destination=44.432018,26.098121&destination_place_id=ChIJwXfea0D_sUARVKdY1hnDhco&origin_place_id=ChIJg8_HQkD_sUARk4guV3o9Jts",
+        "apple": "https://maps.apple.com/?saddr=44.432322,26.097653&daddr=44.432018,26.098121&dirflg=w"
+       },
+       {
+        "segment_index": 8,
+        "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.432018,26.098121&destination=44.431793,26.098859&origin_place_id=ChIJwXfea0D_sUARVKdY1hnDhco",
+        "apple": "https://maps.apple.com/?saddr=44.432018,26.098121&daddr=44.431793,26.098859&dirflg=w"
+       }
+      ]
+     },
+     "bbox": [26.0976529, 44.430103599999995, 26.104558599999997, 44.436079],
+     "sequence": [
+      {
+       "place_id": "16706857500134836515",
+       "kind": "slot",
+       "slot_index": 0,
+       "activity": "sight",
+       "dwell_min": 35.0,
+       "dwell_fixed": false
+      },
+      {
+       "place_id": "9279824186385889317",
+       "kind": "slot",
+       "slot_index": 1,
+       "activity": "coffee",
+       "dwell_min": 30.0,
+       "dwell_fixed": false
+      },
+      {
+       "place_id": "4799452667097853425",
+       "kind": "on_the_way",
+       "slot_index": null,
+       "activity": "sight",
+       "dwell_min": 10.0,
+       "dwell_fixed": false
+      },
+      {
+       "place_id": "6194615972455793446",
+       "kind": "on_the_way",
+       "slot_index": null,
+       "activity": "sight",
+       "dwell_min": 10.0,
+       "dwell_fixed": false
+      },
+      {
+       "place_id": "16102257020469288161",
+       "kind": "slot",
+       "slot_index": 2,
+       "activity": "park",
+       "dwell_min": 10.0,
+       "dwell_fixed": false
+      },
+      {
+       "place_id": "15978145016794525298",
+       "kind": "on_the_way",
+       "slot_index": null,
+       "activity": "sight",
+       "dwell_min": 10.0,
+       "dwell_fixed": false
+      },
+      {
+       "place_id": "15791376739079194771",
+       "kind": "on_the_way",
+       "slot_index": null,
+       "activity": "sight",
+       "dwell_min": 10.0,
+       "dwell_fixed": false
+      },
+      {
+       "place_id": "14593284683301693268",
+       "kind": "slot",
+       "slot_index": 3,
+       "activity": "food",
+       "dwell_min": 75.0,
+       "dwell_fixed": false
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "edited": false,
+     "summary": {
+      "stops_total": 4,
+      "slots_requested": 4,
+      "slots_filled": 4,
+      "on_the_way": 0,
+      "pinned": 0,
+      "dropped_slot_indices": [],
+      "finish_at": {"offset_min": 238.47804267297164, "local": "2026-10-03T13:58"},
+      "finish_kind": "return",
+      "window_min": 240,
+      "total_min": 238.47804267297164,
+      "walk_min": 28.478042672971632,
+      "dwell_min": 210.0,
+      "wait_min": 0.0,
+      "distance_km": 2.1358532004728725,
+      "slack_min": 1.5219573270283604,
+      "over_budget": false,
+      "routing": "estimate"
+     },
+     "messages": [
+      {
+       "code": "routing_estimate",
+       "severity": "info",
+       "scope": "variant",
+       "params": {"segments_estimated": 5, "segments_total": 5},
+       "stop_index": null,
+       "text": "Пешие отрезки посчитаны по прямой (оценка): 5 из 5 — по улицам путь может быть длиннее."
+      }
+     ],
+     "stops": [
+      {
+       "index": 0,
+       "number": 1,
+       "place_id": "5806071778867054569",
+       "name": "National Museum of Romanian History",
+       "lat": 44.4315188,
+       "lon": 26.097249899999998,
+       "kind": "slot",
+       "slot_index": 0,
+       "activity": "sight",
+       "arrival": {"offset_min": 2.3647554217473368, "local": "2026-10-03T10:02"},
+       "visit_start": {"offset_min": 2.3647554217473368, "local": "2026-10-03T10:02"},
+       "departure": {"offset_min": 77.36475542174733, "local": "2026-10-03T11:17"},
+       "dwell_min": 75.0,
+       "dwell_fixed": false,
+       "wait_min": 0.0,
+       "hours": {
+        "status": "open",
+        "day": {
+         "weekday": 5,
+         "open_24h": false,
+         "closed_all_day": false,
+         "intervals": [{"open": "09:00", "close": "17:00", "close_day_offset": 0}],
+         "carryover_until": null
+        }
+       },
+       "business_status": "operational",
+       "interest": 0.6717725300150837
+      },
+      {
+       "index": 1,
+       "number": 2,
+       "place_id": "14169121335398956031",
+       "name": "Origo",
+       "lat": 44.4332121,
+       "lon": 26.0953452,
+       "kind": "slot",
+       "slot_index": 1,
+       "activity": "coffee",
+       "arrival": {"offset_min": 81.71183616161244, "local": "2026-10-03T11:22"},
+       "visit_start": {"offset_min": 81.71183616161244, "local": "2026-10-03T11:22"},
+       "departure": {"offset_min": 111.71183616161244, "local": "2026-10-03T11:52"},
+       "dwell_min": 30.0,
+       "dwell_fixed": false,
+       "wait_min": 0.0,
+       "hours": {
+        "status": "open",
+        "day": {
+         "weekday": 5,
+         "open_24h": false,
+         "closed_all_day": false,
+         "intervals": [{"open": "08:00", "close": "00:00", "close_day_offset": 1}],
+         "carryover_until": null
+        }
+       },
+       "business_status": "operational",
+       "interest": 0.7339311186844999
+      },
+      {
+       "index": 2,
+       "number": 3,
+       "place_id": "55295570421893244",
+       "name": "Lake Cișmigiu",
+       "lat": 44.4361588,
+       "lon": 26.0915902,
+       "kind": "slot",
+       "slot_index": 2,
+       "activity": "park",
+       "arrival": {"offset_min": 119.68583456094822, "local": "2026-10-03T12:00"},
+       "visit_start": {"offset_min": 119.68583456094822, "local": "2026-10-03T12:00"},
+       "departure": {"offset_min": 149.68583456094822, "local": "2026-10-03T12:30"},
+       "dwell_min": 30.0,
+       "dwell_fixed": false,
+       "wait_min": 0.0,
+       "hours": {"status": "unknown", "day": null},
+       "business_status": "operational",
+       "interest": 0.4110991409933806
+      },
+      {
+       "index": 3,
+       "number": 4,
+       "place_id": "516452116503593413",
+       "name": "Le Bab Downtown",
+       "lat": 44.4320275,
+       "lon": 26.097573099999998,
+       "kind": "slot",
+       "slot_index": 3,
+       "activity": "food",
+       "arrival": {"offset_min": 161.5807261019699, "local": "2026-10-03T12:42"},
+       "visit_start": {"offset_min": 161.5807261019699, "local": "2026-10-03T12:42"},
+       "departure": {"offset_min": 236.5807261019699, "local": "2026-10-03T13:57"},
+       "dwell_min": 75.0,
+       "dwell_fixed": false,
+       "wait_min": 0.0,
+       "hours": {
+        "status": "open",
+        "day": {
+         "weekday": 5,
+         "open_24h": false,
+         "closed_all_day": false,
+         "intervals": [{"open": "11:00", "close": "23:30", "close_day_offset": 0}],
+         "carryover_until": null
+        }
+       },
+       "business_status": "operational",
+       "interest": 0.7273584956536671
+      }
+     ],
+     "segments": [
+      {
+       "index": 0,
+       "from": {"kind": "start", "stop_index": null},
+       "to": {"kind": "stop", "stop_index": 0},
+       "walk_min": 2.3647554217473368,
+       "distance_m": 177,
+       "depart": {"offset_min": 0.0, "local": "2026-10-03T10:00"},
+       "arrive": {"offset_min": 2.3647554217473368, "local": "2026-10-03T10:02"},
+       "quality": "estimate",
+       "provider": "haversine",
+       "geometry": {"type": "LineString", "coordinates": [[26.098859299999997, 44.4317929], [26.097249899999998, 44.4315188]]}
+      },
+      {
+       "index": 1,
+       "from": {"kind": "stop", "stop_index": 0},
+       "to": {"kind": "stop", "stop_index": 1},
+       "walk_min": 4.347080739865101,
+       "distance_m": 326,
+       "depart": {"offset_min": 77.36475542174733, "local": "2026-10-03T11:17"},
+       "arrive": {"offset_min": 81.71183616161244, "local": "2026-10-03T11:22"},
+       "quality": "estimate",
+       "provider": "haversine",
+       "geometry": {"type": "LineString", "coordinates": [[26.097249899999998, 44.4315188], [26.0953452, 44.4332121]]}
+      },
+      {
+       "index": 2,
+       "from": {"kind": "stop", "stop_index": 1},
+       "to": {"kind": "stop", "stop_index": 2},
+       "walk_min": 7.973998399335787,
+       "distance_m": 598,
+       "depart": {"offset_min": 111.71183616161244, "local": "2026-10-03T11:52"},
+       "arrive": {"offset_min": 119.68583456094822, "local": "2026-10-03T12:00"},
+       "quality": "estimate",
+       "provider": "haversine",
+       "geometry": {"type": "LineString", "coordinates": [[26.0953452, 44.4332121], [26.0915902, 44.4361588]]}
+      },
+      {
+       "index": 3,
+       "from": {"kind": "stop", "stop_index": 2},
+       "to": {"kind": "stop", "stop_index": 3},
+       "walk_min": 11.894891541021686,
+       "distance_m": 892,
+       "depart": {"offset_min": 149.68583456094822, "local": "2026-10-03T12:30"},
+       "arrive": {"offset_min": 161.5807261019699, "local": "2026-10-03T12:42"},
+       "quality": "estimate",
+       "provider": "haversine",
+       "geometry": {"type": "LineString", "coordinates": [[26.0915902, 44.4361588], [26.097573099999998, 44.4320275]]}
+      },
+      {
+       "index": 4,
+       "from": {"kind": "stop", "stop_index": 3},
+       "to": {"kind": "start", "stop_index": null},
+       "walk_min": 1.897316571001725,
+       "distance_m": 142,
+       "depart": {"offset_min": 236.5807261019699, "local": "2026-10-03T13:57"},
+       "arrive": {"offset_min": 238.47804267297164, "local": "2026-10-03T13:58"},
+       "quality": "estimate",
+       "provider": "haversine",
+       "geometry": {"type": "LineString", "coordinates": [[26.097573099999998, 44.4320275], [26.098859299999997, 44.4317929]]}
+      }
+     ],
+     "navigation": {
+      "google_parts": ["https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.431793,26.098859&destination=44.431793,26.098859&waypoints=44.431519,26.097250%7C44.433212,26.095345%7C44.436159,26.091590%7C44.432027,26.097573&waypoint_place_ids=ChIJkftvFkD_sUAR6YfKX4VPk1A%7CChIJQbgapEH_sUAR__vch8jUosQ%7CChIJO_wCXkP_sUARfEimQAdzxAA%7CChIJAVaSder_sUARxQGys3bOKgc"],
+      "legs": [
+       {
+        "segment_index": 0,
+        "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.431793,26.098859&destination=44.431519,26.097250&destination_place_id=ChIJkftvFkD_sUAR6YfKX4VPk1A",
+        "apple": "https://maps.apple.com/?saddr=44.431793,26.098859&daddr=44.431519,26.097250&dirflg=w"
+       },
+       {
+        "segment_index": 1,
+        "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.431519,26.097250&destination=44.433212,26.095345&destination_place_id=ChIJQbgapEH_sUAR__vch8jUosQ&origin_place_id=ChIJkftvFkD_sUAR6YfKX4VPk1A",
+        "apple": "https://maps.apple.com/?saddr=44.431519,26.097250&daddr=44.433212,26.095345&dirflg=w"
+       },
+       {
+        "segment_index": 2,
+        "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.433212,26.095345&destination=44.436159,26.091590&destination_place_id=ChIJO_wCXkP_sUARfEimQAdzxAA&origin_place_id=ChIJQbgapEH_sUAR__vch8jUosQ",
+        "apple": "https://maps.apple.com/?saddr=44.433212,26.095345&daddr=44.436159,26.091590&dirflg=w"
+       },
+       {
+        "segment_index": 3,
+        "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.436159,26.091590&destination=44.432027,26.097573&destination_place_id=ChIJAVaSder_sUARxQGys3bOKgc&origin_place_id=ChIJO_wCXkP_sUARfEimQAdzxAA",
+        "apple": "https://maps.apple.com/?saddr=44.436159,26.091590&daddr=44.432027,26.097573&dirflg=w"
+       },
+       {
+        "segment_index": 4,
+        "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.432027,26.097573&destination=44.431793,26.098859&origin_place_id=ChIJAVaSder_sUARxQGys3bOKgc",
+        "apple": "https://maps.apple.com/?saddr=44.432027,26.097573&daddr=44.431793,26.098859&dirflg=w"
+       }
+      ]
+     },
+     "bbox": [26.0915902, 44.4315188, 26.098859299999997, 44.4361588],
+     "sequence": [
+      {
+       "place_id": "5806071778867054569",
+       "kind": "slot",
+       "slot_index": 0,
+       "activity": "sight",
+       "dwell_min": 75.0,
+       "dwell_fixed": false
+      },
+      {
+       "place_id": "14169121335398956031",
+       "kind": "slot",
+       "slot_index": 1,
+       "activity": "coffee",
+       "dwell_min": 30.0,
+       "dwell_fixed": false
+      },
+      {
+       "place_id": "55295570421893244",
+       "kind": "slot",
+       "slot_index": 2,
+       "activity": "park",
+       "dwell_min": 30.0,
+       "dwell_fixed": false
+      },
+      {
+       "place_id": "516452116503593413",
+       "kind": "slot",
+       "slot_index": 3,
+       "activity": "food",
+       "dwell_min": 75.0,
+       "dwell_fixed": false
+      }
+     ]
+    }
+   ],
+   "places": {
+    "10915586233752676659": {
+     "place_id": "10915586233752676659",
+     "name": "The Church of the \"Stavropoleos\" Monastery",
+     "type_label": "Brancovenesc Orthodox monastery church",
+     "primary_type": "historical_landmark",
+     "theme": "culture_sights",
+     "theme_group": "sights",
+     "rating": 4.8,
+     "rating_count": 5781,
+     "summary": "A tiny eighteenth-century Orthodox monastery church with ornate Brancovenesc carvings, vivid frescoes, a peaceful cloister and a serene courtyard in Bucharest Old Town.",
+     "summary_lang": "en",
+     "photos": [
+      {"key": "photos_cid/10915586233752676659/00_all.jpg", "url": null},
+      {"key": "photos_cid/10915586233752676659/03_all.jpg", "url": null},
+      {"key": "photos_cid/10915586233752676659/04_all.jpg", "url": null},
+      {"key": "photos_cid/10915586233752676659/06_all.jpg", "url": null}
+     ],
+     "google_maps_url": "https://www.google.com/maps?cid=10915586233752676659",
+     "google_place_id": "ChIJEZe8dkD_sUARM-n4qdjze5c",
+     "address": "Strada Stavropoleos 4, 030167 București",
+     "business_status": "operational",
+     "lat": 44.4317929,
+     "lon": 26.098859299999997,
+     "price_level": null
+    },
+    "3964556970519084671": {
+     "place_id": "3964556970519084671",
+     "name": "Arcade Cafe",
+     "type_label": "cafe-pub",
+     "primary_type": "restaurant",
+     "theme": "food_drink",
+     "theme_group": "food_drink",
+     "rating": 4.3,
+     "rating_count": 3616,
+     "summary": "Old Town cafe-pub with a leafy garden, big portions, cocktails and brunch, mixing classic Romanian dishes with burgers and drinks late into the night.",
+     "summary_lang": "en",
+     "photos": [
+      {"key": "photos_cid/3964556970519084671/02_vibe.jpg", "url": null},
+      {"key": "photos_cid/3964556970519084671/03_vibe.jpg", "url": null},
+      {"key": "photos_cid/3964556970519084671/04_vibe.jpg", "url": null},
+      {"key": "photos_cid/3964556970519084671/05_vibe.jpg", "url": null}
+     ],
+     "google_maps_url": "https://www.google.com/maps?cid=3964556970519084671",
+     "google_place_id": "ChIJiwrs2z__sUARf76WP4_vBDc",
+     "address": "Strada Smârdan 30, 030167 București, Romania",
+     "business_status": "operational",
+     "lat": 44.430484899999996,
+     "lon": 26.100030399999998,
+     "price_level": "moderate"
+    },
+    "6888593115770266135": {
+     "place_id": "6888593115770266135",
+     "name": "Tribunalului Park",
+     "type_label": "shaded urban neighborhood park",
+     "primary_type": "park",
+     "theme": "nature_outdoors",
+     "theme_group": "sights",
+     "rating": 4.4,
+     "rating_count": 98,
+     "summary": "A small, shaded neighborhood park with a well-equipped children's playground, fitness area, benches, and quiet paths between city buildings.",
+     "summary_lang": "en",
+     "photos": [
+      {"key": "photos_cid/6888593115770266135/02_all.jpg", "url": null},
+      {"key": "photos_cid/6888593115770266135/03_all.jpg", "url": null},
+      {"key": "photos_cid/6888593115770266135/04_all.jpg", "url": null},
+      {"key": "photos_cid/6888593115770266135/05_all.jpg", "url": null}
+     ],
+     "google_maps_url": "https://www.google.com/maps?cid=6888593115770266135",
+     "google_place_id": "ChIJYZWe_RT_sUARFyKwA_EymV8",
+     "address": "Unnamed Road, București, Romania",
+     "business_status": "operational",
+     "lat": 44.4277824,
+     "lon": 26.0985113,
+     "price_level": null
+    },
+    "16068592796011144749": {
+     "place_id": "16068592796011144749",
+     "name": "Jeonjuu Korean BBQ",
+     "type_label": "Korean barbecue restaurant and cocktail bar",
+     "primary_type": "korean_barbecue_restaurant",
+     "theme": "food_drink",
+     "theme_group": "food_drink",
+     "rating": 4.8,
+     "rating_count": 4492,
+     "summary": "Lively Korean barbecue spot in Old Town with grill-at-table sets, creative cocktails, and attentive service in a sleek, Korea-inspired room.",
+     "summary_lang": "en",
+     "photos": [
+      {"key": "photos_cid/16068592796011144749/00_vibe.jpg", "url": null},
+      {"key": "photos_cid/16068592796011144749/02_vibe.jpg", "url": null},
+      {"key": "photos_cid/16068592796011144749/03_vibe.jpg", "url": null},
+      {"key": "photos_cid/16068592796011144749/04_vibe.jpg", "url": null}
+     ],
+     "google_maps_url": "https://www.google.com/maps?cid=16068592796011144749",
+     "google_place_id": "ChIJAQA87j__sUARLSalTgMc_94",
+     "address": "Strada Sfântul Dumitru 3, București 030077",
+     "business_status": "operational",
+     "lat": 44.430973699999996,
+     "lon": 26.0994894,
+     "price_level": "expensive"
+    },
+    "16706857500134836515": {
+     "place_id": "16706857500134836515",
+     "name": "Palatul Pinacotecii",
+     "type_label": "historic palace and art exhibition venue",
+     "primary_type": "historical_landmark",
+     "theme": "culture_sights",
+     "theme_group": "sights",
+     "rating": 4.7,
+     "rating_count": 197,
+     "summary": "Historic eclectic palace in Bucharest's old town, pairing elegant interiors and architectural details with Art Safari's changing contemporary and historic exhibitions.",
+     "summary_lang": "en",
+     "photos": [
+      {"key": "photos_cid/16706857500134836515/00_all.jpg", "url": null},
+      {"key": "photos_cid/16706857500134836515/02_all.jpg", "url": null},
+      {"key": "photos_cid/16706857500134836515/03_all.jpg", "url": null},
+      {"key": "photos_cid/16706857500134836515/04_all.jpg", "url": null}
+     ],
+     "google_maps_url": "https://www.google.com/maps?cid=16706857500134836515",
+     "google_place_id": "ChIJUTP7eED_sUARI4mbMGGu2uc",
+     "address": "Strada Lipscani 18-20, 030167 București",
+     "business_status": "operational",
+     "lat": 44.432075999999995,
+     "lon": 26.098898199999997,
+     "price_level": null
+    },
+    "9279824186385889317": {
+     "place_id": "9279824186385889317",
+     "name": "Cărturești Carusel",
+     "type_label": "bookstore cafe and cultural gift shop",
+     "primary_type": "book_store",
+     "theme": "food_drink",
+     "theme_group": "food_drink",
+     "rating": 4.8,
+     "rating_count": 23147,
+     "summary": "A luminous multi-level bookstore in a restored historic building, with books, gifts, music and an upstairs cafe overlooking its iconic atrium.",
+     "summary_lang": "en",
+     "photos": [
+      {"key": "photos_cid/9279824186385889317/00_all.jpg", "url": null},
+      {"key": "photos_cid/9279824186385889317/02_all.jpg", "url": null},
+      {"key": "photos_cid/9279824186385889317/03_all.jpg", "url": null},
+      {"key": "photos_cid/9279824186385889317/04_all.jpg", "url": null}
+     ],
+     "google_maps_url": "https://www.google.com/maps?cid=9279824186385889317",
+     "google_place_id": "ChIJhXfcoD__sUARJfibT-6OyIA",
+     "address": "Strada Lipscani 55, București 030033",
+     "business_status": "operational",
+     "lat": 44.4319847,
+     "lon": 26.1016028,
+     "price_level": null
+    },
+    "4799452667097853425": {
+     "place_id": "4799452667097853425",
+     "name": "St. Anthony’s Church",
+     "type_label": "Orthodox historic church",
+     "primary_type": "orthodox_church",
+     "theme": "culture_sights",
+     "theme_group": "sights",
+     "rating": 4.8,
+     "rating_count": 4466,
+     "summary": "A small, atmospheric Orthodox church in Bucharest's Old Town, known for sixteenth-century heritage, frescoes, icons, Brancovenesc details, and a peaceful courtyard.",
+     "summary_lang": "en",
+     "photos": [
+      {"key": "photos_cid/4799452667097853425/00_all.jpg", "url": null},
+      {"key": "photos_cid/4799452667097853425/02_all.jpg", "url": null},
+      {"key": "photos_cid/4799452667097853425/05_all.jpg", "url": null},
+      {"key": "photos_cid/4799452667097853425/07_all.jpg", "url": null}
+     ],
+     "google_maps_url": "https://www.google.com/maps?cid=4799452667097853425",
+     "google_place_id": "ChIJRTfpMT7_sUAR8S2rqsUUm0I",
+     "address": "Str. Franceză 33, 030105 București",
+     "business_status": "operational",
+     "lat": 44.430103599999995,
+     "lon": 26.1020425,
+     "price_level": null
+    },
+    "6194615972455793446": {
+     "place_id": "6194615972455793446",
+     "name": "The New \"Saint George\" Church",
+     "type_label": "Orthodox church",
+     "primary_type": "orthodox_church",
+     "theme": "culture_sights",
+     "theme_group": "sights",
+     "rating": 4.8,
+     "rating_count": 2483,
+     "summary": "Historic Orthodox church with lavish frescoes, mosaics, carved columns and the ornate tomb of Constantin Brancoveanu in central Bucharest.",
+     "summary_lang": "en",
+     "photos": [
+      {"key": "photos_cid/6194615972455793446/00_all.jpg", "url": null},
+      {"key": "photos_cid/6194615972455793446/01_all.jpg", "url": null},
+      {"key": "photos_cid/6194615972455793446/02_all.jpg", "url": null},
+      {"key": "photos_cid/6194615972455793446/03_all.jpg", "url": null}
+     ],
+     "google_maps_url": "https://www.google.com/maps?cid=6194615972455793446",
+     "google_place_id": "ChIJQVgE_T7_sUARJkMwDmiy91U",
+     "address": "Strada Cavafii Vechi 6, București 030254, Romania",
+     "business_status": "operational",
+     "lat": 44.4324787,
+     "lon": 26.104558599999997,
+     "price_level": null
+    },
+    "16102257020469288161": {
+     "place_id": "16102257020469288161",
+     "name": "Parcul TNB",
+     "type_label": "Urban sculpture park",
+     "primary_type": "city_park",
+     "theme": "nature_outdoors",
+     "theme_group": "sights",
+     "rating": 4.7,
+     "rating_count": 23,
+     "summary": "Small central Bucharest park opposite the National Theatre, known for its Caragiale-themed bronze sculpture ensemble and a quiet place to pause.",
+     "summary_lang": "en",
+     "photos": [
+      {"key": "photos_cid/16102257020469288161/00_all.jpg", "url": null},
+      {"key": "photos_cid/16102257020469288161/01_all.jpg", "url": null},
+      {"key": "photos_cid/16102257020469288161/02_all.jpg", "url": null},
+      {"key": "photos_cid/16102257020469288161/04_all.jpg", "url": null}
+     ],
+     "google_maps_url": "https://www.google.com/maps?cid=16102257020469288161",
+     "google_place_id": "ChIJgZ_kwvP_sUAR4ZwcW3K1dt8",
+     "address": "Bulevardul Nicolae Bălcescu 2, 010051 București, Romania",
+     "business_status": "operational",
+     "lat": 44.436079,
+     "lon": 26.1028383,
+     "price_level": null
+    },
+    "15978145016794525298": {
+     "place_id": "15978145016794525298",
+     "name": "University Square",
+     "type_label": "historic city square",
+     "primary_type": "historical_landmark",
+     "theme": "culture_sights",
+     "theme_group": "sights",
+     "rating": 4.5,
+     "rating_count": 8461,
+     "summary": "Historic central Bucharest square framed by the university and grand civic buildings, with statues, events, cafes, and a lively route into the Old Town.",
+     "summary_lang": "en",
+     "photos": [
+      {"key": "photos_cid/15978145016794525298/00_all.jpg", "url": null},
+      {"key": "photos_cid/15978145016794525298/01_all.jpg", "url": null},
+      {"key": "photos_cid/15978145016794525298/02_all.jpg", "url": null},
+      {"key": "photos_cid/15978145016794525298/03_all.jpg", "url": null}
+     ],
+     "google_maps_url": "https://www.google.com/maps?cid=15978145016794525298",
+     "google_place_id": "ChIJ_2p6Tkf_sUARci63pzzGvd0",
+     "address": "Bulevardul Regina Elisabeta, 030167 București, Romania",
+     "business_status": "operational",
+     "lat": 44.4347985,
+     "lon": 26.1011925,
+     "price_level": null
+    },
+    "15791376739079194771": {
+     "place_id": "15791376739079194771",
+     "name": "Zlatari Church",
+     "type_label": "Orthodox church",
+     "primary_type": "orthodox_church",
+     "theme": "culture_sights",
+     "theme_group": "sights",
+     "rating": 4.8,
+     "rating_count": 1582,
+     "summary": "Historic Orthodox church in central Bucharest, known for ornate frescoes, rare stained glass, a peaceful interior, and revered Saint Cyprian relics.",
+     "summary_lang": "en",
+     "photos": [
+      {"key": "photos_cid/15791376739079194771/00_all.jpg", "url": null},
+      {"key": "photos_cid/15791376739079194771/02_all.jpg", "url": null},
+      {"key": "photos_cid/15791376739079194771/03_all.jpg", "url": null},
+      {"key": "photos_cid/15791376739079194771/04_all.jpg", "url": null}
+     ],
+     "google_maps_url": "https://www.google.com/maps?cid=15791376739079194771",
+     "google_place_id": "ChIJg8_HQkD_sUARk4guV3o9Jts",
+     "address": "Calea Victoriei 12D, București 030026",
+     "business_status": "operational",
+     "lat": 44.432322299999996,
+     "lon": 26.0976529,
+     "price_level": null
+    },
+    "14593284683301693268": {
+     "place_id": "14593284683301693268",
+     "name": "Caru' cu bere",
+     "type_label": "historic Romanian restaurant",
+     "primary_type": "romanian_restaurant",
+     "theme": "food_drink",
+     "theme_group": "food_drink",
+     "rating": 4.5,
+     "rating_count": 83400,
+     "summary": "Historic Romanian restaurant with grand Neo-Gothic interiors, live folk performances, and hearty traditional dishes like pork knuckle and sarmale.",
+     "summary_lang": "en",
+     "photos": [
+      {"key": "photos_cid/14593284683301693268/00_vibe.jpg", "url": null},
+      {"key": "photos_cid/14593284683301693268/02_vibe.jpg", "url": null},
+      {"key": "photos_cid/14593284683301693268/04_vibe.jpg", "url": null},
+      {"key": "photos_cid/14593284683301693268/05_vibe.jpg", "url": null}
+     ],
+     "google_maps_url": "https://www.google.com/maps?cid=14593284683301693268",
+     "google_place_id": "ChIJwXfea0D_sUARVKdY1hnDhco",
+     "address": "Strada Stavropoleos 5, 030081 București",
+     "business_status": "operational",
+     "lat": 44.4320175,
+     "lon": 26.0981207,
+     "price_level": "moderate"
+    },
+    "5806071778867054569": {
+     "place_id": "5806071778867054569",
+     "name": "National Museum of Romanian History",
+     "type_label": "history museum",
+     "primary_type": "national_museum",
+     "theme": "culture_sights",
+     "theme_group": "sights",
+     "rating": 4.4,
+     "rating_count": 7569,
+     "summary": "A grand Bucharest history museum in a former post office, known for Trajan's Column, Dacian gold, royal jewels, and a compact toy collection.",
+     "summary_lang": "en",
+     "photos": [
+      {"key": "photos_cid/5806071778867054569/00_all.jpg", "url": null},
+      {"key": "photos_cid/5806071778867054569/02_all.jpg", "url": null},
+      {"key": "photos_cid/5806071778867054569/03_all.jpg", "url": null},
+      {"key": "photos_cid/5806071778867054569/04_all.jpg", "url": null}
+     ],
+     "google_maps_url": "https://www.google.com/maps?cid=5806071778867054569",
+     "google_place_id": "ChIJkftvFkD_sUAR6YfKX4VPk1A",
+     "address": "Calea Victoriei 12, București 030026",
+     "business_status": "operational",
+     "lat": 44.4315188,
+     "lon": 26.097249899999998,
+     "price_level": null
+    },
+    "14169121335398956031": {
+     "place_id": "14169121335398956031",
+     "name": "Origo",
+     "type_label": "specialty coffee shop and cocktail bar",
+     "primary_type": "cafe",
+     "theme": "food_drink",
+     "theme_group": "food_drink",
+     "rating": 4.7,
+     "rating_count": 4846,
+     "summary": "Stylish specialty coffee shop by day and cocktail bar at night, known for expert brews, terrace seating, and a calm, modern interior.",
+     "summary_lang": "en",
+     "photos": [
+      {"key": "photos_cid/14169121335398956031/00_vibe.jpg", "url": null},
+      {"key": "photos_cid/14169121335398956031/01_vibe.jpg", "url": null},
+      {"key": "photos_cid/14169121335398956031/02_vibe.jpg", "url": null},
+      {"key": "photos_cid/14169121335398956031/04_vibe.jpg", "url": null}
+     ],
+     "google_maps_url": "https://www.google.com/maps?cid=14169121335398956031",
+     "google_place_id": "ChIJQbgapEH_sUAR__vch8jUosQ",
+     "address": "Strada Lipscani 9, București 050971",
+     "business_status": "operational",
+     "lat": 44.4332121,
+     "lon": 26.0953452,
+     "price_level": null
+    },
+    "55295570421893244": {
+     "place_id": "55295570421893244",
+     "name": "Lake Cișmigiu",
+     "type_label": "Lake in a historic city park",
+     "primary_type": "lake",
+     "theme": "nature_outdoors",
+     "theme_group": "sights",
+     "rating": 4.4,
+     "rating_count": 104,
+     "summary": "A tranquil lake in Bucharest's historic Cismigiu Park, with shaded paths, scenic water views, and seasonal boat rides or skating.",
+     "summary_lang": "en",
+     "photos": [
+      {"key": "photos_cid/55295570421893244/00_all.jpg", "url": null},
+      {"key": "photos_cid/55295570421893244/02_all.jpg", "url": null},
+      {"key": "photos_cid/55295570421893244/03_all.jpg", "url": null},
+      {"key": "photos_cid/55295570421893244/04_all.jpg", "url": null}
+     ],
+     "google_maps_url": "https://www.google.com/maps?cid=55295570421893244",
+     "google_place_id": "ChIJO_wCXkP_sUARfEimQAdzxAA",
+     "address": "Bucharest",
+     "business_status": "operational",
+     "lat": 44.4361588,
+     "lon": 26.0915902,
+     "price_level": null
+    },
+    "516452116503593413": {
+     "place_id": "516452116503593413",
+     "name": "Le Bab Downtown",
+     "type_label": "modern Middle Eastern restaurant",
+     "primary_type": "restaurant",
+     "theme": "food_drink",
+     "theme_group": "food_drink",
+     "rating": 4.7,
+     "rating_count": 4378,
+     "summary": "Modern Middle Eastern restaurant in Old Town serving grilled dishes, brunch, and standout potato sides in a stylish, upbeat setting.",
+     "summary_lang": "en",
+     "photos": [
+      {"key": "photos_cid/516452116503593413/02_vibe.jpg", "url": null},
+      {"key": "photos_cid/516452116503593413/03_vibe.jpg", "url": null},
+      {"key": "photos_cid/516452116503593413/06_vibe.jpg", "url": null},
+      {"key": "photos_cid/516452116503593413/07_vibe.jpg", "url": null}
+     ],
+     "google_maps_url": "https://www.google.com/maps?cid=516452116503593413",
+     "google_place_id": "ChIJAVaSder_sUARxQGys3bOKgc",
+     "address": "Calea Victoriei 12A, 030026 București, Romania",
+     "business_status": "operational",
+     "lat": 44.4320275,
+     "lon": 26.097573099999998,
+     "price_level": "expensive"
+    }
+   }
+  }
+ },
+ "edits": {}
+}

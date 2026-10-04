@@ -1,0 +1,129 @@
+{
+ "scenario": {
+  "id": "S11_sunrise",
+  "city": "Bucharest",
+  "date": "2026-10-04",
+  "start_time": "05:30",
+  "end_time": "09:00",
+  "end_day_offset": 0,
+  "shape": "loop",
+  "start": "city_center",
+  "style": "max",
+  "slots": [
+   {"activity": "coffee", "dwell_min": null},
+   {"activity": "sight", "dwell_min": null}
+  ],
+  "must_visit_place_ids": [],
+  "variants": 1,
+  "radius_km": 2.5,
+  "fill_window": false,
+  "known_hours_only": false,
+  "top_k": 8,
+  "edits": []
+ },
+ "inputs_resolved": {
+  "start": [44.440287, 26.097708],
+  "center": [44.440287, 26.097708],
+  "start_exact": ["44.4402865461307", "26.097708464099995"],
+  "center_exact": ["44.4402865461307", "26.097708464099995"],
+  "t_start": "05:30",
+  "t0": 8970,
+  "budget_min": 210,
+  "end_abs": 540,
+  "next_day": false,
+  "end_label_ru": "09:00",
+  "slot_labels": ["Кофе", "Достопримечательность"],
+  "style_label": "Максимум мест",
+  "dwell_by_slot": {},
+  "must_ids": [],
+  "seed_ids": []
+ },
+ "error": null,
+ "notes": [],
+ "search_km": 2.5,
+ "area": [44.440287, 26.097708],
+ "request": {"mode": "slots", "n_slots": 2, "start": [44.440287, 26.097708], "shape": "loop", "style": "max", "time_budget_min": 210.0, "fit_budget": true, "start_week_min": 8970.0, "max_wait_min": 30.0, "fill_window": false, "walk_weight": null, "max_leg_min": 45.0, "interest_weight": null, "max_stops": null, "provider": "walk_planner.RoutingProvider(walk_kmh=4.5, detour=1.35)", "n_candidates": 31, "n_must_visit": 0, "n_variants_requested": 1},
+ "candidates": {
+  "slot": [
+   ["14169121335398956031", 0, 0.733931, 30.0, false, "coffee", "cafe"],
+   ["3325034453752002666", 0, 0.717382, 30.0, false, "coffee", "dessert_shop"],
+   ["293391505644345885", 0, 0.705493, 75.0, false, "coffee", "restaurant"],
+   ["11793110354655099568", 0, 0.702627, 30.0, false, "coffee", "coffee_shop"],
+   ["506466575246578065", 0, 0.697191, 30.0, false, "coffee", "restaurant_brasserie"],
+   ["15263063180770304130", 0, 0.682671, 30.0, false, "coffee", "coffee_shop"],
+   ["10005805960616076113", 0, 0.668646, 30.0, false, "coffee", "cafe"],
+   ["9347737314523027711", 0, 0.643615, 30.0, false, "coffee", "cafe"],
+   ["284364362787826053", 0, 0.611125, 30.0, false, "coffee", "dessert_shop"],
+   ["10532099939513755931", 0, 0.509175, 30.0, false, "coffee", "coffee_shop"],
+   ["14636091576834155908", 0, 0.562754, 75.0, false, "coffee", "restaurant"],
+   ["4425007252737320613", 0, 0.586543, 30.0, false, "coffee", "coffee_shop"],
+   ["10039533104628781535", 0, 0.613725, 30.0, false, "coffee", "coffee_shop"],
+   ["15293069662429964019", 0, 0.515636, 30.0, false, "coffee", "cafe"],
+   ["10918347410354198575", 0, 0.535765, 30.0, false, "coffee", "cafe"],
+   ["556613190747548448", 1, 0.796139, 55.0, false, "culture_sights", "monastery"],
+   ["8814498684371616875", 1, 0.769299, 20.0, false, "culture_sights", "tourist_attraction"],
+   ["4799452667097853425", 1, 0.758888, 35.0, false, "culture_sights", "orthodox_church"],
+   ["15434284566899275827", 1, 0.739394, 55.0, false, "culture_sights", "cathedral"],
+   ["623836095872856917", 1, 0.728687, 55.0, false, "culture_sights", "orthodox_church"],
+   ["6194615972455793446", 1, 0.722035, 55.0, false, "culture_sights", "orthodox_church"],
+   ["17991847120941406752", 1, 0.717282, 20.0, false, "culture_sights", "church"],
+   ["6556823942046256710", 1, 0.71647, 35.0, false, "culture_sights", "monastery"],
+   ["2302333767644454498", 1, 0.600764, 10.0, false, "culture_sights", "sculpture"],
+   ["11484690504626613379", 1, 0.583292, 25.0, false, "culture_sights", "orthodox_church"],
+   ["13484124012727544921", 1, 0.491894, 10.0, false, "culture_sights", "tourist_attraction"],
+   ["15198693957308866935", 1, 0.503081, 20.0, false, "culture_sights", "monument"],
+   ["6153831670984642249", 1, 0.349965, 20.0, false, "culture_sights", "tourist_attraction"],
+   ["6975675940809821901", 1, 0.640453, 45.0, false, "culture_sights", "orthodox_church"],
+   ["8825391489902434532", 1, 0.61666, 25.0, false, "culture_sights", "catholic_church"],
+   ["15387643079662744112", 1, 0.630728, 25.0, false, "culture_sights", "orthodox_church"]
+  ],
+  "extra": [],
+  "must": []
+ },
+ "variants": [
+  {
+   "dropped": ["Кофе"],
+   "plan": {
+    "stops": [
+     {"order": 0, "place_id": "2302333767644454498", "name": "Equestrian Statue of Carol I", "slot": 1, "theme": "culture_sights", "extra": false, "pinned": false, "interest": 0.600764, "dwell_min": 10.0, "arrival_min": 1.616921, "wait_min": 0.0, "depart_min": 11.616921, "hours_ok": true, "hours_label_ru": "вс круглосуточно"}
+    ],
+    "segments": [
+     {"from_order": -1, "to_order": 0, "walk_min": 1.616921, "distance_km": 0.121269, "n_geom": 2},
+     {"from_order": 0, "to_order": -1, "walk_min": 1.616921, "distance_km": 0.121269, "n_geom": 2}
+    ],
+    "total_time_min": 13.233842,
+    "total_walk_min": 3.233842,
+    "total_dwell_min": 10.0,
+    "total_wait_min": 0.0,
+    "total_distance_km": 0.242538,
+    "over_budget": false,
+    "dropped_slots": [0],
+    "note": ""
+   },
+   "render": {
+    "manual": false,
+    "variants_caption": null,
+    "metric_stops": "1 из 2",
+    "metric_finish_label": "Возвращение",
+    "metric_finish": "05:43",
+    "metric_delta": "+197 мин запаса",
+    "metric_walk": "0.2 км · 0:03",
+    "metric_window": "05:30–09:00",
+    "captions": [],
+    "warnings": ["Не поместилось в окно: Кофе. Остальное уложено до 09:00; чтобы вернуть слоты, раздвиньте окно."],
+    "infos": [],
+    "stop_lines": [
+     ["1. Equestrian Statue of Carol I — Достопримечательность", "05:32–05:42 · осмотр 10 мин", "🕒 вс круглосуточно"]
+    ]
+   },
+   "navigation": {
+    "google": ["https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440287,26.097708&destination=44.440287,26.097708&waypoints=44.439648,26.097016&waypoint_place_ids=ChIJpa8ak0X_sUARYp7VBl2I8x8"],
+    "legs": [
+     {"from": "Старт", "to": "Equestrian Statue of Carol I", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440287,26.097708&destination=44.439648,26.097016&destination_place_id=ChIJpa8ak0X_sUARYp7VBl2I8x8", "apple": "https://maps.apple.com/?saddr=44.440287,26.097708&daddr=44.439648,26.097016&dirflg=w"},
+     {"from": "Equestrian Statue of Carol I", "to": "Старт", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.439648,26.097016&destination=44.440287,26.097708&origin_place_id=ChIJpa8ak0X_sUARYp7VBl2I8x8", "apple": "https://maps.apple.com/?saddr=44.439648,26.097016&daddr=44.440287,26.097708&dirflg=w"}
+    ]
+   }
+  }
+ ],
+ "edits": {}
+}

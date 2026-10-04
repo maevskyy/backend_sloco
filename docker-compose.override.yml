@@ -12,3 +12,15 @@ services:
     image: sloco-recommendation-service:local
     ports:
       - "127.0.0.1:8000:8000"
+
+  walk-planner:
+    build:
+      context: ./services/walk-planner
+      dockerfile: deploy/Dockerfile
+      args:
+        GIT_SHA: ${WALK_PLANNER_GIT_SHA:-1.0.0-20261003}
+    image: sloco-walk-planner:local
+    environment:
+      ENVIRONMENT: development
+    ports:
+      - "127.0.0.1:18600:8000"

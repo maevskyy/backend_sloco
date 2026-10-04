@@ -1,0 +1,44 @@
+# Build context of deploy/Dockerfile = this directory (services/walk_planner).
+# The image needs only: pyproject.toml, walk_planner/ (+ README/CHANGELOG if pyproject ever references them)
+# and the four deploy files re-included at the bottom. Tests, golden data, docs and every env file stay out.
+
+# caches / build output
+**/__pycache__
+**/*.py[cod]
+**/.pytest_cache
+**/.mypy_cache
+**/.ruff_cache
+**/.ipynb_checkpoints
+**/*.egg-info
+build
+dist
+
+# VCS, editors, OS junk (macOS / exFAT AppleDouble files)
+.git
+.github
+.idea
+.vscode
+**/.DS_Store
+**/._*
+
+# virtualenvs
+.venv
+venv
+
+# secrets: never part of a build context (walk.env, .env, ...)
+**/.env
+**/.env.*
+**/*.env
+
+# not needed in the image
+tests
+golden
+docs
+**/*.ipynb
+
+# deploy/: only what the Dockerfile copies
+deploy/*
+!deploy/requirements.lock
+!deploy/requirements-build.lock
+!deploy/docker-entrypoint.sh
+!deploy/uvicorn-log-config.json

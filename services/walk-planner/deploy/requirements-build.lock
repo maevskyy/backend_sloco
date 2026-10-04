@@ -1,0 +1,7 @@
+# Build-only dependency: setuptools builds the walk_planner wheel in the first stage of deploy/Dockerfile
+# (pyproject build-system; pip runs with --no-build-isolation so nothing unpinned is fetched). It never
+# reaches the runtime image. 83.0.0 = first release without GHSA-h35f-9h28-mq5c.
+
+setuptools==83.0.0 \
+    --hash=sha256:29b23c360f22f414dc7336bb39178cc7bcbf6021ed2733cde173f09dba19abb3
+    # builds the walk_planner wheel (pyproject build-system)

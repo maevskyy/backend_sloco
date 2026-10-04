@@ -1,0 +1,317 @@
+{
+ "scenario": {
+  "id": "S12_monday_evening",
+  "city": "Bucharest",
+  "date": "2026-10-05",
+  "start_time": "18:30",
+  "end_time": "22:00",
+  "end_day_offset": 0,
+  "shape": "loop",
+  "start": {"lat": 44.46, "lon": 26.099},
+  "style": "max",
+  "slots": [
+   {"activity": "coffee", "dwell_min": null},
+   {"activity": "bar", "dwell_min": null},
+   {"activity": "market", "dwell_min": null}
+  ],
+  "must_visit_place_ids": [],
+  "variants": 3,
+  "radius_km": 2.5,
+  "fill_window": true,
+  "known_hours_only": false,
+  "top_k": 8,
+  "edits": [
+   {
+    "chain": "A",
+    "ops": [
+     {"op": "add", "place_id": "14169121335398956031"}
+    ]
+   }
+  ]
+ },
+ "inputs_resolved": {
+  "start": [44.46, 26.099],
+  "center": [44.440287, 26.097708],
+  "start_exact": ["44.46", "26.099"],
+  "center_exact": ["44.4402865461307", "26.097708464099995"],
+  "t_start": "18:30",
+  "t0": 1110,
+  "budget_min": 210,
+  "end_abs": 1320,
+  "next_day": false,
+  "end_label_ru": "22:00",
+  "slot_labels": ["Кофе", "Бар / напитки", "Рынок / площадь"],
+  "style_label": "Максимум мест",
+  "dwell_by_slot": {},
+  "must_ids": [],
+  "seed_ids": []
+ },
+ "error": null,
+ "notes": [
+  {"kind": "info", "text": "Радиус 2.5 км сужен до 2.2 км: за окно 18:30–22:00 дальше не успеть — ~130 мин уходит на сами места, и нужно вернуться к старту."}
+ ],
+ "search_km": 2.222222,
+ "area": [44.46, 26.099],
+ "request": {"mode": "slots", "n_slots": 3, "start": [44.46, 26.099], "shape": "loop", "style": "max", "time_budget_min": 210.0, "fit_budget": true, "start_week_min": 1110.0, "max_wait_min": 30.0, "fill_window": true, "walk_weight": null, "max_leg_min": 45.0, "interest_weight": null, "max_stops": null, "provider": "walk_planner.RoutingProvider(walk_kmh=4.5, detour=1.35)", "n_candidates": 38, "n_must_visit": 0, "n_variants_requested": 3},
+ "candidates": {
+  "slot": [
+   ["17733277001575791107", 0, 0.726842, 30.0, false, "coffee", "coffee_shop"],
+   ["3325034453752002666", 0, 0.717382, 30.0, false, "coffee", "dessert_shop"],
+   ["293391505644345885", 0, 0.705493, 75.0, false, "coffee", "restaurant"],
+   ["11793110354655099568", 0, 0.702627, 30.0, false, "coffee", "coffee_shop"],
+   ["5564669006134392295", 0, 0.700591, 30.0, false, "coffee", "ice_cream_shop"],
+   ["7960103630939296652", 0, 0.699974, 30.0, false, "coffee", "ice_cream_shop"],
+   ["506466575246578065", 0, 0.697191, 30.0, false, "coffee", "restaurant_brasserie"],
+   ["15263063180770304130", 0, 0.682671, 30.0, false, "coffee", "coffee_shop"],
+   ["14976919172939607885", 0, 0.53558, 30.0, false, "coffee", "cafe"],
+   ["9492692301607451791", 0, 0.499537, 30.0, false, "coffee", "cafe"],
+   ["5819102646270771574", 0, 0.499421, 75.0, false, "coffee", "restaurant"],
+   ["11711862192228983442", 0, 0.639656, 30.0, false, "coffee", "coffee_shop"],
+   ["5194688225799871231", 0, 0.33255, 30.0, false, "coffee", "coffee_roasters"],
+   ["15350162146171561439", 0, 0.643361, 30.0, false, "coffee", "restaurant_brasserie"],
+   ["423163730916127974", 0, 0.511337, 30.0, false, "coffee", "bakery"],
+   ["3667137107266216702", 0, 0.408614, 30.0, false, "coffee", "cafe"],
+   ["13368924670083442037", 1, 0.756252, 60.0, false, "bar", "barbecue_restaurant"],
+   ["3657335102789003901", 1, 0.753121, 75.0, false, "bar", "restaurant"],
+   ["11162370320580970770", 1, 0.709869, 60.0, false, "bar", "hamburger_restaurant"],
+   ["8130567416563340074", 1, 0.70374, 60.0, false, "bar", "hamburger_restaurant"],
+   ["15041444465674780568", 1, 0.703316, 75.0, false, "bar", "restaurant"],
+   ["16485724495374170726", 1, 0.694623, 75.0, false, "bar", "restaurant"],
+   ["13908984302501067361", 1, 0.691481, 60.0, false, "bar", "hookah_bar"],
+   ["6323344410516864993", 1, 0.689678, 75.0, false, "bar", "restaurant"],
+   ["15118509735595672585", 1, 0.559408, 75.0, false, "bar", "restaurant"],
+   ["8111043175556084070", 1, 0.562854, 75.0, false, "bar", "restaurant"],
+   ["16775550910948685689", 1, 0.48482, 60.0, false, "bar", "barber_shop"],
+   ["8579077371346466984", 1, 0.574044, 75.0, false, "bar", "restaurant"],
+   ["10354330098494096109", 1, 0.601463, 60.0, false, "bar", "gastropub"],
+   ["10592059316047976838", 1, 0.578569, 60.0, false, "bar", "ice_cream_shop"],
+   ["15984467645587323741", 1, 0.505069, 75.0, false, "bar", "restaurant"],
+   ["9970181098416117929", 1, 0.473724, 75.0, false, "bar", "restaurant"],
+   ["17797059075230873261", 2, 0.60004, 40.0, false, "markets_walks", "christmas_store"],
+   ["5853720723767717194", 2, 0.189286, 20.0, false, "markets_walks", "christmas_market"],
+   ["1674269970540788428", 2, 0.1431, 10.0, false, "markets_walks", "town_square"]
+  ],
+  "extra": [
+   ["17797059075230873261", 2, 0.60004, 40.0, "Рынок / площадь"],
+   ["5853720723767717194", 2, 0.189286, 20.0, "Рынок / площадь"],
+   ["1674269970540788428", 2, 0.1431, 10.0, "Рынок / площадь"]
+  ],
+  "must": []
+ },
+ "variants": [
+  {
+   "dropped": [],
+   "plan": {
+    "stops": [
+     {"order": 0, "place_id": "15350162146171561439", "name": "Nuba Cafe", "slot": 0, "theme": "coffee", "extra": false, "pinned": false, "interest": 0.643361, "dwell_min": 30.0, "arrival_min": 7.332017, "wait_min": 0.0, "depart_min": 37.332017, "hours_ok": true, "hours_label_ru": "пн 09:00–00:00"},
+     {"order": 1, "place_id": "10354330098494096109", "name": "White Horse", "slot": 1, "theme": "bar", "extra": false, "pinned": false, "interest": 0.601463, "dwell_min": 60.0, "arrival_min": 39.105694, "wait_min": 0.0, "depart_min": 99.105694, "hours_ok": true, "hours_label_ru": "пн 10:00–22:00"},
+     {"order": 2, "place_id": "5853720723767717194", "name": "Christmas Collection", "slot": 2, "theme": "markets_walks", "extra": false, "pinned": false, "interest": 0.189286, "dwell_min": 20.0, "arrival_min": 114.232527, "wait_min": 0.0, "depart_min": 134.232527, "hours_ok": true, "hours_label_ru": "пн 10:00–21:00"}
+    ],
+    "segments": [
+     {"from_order": -1, "to_order": 0, "walk_min": 7.332017, "distance_km": 0.549901, "n_geom": 2},
+     {"from_order": 0, "to_order": 1, "walk_min": 1.773677, "distance_km": 0.133026, "n_geom": 2},
+     {"from_order": 1, "to_order": 2, "walk_min": 15.126834, "distance_km": 1.134513, "n_geom": 2},
+     {"from_order": 2, "to_order": -1, "walk_min": 20.557967, "distance_km": 1.541848, "n_geom": 2}
+    ],
+    "total_time_min": 154.790495,
+    "total_walk_min": 44.790495,
+    "total_dwell_min": 110.0,
+    "total_wait_min": 0.0,
+    "total_distance_km": 3.359287,
+    "over_budget": false,
+    "dropped_slots": [],
+    "note": ""
+   },
+   "render": {
+    "manual": false,
+    "variants_caption": "**Вариант 1**: 3 места · 3.4 км · до 21:05  ·  Вариант 2: 3 места · 3.3 км · до 21:19  ·  Вариант 3: 3 места · 3.3 км · до 21:18",
+    "metric_stops": "3 из 3",
+    "metric_finish_label": "Возвращение",
+    "metric_finish": "21:05",
+    "metric_delta": "+55 мин запаса",
+    "metric_walk": "3.4 км · 0:45",
+    "metric_window": "18:30–22:00",
+    "captions": [],
+    "warnings": [],
+    "infos": [],
+    "stop_lines": [
+     ["1. Nuba Cafe — Кофе", "18:37–19:07 · осмотр 30 мин", "🕒 пн 09:00–00:00"],
+     ["2. White Horse — Бар / напитки", "19:09–20:09 · осмотр 60 мин", "🕒 пн 10:00–22:00"],
+     ["3. Christmas Collection — Рынок / площадь", "20:24–20:44 · осмотр 20 мин", "🕒 пн 10:00–21:00"]
+    ]
+   },
+   "navigation": {
+    "google": ["https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.460000,26.099000&destination=44.460000,26.099000&waypoints=44.461866,26.094583%7C44.461464,26.095690%7C44.463695,26.085572&waypoint_place_ids=ChIJY8QgaQgCskAR3yU0ryS7BtU%7CChIJBz5HEwgCskAR7ULgb134sY8%7CChIJQaxKlfsDskARSm2E4vuXPFE"],
+    "legs": [
+     {"from": "Старт", "to": "Nuba Cafe", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.460000,26.099000&destination=44.461866,26.094583&destination_place_id=ChIJY8QgaQgCskAR3yU0ryS7BtU", "apple": "https://maps.apple.com/?saddr=44.460000,26.099000&daddr=44.461866,26.094583&dirflg=w"},
+     {"from": "Nuba Cafe", "to": "White Horse", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.461866,26.094583&destination=44.461464,26.095690&destination_place_id=ChIJBz5HEwgCskAR7ULgb134sY8&origin_place_id=ChIJY8QgaQgCskAR3yU0ryS7BtU", "apple": "https://maps.apple.com/?saddr=44.461866,26.094583&daddr=44.461464,26.095690&dirflg=w"},
+     {"from": "White Horse", "to": "Christmas Collection", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.461464,26.095690&destination=44.463695,26.085572&destination_place_id=ChIJQaxKlfsDskARSm2E4vuXPFE&origin_place_id=ChIJBz5HEwgCskAR7ULgb134sY8", "apple": "https://maps.apple.com/?saddr=44.461464,26.095690&daddr=44.463695,26.085572&dirflg=w"},
+     {"from": "Christmas Collection", "to": "Старт", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.463695,26.085572&destination=44.460000,26.099000&origin_place_id=ChIJQaxKlfsDskARSm2E4vuXPFE", "apple": "https://maps.apple.com/?saddr=44.463695,26.085572&daddr=44.460000,26.099000&dirflg=w"}
+    ]
+   }
+  },
+  {
+   "dropped": [],
+   "plan": {
+    "stops": [
+     {"order": 0, "place_id": "14976919172939607885", "name": "C-O FI Factory", "slot": 0, "theme": "coffee", "extra": false, "pinned": false, "interest": 0.53558, "dwell_min": 30.0, "arrival_min": 2.453716, "wait_min": 0.0, "depart_min": 32.453716, "hours_ok": true, "hours_label_ru": "пн 08:00–20:00"},
+     {"order": 1, "place_id": "8111043175556084070", "name": "TASTING ROOM by Ethic Wine", "slot": 1, "theme": "bar", "extra": false, "pinned": false, "interest": 0.562854, "dwell_min": 75.0, "arrival_min": 32.549044, "wait_min": 0.0, "depart_min": 107.549044, "hours_ok": true, "hours_label_ru": "пн 12:00–00:00"},
+     {"order": 2, "place_id": "5853720723767717194", "name": "Christmas Collection", "slot": 2, "theme": "markets_walks", "extra": false, "pinned": false, "interest": 0.06625, "dwell_min": 20.0, "arrival_min": 128.369086, "wait_min": 0.0, "depart_min": 148.369086, "hours_ok": true, "hours_label_ru": "пн 10:00–21:00"}
+    ],
+    "segments": [
+     {"from_order": -1, "to_order": 0, "walk_min": 2.453716, "distance_km": 0.184029, "n_geom": 2},
+     {"from_order": 0, "to_order": 1, "walk_min": 0.095328, "distance_km": 0.00715, "n_geom": 2},
+     {"from_order": 1, "to_order": 2, "walk_min": 20.820042, "distance_km": 1.561503, "n_geom": 2},
+     {"from_order": 2, "to_order": -1, "walk_min": 20.557967, "distance_km": 1.541848, "n_geom": 2}
+    ],
+    "total_time_min": 168.927053,
+    "total_walk_min": 43.927053,
+    "total_dwell_min": 125.0,
+    "total_wait_min": 0.0,
+    "total_distance_km": 3.294529,
+    "over_budget": false,
+    "dropped_slots": [],
+    "note": ""
+   },
+   "render": {
+    "manual": false,
+    "variants_caption": "Вариант 1: 3 места · 3.4 км · до 21:05  ·  **Вариант 2**: 3 места · 3.3 км · до 21:19  ·  Вариант 3: 3 места · 3.3 км · до 21:18",
+    "metric_stops": "3 из 3",
+    "metric_finish_label": "Возвращение",
+    "metric_finish": "21:19",
+    "metric_delta": "+41 мин запаса",
+    "metric_walk": "3.3 км · 0:44",
+    "metric_window": "18:30–22:00",
+    "captions": [],
+    "warnings": [],
+    "infos": [],
+    "stop_lines": [
+     ["1. C-O FI Factory — Кофе", "18:32–19:02 · осмотр 30 мин", "🕒 пн 08:00–20:00"],
+     ["2. TASTING ROOM by Ethic Wine — Бар / напитки", "19:03–20:18 · осмотр 75 мин", "🕒 пн 12:00–00:00"],
+     ["3. Christmas Collection — Рынок / площадь", "20:38–20:58 · осмотр 20 мин", "🕒 пн 10:00–21:00"]
+    ]
+   },
+   "navigation": {
+    "google": ["https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.460000,26.099000&destination=44.460000,26.099000&waypoints=44.461133,26.099656%7C44.461162,26.099708%7C44.463695,26.085572&waypoint_place_ids=ChIJ79D3uaf4sUARTW_N_KK02M8%7CChIJleS8sKf4sUARZnHgRMs2kHA%7CChIJQaxKlfsDskARSm2E4vuXPFE"],
+    "legs": [
+     {"from": "Старт", "to": "C-O FI Factory", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.460000,26.099000&destination=44.461133,26.099656&destination_place_id=ChIJ79D3uaf4sUARTW_N_KK02M8", "apple": "https://maps.apple.com/?saddr=44.460000,26.099000&daddr=44.461133,26.099656&dirflg=w"},
+     {"from": "C-O FI Factory", "to": "TASTING ROOM by Ethic Wine", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.461133,26.099656&destination=44.461162,26.099708&destination_place_id=ChIJleS8sKf4sUARZnHgRMs2kHA&origin_place_id=ChIJ79D3uaf4sUARTW_N_KK02M8", "apple": "https://maps.apple.com/?saddr=44.461133,26.099656&daddr=44.461162,26.099708&dirflg=w"},
+     {"from": "TASTING ROOM by Ethic Wine", "to": "Christmas Collection", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.461162,26.099708&destination=44.463695,26.085572&destination_place_id=ChIJQaxKlfsDskARSm2E4vuXPFE&origin_place_id=ChIJleS8sKf4sUARZnHgRMs2kHA", "apple": "https://maps.apple.com/?saddr=44.461162,26.099708&daddr=44.463695,26.085572&dirflg=w"},
+     {"from": "Christmas Collection", "to": "Старт", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.463695,26.085572&destination=44.460000,26.099000&origin_place_id=ChIJQaxKlfsDskARSm2E4vuXPFE", "apple": "https://maps.apple.com/?saddr=44.463695,26.085572&daddr=44.460000,26.099000&dirflg=w"}
+    ]
+   }
+  },
+  {
+   "dropped": [],
+   "plan": {
+    "stops": [
+     {"order": 0, "place_id": "423163730916127974", "name": "Paul", "slot": 0, "theme": "coffee", "extra": false, "pinned": false, "interest": 0.511337, "dwell_min": 30.0, "arrival_min": 6.933693, "wait_min": 0.0, "depart_min": 36.933693, "hours_ok": true, "hours_label_ru": "пн 08:00–21:00"},
+     {"order": 1, "place_id": "15984467645587323741", "name": "Bibo Restaurant", "slot": 1, "theme": "bar", "extra": false, "pinned": false, "interest": 0.505069, "dwell_min": 75.0, "arrival_min": 38.000353, "wait_min": 0.0, "depart_min": 113.000353, "hours_ok": true, "hours_label_ru": "пн 11:00–22:00"},
+     {"order": 2, "place_id": "5853720723767717194", "name": "Christmas Collection", "slot": 2, "theme": "markets_walks", "extra": false, "pinned": false, "interest": 0.06625, "dwell_min": 20.0, "arrival_min": 127.792505, "wait_min": 0.0, "depart_min": 147.792505, "hours_ok": true, "hours_label_ru": "пн 10:00–21:00"}
+    ],
+    "segments": [
+     {"from_order": -1, "to_order": 0, "walk_min": 6.933693, "distance_km": 0.520027, "n_geom": 2},
+     {"from_order": 0, "to_order": 1, "walk_min": 1.06666, "distance_km": 0.079999, "n_geom": 2},
+     {"from_order": 1, "to_order": 2, "walk_min": 14.792152, "distance_km": 1.109411, "n_geom": 2},
+     {"from_order": 2, "to_order": -1, "walk_min": 20.557967, "distance_km": 1.541848, "n_geom": 2}
+    ],
+    "total_time_min": 168.350472,
+    "total_walk_min": 43.350472,
+    "total_dwell_min": 125.0,
+    "total_wait_min": 0.0,
+    "total_distance_km": 3.251285,
+    "over_budget": false,
+    "dropped_slots": [],
+    "note": ""
+   },
+   "render": {
+    "manual": false,
+    "variants_caption": "Вариант 1: 3 места · 3.4 км · до 21:05  ·  Вариант 2: 3 места · 3.3 км · до 21:19  ·  **Вариант 3**: 3 места · 3.3 км · до 21:18",
+    "metric_stops": "3 из 3",
+    "metric_finish_label": "Возвращение",
+    "metric_finish": "21:18",
+    "metric_delta": "+42 мин запаса",
+    "metric_walk": "3.3 км · 0:43",
+    "metric_window": "18:30–22:00",
+    "captions": [],
+    "warnings": [],
+    "infos": [],
+    "stop_lines": [
+     ["1. Paul — Кофе", "18:37–19:07 · осмотр 30 мин", "🕒 пн 08:00–21:00"],
+     ["2. Bibo Restaurant — Бар / напитки", "19:08–20:23 · осмотр 75 мин", "🕒 пн 11:00–22:00"],
+     ["3. Christmas Collection — Рынок / площадь", "20:38–20:58 · осмотр 20 мин", "🕒 пн 10:00–21:00"]
+    ]
+   },
+   "navigation": {
+    "google": ["https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.460000,26.099000&destination=44.460000,26.099000&waypoints=44.460739,26.094258%7C44.460612,26.094983%7C44.463695,26.085572&waypoint_place_ids=ChIJNeQd3wcCskAR5rQV1yth3wU%7CChIJJ3PHxmL5sUARXfv0YqI81N0%7CChIJQaxKlfsDskARSm2E4vuXPFE"],
+    "legs": [
+     {"from": "Старт", "to": "Paul", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.460000,26.099000&destination=44.460739,26.094258&destination_place_id=ChIJNeQd3wcCskAR5rQV1yth3wU", "apple": "https://maps.apple.com/?saddr=44.460000,26.099000&daddr=44.460739,26.094258&dirflg=w"},
+     {"from": "Paul", "to": "Bibo Restaurant", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.460739,26.094258&destination=44.460612,26.094983&destination_place_id=ChIJJ3PHxmL5sUARXfv0YqI81N0&origin_place_id=ChIJNeQd3wcCskAR5rQV1yth3wU", "apple": "https://maps.apple.com/?saddr=44.460739,26.094258&daddr=44.460612,26.094983&dirflg=w"},
+     {"from": "Bibo Restaurant", "to": "Christmas Collection", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.460612,26.094983&destination=44.463695,26.085572&destination_place_id=ChIJQaxKlfsDskARSm2E4vuXPFE&origin_place_id=ChIJJ3PHxmL5sUARXfv0YqI81N0", "apple": "https://maps.apple.com/?saddr=44.460612,26.094983&daddr=44.463695,26.085572&dirflg=w"},
+     {"from": "Christmas Collection", "to": "Старт", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.463695,26.085572&destination=44.460000,26.099000&origin_place_id=ChIJQaxKlfsDskARSm2E4vuXPFE", "apple": "https://maps.apple.com/?saddr=44.463695,26.085572&daddr=44.460000,26.099000&dirflg=w"}
+    ]
+   }
+  }
+ ],
+ "edits": {
+  "A": {
+   "ops": [
+    {"op": "add", "place_id": "14169121335398956031", "name": "Origo", "applied": true}
+   ],
+   "manual": true,
+   "removed": [],
+   "plan": {
+    "stops": [
+     {"order": 0, "place_id": "15350162146171561439", "name": "Nuba Cafe", "slot": 0, "theme": "coffee", "extra": false, "pinned": false, "interest": 0.643361, "dwell_min": 30.0, "arrival_min": 7.332017, "wait_min": 0.0, "depart_min": 37.332017, "hours_ok": true, "hours_label_ru": "пн 09:00–00:00"},
+     {"order": 1, "place_id": "10354330098494096109", "name": "White Horse", "slot": 1, "theme": "bar", "extra": false, "pinned": false, "interest": 0.601463, "dwell_min": 60.0, "arrival_min": 39.105694, "wait_min": 0.0, "depart_min": 99.105694, "hours_ok": true, "hours_label_ru": "пн 10:00–22:00"},
+     {"order": 2, "place_id": "5853720723767717194", "name": "Christmas Collection", "slot": 2, "theme": "markets_walks", "extra": false, "pinned": false, "interest": 0.189286, "dwell_min": 20.0, "arrival_min": 114.232527, "wait_min": 0.0, "depart_min": 134.232527, "hours_ok": true, "hours_label_ru": "пн 10:00–21:00"},
+     {"order": 3, "place_id": "14169121335398956031", "name": "Origo", "slot": -1, "theme": "food_drink", "extra": false, "pinned": true, "interest": 0.0, "dwell_min": 30.0, "arrival_min": 196.82198, "wait_min": 0.0, "depart_min": 226.82198, "hours_ok": false, "hours_label_ru": "пн 07:30–20:00"}
+    ],
+    "segments": [
+     {"from_order": -1, "to_order": 0, "walk_min": 7.332017, "distance_km": 0.549901, "n_geom": 2},
+     {"from_order": 0, "to_order": 1, "walk_min": 1.773677, "distance_km": 0.133026, "n_geom": 2},
+     {"from_order": 1, "to_order": 2, "walk_min": 15.126834, "distance_km": 1.134513, "n_geom": 2},
+     {"from_order": 2, "to_order": 3, "walk_min": 62.589453, "distance_km": 4.694209, "n_geom": 2},
+     {"from_order": 3, "to_order": -1, "walk_min": 53.870017, "distance_km": 4.040251, "n_geom": 2}
+    ],
+    "total_time_min": 280.691997,
+    "total_walk_min": 140.691997,
+    "total_dwell_min": 140.0,
+    "total_wait_min": 0.0,
+    "total_distance_km": 10.5519,
+    "over_budget": true,
+    "dropped_slots": [],
+    "note": "Route needs ~281 min but the budget is 210 min."
+   },
+   "render": {
+    "manual": true,
+    "variants_caption": "**Вариант 1**: 4 места · 10.6 км · до 23:11 · ✏️ изменён  ·  Вариант 2: 3 места · 3.3 км · до 21:19  ·  Вариант 3: 3 места · 3.3 км · до 21:18",
+    "metric_stops": "3 из 3 + 📍1",
+    "metric_finish_label": "Возвращение",
+    "metric_finish": "23:11",
+    "metric_delta": "-71 мин, не успеваю",
+    "metric_walk": "10.6 км · 2:21",
+    "metric_window": "18:30–22:00",
+    "captions": [],
+    "warnings": ["Маршрут займёт ~281 мин, а окно 210 мин: финиш в 23:11, позже 22:00.", "⚠️ «Origo» — в 21:47 по графику закрыто (пн 07:30–20:00). Маршрут всё равно построен: оставьте, если знаете, что сегодня работает дольше."],
+    "infos": [],
+    "stop_lines": [
+     ["1. Nuba Cafe — Кофе", "18:37–19:07 · осмотр 30 мин", "🕒 пн 09:00–00:00"],
+     ["2. White Horse — Бар / напитки", "19:09–20:09 · осмотр 60 мин", "🕒 пн 10:00–22:00"],
+     ["3. Christmas Collection — Рынок / площадь", "20:24–20:44 · осмотр 20 мин", "🕒 пн 10:00–21:00"],
+     ["4. Origo — 📍 ваше место", "21:47–22:17 · осмотр 30 мин", "🕒 пн 07:30–20:00", "⚠️ по графику в это время может быть закрыто — маршрут построен как есть"]
+    ]
+   },
+   "navigation": {
+    "google": ["https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.460000,26.099000&destination=44.460000,26.099000&waypoints=44.461866,26.094583%7C44.461464,26.095690%7C44.463695,26.085572%7C44.433212,26.095345&waypoint_place_ids=ChIJY8QgaQgCskAR3yU0ryS7BtU%7CChIJBz5HEwgCskAR7ULgb134sY8%7CChIJQaxKlfsDskARSm2E4vuXPFE%7CChIJQbgapEH_sUAR__vch8jUosQ"],
+    "legs": [
+     {"from": "Старт", "to": "Nuba Cafe", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.460000,26.099000&destination=44.461866,26.094583&destination_place_id=ChIJY8QgaQgCskAR3yU0ryS7BtU", "apple": "https://maps.apple.com/?saddr=44.460000,26.099000&daddr=44.461866,26.094583&dirflg=w"},
+     {"from": "Nuba Cafe", "to": "White Horse", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.461866,26.094583&destination=44.461464,26.095690&destination_place_id=ChIJBz5HEwgCskAR7ULgb134sY8&origin_place_id=ChIJY8QgaQgCskAR3yU0ryS7BtU", "apple": "https://maps.apple.com/?saddr=44.461866,26.094583&daddr=44.461464,26.095690&dirflg=w"},
+     {"from": "White Horse", "to": "Christmas Collection", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.461464,26.095690&destination=44.463695,26.085572&destination_place_id=ChIJQaxKlfsDskARSm2E4vuXPFE&origin_place_id=ChIJBz5HEwgCskAR7ULgb134sY8", "apple": "https://maps.apple.com/?saddr=44.461464,26.095690&daddr=44.463695,26.085572&dirflg=w"},
+     {"from": "Christmas Collection", "to": "Origo", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.463695,26.085572&destination=44.433212,26.095345&destination_place_id=ChIJQbgapEH_sUAR__vch8jUosQ&origin_place_id=ChIJQaxKlfsDskARSm2E4vuXPFE", "apple": "https://maps.apple.com/?saddr=44.463695,26.085572&daddr=44.433212,26.095345&dirflg=w"},
+     {"from": "Origo", "to": "Старт", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.433212,26.095345&destination=44.460000,26.099000&origin_place_id=ChIJQbgapEH_sUAR__vch8jUosQ", "apple": "https://maps.apple.com/?saddr=44.433212,26.095345&daddr=44.460000,26.099000&dirflg=w"}
+    ]
+   }
+  }
+ }
+}

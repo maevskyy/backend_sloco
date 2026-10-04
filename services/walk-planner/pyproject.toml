@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sloco-walk-planner"
+dynamic = ["version"]
+description = "SLOCO Walk Planner: walking-route planning algorithm + FastAPI microservice"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=1.26",
+    "pandas>=2.2",
+    "pyarrow>=15",
+    "requests>=2.31",
+]
+
+[project.optional-dependencies]
+interest = ["scikit-learn>=1.4"]
+service = ["fastapi>=0.110", "uvicorn[standard]>=0.29", "pydantic>=2.6", "pydantic-settings>=2.2", "scikit-learn>=1.4"]
+dev = ["pytest>=8", "httpx>=0.27"]
+
+[project.scripts]
+walk-planner = "walk_planner.cli:main"
+
+[tool.setuptools]
+packages = ["walk_planner", "walk_planner.service"]
+
+[tool.setuptools.dynamic]
+version = {attr = "walk_planner.version.ALGORITHM_VERSION"}
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-p no:cacheprovider"

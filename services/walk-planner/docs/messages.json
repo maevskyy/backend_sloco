@@ -1,0 +1,981 @@
+{
+  "errors": [
+    {
+      "code": "bad_request",
+      "en": "Bad request.",
+      "examples": [
+        {
+          "en": "Bad request.",
+          "params": {},
+          "ru": "Некорректный запрос."
+        }
+      ],
+      "http_status": 400,
+      "kind": "error",
+      "optional_params": [],
+      "params": [],
+      "ru": "Некорректный запрос.",
+      "scope": "error",
+      "severity": "error"
+    },
+    {
+      "code": "busy",
+      "en": "The service is busy with other routes — please retry in a couple of seconds.",
+      "examples": [
+        {
+          "en": "The service is busy with other routes — please retry in a couple of seconds.",
+          "params": {
+            "max_concurrent": 2,
+            "retry_after_s": 2
+          },
+          "ru": "Сервис сейчас занят другими маршрутами — повторите через пару секунд."
+        }
+      ],
+      "http_status": 503,
+      "kind": "error",
+      "optional_params": [],
+      "params": [
+        "max_concurrent",
+        "retry_after_s"
+      ],
+      "ru": "Сервис сейчас занят другими маршрутами — повторите через пару секунд.",
+      "scope": "error",
+      "severity": "error"
+    },
+    {
+      "code": "catalog_changed",
+      "en": "The place data was updated — please build the route again.",
+      "examples": [
+        {
+          "en": "The place data was updated — please build the route again.",
+          "params": {
+            "catalog_version": "bucharest-20261101-0a1b2c3d",
+            "place_id": "3333333333333333333",
+            "plan_catalog_version": "bucharest-20261003-9f8e7d6c"
+          },
+          "ru": "Данные о местах обновились — постройте маршрут заново."
+        }
+      ],
+      "http_status": 409,
+      "kind": "error",
+      "optional_params": [],
+      "params": [
+        "place_id",
+        "catalog_version",
+        "plan_catalog_version"
+      ],
+      "ru": "Данные о местах обновились — постройте маршрут заново.",
+      "scope": "error",
+      "severity": "error"
+    },
+    {
+      "code": "duplicate_activity",
+      "en": "Each activity can be chosen only once: Sight.",
+      "examples": [
+        {
+          "en": "Each activity can be chosen only once: Sight.",
+          "params": {
+            "activity": "sight",
+            "slot_index": 1
+          },
+          "ru": "Каждый тип активности можно выбрать только один раз: Достопримечательность."
+        }
+      ],
+      "http_status": 422,
+      "kind": "error",
+      "optional_params": [],
+      "params": [
+        "activity",
+        "slot_index"
+      ],
+      "ru": "Каждый тип активности можно выбрать только один раз: Достопримечательность.",
+      "scope": "error",
+      "severity": "error"
+    },
+    {
+      "code": "internal_error",
+      "en": "Internal service error — please try again later.",
+      "examples": [
+        {
+          "en": "Internal service error — please try again later.",
+          "params": {
+            "request_id": "0f3c5d1e2b7a4c9d8e6f1a2b3c4d5e6f"
+          },
+          "ru": "Внутренняя ошибка сервиса — повторите позже."
+        }
+      ],
+      "http_status": 500,
+      "kind": "error",
+      "optional_params": [],
+      "params": [
+        "request_id"
+      ],
+      "ru": "Внутренняя ошибка сервиса — повторите позже.",
+      "scope": "error",
+      "severity": "error"
+    },
+    {
+      "code": "invalid_window",
+      "en": "The walk window must be between 15 min and 24 h (got 5 min).",
+      "examples": [
+        {
+          "en": "The walk window must be between 15 min and 24 h (got 5 min).",
+          "params": {
+            "max": 1440,
+            "min": 15,
+            "window_min": 5
+          },
+          "ru": "Окно прогулки должно быть от 15 мин до 24 ч (сейчас 5 мин)."
+        }
+      ],
+      "http_status": 422,
+      "kind": "error",
+      "optional_params": [],
+      "params": [
+        "window_min",
+        "min",
+        "max"
+      ],
+      "ru": "Окно прогулки должно быть от 15 мин до 24 ч (сейчас 5 мин).",
+      "scope": "error",
+      "severity": "error"
+    },
+    {
+      "code": "method_not_allowed",
+      "en": "Method not allowed here.",
+      "examples": [
+        {
+          "en": "Method not allowed here.",
+          "params": {
+            "path": "/v1/walks/plan"
+          },
+          "ru": "Этот HTTP-метод здесь не поддерживается."
+        }
+      ],
+      "http_status": 405,
+      "kind": "error",
+      "optional_params": [],
+      "params": [
+        "path"
+      ],
+      "ru": "Этот HTTP-метод здесь не поддерживается.",
+      "scope": "error",
+      "severity": "error"
+    },
+    {
+      "code": "no_slots_or_must_visits",
+      "en": "Add at least one activity or a place you must visit.",
+      "examples": [
+        {
+          "en": "Add at least one activity or a place you must visit.",
+          "params": {},
+          "ru": "Добавьте хотя бы один слот активности или место, куда обязательно зайти."
+        }
+      ],
+      "http_status": 422,
+      "kind": "error",
+      "optional_params": [],
+      "params": [],
+      "ru": "Добавьте хотя бы один слот активности или место, куда обязательно зайти.",
+      "scope": "error",
+      "severity": "error"
+    },
+    {
+      "code": "not_found",
+      "en": "No such API path.",
+      "examples": [
+        {
+          "en": "No such API path.",
+          "params": {
+            "path": "/v1/nothing-here"
+          },
+          "ru": "Такого адреса в API нет."
+        }
+      ],
+      "http_status": 404,
+      "kind": "error",
+      "optional_params": [],
+      "params": [
+        "path"
+      ],
+      "ru": "Такого адреса в API нет.",
+      "scope": "error",
+      "severity": "error"
+    },
+    {
+      "code": "not_ready",
+      "en": "The service is still starting — try again in a minute.",
+      "examples": [
+        {
+          "en": "The service is still starting — try again in a minute.",
+          "params": {
+            "state": "starting"
+          },
+          "ru": "Сервис ещё загружается — повторите через минуту."
+        }
+      ],
+      "http_status": 503,
+      "kind": "error",
+      "optional_params": [],
+      "params": [
+        "state"
+      ],
+      "ru": "Сервис ещё загружается — повторите через минуту.",
+      "scope": "error",
+      "severity": "error"
+    },
+    {
+      "code": "payload_too_large",
+      "en": "The request body is too large.",
+      "examples": [
+        {
+          "en": "The request body is too large.",
+          "params": {
+            "max_bytes": 1048576
+          },
+          "ru": "Слишком большой запрос."
+        }
+      ],
+      "http_status": 413,
+      "kind": "error",
+      "optional_params": [],
+      "params": [
+        "max_bytes"
+      ],
+      "ru": "Слишком большой запрос.",
+      "scope": "error",
+      "severity": "error"
+    },
+    {
+      "code": "place_already_in_route",
+      "en": "This place is already in the route.",
+      "examples": [
+        {
+          "en": "This place is already in the route.",
+          "params": {
+            "place_id": "18000000000000395950"
+          },
+          "ru": "Это место уже в маршруте."
+        }
+      ],
+      "http_status": 409,
+      "kind": "error",
+      "optional_params": [],
+      "params": [
+        "place_id"
+      ],
+      "ru": "Это место уже в маршруте.",
+      "scope": "error",
+      "severity": "error"
+    },
+    {
+      "code": "place_closed_forever",
+      "en": "⛔ Permanently closed according to Google — it can't be added.",
+      "examples": [
+        {
+          "en": "⛔ Permanently closed according to Google — it can't be added.",
+          "params": {
+            "name": "Craft Corner",
+            "place_id": "9100000000006179011"
+          },
+          "ru": "⛔ Закрыто навсегда по данным Google — добавить нельзя."
+        }
+      ],
+      "http_status": 422,
+      "kind": "error",
+      "optional_params": [],
+      "params": [
+        "place_id",
+        "name"
+      ],
+      "ru": "⛔ Закрыто навсегда по данным Google — добавить нельзя.",
+      "scope": "error",
+      "severity": "error"
+    },
+    {
+      "code": "place_temporarily_closed",
+      "en": "⛔ Temporarily closed according to Google — add it anyway?",
+      "examples": [
+        {
+          "en": "⛔ Temporarily closed according to Google — add it anyway?",
+          "params": {
+            "name": "Ryan's Pub",
+            "place_id": "10366085341954844986"
+          },
+          "ru": "⛔ Временно закрыто по данным Google — всё равно добавить?"
+        }
+      ],
+      "http_status": 422,
+      "kind": "error",
+      "optional_params": [],
+      "params": [
+        "place_id",
+        "name"
+      ],
+      "ru": "⛔ Временно закрыто по данным Google — всё равно добавить?",
+      "scope": "error",
+      "severity": "error"
+    },
+    {
+      "code": "start_required",
+      "en": "Shape \"Loop\" needs a start point.",
+      "examples": [
+        {
+          "en": "Shape \"Loop\" needs a start point.",
+          "params": {
+            "shape": "loop"
+          },
+          "ru": "Для формы «Петля» нужна точка старта."
+        }
+      ],
+      "http_status": 422,
+      "kind": "error",
+      "optional_params": [],
+      "params": [
+        "shape"
+      ],
+      "ru": "Для формы «Петля» нужна точка старта.",
+      "scope": "error",
+      "severity": "error"
+    },
+    {
+      "code": "too_many_must_visits",
+      "en": "Too many must-visit places: 11 (at most 10).",
+      "examples": [
+        {
+          "en": "Too many must-visit places: 11 (at most 10).",
+          "params": {
+            "count": 11,
+            "max": 10
+          },
+          "ru": "Слишком много обязательных мест: 11, можно не больше 10."
+        }
+      ],
+      "http_status": 422,
+      "kind": "error",
+      "optional_params": [],
+      "params": [
+        "count",
+        "max"
+      ],
+      "ru": "Слишком много обязательных мест: 11, можно не больше 10.",
+      "scope": "error",
+      "severity": "error"
+    },
+    {
+      "code": "unknown_activity",
+      "en": "Unknown activity: museum.",
+      "examples": [
+        {
+          "en": "Unknown activity: museum.",
+          "params": {
+            "activity": "museum",
+            "allowed": [
+              "sight",
+              "coffee",
+              "food",
+              "bar",
+              "park",
+              "market",
+              "entertainment",
+              "shopping"
+            ],
+            "slot_index": 0
+          },
+          "ru": "Неизвестный тип активности: museum."
+        }
+      ],
+      "http_status": 422,
+      "kind": "error",
+      "optional_params": [],
+      "params": [
+        "activity",
+        "slot_index",
+        "allowed"
+      ],
+      "ru": "Неизвестный тип активности: museum.",
+      "scope": "error",
+      "severity": "error"
+    },
+    {
+      "code": "unknown_city",
+      "en": "City \"Atlantis\" is not supported.",
+      "examples": [
+        {
+          "en": "City \"Atlantis\" is not supported.",
+          "params": {
+            "available": [
+              "Bucharest"
+            ],
+            "city": "Atlantis"
+          },
+          "ru": "Город «Atlantis» не поддерживается."
+        }
+      ],
+      "http_status": 422,
+      "kind": "error",
+      "optional_params": [],
+      "params": [
+        "city",
+        "available"
+      ],
+      "ru": "Город «Atlantis» не поддерживается.",
+      "scope": "error",
+      "severity": "error"
+    },
+    {
+      "code": "unknown_place",
+      "en": "Place 3333333333333333333 is not in the catalog.",
+      "examples": [
+        {
+          "en": "Place 3333333333333333333 is not in the catalog.",
+          "params": {
+            "field": "place_id",
+            "place_id": "3333333333333333333"
+          },
+          "ru": "Место 3333333333333333333 не найдено в каталоге."
+        }
+      ],
+      "http_status": 404,
+      "kind": "error",
+      "optional_params": [],
+      "params": [
+        "place_id",
+        "field"
+      ],
+      "ru": "Место 3333333333333333333 не найдено в каталоге.",
+      "scope": "error",
+      "severity": "error"
+    },
+    {
+      "code": "validation_error",
+      "en": "Invalid request: start_time — expected a time HH:MM.",
+      "examples": [
+        {
+          "en": "Invalid request: start_time — expected a time HH:MM.",
+          "params": {
+            "field": "start_time",
+            "reason": "expected a time HH:MM",
+            "value": "9:00"
+          },
+          "ru": "Некорректный запрос: start_time — expected a time HH:MM."
+        },
+        {
+          "en": "Invalid request: body.variants — Input should be less than or equal to 5.",
+          "params": {
+            "errors": [
+              {
+                "ctx": {
+                  "le": 5
+                },
+                "input": 7,
+                "loc": [
+                  "body",
+                  "variants"
+                ],
+                "msg": "Input should be less than or equal to 5",
+                "type": "less_than_equal"
+              }
+            ],
+            "field": "body.variants",
+            "reason": "Input should be less than or equal to 5"
+          },
+          "ru": "Некорректный запрос: body.variants — Input should be less than or equal to 5."
+        }
+      ],
+      "http_status": 422,
+      "kind": "error",
+      "optional_params": [
+        "field",
+        "reason",
+        "value",
+        "place_id",
+        "available",
+        "errors"
+      ],
+      "params": [],
+      "ru": "Некорректный запрос: start_time — expected a time HH:MM.",
+      "scope": "error",
+      "severity": "error"
+    }
+  ],
+  "format": "walk-messages/v1",
+  "generated_by": "tools/export_messages.py",
+  "languages": [
+    "ru",
+    "en"
+  ],
+  "messages": [
+    {
+      "code": "extras_added",
+      "en": "Style \"Max places\": 4 stops added on the way to fill 10:00–14:00. To keep only your activities, turn off \"Add stops on the way\".",
+      "examples": [
+        {
+          "en": "Style \"Max places\": 4 stops added on the way to fill 10:00–14:00. To keep only your activities, turn off \"Add stops on the way\".",
+          "params": {
+            "count": 4,
+            "style": "max",
+            "window_end_label": "14:00",
+            "window_start_label": "10:00"
+          },
+          "ru": "Стиль «Максимум мест»: по пути добавлено мест — 4, чтобы занять окно 10:00–14:00. Только выбранные слоты — выключите «Добавлять места по пути»."
+        }
+      ],
+      "http_status": null,
+      "kind": "message",
+      "optional_params": [],
+      "params": [
+        "count",
+        "style",
+        "window_start_label",
+        "window_end_label"
+      ],
+      "ru": "Стиль «Максимум мест»: по пути добавлено мест — 4, чтобы занять окно 10:00–14:00. Только выбранные слоты — выключите «Добавлять места по пути».",
+      "scope": "variant",
+      "severity": "info"
+    },
+    {
+      "code": "fewer_variants",
+      "en": "Only 1 of 3 different routes: not enough suitable places. Widen the radius or the window.",
+      "examples": [
+        {
+          "en": "Only 1 of 3 different routes: not enough suitable places. Widen the radius or the window.",
+          "params": {
+            "built": 1,
+            "requested": 3
+          },
+          "ru": "Разных маршрутов получилось 1 из 3: подходящих мест мало — расширьте радиус, окно или число кандидатов на слот."
+        }
+      ],
+      "http_status": null,
+      "kind": "message",
+      "optional_params": [],
+      "params": [
+        "built",
+        "requested"
+      ],
+      "ru": "Разных маршрутов получилось 1 из 3: подходящих мест мало — расширьте радиус, окно или число кандидатов на слот.",
+      "scope": "request",
+      "severity": "info"
+    },
+    {
+      "code": "must_visit_closed_forever",
+      "en": "Permanently closed according to Google, left out of the route: La Mama.",
+      "examples": [
+        {
+          "en": "Permanently closed according to Google, left out of the route: La Mama.",
+          "params": {
+            "names": [
+              "La Mama"
+            ],
+            "place_ids": [
+              "14018219728270213257"
+            ]
+          },
+          "ru": "Закрыто навсегда по данным Google — не добавлено в маршрут: La Mama."
+        }
+      ],
+      "http_status": null,
+      "kind": "message",
+      "optional_params": [],
+      "params": [
+        "place_ids",
+        "names"
+      ],
+      "ru": "Закрыто навсегда по данным Google — не добавлено в маршрут: La Mama.",
+      "scope": "request",
+      "severity": "warning"
+    },
+    {
+      "code": "no_candidates",
+      "en": "No places found. Widen the radius or the time window.",
+      "examples": [
+        {
+          "en": "No places found. Widen the radius or the time window.",
+          "params": {},
+          "ru": "Кандидатов не найдено — расширьте радиус или окно времени."
+        }
+      ],
+      "http_status": null,
+      "kind": "message",
+      "optional_params": [],
+      "params": [],
+      "ru": "Кандидатов не найдено — расширьте радиус или окно времени.",
+      "scope": "request",
+      "severity": "error"
+    },
+    {
+      "code": "no_route",
+      "en": "Couldn't build a route: by the time you'd reach them, the places are closed or don't fit the window. Shift the time or change the activities.",
+      "examples": [
+        {
+          "en": "Couldn't build a route: by the time you'd reach them, the places are closed or don't fit the window. Shift the time or change the activities.",
+          "params": {},
+          "ru": "Не удалось собрать маршрут: к моменту, когда до них можно дойти, кандидаты закрыты или не помещаются в окно. Сдвиньте время или смените слоты."
+        }
+      ],
+      "http_status": null,
+      "kind": "message",
+      "optional_params": [],
+      "params": [],
+      "ru": "Не удалось собрать маршрут: к моменту, когда до них можно дойти, кандидаты закрыты или не помещаются в окно. Сдвиньте время или смените слоты.",
+      "scope": "request",
+      "severity": "error"
+    },
+    {
+      "code": "over_budget",
+      "en": "The route takes ~277 min but the window is 240 min: you finish at 14:37, after 14:00.",
+      "examples": [
+        {
+          "en": "The route takes ~277 min but the window is 240 min: you finish at 14:37, after 14:00.",
+          "params": {
+            "finish_at": {
+              "local": "2026-10-03T14:37",
+              "offset_min": 277.1415856355617
+            },
+            "finish_label": "14:37",
+            "total_min": 277.1415856355617,
+            "window_end_label": "14:00",
+            "window_min": 240
+          },
+          "ru": "Маршрут займёт ~277 мин, а окно 240 мин: финиш в 14:37, позже 14:00."
+        }
+      ],
+      "http_status": null,
+      "kind": "message",
+      "optional_params": [],
+      "params": [
+        "total_min",
+        "window_min",
+        "finish_label",
+        "window_end_label",
+        "finish_at"
+      ],
+      "ru": "Маршрут займёт ~277 мин, а окно 240 мин: финиш в 14:37, позже 14:00.",
+      "scope": "variant",
+      "severity": "warning"
+    },
+    {
+      "code": "personalization_unavailable",
+      "en": "Personalization is unavailable right now; places are ranked by popularity.",
+      "examples": [
+        {
+          "en": "Personalization is unavailable right now; places are ranked by popularity.",
+          "params": {
+            "reason": "taste_unavailable"
+          },
+          "ru": "⚠︎ персонализация недоступна; ранжирую по популярности."
+        },
+        {
+          "en": "Personalization is unavailable right now; places are ranked by popularity.",
+          "params": {
+            "detail": "любимые места не найдены в данных этого города",
+            "reason": "taste_unavailable"
+          },
+          "ru": "⚠︎ персонализация недоступна (любимые места не найдены в данных этого города); ранжирую по популярности."
+        }
+      ],
+      "http_status": null,
+      "kind": "message",
+      "optional_params": [
+        "detail"
+      ],
+      "params": [
+        "reason"
+      ],
+      "ru": "⚠︎ персонализация недоступна; ранжирую по популярности.",
+      "scope": "request",
+      "severity": "warning"
+    },
+    {
+      "code": "place_temporarily_closed",
+      "en": "⛔ \"Ryan's Pub\" is temporarily closed according to Google. The route was built anyway: check before you go.",
+      "examples": [
+        {
+          "en": "⛔ \"Ryan's Pub\" is temporarily closed according to Google. The route was built anyway: check before you go.",
+          "params": {
+            "name": "Ryan's Pub",
+            "place_id": "10366085341954844986"
+          },
+          "ru": "⛔ «Ryan's Pub» — временно закрыто по данным Google. Маршрут всё равно построен: проверьте, прежде чем идти."
+        }
+      ],
+      "http_status": null,
+      "kind": "message",
+      "optional_params": [],
+      "params": [
+        "place_id",
+        "name"
+      ],
+      "ru": "⛔ «Ryan's Pub» — временно закрыто по данным Google. Маршрут всё равно построен: проверьте, прежде чем идти.",
+      "scope": "stop",
+      "severity": "warning"
+    },
+    {
+      "code": "radius_shrunk",
+      "en": "Search radius narrowed from 2.5 to 1.4 km: you can't get further within 10:00–14:00; ~190 min go to the visits, and you need to walk back.",
+      "examples": [
+        {
+          "en": "Search radius narrowed from 2.5 to 1.4 km: you can't get further within 10:00–14:00; ~190 min go to the visits, and you need to walk back.",
+          "params": {
+            "anchor": "start",
+            "dwell_total_min": 190.0,
+            "loop": true,
+            "radius_km": 2.5,
+            "reason": "reach",
+            "search_radius_km": 1.3888888888888888,
+            "window_end_label": "14:00",
+            "window_min": 240,
+            "window_start_label": "10:00"
+          },
+          "ru": "Радиус 2.5 км сужен до 1.4 км: за окно 10:00–14:00 дальше не успеть — ~190 мин уходит на сами места, и нужно вернуться к старту."
+        },
+        {
+          "en": "Search radius narrowed from 2.5 to 0.4 km: your activities need ~75 min, more than the 15-min window, so I'm searching near the start; activities that don't fit will be dropped.",
+          "params": {
+            "anchor": "start",
+            "dwell_total_min": 75.0,
+            "loop": true,
+            "radius_km": 2.5,
+            "reason": "overpacked",
+            "search_radius_km": 0.41666666666666663,
+            "window_end_label": "12:15",
+            "window_min": 15,
+            "window_start_label": "12:00"
+          },
+          "ru": "Радиус 2.5 км сужен до 0.4 км: на все слоты нужно ~75 мин, это больше окна (15 мин), поэтому ищу рядом со стартом, а слоты, которые не влезут, отпадут."
+        }
+      ],
+      "http_status": null,
+      "kind": "message",
+      "optional_params": [],
+      "params": [
+        "radius_km",
+        "search_radius_km",
+        "reason",
+        "dwell_total_min",
+        "window_min",
+        "window_start_label",
+        "window_end_label",
+        "anchor",
+        "loop"
+      ],
+      "ru": "Радиус 2.5 км сужен до 1.4 км: за окно 10:00–14:00 дальше не успеть — ~190 мин уходит на сами места, и нужно вернуться к старту.",
+      "scope": "request",
+      "severity": "info"
+    },
+    {
+      "code": "route_empty",
+      "en": "No stops left. Drag a place back or add one.",
+      "examples": [
+        {
+          "en": "No stops left. Drag a place back or add one.",
+          "params": {},
+          "ru": "В маршруте не осталось мест — перетащите что-нибудь обратно или добавьте место."
+        }
+      ],
+      "http_status": null,
+      "kind": "message",
+      "optional_params": [],
+      "params": [],
+      "ru": "В маршруте не осталось мест — перетащите что-нибудь обратно или добавьте место.",
+      "scope": "variant",
+      "severity": "info"
+    },
+    {
+      "code": "routing_estimate",
+      "en": "Walking legs are straight-line estimates: 9 of 9 — the street route may be longer.",
+      "examples": [
+        {
+          "en": "Walking legs are straight-line estimates: 9 of 9 — the street route may be longer.",
+          "params": {
+            "segments_estimated": 9,
+            "segments_total": 9
+          },
+          "ru": "Пешие отрезки посчитаны по прямой (оценка): 9 из 9 — по улицам путь может быть длиннее."
+        }
+      ],
+      "http_status": null,
+      "kind": "message",
+      "optional_params": [],
+      "params": [
+        "segments_estimated",
+        "segments_total"
+      ],
+      "ru": "Пешие отрезки посчитаны по прямой (оценка): 9 из 9 — по улицам путь может быть длиннее.",
+      "scope": "variant",
+      "severity": "info"
+    },
+    {
+      "code": "slots_dropped",
+      "en": "Didn't fit the window: Coffee. Everything else fits by 00:00 (+1 day); widen the window to bring them back.",
+      "examples": [
+        {
+          "en": "Didn't fit the window: Coffee. Everything else fits by 00:00 (+1 day); widen the window to bring them back.",
+          "params": {
+            "activities": [
+              "coffee"
+            ],
+            "slot_indices": [
+              1
+            ],
+            "window_end_label": "00:00 (+1 день)"
+          },
+          "ru": "Не поместилось в окно: Кофе. Остальное уложено до 00:00 (+1 день); чтобы вернуть слоты, раздвиньте окно."
+        }
+      ],
+      "http_status": null,
+      "kind": "message",
+      "optional_params": [],
+      "params": [
+        "activities",
+        "slot_indices",
+        "window_end_label"
+      ],
+      "ru": "Не поместилось в окно: Кофе. Остальное уложено до 00:00 (+1 день); чтобы вернуть слоты, раздвиньте окно.",
+      "scope": "variant",
+      "severity": "warning"
+    },
+    {
+      "code": "slots_no_candidates",
+      "en": "No places open at that time within the radius for: Coffee, Market / square. Widen the radius or window, or change the start.",
+      "examples": [
+        {
+          "en": "No places open at that time within the radius for: Coffee, Market / square. Widen the radius or window, or change the start.",
+          "params": {
+            "activities": [
+              "coffee",
+              "market"
+            ],
+            "slot_indices": [
+              1,
+              2
+            ]
+          },
+          "ru": "Не нашлось мест, открытых в это время в радиусе, для слотов: Кофе, Рынок / площадь — увеличьте радиус или окно, или смените точку старта."
+        }
+      ],
+      "http_status": null,
+      "kind": "message",
+      "optional_params": [],
+      "params": [
+        "activities",
+        "slot_indices"
+      ],
+      "ru": "Не нашлось мест, открытых в это время в радиусе, для слотов: Кофе, Рынок / площадь — увеличьте радиус или окно, или смените точку старта.",
+      "scope": "request",
+      "severity": "warning"
+    },
+    {
+      "code": "stop_hours_conflict",
+      "en": "\"St. Nicholas in-a-Day Church\" is scheduled to be closed at 13:02 (Sat 08:00–13:00). The route was built anyway; keep it if you know it's open longer today.",
+      "examples": [
+        {
+          "en": "\"St. Nicholas in-a-Day Church\" is scheduled to be closed at 13:02 (Sat 08:00–13:00). The route was built anyway; keep it if you know it's open longer today.",
+          "params": {
+            "arrival_label": "13:02",
+            "closed_all_day": false,
+            "departure_label": "13:12",
+            "hours_day": {
+              "carryover_until": null,
+              "closed_all_day": false,
+              "intervals": [
+                {
+                  "close": "13:00",
+                  "close_day_offset": 0,
+                  "open": "08:00"
+                }
+              ],
+              "open_24h": false,
+              "weekday": 5
+            },
+            "hours_label": "сб 08:00–13:00",
+            "name": "St. Nicholas in-a-Day Church",
+            "place_id": "10146158162049940249",
+            "reason": "closed_at_arrival"
+          },
+          "ru": "⚠️ «St. Nicholas in-a-Day Church» — в 13:02 по графику закрыто (сб 08:00–13:00). Маршрут всё равно построен: оставьте, если знаете, что сегодня работает дольше."
+        },
+        {
+          "en": "\"St. Nicholas in-a-Day Church\" closes before your visit ends (12:40–13:10; Sat 08:00–13:00). The route was built anyway; keep it if you know it's open longer today.",
+          "params": {
+            "arrival_label": "12:40",
+            "closed_all_day": false,
+            "departure_label": "13:10",
+            "hours_day": {
+              "carryover_until": null,
+              "closed_all_day": false,
+              "intervals": [
+                {
+                  "close": "13:00",
+                  "close_day_offset": 0,
+                  "open": "08:00"
+                }
+              ],
+              "open_24h": false,
+              "weekday": 5
+            },
+            "hours_label": "сб 08:00–13:00",
+            "name": "St. Nicholas in-a-Day Church",
+            "place_id": "10146158162049940249",
+            "reason": "closes_during_visit"
+          },
+          "ru": "⚠️ «St. Nicholas in-a-Day Church» — закрывается раньше, чем закончится визит 12:40–13:10 (сб 08:00–13:00). Маршрут всё равно построен: оставьте, если знаете, что сегодня работает дольше."
+        }
+      ],
+      "http_status": null,
+      "kind": "message",
+      "optional_params": [],
+      "params": [
+        "reason",
+        "place_id",
+        "name",
+        "arrival_label",
+        "departure_label",
+        "hours_label",
+        "closed_all_day",
+        "hours_day"
+      ],
+      "ru": "⚠️ «St. Nicholas in-a-Day Church» — в 13:02 по графику закрыто (сб 08:00–13:00). Маршрут всё равно построен: оставьте, если знаете, что сегодня работает дольше.",
+      "scope": "stop",
+      "severity": "warning"
+    },
+    {
+      "code": "unknown_place_ids",
+      "en": "Not in the city catalog, skipped: 3333333333333333333.",
+      "examples": [
+        {
+          "en": "Not in the city catalog, skipped: 3333333333333333333.",
+          "params": {
+            "field": "must_visit_place_ids",
+            "place_ids": [
+              "3333333333333333333"
+            ]
+          },
+          "ru": "Не нашли в каталоге города, пропущено: 3333333333333333333."
+        }
+      ],
+      "http_status": null,
+      "kind": "message",
+      "optional_params": [],
+      "params": [
+        "place_ids",
+        "field"
+      ],
+      "ru": "Не нашли в каталоге города, пропущено: 3333333333333333333.",
+      "scope": "request",
+      "severity": "warning"
+    }
+  ],
+  "notes": [
+    "Messages (kind 'message') come inside 200 responses: plan 'messages' (scope request), variant 'messages' (scope variant; scope stop with 'stop_index'). Each carries code, severity, scope, params, stop_index and 'text' rendered in the request's lang.",
+    "Errors (kind 'error') are the HTTP error bodies {\"error\": {\"code\", \"message\", \"params\"}} with 'http_status'; 503 busy and not_ready come with a Retry-After header (2 / 5 s).",
+    "Codes are append-only: treat an unknown message code as informational and an unknown error code by its HTTP status.",
+    "ru / en are the texts of the first example; the API renders the real params. Russian texts of the codes the dashboard already showed reproduce it byte for byte; Russian texts of codes new in v1 (closed places, routing estimate, validation and service errors) and all English texts are drafts needing product sign-off.",
+    "params are always present; optional_params only in some responses (e.g. validation_error from the request-format check carries 'errors', from the planner 'field' / 'reason')."
+  ],
+  "versions": {
+    "algorithm": "1.0.0",
+    "api": "v1"
+  }
+}

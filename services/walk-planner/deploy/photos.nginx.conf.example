@@ -1,0 +1,64 @@
+# Walk Planner card photos, served read-only and straight from disk by the host's existing nginx (no app).
+#
+# The service emits photo keys "photos_cid/<cid>/<NN>_<label>.jpg"; a card's url = PHOTO_BASE_URL + "/" + key.
+# With the block below and PHOTO_BASE_URL=https://api.example.com/walk-media:
+#   https://api.example.com/walk-media/photos_cid/10001948988812759057/00_all.jpg
+#   -> /opt/sloco-data/visual_photo_profiles/photos_cid/10001948988812759057/00_all.jpg
+# The files arrive with `deploy/sync_bundle.sh --photos` (or the research repo's deploy/sync_data_to_server.sh).
+#
+# Setup: paste the `location` block into the server{} that should serve the photos (e.g. the backend's HTTPS
+# vhost), or use the dedicated server{} at the bottom. Then: nginx -t && systemctl reload nginx.
+# nginx (www-data) needs read access: dirs 755, files 644 (`sync_bundle.sh --photos` runs chmod -R a+rX).
+# Check: curl -sI https://api.example.com/walk-media/photos_cid/<cid>/00_all.jpg  -> 200, image/jpeg, Cache-Control
+#        curl -sI https://api.example.com/walk-media/photos_cid/                  -> 404 (no listings)
+# If nginx runs in a container, mount /opt/sloco-data/visual_photo_profiles read-only at the same path.
+#
+# Follow-up (recommended before launch): originals average ~0.4 MB and reach ~1 MB, while a phone card needs
+# ~50-150 KB. Pre-generate resized variants offline (e.g. WebP 480 px and 1080 px wide, quality ~75) into
+# sibling trees (photos_cid_w480/...), or put imgproxy or a resizing CDN with proxy_cache behind this prefix.
+# Keep the key format, so PHOTO_BASE_URL stays the only switch.
+# Access: these are third-party place photos. If they must not be world-readable, protect the prefix (e.g.
+# nginx secure_link with expiring URLs signed by the gateway) instead of serving it openly.
+
+location ^~ /walk-media/ {
+    # Only photos_cid/<digits>/<NN>_<label>.jpg is served; anything else (listings, dotfiles, other paths) is 404.
+    location ~ "^/walk-media/(photos_cid/[0-9]{1,20}/[0-9]{2}_[a-z]{1,16}\.jpg)$" {
+        root /opt/sloco-data/visual_photo_profiles;
+        try_files /$1 =404;
+
+        limit_except GET { deny all; }      # GET and HEAD only
+        types { image/jpeg jpg; }
+        default_type image/jpeg;
+
+        # Keys are stable but NOT content-addressed (a re-scrape may replace 00_all.jpg in place): clients cache
+        # for a week and then revalidate (nginx sends ETag + Last-Modified for static files). No `always` on
+        # Cache-Control, so a 404 (photo not synced yet) is never cached.
+        add_header Cache-Control "public, max-age=604800, stale-while-revalidate=86400";
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header Access-Control-Allow-Origin "*";   # public images; lets web clients draw them on a canvas
+
+        sendfile on;
+        tcp_nopush on;
+        open_file_cache max=20000 inactive=10m;
+        open_file_cache_valid 5m;
+        open_file_cache_errors on;
+        access_log /var/log/nginx/walk-media.access.log combined buffer=64k flush=5m;
+
+        # Optional per-IP rate limit; declare the zone once in http{}:
+        #   limit_req_zone $binary_remote_addr zone=walk_media:10m rate=50r/s;
+        # limit_req zone=walk_media burst=200 nodelay;
+    }
+    return 404;
+}
+
+# --- or a dedicated vhost (DNS + certbot as in the research repo's deploy/nginx.example.conf) -------------
+# server {
+#     listen 443 ssl;
+#     http2 on;                              # nginx >= 1.25.1; older: `listen 443 ssl http2;`
+#     server_name media.example.com;         # then PHOTO_BASE_URL=https://media.example.com/walk-media
+#     ssl_certificate     /etc/letsencrypt/live/media.example.com/fullchain.pem;
+#     ssl_certificate_key /etc/letsencrypt/live/media.example.com/privkey.pem;
+#
+#     location ^~ /walk-media/ { ... the block above ... }
+#     location / { return 404; }
+# }

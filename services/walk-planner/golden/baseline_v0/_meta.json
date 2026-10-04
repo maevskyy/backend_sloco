@@ -1,0 +1,20 @@
+{
+ "captured_at": "2026-10-02T16:57:29+00:00",
+ "git_head": "f1b2196561f461cb9a8720f46d21a35774f2f40f",
+ "git_tracked_changes": "none",
+ "catalog_sha256": "31b9122abba5e0e641d4f92ee9e453e1870b6e9555198d3e142f771434493297",
+ "catalog_path": "recommendation_system/ai_location_recommender/data/locations_bucharest_all.csv",
+ "catalog_rows": 12961,
+ "scenarios_sha256": "3999e8ee82d4fc44865dee75731b6497de120e00cf7e317f52e4c63366c95797",
+ "python": "3.13.3",
+ "numpy": "2.4.6",
+ "pandas": "3.0.3",
+ "streamlit": "1.58.0",
+ "platform": "Darwin 27.0.0 arm64",
+ "routing": "estimate",
+ "routing_provider": "walk_planner.RoutingProvider(walk_kmh=4.5, detour=1.35); ORS_API_KEY=''; network disabled",
+ "n_scenarios": 24,
+ "n_edit_chains": 32,
+ "scenario_ids": ["S01_default", "S02_chill", "S03_scenic", "S04_one_way", "S05_free", "S06_fill_off", "S07_long_day", "S08_full_day", "S09_night_bars", "S10_short_15min", "S11_sunrise", "S12_monday_evening", "S13_dwell_overrides", "S14_known_hours_only", "S15_five_variants", "S16_all_slots", "S17_must_only", "S18_must_evening_bar", "S19_must_closed", "S20_start_place", "S21_radius_small", "S22_radius_huge", "S23_ent_shopping", "S24_topk20"],
+ "notes": ["Produced by services/walk_planner/golden/tools/capture_baseline.py from services/walk_planner/golden/scenarios.json.", "Pipeline = dashboard_app._walk_build (called like page_walk_planner: rec=None, ctx=None, seed_ids=[] -> cold-start popularity interest, has_hours=True) + the page's render/navigation logic; route edits via _walk_remove_place / _walk_add_place and a line-by-line replica of _walk_editor's drag-and-drop and minutes editor.", "Catalog rows = pd.read_csv(locations_bucharest_all.csv) + place_id.astype(str); identical to LocationRecommender.from_artifacts(...).locations for every column the planner reads, row order included.", "Routing = straight-line estimate (walk_planner.RoutingProvider, 4.5 km/h x 1.35 detour): ORS_API_KEY forced to '', no .env loaded, sockets disabled during the capture.", "Edit chains are independent, each on a fresh copy of variant index 0; negative indices count from the end and are resolved against the sequence at the time of the op (resolved values + applied flag are in each digest's edits.*.ops).", "Floats rounded to 6 decimals (Python round, -0.0 -> 0.0); render strings embed the dashboard's own rounding (_walk_clock rounds minutes with round(), metrics use :.0f/:.1f -- both round-half-even). Compare floats with an absolute tolerance of ~2e-6, strings exactly.", "Feed the new code inputs_resolved.start_exact / center_exact (exact repr strings), not the 6-decimal start/center: a rounded centre shifts walk minutes in the 4th decimal. center = mean latitude/longitude of the city rows.", "candidates.slot / candidates.extra rows with TIED interest are ordered (and cut at top-K) by pandas' default quicksort in _walk_slot_candidates + catalog row order: with a stable sort (14/24 scenarios) or a shuffled catalog (10-14/24 over 3 seeds) the digests differ ONLY there (all affected rows have interest < 0.3 = EXTRA_MIN_INTEREST); plans, renders, navigation and edits are unchanged. Compare tied-interest candidate rows as sets."]
+}

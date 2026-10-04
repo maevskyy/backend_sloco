@@ -1,0 +1,240 @@
+{
+ "scenario": {
+  "id": "S10_short_15min",
+  "city": "Bucharest",
+  "date": "2026-10-03",
+  "start_time": "12:00",
+  "end_time": "12:15",
+  "end_day_offset": 0,
+  "shape": "loop",
+  "start": "city_center",
+  "style": "max",
+  "slots": [
+   {"activity": "sight", "dwell_min": null},
+   {"activity": "coffee", "dwell_min": null}
+  ],
+  "must_visit_place_ids": [],
+  "variants": 3,
+  "radius_km": 2.5,
+  "fill_window": true,
+  "known_hours_only": false,
+  "top_k": 8,
+  "edits": []
+ },
+ "inputs_resolved": {
+  "start": [44.440287, 26.097708],
+  "center": [44.440287, 26.097708],
+  "start_exact": ["44.4402865461307", "26.097708464099995"],
+  "center_exact": ["44.4402865461307", "26.097708464099995"],
+  "t_start": "12:00",
+  "t0": 7920,
+  "budget_min": 15,
+  "end_abs": 735,
+  "next_day": false,
+  "end_label_ru": "12:15",
+  "slot_labels": ["Достопримечательность", "Кофе"],
+  "style_label": "Максимум мест",
+  "dwell_by_slot": {},
+  "must_ids": [],
+  "seed_ids": []
+ },
+ "error": null,
+ "notes": [
+  {"kind": "info", "text": "Радиус 2.5 км сужен до 0.4 км: на все слоты нужно ~75 мин, это больше окна (15 мин), поэтому ищу рядом со стартом, а слоты, которые не влезут, отпадут."}
+ ],
+ "search_km": 0.416667,
+ "area": [44.440287, 26.097708],
+ "request": {"mode": "slots", "n_slots": 2, "start": [44.440287, 26.097708], "shape": "loop", "style": "max", "time_budget_min": 15.0, "fit_budget": true, "start_week_min": 7920.0, "max_wait_min": 30.0, "fill_window": true, "walk_weight": null, "max_leg_min": 45.0, "interest_weight": null, "max_stops": null, "provider": "walk_planner.RoutingProvider(walk_kmh=4.5, detour=1.35)", "n_candidates": 41, "n_must_visit": 0, "n_variants_requested": 3},
+ "candidates": {
+  "slot": [
+   ["8825391489902434532", 0, 0.61666, 25.0, false, "culture_sights", "catholic_church"],
+   ["11484690504626613379", 0, 0.583292, 25.0, false, "culture_sights", "orthodox_church"],
+   ["14147436869860924214", 0, 0.497169, 10.0, false, "culture_sights", "historic_site"],
+   ["8943340123139727326", 0, 0.46426, 20.0, false, "culture_sights", "orthodox_church"],
+   ["13865075748589513525", 0, 0.360862, 20.0, false, "culture_sights", "art_gallery"],
+   ["6153831670984642249", 0, 0.349965, 20.0, false, "culture_sights", "tourist_attraction"],
+   ["5161039537511302668", 0, 0.306734, 10.0, false, "culture_sights", "memorial"],
+   ["5754182628415187855", 0, 0.285286, 20.0, false, "culture_sights", "historical_landmark"],
+   ["3531647606479213952", 0, 0.277696, 45.0, false, "culture_sights", "art_museum"],
+   ["3933325662776773114", 0, 0.19935, 35.0, false, "culture_sights", "historical_landmark"],
+   ["9959063147543523625", 0, 0.277107, 45.0, false, "culture_sights", "museum"],
+   ["5100224917723369489", 1, 0.285134, 30.0, false, "coffee", "coffee_shop"],
+   ["15972941565951700908", 1, 0.173467, 30.0, false, "coffee", "bistro"],
+   ["18134919917499706495", 1, 0.1011, 30.0, false, "coffee", "cafe"]
+  ],
+  "extra": [
+   ["8825391489902434532", 0, 0.61666, 25.0, "Достопримечательность"],
+   ["11484690504626613379", 0, 0.583292, 25.0, "Достопримечательность"],
+   ["14147436869860924214", 0, 0.497169, 10.0, "Достопримечательность"],
+   ["8943340123139727326", 0, 0.46426, 20.0, "Достопримечательность"],
+   ["13865075748589513525", 0, 0.360862, 20.0, "Достопримечательность"],
+   ["6153831670984642249", 0, 0.349965, 20.0, "Достопримечательность"],
+   ["5161039537511302668", 0, 0.306734, 10.0, "Достопримечательность"],
+   ["5754182628415187855", 0, 0.285286, 20.0, "Достопримечательность"],
+   ["3531647606479213952", 0, 0.277696, 45.0, "Достопримечательность"],
+   ["9959063147543523625", 0, 0.277107, 45.0, "Достопримечательность"],
+   ["17993608619009566349", 0, 0.268623, 20.0, "Достопримечательность"],
+   ["10576594162224312791", 0, 0.261728, 20.0, "Достопримечательность"],
+   ["15920426742515248529", 0, 0.258723, 20.0, "Достопримечательность"],
+   ["2567022414744373590", 0, 0.249439, 15.0, "Достопримечательность"],
+   ["13841801476642051230", 0, 0.249439, 20.0, "Достопримечательность"],
+   ["13204895161224291023", 0, 0.238757, 20.0, "Достопримечательность"],
+   ["5248580467276123311", 0, 0.234658, 20.0, "Достопримечательность"],
+   ["3933325662776773114", 0, 0.19935, 35.0, "Достопримечательность"],
+   ["6735727465929939698", 0, 0.179319, 20.0, "Достопримечательность"],
+   ["3598904849430363340", 0, 0.164919, 10.0, "Достопримечательность"],
+   ["621813032508670644", 0, 0.164919, 20.0, "Достопримечательность"],
+   ["11684304911419813801", 0, 0.1431, 25.0, "Достопримечательность"],
+   ["9537514143762246458", 0, 0.1431, 25.0, "Достопримечательность"],
+   ["16008056090232803547", 0, 0.1431, 25.0, "Достопримечательность"],
+   ["12087649811345417501", 0, 0.1431, 10.0, "Достопримечательность"],
+   ["10737019462800357435", 0, 0.1431, 25.0, "Достопримечательность"],
+   ["545018384340751510", 0, 0.1431, 45.0, "Достопримечательность"]
+  ],
+  "must": []
+ },
+ "variants": [
+  {
+   "dropped": [],
+   "plan": {
+    "stops": [
+     {"order": 0, "place_id": "11484690504626613379", "name": "Boteanu Church", "slot": 0, "theme": "culture_sights", "extra": false, "pinned": false, "interest": 0.583292, "dwell_min": 25.0, "arrival_min": 1.940318, "wait_min": 0.0, "depart_min": 26.940318, "hours_ok": null, "hours_label_ru": "часы работы неизвестны"},
+     {"order": 1, "place_id": "18134919917499706495", "name": "Express Coffee & Sandwich", "slot": 1, "theme": "coffee", "extra": false, "pinned": false, "interest": 0.1011, "dwell_min": 30.0, "arrival_min": 29.436914, "wait_min": 0.0, "depart_min": 59.436914, "hours_ok": null, "hours_label_ru": "часы работы неизвестны"}
+    ],
+    "segments": [
+     {"from_order": -1, "to_order": 0, "walk_min": 1.940318, "distance_km": 0.145524, "n_geom": 2},
+     {"from_order": 0, "to_order": 1, "walk_min": 2.496595, "distance_km": 0.187245, "n_geom": 2},
+     {"from_order": 1, "to_order": -1, "walk_min": 4.351587, "distance_km": 0.326369, "n_geom": 2}
+    ],
+    "total_time_min": 63.788501,
+    "total_walk_min": 8.788501,
+    "total_dwell_min": 55.0,
+    "total_wait_min": 0.0,
+    "total_distance_km": 0.659138,
+    "over_budget": true,
+    "dropped_slots": [],
+    "note": "Route needs ~64 min but the budget is 15 min."
+   },
+   "render": {
+    "manual": false,
+    "variants_caption": "**Вариант 1**: 2 места · 0.7 км · до 13:04  ·  Вариант 2: 2 места · 0.9 км · до 13:06  ·  Вариант 3: 2 места · 0.7 км · до 12:59",
+    "metric_stops": "2 из 2",
+    "metric_finish_label": "Возвращение",
+    "metric_finish": "13:04",
+    "metric_delta": "-49 мин, не успеваю",
+    "metric_walk": "0.7 км · 0:09",
+    "metric_window": "12:00–12:15",
+    "captions": [],
+    "warnings": ["Маршрут займёт ~64 мин, а окно 15 мин: финиш в 13:04, позже 12:15."],
+    "infos": [],
+    "stop_lines": [
+     ["1. Boteanu Church — Достопримечательность", "12:02–12:27 · осмотр 25 мин", "🕒 часы работы неизвестны"],
+     ["2. Express Coffee & Sandwich — Кофе", "12:29–12:59 · осмотр 30 мин", "🕒 часы работы неизвестны"]
+    ]
+   },
+   "navigation": {
+    "google": ["https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440287,26.097708&destination=44.440287,26.097708&waypoints=44.440365,26.099062%7C44.440937,26.100614&waypoint_place_ids=ChIJgyfXUE__sUARgyySWyrRYZ8%7CChIJqS2Mykj_sUARf-y5AJUtrPs"],
+    "legs": [
+     {"from": "Старт", "to": "Boteanu Church", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440287,26.097708&destination=44.440365,26.099062&destination_place_id=ChIJgyfXUE__sUARgyySWyrRYZ8", "apple": "https://maps.apple.com/?saddr=44.440287,26.097708&daddr=44.440365,26.099062&dirflg=w"},
+     {"from": "Boteanu Church", "to": "Express Coffee & Sandwich", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440365,26.099062&destination=44.440937,26.100614&destination_place_id=ChIJqS2Mykj_sUARf-y5AJUtrPs&origin_place_id=ChIJgyfXUE__sUARgyySWyrRYZ8", "apple": "https://maps.apple.com/?saddr=44.440365,26.099062&daddr=44.440937,26.100614&dirflg=w"},
+     {"from": "Express Coffee & Sandwich", "to": "Старт", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440937,26.100614&destination=44.440287,26.097708&origin_place_id=ChIJqS2Mykj_sUARf-y5AJUtrPs", "apple": "https://maps.apple.com/?saddr=44.440937,26.100614&daddr=44.440287,26.097708&dirflg=w"}
+    ]
+   }
+  },
+  {
+   "dropped": [],
+   "plan": {
+    "stops": [
+     {"order": 0, "place_id": "8825391489902434532", "name": "The Italian Church", "slot": 0, "theme": "culture_sights", "extra": false, "pinned": false, "interest": 0.61666, "dwell_min": 25.0, "arrival_min": 4.491464, "wait_min": 0.0, "depart_min": 29.491464, "hours_ok": null, "hours_label_ru": "часы работы неизвестны"},
+     {"order": 1, "place_id": "18134919917499706495", "name": "Express Coffee & Sandwich", "slot": 1, "theme": "coffee", "extra": false, "pinned": false, "interest": 0.035385, "dwell_min": 30.0, "arrival_min": 32.050311, "wait_min": 0.0, "depart_min": 62.050311, "hours_ok": null, "hours_label_ru": "часы работы неизвестны"}
+    ],
+    "segments": [
+     {"from_order": -1, "to_order": 0, "walk_min": 4.491464, "distance_km": 0.33686, "n_geom": 2},
+     {"from_order": 0, "to_order": 1, "walk_min": 2.558847, "distance_km": 0.191914, "n_geom": 2},
+     {"from_order": 1, "to_order": -1, "walk_min": 4.351587, "distance_km": 0.326369, "n_geom": 2}
+    ],
+    "total_time_min": 66.401898,
+    "total_walk_min": 11.401898,
+    "total_dwell_min": 55.0,
+    "total_wait_min": 0.0,
+    "total_distance_km": 0.855142,
+    "over_budget": true,
+    "dropped_slots": [],
+    "note": "Route needs ~66 min but the budget is 15 min."
+   },
+   "render": {
+    "manual": false,
+    "variants_caption": "Вариант 1: 2 места · 0.7 км · до 13:04  ·  **Вариант 2**: 2 места · 0.9 км · до 13:06  ·  Вариант 3: 2 места · 0.7 км · до 12:59",
+    "metric_stops": "2 из 2",
+    "metric_finish_label": "Возвращение",
+    "metric_finish": "13:06",
+    "metric_delta": "-51 мин, не успеваю",
+    "metric_walk": "0.9 км · 0:11",
+    "metric_window": "12:00–12:15",
+    "captions": [],
+    "warnings": ["Маршрут займёт ~66 мин, а окно 15 мин: финиш в 13:06, позже 12:15."],
+    "infos": [],
+    "stop_lines": [
+     ["1. The Italian Church — Достопримечательность", "12:04–12:29 · осмотр 25 мин", "🕒 часы работы неизвестны"],
+     ["2. Express Coffee & Sandwich — Кофе", "12:32–13:02 · осмотр 30 мин", "🕒 часы работы неизвестны"]
+    ]
+   },
+   "navigation": {
+    "google": ["https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440287,26.097708&destination=44.440287,26.097708&waypoints=44.439662,26.100727%7C44.440937,26.100614&waypoint_place_ids=ChIJLyg1p0j_sUAR5NhjF80Weno%7CChIJqS2Mykj_sUARf-y5AJUtrPs"],
+    "legs": [
+     {"from": "Старт", "to": "The Italian Church", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440287,26.097708&destination=44.439662,26.100727&destination_place_id=ChIJLyg1p0j_sUAR5NhjF80Weno", "apple": "https://maps.apple.com/?saddr=44.440287,26.097708&daddr=44.439662,26.100727&dirflg=w"},
+     {"from": "The Italian Church", "to": "Express Coffee & Sandwich", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.439662,26.100727&destination=44.440937,26.100614&destination_place_id=ChIJqS2Mykj_sUARf-y5AJUtrPs&origin_place_id=ChIJLyg1p0j_sUAR5NhjF80Weno", "apple": "https://maps.apple.com/?saddr=44.439662,26.100727&daddr=44.440937,26.100614&dirflg=w"},
+     {"from": "Express Coffee & Sandwich", "to": "Старт", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440937,26.100614&destination=44.440287,26.097708&origin_place_id=ChIJqS2Mykj_sUARf-y5AJUtrPs", "apple": "https://maps.apple.com/?saddr=44.440937,26.100614&daddr=44.440287,26.097708&dirflg=w"}
+    ]
+   }
+  },
+  {
+   "dropped": [],
+   "plan": {
+    "stops": [
+     {"order": 0, "place_id": "5754182628415187855", "name": "Scala Cinema", "slot": 0, "theme": "culture_sights", "extra": false, "pinned": false, "interest": 0.285286, "dwell_min": 20.0, "arrival_min": 3.496582, "wait_min": 0.0, "depart_min": 23.496582, "hours_ok": null, "hours_label_ru": "часы работы неизвестны"},
+     {"order": 1, "place_id": "18134919917499706495", "name": "Express Coffee & Sandwich", "slot": 1, "theme": "coffee", "extra": false, "pinned": false, "interest": 0.035385, "dwell_min": 30.0, "arrival_min": 24.498365, "wait_min": 0.0, "depart_min": 54.498365, "hours_ok": null, "hours_label_ru": "часы работы неизвестны"}
+    ],
+    "segments": [
+     {"from_order": -1, "to_order": 0, "walk_min": 3.496582, "distance_km": 0.262244, "n_geom": 2},
+     {"from_order": 0, "to_order": 1, "walk_min": 1.001783, "distance_km": 0.075134, "n_geom": 2},
+     {"from_order": 1, "to_order": -1, "walk_min": 4.351587, "distance_km": 0.326369, "n_geom": 2}
+    ],
+    "total_time_min": 58.849952,
+    "total_walk_min": 8.849952,
+    "total_dwell_min": 50.0,
+    "total_wait_min": 0.0,
+    "total_distance_km": 0.663746,
+    "over_budget": true,
+    "dropped_slots": [],
+    "note": "Route needs ~59 min but the budget is 15 min."
+   },
+   "render": {
+    "manual": false,
+    "variants_caption": "Вариант 1: 2 места · 0.7 км · до 13:04  ·  Вариант 2: 2 места · 0.9 км · до 13:06  ·  **Вариант 3**: 2 места · 0.7 км · до 12:59",
+    "metric_stops": "2 из 2",
+    "metric_finish_label": "Возвращение",
+    "metric_finish": "12:59",
+    "metric_delta": "-44 мин, не успеваю",
+    "metric_walk": "0.7 км · 0:09",
+    "metric_window": "12:00–12:15",
+    "captions": [],
+    "warnings": ["Маршрут займёт ~59 мин, а окно 15 мин: финиш в 12:59, позже 12:15."],
+    "infos": [],
+    "stop_lines": [
+     ["1. Scala Cinema — Достопримечательность", "12:03–12:23 · осмотр 20 мин", "🕒 часы работы неизвестны"],
+     ["2. Express Coffee & Sandwich — Кофе", "12:24–12:54 · осмотр 30 мин", "🕒 часы работы неизвестны"]
+    ]
+   },
+   "navigation": {
+    "google": ["https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440287,26.097708&destination=44.440287,26.097708&waypoints=44.441027,26.099924%7C44.440937,26.100614&waypoint_place_ids=ChIJCU4oaOX_sUARjytpE5322k8%7CChIJqS2Mykj_sUARf-y5AJUtrPs"],
+    "legs": [
+     {"from": "Старт", "to": "Scala Cinema", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440287,26.097708&destination=44.441027,26.099924&destination_place_id=ChIJCU4oaOX_sUARjytpE5322k8", "apple": "https://maps.apple.com/?saddr=44.440287,26.097708&daddr=44.441027,26.099924&dirflg=w"},
+     {"from": "Scala Cinema", "to": "Express Coffee & Sandwich", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.441027,26.099924&destination=44.440937,26.100614&destination_place_id=ChIJqS2Mykj_sUARf-y5AJUtrPs&origin_place_id=ChIJCU4oaOX_sUARjytpE5322k8", "apple": "https://maps.apple.com/?saddr=44.441027,26.099924&daddr=44.440937,26.100614&dirflg=w"},
+     {"from": "Express Coffee & Sandwich", "to": "Старт", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440937,26.100614&destination=44.440287,26.097708&origin_place_id=ChIJqS2Mykj_sUARf-y5AJUtrPs", "apple": "https://maps.apple.com/?saddr=44.440937,26.100614&daddr=44.440287,26.097708&dirflg=w"}
+    ]
+   }
+  }
+ ],
+ "edits": {}
+}

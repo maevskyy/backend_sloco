@@ -1,0 +1,190 @@
+{
+  "schema_version": 1,
+  "bundle_id": "minitown-20261002-17bd5998",
+  "city": "Minitown",
+  "city_slug": "minitown",
+  "timezone": "Europe/Bucharest",
+  "built_at": "2026-10-02T19:25:01Z",
+  "builder": {
+    "package": "sloco-walk-planner",
+    "package_version": "1.0.0",
+    "git_sha": "f1b2196561f461cb9a8720f46d21a35774f2f40f",
+    "cmd": "walk-planner bundle build --out-root tests/fixtures/mini/bundles --city-slug minitown --timezone Europe/Bucharest --catalog-csv tests/fixtures/mini/source/locations_minitown.csv --photo-manifest-csv tests/fixtures/mini/source/photo_manifest_minitown.csv --text-npy tests/fixtures/mini/source/text_minitown.npy --text-meta-csv tests/fixtures/mini/source/text_minitown_metadata.csv --image-npy tests/fixtures/mini/source/image_minitown.npy --image-meta tests/fixtures/mini/source/image_minitown_metadata.csv",
+    "python": "3.13.3",
+    "numpy": "2.4.6",
+    "pandas": "3.0.3",
+    "pyarrow": "24.0.0"
+  },
+  "source": {
+    "catalog_csv": {
+      "file": "locations_minitown.csv",
+      "sha256": "6845c67bae2e6cba03960818702ea3e95f92cbbbbbd20310cde612dba8175417",
+      "bytes": 35517
+    },
+    "photo_manifest_csv": {
+      "file": "photo_manifest_minitown.csv",
+      "sha256": "aa67bf09297a44bacbc83eedd89c7370d98cc76d034147116bf2d9f30eeeb6c5",
+      "bytes": 8686
+    },
+    "text_npy": {
+      "file": "text_minitown.npy",
+      "sha256": "f927a0327f80793562b696ec1b588a5ed99437480b1d89e6ef8cd33bd43c8846",
+      "bytes": 2048
+    },
+    "text_meta_csv": {
+      "file": "text_minitown_metadata.csv",
+      "sha256": "5aa17d558c71537de0479e99abdb9c2dadd219e1224197e5bab4a24d18690acc",
+      "bytes": 3875
+    },
+    "image_npy": {
+      "file": "image_minitown.npy",
+      "sha256": "e05cd9ccba7551eb215f089d87f13462c31ee94cc5ac2e08486234880fd8c186",
+      "bytes": 912
+    },
+    "image_meta": {
+      "file": "image_minitown_metadata.csv",
+      "sha256": "40eaa3bb409d28ee5baf4d50223466e13629c4b747c06876d079d5e18570cfc4",
+      "bytes": 3573
+    }
+  },
+  "rows": 60,
+  "rows_by_theme_group": {
+    "food_drink": 29,
+    "shopping": 4,
+    "sights": 23,
+    "things_to_do": 4
+  },
+  "coverage": {
+    "opening_hours": 0.9333,
+    "photos": 0.8333,
+    "closed": 0.05,
+    "places_with_opening_hours": 56,
+    "places_with_photos": 50,
+    "closed_forever": 2,
+    "temporarily_closed": 1,
+    "places_without_coordinates": 1
+  },
+  "photos": {
+    "max_per_place": 10,
+    "checked_against_files": false,
+    "dropped_missing_files": 0,
+    "key_pattern": "photos_cid/<place_id>/<NN>_<vibe|all>.jpg",
+    "keys": 120,
+    "places_with_photos": 50
+  },
+  "bbox": [
+    26.084033,
+    44.418092,
+    26.114536,
+    44.44189
+  ],
+  "catalog": {
+    "file": "walk_catalog.parquet",
+    "columns": [
+      "place_id",
+      "google_place_id",
+      "city",
+      "name",
+      "latitude",
+      "longitude",
+      "theme_group",
+      "theme",
+      "primary_type",
+      "ai_place_type_summary",
+      "ai_card_summary",
+      "google_rating",
+      "google_user_rating_count",
+      "bayesian_rating",
+      "map_visibility_score",
+      "opening_hours",
+      "business_status",
+      "address",
+      "price_level",
+      "ai_vibe",
+      "ai_what_to_expect",
+      "ai_tags_csv",
+      "ai_confidence",
+      "photos",
+      "photo_count"
+    ],
+    "catalog_sha256": "5fc79d8c8c5895813ab8bfe40e26d61871cc84a2d31705c9cb10cb3dcdc227d1"
+  },
+  "interest": {
+    "version": "walk_interest_v1",
+    "dir": "interest",
+    "fingerprint": "df8bf80ea4bc525ea78d99c60eb9fac5b0b337fe366d6f74a4ded46d5b137c6a",
+    "text_model": "text-embedding-3-small",
+    "text_run_id": null,
+    "image_model": "openclip_vitb32_v1",
+    "image_model_tag": "openclip_vitb32_laion2b",
+    "csls_k": 10,
+    "csls_penalty": 0.5,
+    "weights": {
+      "text": 0.26,
+      "image": 0.5,
+      "tag": 0.08,
+      "axis": 0.06,
+      "quality": 0.06,
+      "price": 0.04
+    },
+    "missing_image_policy": "zero",
+    "quality": {
+      "version": "v2",
+      "shrinkage_prior": 25.0
+    },
+    "rows": 60,
+    "text_dim": 8,
+    "image_dim": 4,
+    "places_with_text": 59,
+    "places_with_image": 48
+  },
+  "content_sha256": "17bd5998ed1a33bd692481e67208cb451f438c9a629eb182f3491e53134497fd",
+  "files": {
+    "interest/csls_density.npy": {
+      "sha256": "21ebc6b505d5bf887306a566609721542a79d8ce5404341f6a15012b3c70b509",
+      "bytes": 368,
+      "shape": [
+        60
+      ],
+      "dtype": "float32"
+    },
+    "interest/features.parquet": {
+      "sha256": "17d044aecdf88ddd90c8b816ed5d8ae9810abd051b4e52ffb6bd8ab083f1ee83",
+      "bytes": 7335
+    },
+    "interest/has_image.npy": {
+      "sha256": "51472f9c6bef86cc22250a33ce6b128087658985e7a8d0cfbdfb1f021a23db88",
+      "bytes": 188,
+      "shape": [
+        60
+      ],
+      "dtype": "bool"
+    },
+    "interest/image_f16.npy": {
+      "sha256": "0f5ed18d73d9de9ea8ea9f4ec3e39545df67b7baa33ae8ce79b4724be5f28e68",
+      "bytes": 608,
+      "shape": [
+        60,
+        4
+      ],
+      "dtype": "float16"
+    },
+    "interest/interest_meta.json": {
+      "sha256": "9f57f924a5c1318a3dce33e97c3252221f9ecc8b3ebfa214db66dcfd44fe1d68",
+      "bytes": 1195
+    },
+    "interest/text_f16.npy": {
+      "sha256": "eea4085f37663a84b56ecb6ece3b48dbdba6f98c1eafae40741f7d6f3031a8d0",
+      "bytes": 1088,
+      "shape": [
+        60,
+        8
+      ],
+      "dtype": "float16"
+    },
+    "walk_catalog.parquet": {
+      "sha256": "9f79167ffc399eb48db77cc11f2d417a5f4c706d9e14be0c33ec752ed907459f",
+      "bytes": 23396
+    }
+  }
+}

@@ -1,0 +1,124 @@
+# Runtime dependencies of the walk-planner image (deploy/Dockerfile) -- hash-pinned, complete closure.
+#
+# Target: CPython 3.12 on Linux/glibc (manylinux wheels), x86_64 and aarch64: the python:3.12-slim image
+# and CI (setup-python 3.12). Not for Python 3.10/3.11 or macOS: numpy 2.4, pandas 3.0, scipy 1.17 and
+# scikit-learn 1.8 need Python >= 3.11, and only Linux wheel hashes are listed.
+#
+# Install (Dockerfile, CI):
+#   pip install --require-hashes --only-binary=:all: -r deploy/requirements.lock
+#
+# Versions = the research venv the package tests and golden parity were verified with (2026-10-02),
+# except three security bumps to the first fixed release (OSV advisories against the venv versions;
+# dependency sets unchanged):
+#   anyio      4.13.0 -> 4.14.2  GHSA-82r6-8w77-94w6 (critical, TLS host-name encoding), GHSA-5p39-cfhj-2xmp
+#   starlette  1.2.1  -> 1.3.1   GHSA-82w8-qh3p-5jfq (high, form-limit DoS), GHSA-jp82-jpqv-5vv3
+#   urllib3    2.7.0  -> 2.8.0   GHSA-8988-9cw3-xx77, GHSA-vxq7-64xx-v4gw (high), GHSA-gh4c-6fx4-qh6g
+# redis is not in the venv: optional L2 leg cache client (7.x line: 3 retries by default, 8.x: 10).
+# numpy/pandas are pinned on purpose: golden outputs (sort ties, float reprs) are byte-identical only on a
+# fixed numeric stack.
+#
+# Direct requirements: numpy pandas pyarrow requests scikit-learn fastapi uvicorn pydantic pydantic-settings
+# redis. Regenerate with a hash-pinning resolver for CPython 3.12 Linux x86_64 + aarch64 (e.g. pip-compile
+# --generate-hashes on Linux, or uv pip compile --universal --python-version 3.12 --generate-hashes), then
+# run the package tests + golden/tools/parity_check.py on the new stack before shipping it.
+# Checked 2026-10-02: every pin has cp312 manylinux x86_64 + aarch64 (or pure) wheels on PyPI, pip's resolver
+# needs nothing beyond these 30 pins, and OSV lists no advisory for any of them.
+
+annotated-doc==0.0.4 \
+    --hash=sha256:571ac1dc6991c450b25a9c2d84a3705e2ae7a53467b5d111c24fa8baabbed320
+    # via fastapi
+annotated-types==0.7.0 \
+    --hash=sha256:1f02e8b43a8fbbc3f3e0d4f0f4bfc8131bcb4eebe8849b8e5c773f3a1c582a53
+    # via pydantic
+anyio==4.14.2 \
+    --hash=sha256:9f505dda5ac9f0c8309b5e8bd445a8c2bf7246f3ce950121e45ea15bc41d1494
+    # via starlette
+certifi==2026.5.20 \
+    --hash=sha256:3c52e209ba0a4ad7aebe60436a4ab349c39e1e602e8c134221e546902ad25897
+    # via requests
+charset-normalizer==3.4.7 \
+    --hash=sha256:6178f72c5508bfc5fd446a5905e698c6212932f25bcdd4b47a757a50605a90e2 \
+    --hash=sha256:5649fd1c7bade02f320a462fdefd0b4bd3ce036065836d4f42e0de958038e116 \
+    --hash=sha256:3dce51d0f5e7951f8bb4900c257dad282f49190fdbebecd4ba99bcc41fef404d
+    # via requests
+click==8.4.1 \
+    --hash=sha256:482be17c6991b8c19c5429a1e995d9b0efdbb63172824c41f99965dc0ade8ec2
+    # via uvicorn
+fastapi==0.142.2 \
+    --hash=sha256:bd5f4d81f1e93a88bcd77caf4dfe3c2dbffc3805407a0007e9a114c18b3a670b
+    # walk_planner.service
+h11==0.16.0 \
+    --hash=sha256:63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86
+    # via uvicorn
+idna==3.17 \
+    --hash=sha256:466e48829084efe2548012b855df21540b96f2e20e51bd124c851536556a592c
+    # via anyio, requests
+joblib==1.5.3 \
+    --hash=sha256:5fc3c5039fc5ca8c0276333a188bbd59d6b7ab37fe6632daa76bc7f9ec18e713
+    # via scikit-learn
+numpy==2.4.6 \
+    --hash=sha256:5f9fb9157b4ce2971008323afe46053787b526ef624fea915b261468a8421a0f \
+    --hash=sha256:90f9849678c75fe7afa2d348ac842c168b0a4d3d61919687216dfc547976d853
+    # walk_planner; via pandas, scikit-learn, scipy
+opentelemetry-api==1.45.0 \
+    --hash=sha256:80e068aba7cd56c8b58512d6a36f8d25cb1dfaa0c0a4cc1c938ccf9f362d9cb3
+    # via fastapi
+pandas==3.0.3 \
+    --hash=sha256:0383c72c75cdcca61a9e116e611143902dbfd08bff356829c2f6d1cf40a9ca8c \
+    --hash=sha256:6dc0b3fd2169c9157deed50b4d519553a3655c8c6a96027136d654592be973a9
+    # walk_planner
+pyarrow==24.0.0 \
+    --hash=sha256:1617043b99bd33e5318ae18eb2919af09c71322ef1ca46566cdafc6e6712fb66 \
+    --hash=sha256:6165461f55ef6314f026de6638d661188e3455d3ec49834556a0ebbdbace18bb
+    # walk_planner (bundle parquet)
+pydantic==2.13.4 \
+    --hash=sha256:45a282cde31d808236fd7ea9d919b128653c8b38b393d1c4ab335c62924d9aba
+    # walk_planner.service; via fastapi, pydantic-settings
+pydantic-core==2.46.4 \
+    --hash=sha256:8233f2947cf85404441fd7e0085f53b10c93e0ee78611099b5c7237e36aacbf7 \
+    --hash=sha256:926c9541b14b12b1681dca8a0b75feb510b06c6341b70a8e500c2fdcff837cce
+    # via pydantic
+pydantic-settings==2.15.0 \
+    --hash=sha256:0ba092c291c94baceb5eff768aa0d56400a457585bc0175925a5a5510303da42
+    # walk_planner.service (env settings)
+python-dateutil==2.9.0.post0 \
+    --hash=sha256:a8b2bc7bffae282281c8140a97d3aa9c14da0b136dfe83f850eea9a5f7470427
+    # via pandas
+python-dotenv==1.2.2 \
+    --hash=sha256:1d8214789a24de455a8b8bd8ae6fe3c6b69a5e3d64aa8a8e5d68e694bbcb285a
+    # via pydantic-settings
+redis==7.4.1 \
+    --hash=sha256:1fa4647af1c5e93a2c685aa248ee44cce092691146d41390518dabe9a99839b0
+    # optional: L2 leg cache (WALK_ROUTE_CACHE_REDIS_URL)
+requests==2.34.2 \
+    --hash=sha256:2a0d60c172f83ac6ab31e4554906c0f3b3588d37b5cb939b1c061f4907e278e0
+    # walk_planner.routing (OSRM/ORS HTTP)
+scikit-learn==1.8.0 \
+    --hash=sha256:4496bb2cf7a43ce1a2d7524a79e40bc5da45cf598dbf9545b7e8316ccba47bb4 \
+    --hash=sha256:a0bcfe4d0d14aec44921545fd2af2338c7471de9cb701f1da4c9d85906ab847a
+    # walk_planner.interest (favourite profiles)
+scipy==1.17.1 \
+    --hash=sha256:e19ebea31758fac5893a2ac360fedd00116cbb7628e650842a6691ba7ca28a21 \
+    --hash=sha256:02ae3b274fde71c5e92ac4d54bc06c42d80e399fec704383dcd99b301df37458
+    # via scikit-learn
+six==1.17.0 \
+    --hash=sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274
+    # via python-dateutil
+starlette==1.3.1 \
+    --hash=sha256:c7372aae11c3c3f26a42df7bd626cec2f47d03483d261d369516a615a53714c6
+    # via fastapi
+threadpoolctl==3.6.0 \
+    --hash=sha256:43a0b8fd5a2928500110039e43a5eed8480b918967083ea48dc3ab9f13c4a7fb
+    # via scikit-learn
+typing-extensions==4.15.0 \
+    --hash=sha256:f0fa19c6845758ab08074a0cfa8b7aecb71c999ca73d62883bc25cc018c4e548
+    # via anyio, fastapi, opentelemetry-api, pydantic, pydantic-core, starlette, typing-inspection
+typing-inspection==0.4.2 \
+    --hash=sha256:4ed1cacbdc298c220f1bd249ed5287caa16f34d44ef4e9c3d0cbad5b521545e7
+    # via fastapi, pydantic, pydantic-settings
+urllib3==2.8.0 \
+    --hash=sha256:0cf3cae568d36aa9576b28dfb35f11328f1cb974ca7647d9475ebb86c75ac6e3
+    # via requests
+uvicorn==0.49.0 \
+    --hash=sha256:ba3d14c3ee7e41c6c654c46c9eb489d33213cdd30aa1696eab1374337c13f68f
+    # walk_planner.service (server)

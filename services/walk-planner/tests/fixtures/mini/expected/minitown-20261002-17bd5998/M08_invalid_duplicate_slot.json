@@ -1,0 +1,52 @@
+{
+ "format": "walk-golden/v1",
+ "scenario": {
+  "id": "M08_invalid_duplicate_slot",
+  "city": "Minitown",
+  "date": "2026-10-03",
+  "start_time": "10:00",
+  "end_time": "14:00",
+  "end_day_offset": 0,
+  "shape": "loop",
+  "start": "city_center",
+  "style": "max",
+  "slots": [{"activity": "sight", "dwell_min": null}, {"activity": "sight", "dwell_min": null}],
+  "must_visit_place_ids": [],
+  "variants": 3,
+  "radius_km": 2.5,
+  "fill_window": true,
+  "known_hours_only": false,
+  "top_k": 8,
+  "edits": []
+ },
+ "plan": {
+  "call": "POST /v1/walks/plan",
+  "options": {"lang": "ru", "geometry": "geojson"},
+  "body": {
+   "city": "Minitown",
+   "date": "2026-10-03",
+   "start_time": "10:00",
+   "end_time": "14:00",
+   "end_day_offset": 0,
+   "shape": "loop",
+   "start": "city_center",
+   "style": "max",
+   "slots": [{"activity": "sight", "dwell_min": null}, {"activity": "sight", "dwell_min": null}],
+   "must_visit_place_ids": [],
+   "variants": 3,
+   "radius_km": 2.5,
+   "fill_window": true,
+   "known_hours_only": false,
+   "top_k": 8
+  },
+  "status": 422,
+  "response": {
+   "error": {
+    "code": "duplicate_activity",
+    "message": "Каждый тип активности можно выбрать только один раз: Достопримечательность.",
+    "params": {"activity": "sight", "slot_index": 1}
+   }
+  }
+ },
+ "edits": {}
+}

@@ -1,0 +1,315 @@
+{
+ "scenario": {
+  "id": "S23_ent_shopping",
+  "city": "Bucharest",
+  "date": "2026-10-04",
+  "start_time": "15:30",
+  "end_time": "18:30",
+  "end_day_offset": 0,
+  "shape": "loop",
+  "start": "city_center",
+  "style": "max",
+  "slots": [
+   {"activity": "park", "dwell_min": null},
+   {"activity": "entertainment", "dwell_min": null},
+   {"activity": "shopping", "dwell_min": null}
+  ],
+  "must_visit_place_ids": [],
+  "variants": 3,
+  "radius_km": 2.5,
+  "fill_window": true,
+  "known_hours_only": false,
+  "top_k": 8,
+  "edits": []
+ },
+ "inputs_resolved": {
+  "start": [44.440287, 26.097708],
+  "center": [44.440287, 26.097708],
+  "start_exact": ["44.4402865461307", "26.097708464099995"],
+  "center_exact": ["44.4402865461307", "26.097708464099995"],
+  "t_start": "15:30",
+  "t0": 9570,
+  "budget_min": 180,
+  "end_abs": 1110,
+  "next_day": false,
+  "end_label_ru": "18:30",
+  "slot_labels": ["Парк / природа", "Развлечение", "Шопинг"],
+  "style_label": "Максимум мест",
+  "dwell_by_slot": {},
+  "must_ids": [],
+  "seed_ids": []
+ },
+ "error": null,
+ "notes": [
+  {"kind": "info", "text": "Радиус 2.5 км сужен до 0.6 км: за окно 15:30–18:30 дальше не успеть — ~160 мин уходит на сами места, и нужно вернуться к старту."}
+ ],
+ "search_km": 0.555556,
+ "area": [44.440287, 26.097708],
+ "request": {"mode": "slots", "n_slots": 3, "start": [44.440287, 26.097708], "shape": "loop", "style": "max", "time_budget_min": 180.0, "fit_budget": true, "start_week_min": 9570.0, "max_wait_min": 30.0, "fill_window": true, "walk_weight": null, "max_leg_min": 45.0, "interest_weight": null, "max_stops": null, "provider": "walk_planner.RoutingProvider(walk_kmh=4.5, detour=1.35)", "n_candidates": 75, "n_must_visit": 0, "n_variants_requested": 3},
+ "candidates": {
+  "slot": [
+   ["84644100838256775", 0, 0.415381, 10.0, false, "nature_outdoors", "park"],
+   ["10934602441818715559", 0, 0.363563, 20.0, false, "nature_outdoors", "state_park"],
+   ["8125310868773553894", 0, 0.346162, 10.0, false, "nature_outdoors", "park"],
+   ["5388868470799362403", 0, 0.249439, 10.0, false, "nature_outdoors", "promenade"],
+   ["7184257282832631611", 0, 0.211567, 10.0, false, "nature_outdoors", "park"],
+   ["135209697355696080", 0, 0.198067, 10.0, false, "nature_outdoors", "park"],
+   ["15343211877505974560", 0, 0.198067, 10.0, false, "nature_outdoors", "park"],
+   ["8888767313490677333", 0, 0.198067, 10.0, false, "nature_outdoors", "park"],
+   ["6517745912057984754", 1, 0.845046, 135.0, false, "performing_arts", "concert_hall"],
+   ["9915577282125126834", 1, 0.741927, 110.0, false, "performing_arts", "escape_room_center"],
+   ["3194071635121029397", 1, 0.668606, 135.0, false, "performing_arts", "concert_hall"],
+   ["18276145252857782250", 1, 0.667276, 55.0, false, "performing_arts", "performing_arts_theater"],
+   ["3385408437322307444", 1, 0.661053, 90.0, false, "performing_arts", "performing_arts_theater"],
+   ["10864595662914695815", 1, 0.596025, 90.0, false, "performing_arts", "performing_arts_theater"],
+   ["10668946557194043177", 1, 0.574297, 90.0, false, "performing_arts", "theater_company"],
+   ["6727728844442281731", 1, 0.570713, 55.0, false, "performing_arts", "performing_arts_theater"],
+   ["12827701966417319257", 1, 0.492517, 70.0, false, "performing_arts", "concert_hall"],
+   ["12463535392293933123", 1, 0.383037, 55.0, false, "performing_arts", "casino"],
+   ["15162603895381257761", 1, 0.546093, 70.0, false, "performing_arts", "escape_room_center"],
+   ["14472836660343011448", 2, 0.79563, 40.0, false, "shopping_souvenirs", "book_store"],
+   ["16191850212067792483", 2, 0.71384, 40.0, false, "shopping_souvenirs", "game_store"],
+   ["7918186604865741958", 2, 0.600492, 30.0, false, "shopping_souvenirs", "souvenir_store"],
+   ["11869969834450145288", 2, 0.595261, 30.0, false, "shopping_souvenirs", "book_store"],
+   ["7258057226082793606", 2, 0.592374, 30.0, false, "shopping_souvenirs", "book_store"],
+   ["14335351831355633937", 2, 0.577443, 30.0, false, "shopping_souvenirs", "gift_shop"],
+   ["3077511671706933845", 2, 0.560552, 30.0, false, "shopping_souvenirs", "book_store"],
+   ["13856892639579919952", 2, 0.510075, 20.0, false, "shopping_souvenirs", "book_store"],
+   ["14086755509504125146", 2, 0.378158, 20.0, false, "shopping_souvenirs", "fashion_accessories_store"],
+   ["17665552279514148715", 2, 0.295918, 20.0, false, "shopping_souvenirs", "jewelry_store"]
+  ],
+  "extra": [
+   ["84644100838256775", 0, 0.415381, 10.0, "Парк / природа"],
+   ["10934602441818715559", 0, 0.363563, 20.0, "Парк / природа"],
+   ["8125310868773553894", 0, 0.346162, 10.0, "Парк / природа"],
+   ["5388868470799362403", 0, 0.249439, 10.0, "Парк / природа"],
+   ["7184257282832631611", 0, 0.211567, 10.0, "Парк / природа"],
+   ["135209697355696080", 0, 0.198067, 10.0, "Парк / природа"],
+   ["15343211877505974560", 0, 0.198067, 10.0, "Парк / природа"],
+   ["8888767313490677333", 0, 0.198067, 10.0, "Парк / природа"],
+   ["13830024241463971150", 0, 0.1431, 40.0, "Парк / природа"],
+   ["2678244278030714937", 0, 0.1431, 25.0, "Парк / природа"],
+   ["6517745912057984754", 1, 0.845046, 135.0, "Развлечение"],
+   ["9915577282125126834", 1, 0.741927, 110.0, "Развлечение"],
+   ["3194071635121029397", 1, 0.668606, 135.0, "Развлечение"],
+   ["18276145252857782250", 1, 0.667276, 55.0, "Развлечение"],
+   ["3385408437322307444", 1, 0.661053, 90.0, "Развлечение"],
+   ["10864595662914695815", 1, 0.596025, 90.0, "Развлечение"],
+   ["10668946557194043177", 1, 0.574297, 90.0, "Развлечение"],
+   ["6727728844442281731", 1, 0.570713, 55.0, "Развлечение"],
+   ["1274593754953465218", 1, 0.554139, 90.0, "Развлечение"],
+   ["15162603895381257761", 1, 0.546093, 70.0, "Развлечение"],
+   ["9825589288657203031", 1, 0.513693, 90.0, "Развлечение"],
+   ["14450738200871488304", 1, 0.50381, 55.0, "Развлечение"],
+   ["9090279730813747732", 1, 0.497137, 70.0, "Развлечение"],
+   ["12827701966417319257", 1, 0.492517, 70.0, "Развлечение"],
+   ["12463535392293933123", 1, 0.383037, 55.0, "Развлечение"],
+   ["8043186383335273888", 1, 0.327332, 70.0, "Развлечение"],
+   ["16515019410901670327", 1, 0.247554, 70.0, "Развлечение"],
+   ["10470317940568054203", 1, 0.235157, 40.0, "Развлечение"],
+   ["5205760721610906686", 1, 0.221523, 45.0, "Развлечение"],
+   ["14197264230884655530", 1, 0.146143, 45.0, "Развлечение"],
+   ["7477915800901739501", 1, 0.0867, 90.0, "Развлечение"],
+   ["12611430155162155666", 1, 0.0867, 90.0, "Развлечение"],
+   ["17079181748603025896", 1, 0.0867, 90.0, "Развлечение"],
+   ["14472836660343011448", 2, 0.79563, 40.0, "Шопинг"],
+   ["16191850212067792483", 2, 0.71384, 40.0, "Шопинг"],
+   ["7918186604865741958", 2, 0.600492, 30.0, "Шопинг"],
+   ["11869969834450145288", 2, 0.595261, 30.0, "Шопинг"],
+   ["7258057226082793606", 2, 0.592374, 30.0, "Шопинг"],
+   ["14335351831355633937", 2, 0.577443, 30.0, "Шопинг"],
+   ["3077511671706933845", 2, 0.560552, 30.0, "Шопинг"],
+   ["13856892639579919952", 2, 0.510075, 20.0, "Шопинг"],
+   ["6671815584510771115", 2, 0.501258, 30.0, "Шопинг"],
+   ["14086755509504125146", 2, 0.378158, 20.0, "Шопинг"],
+   ["8520530883232632145", 2, 0.317218, 20.0, "Шопинг"],
+   ["17665552279514148715", 2, 0.295918, 20.0, "Шопинг"],
+   ["8123390980003858098", 2, 0.264286, 15.0, "Шопинг"]
+  ],
+  "must": []
+ },
+ "variants": [
+  {
+   "dropped": [],
+   "plan": {
+    "stops": [
+     {"order": 0, "place_id": "8125310868773553894", "name": "Parcul Ateneului", "slot": 0, "theme": "nature_outdoors", "extra": false, "pinned": false, "interest": 0.346162, "dwell_min": 10.0, "arrival_min": 2.018659, "wait_min": 0.0, "depart_min": 12.018659, "hours_ok": null, "hours_label_ru": "часы работы неизвестны"},
+     {"order": 1, "place_id": "6517745912057984754", "name": "The Romanian Athenaeum", "slot": 1, "theme": "performing_arts", "extra": false, "pinned": false, "interest": 0.845046, "dwell_min": 135.0, "arrival_min": 13.177208, "wait_min": 0.0, "depart_min": 148.177208, "hours_ok": null, "hours_label_ru": "часы работы неизвестны"},
+     {"order": 2, "place_id": "13856892639579919952", "name": "Târgul Cărții", "slot": 2, "theme": "shopping_souvenirs", "extra": false, "pinned": false, "interest": 0.510075, "dwell_min": 20.0, "arrival_min": 152.313032, "wait_min": 0.0, "depart_min": 172.313032, "hours_ok": true, "hours_label_ru": "вс 10:00–20:00"}
+    ],
+    "segments": [
+     {"from_order": -1, "to_order": 0, "walk_min": 2.018659, "distance_km": 0.151399, "n_geom": 2},
+     {"from_order": 0, "to_order": 1, "walk_min": 1.158549, "distance_km": 0.086891, "n_geom": 2},
+     {"from_order": 1, "to_order": 2, "walk_min": 4.135824, "distance_km": 0.310187, "n_geom": 2},
+     {"from_order": 2, "to_order": -1, "walk_min": 5.845308, "distance_km": 0.438398, "n_geom": 2}
+    ],
+    "total_time_min": 178.158341,
+    "total_walk_min": 13.158341,
+    "total_dwell_min": 165.0,
+    "total_wait_min": 0.0,
+    "total_distance_km": 0.986876,
+    "over_budget": false,
+    "dropped_slots": [],
+    "note": ""
+   },
+   "render": {
+    "manual": false,
+    "variants_caption": "**Вариант 1**: 3 места · 1.0 км · до 18:28  ·  Вариант 2: 7 мест · 2.5 км · до 18:18  ·  Вариант 3: 6 мест · 1.9 км · до 18:15",
+    "metric_stops": "3 из 3",
+    "metric_finish_label": "Возвращение",
+    "metric_finish": "18:28",
+    "metric_delta": "+2 мин запаса",
+    "metric_walk": "1.0 км · 0:13",
+    "metric_window": "15:30–18:30",
+    "captions": [],
+    "warnings": [],
+    "infos": [],
+    "stop_lines": [
+     ["1. Parcul Ateneului — Парк / природа", "15:32–15:42 · осмотр 10 мин", "🕒 часы работы неизвестны"],
+     ["2. The Romanian Athenaeum — Развлечение", "15:43–17:58 · осмотр 135 мин", "🕒 часы работы неизвестны"],
+     ["3. Târgul Cărții — Шопинг", "18:02–18:22 · осмотр 20 мин", "🕒 вс 10:00–20:00"]
+    ]
+   },
+   "navigation": {
+    "google": ["https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440287,26.097708&destination=44.440287,26.097708&waypoints=44.440977,26.096679%7C44.441334,26.097318%7C44.443094,26.098834&waypoint_place_ids=ChIJu73uv6r_sUAR5kbedi_nwnA%7CChIJl3ltbk__sUAR8nZ44F-vc1o%7CChIJmUFXEmH_sUARUNbiUHCSTcA"],
+    "legs": [
+     {"from": "Старт", "to": "Parcul Ateneului", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440287,26.097708&destination=44.440977,26.096679&destination_place_id=ChIJu73uv6r_sUAR5kbedi_nwnA", "apple": "https://maps.apple.com/?saddr=44.440287,26.097708&daddr=44.440977,26.096679&dirflg=w"},
+     {"from": "Parcul Ateneului", "to": "The Romanian Athenaeum", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440977,26.096679&destination=44.441334,26.097318&destination_place_id=ChIJl3ltbk__sUAR8nZ44F-vc1o&origin_place_id=ChIJu73uv6r_sUAR5kbedi_nwnA", "apple": "https://maps.apple.com/?saddr=44.440977,26.096679&daddr=44.441334,26.097318&dirflg=w"},
+     {"from": "The Romanian Athenaeum", "to": "Târgul Cărții", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.441334,26.097318&destination=44.443094,26.098834&destination_place_id=ChIJmUFXEmH_sUARUNbiUHCSTcA&origin_place_id=ChIJl3ltbk__sUAR8nZ44F-vc1o", "apple": "https://maps.apple.com/?saddr=44.441334,26.097318&daddr=44.443094,26.098834&dirflg=w"},
+     {"from": "Târgul Cărții", "to": "Старт", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.443094,26.098834&destination=44.440287,26.097708&origin_place_id=ChIJmUFXEmH_sUARUNbiUHCSTcA", "apple": "https://maps.apple.com/?saddr=44.443094,26.098834&daddr=44.440287,26.097708&dirflg=w"}
+    ]
+   }
+  },
+  {
+   "dropped": [],
+   "plan": {
+    "stops": [
+     {"order": 0, "place_id": "16191850212067792483", "name": "Red Goblin", "slot": 2, "theme": "shopping_souvenirs", "extra": true, "pinned": false, "interest": 0.71384, "dwell_min": 10.0, "arrival_min": 5.153723, "wait_min": 0.0, "depart_min": 15.153723, "hours_ok": true, "hours_label_ru": "вс 10:00–22:00"},
+     {"order": 1, "place_id": "3194071635121029397", "name": "The Palace Hall", "slot": 1, "theme": "performing_arts", "extra": true, "pinned": false, "interest": 0.668606, "dwell_min": 10.0, "arrival_min": 18.170862, "wait_min": 0.0, "depart_min": 28.170862, "hours_ok": null, "hours_label_ru": "часы работы неизвестны"},
+     {"order": 2, "place_id": "84644100838256775", "name": "Piața Revoluției", "slot": 0, "theme": "nature_outdoors", "extra": false, "pinned": false, "interest": 0.415381, "dwell_min": 10.0, "arrival_min": 32.041374, "wait_min": 0.0, "depart_min": 42.041374, "hours_ok": null, "hours_label_ru": "часы работы неизвестны"},
+     {"order": 3, "place_id": "18276145252857782250", "name": "The \"Excelsior\" Theatre", "slot": 1, "theme": "performing_arts", "extra": false, "pinned": false, "interest": 0.667276, "dwell_min": 55.0, "arrival_min": 44.155159, "wait_min": 0.0, "depart_min": 99.155159, "hours_ok": null, "hours_label_ru": "часы работы неизвестны"},
+     {"order": 4, "place_id": "11869969834450145288", "name": "Librăria Humanitas", "slot": 2, "theme": "shopping_souvenirs", "extra": false, "pinned": false, "interest": 0.595261, "dwell_min": 30.0, "arrival_min": 104.685867, "wait_min": 0.0, "depart_min": 134.685867, "hours_ok": true, "hours_label_ru": "вс 11:00–18:00"},
+     {"order": 5, "place_id": "9915577282125126834", "name": "The Void Escape Room Bucuresti", "slot": 1, "theme": "performing_arts", "extra": true, "pinned": false, "interest": 0.741927, "dwell_min": 10.0, "arrival_min": 140.432492, "wait_min": 0.0, "depart_min": 150.432492, "hours_ok": true, "hours_label_ru": "вс 10:00–22:00"},
+     {"order": 6, "place_id": "14472836660343011448", "name": "Cărturești Verona", "slot": 2, "theme": "shopping_souvenirs", "extra": true, "pinned": false, "interest": 0.79563, "dwell_min": 10.0, "arrival_min": 152.319138, "wait_min": 0.0, "depart_min": 162.319138, "hours_ok": true, "hours_label_ru": "вс 10:00–22:00"}
+    ],
+    "segments": [
+     {"from_order": -1, "to_order": 0, "walk_min": 5.153723, "distance_km": 0.386529, "n_geom": 2},
+     {"from_order": 0, "to_order": 1, "walk_min": 3.017139, "distance_km": 0.226285, "n_geom": 2},
+     {"from_order": 1, "to_order": 2, "walk_min": 3.870512, "distance_km": 0.290288, "n_geom": 2},
+     {"from_order": 2, "to_order": 3, "walk_min": 2.113785, "distance_km": 0.158534, "n_geom": 2},
+     {"from_order": 3, "to_order": 4, "walk_min": 5.530708, "distance_km": 0.414803, "n_geom": 2},
+     {"from_order": 4, "to_order": 5, "walk_min": 5.746626, "distance_km": 0.430997, "n_geom": 2},
+     {"from_order": 5, "to_order": 6, "walk_min": 1.886646, "distance_km": 0.141498, "n_geom": 2},
+     {"from_order": 6, "to_order": -1, "walk_min": 5.660092, "distance_km": 0.424507, "n_geom": 2}
+    ],
+    "total_time_min": 167.97923,
+    "total_walk_min": 32.97923,
+    "total_dwell_min": 135.0,
+    "total_wait_min": 0.0,
+    "total_distance_km": 2.473442,
+    "over_budget": false,
+    "dropped_slots": [],
+    "note": ""
+   },
+   "render": {
+    "manual": false,
+    "variants_caption": "Вариант 1: 3 места · 1.0 км · до 18:28  ·  **Вариант 2**: 7 мест · 2.5 км · до 18:18  ·  Вариант 3: 6 мест · 1.9 км · до 18:15",
+    "metric_stops": "3 из 3 + 4",
+    "metric_finish_label": "Возвращение",
+    "metric_finish": "18:18",
+    "metric_delta": "+12 мин запаса",
+    "metric_walk": "2.5 км · 0:33",
+    "metric_window": "15:30–18:30",
+    "captions": ["Стиль «Максимум мест»: по пути добавлено мест — 4, чтобы занять окно 15:30–18:30. Только выбранные слоты — выключите «Добавлять места по пути»."],
+    "warnings": [],
+    "infos": [],
+    "stop_lines": [
+     ["1. Red Goblin — Шопинг · по пути, можно пройти мимо", "15:35–15:45 · осмотр 10 мин", "🕒 вс 10:00–22:00"],
+     ["2. The Palace Hall — Развлечение · по пути, можно пройти мимо", "15:48–15:58 · осмотр 10 мин", "🕒 часы работы неизвестны"],
+     ["3. Piața Revoluției — Парк / природа", "16:02–16:12 · осмотр 10 мин", "🕒 часы работы неизвестны"],
+     ["4. The \"Excelsior\" Theatre — Развлечение", "16:14–17:09 · осмотр 55 мин", "🕒 часы работы неизвестны"],
+     ["5. Librăria Humanitas — Шопинг", "17:15–17:45 · осмотр 30 мин", "🕒 вс 11:00–18:00"],
+     ["6. The Void Escape Room Bucuresti — Развлечение · по пути, можно пройти мимо", "17:50–18:00 · осмотр 10 мин", "🕒 вс 10:00–22:00"],
+     ["7. Cărturești Verona — Шопинг · по пути, можно пройти мимо", "18:02–18:12 · осмотр 10 мин", "🕒 вс 10:00–22:00"]
+    ]
+   },
+   "navigation": {
+    "google": ["https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440287,26.097708&destination=44.440287,26.097708&waypoints=44.440503,26.094115%7C44.439153,26.095054%7C44.438490,26.097598%7C44.437762,26.098669%7C44.440271,26.100290%7C44.443135,26.100563%7C44.442878,26.099293&waypoint_place_ids=ChIJ2RhyJzn_sUARY1ai0voBteA%7CChIJ2zVXPUX_sUARFUGKrjqfUyw%7CChIJzzxBU3f_sUARh_DLely3LAE%7CChIJEW85Ykb_sUAR6p8HvEbpof0%7CChIJs49Qskj_sUARCNAAtayauqQ%7CChIJv1BbwE7_sUARslwAzAA1m4k%7CChIJl17Y5E7_sUARePj-H0PY2cg"],
+    "legs": [
+     {"from": "Старт", "to": "Red Goblin", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440287,26.097708&destination=44.440503,26.094115&destination_place_id=ChIJ2RhyJzn_sUARY1ai0voBteA", "apple": "https://maps.apple.com/?saddr=44.440287,26.097708&daddr=44.440503,26.094115&dirflg=w"},
+     {"from": "Red Goblin", "to": "The Palace Hall", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440503,26.094115&destination=44.439153,26.095054&destination_place_id=ChIJ2zVXPUX_sUARFUGKrjqfUyw&origin_place_id=ChIJ2RhyJzn_sUARY1ai0voBteA", "apple": "https://maps.apple.com/?saddr=44.440503,26.094115&daddr=44.439153,26.095054&dirflg=w"},
+     {"from": "The Palace Hall", "to": "Piața Revoluției", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.439153,26.095054&destination=44.438490,26.097598&destination_place_id=ChIJzzxBU3f_sUARh_DLely3LAE&origin_place_id=ChIJ2zVXPUX_sUARFUGKrjqfUyw", "apple": "https://maps.apple.com/?saddr=44.439153,26.095054&daddr=44.438490,26.097598&dirflg=w"},
+     {"from": "Piața Revoluției", "to": "The \"Excelsior\" Theatre", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.438490,26.097598&destination=44.437762,26.098669&destination_place_id=ChIJEW85Ykb_sUAR6p8HvEbpof0&origin_place_id=ChIJzzxBU3f_sUARh_DLely3LAE", "apple": "https://maps.apple.com/?saddr=44.438490,26.097598&daddr=44.437762,26.098669&dirflg=w"},
+     {"from": "The \"Excelsior\" Theatre", "to": "Librăria Humanitas", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.437762,26.098669&destination=44.440271,26.100290&destination_place_id=ChIJs49Qskj_sUARCNAAtayauqQ&origin_place_id=ChIJEW85Ykb_sUAR6p8HvEbpof0", "apple": "https://maps.apple.com/?saddr=44.437762,26.098669&daddr=44.440271,26.100290&dirflg=w"},
+     {"from": "Librăria Humanitas", "to": "The Void Escape Room Bucuresti", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440271,26.100290&destination=44.443135,26.100563&destination_place_id=ChIJv1BbwE7_sUARslwAzAA1m4k&origin_place_id=ChIJs49Qskj_sUARCNAAtayauqQ", "apple": "https://maps.apple.com/?saddr=44.440271,26.100290&daddr=44.443135,26.100563&dirflg=w"},
+     {"from": "The Void Escape Room Bucuresti", "to": "Cărturești Verona", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.443135,26.100563&destination=44.442878,26.099293&destination_place_id=ChIJl17Y5E7_sUARePj-H0PY2cg&origin_place_id=ChIJv1BbwE7_sUARslwAzAA1m4k", "apple": "https://maps.apple.com/?saddr=44.443135,26.100563&daddr=44.442878,26.099293&dirflg=w"},
+     {"from": "Cărturești Verona", "to": "Старт", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.442878,26.099293&destination=44.440287,26.097708&origin_place_id=ChIJl17Y5E7_sUARePj-H0PY2cg", "apple": "https://maps.apple.com/?saddr=44.442878,26.099293&daddr=44.440287,26.097708&dirflg=w"}
+    ]
+   }
+  },
+  {
+   "dropped": [],
+   "plan": {
+    "stops": [
+     {"order": 0, "place_id": "8125310868773553894", "name": "Parcul Ateneului", "slot": 0, "theme": "nature_outdoors", "extra": false, "pinned": false, "interest": 0.121157, "dwell_min": 10.0, "arrival_min": 2.018659, "wait_min": 0.0, "depart_min": 12.018659, "hours_ok": null, "hours_label_ru": "часы работы неизвестны"},
+     {"order": 1, "place_id": "12827701966417319257", "name": "Auditorium", "slot": 1, "theme": "performing_arts", "extra": false, "pinned": false, "interest": 0.492517, "dwell_min": 70.0, "arrival_min": 14.062933, "wait_min": 0.0, "depart_min": 84.062933, "hours_ok": null, "hours_label_ru": "часы работы неизвестны"},
+     {"order": 2, "place_id": "7918186604865741958", "name": "my romanian store", "slot": 2, "theme": "shopping_souvenirs", "extra": false, "pinned": false, "interest": 0.600492, "dwell_min": 30.0, "arrival_min": 87.751759, "wait_min": 0.0, "depart_min": 117.751759, "hours_ok": true, "hours_label_ru": "вс 11:30–15:00, 16:00–20:00"},
+     {"order": 3, "place_id": "9825589288657203031", "name": "Teatrul „Ion Creangă” - Sala Mare", "slot": 1, "theme": "performing_arts", "extra": true, "pinned": false, "interest": 0.513693, "dwell_min": 10.0, "arrival_min": 122.97488, "wait_min": 0.0, "depart_min": 132.97488, "hours_ok": null, "hours_label_ru": "часы работы неизвестны"},
+     {"order": 4, "place_id": "15162603895381257761", "name": "EscapeReality - Escape Rooms București", "slot": 1, "theme": "performing_arts", "extra": true, "pinned": false, "interest": 0.546093, "dwell_min": 10.0, "arrival_min": 135.248877, "wait_min": 0.0, "depart_min": 145.248877, "hours_ok": true, "hours_label_ru": "вс 10:00–23:00"},
+     {"order": 5, "place_id": "10864595662914695815", "name": "Nottara Theatre", "slot": 1, "theme": "performing_arts", "extra": true, "pinned": false, "interest": 0.596025, "dwell_min": 10.0, "arrival_min": 148.381925, "wait_min": 0.0, "depart_min": 158.381925, "hours_ok": null, "hours_label_ru": "часы работы неизвестны"}
+    ],
+    "segments": [
+     {"from_order": -1, "to_order": 0, "walk_min": 2.018659, "distance_km": 0.151399, "n_geom": 2},
+     {"from_order": 0, "to_order": 1, "walk_min": 2.044274, "distance_km": 0.153321, "n_geom": 2},
+     {"from_order": 1, "to_order": 2, "walk_min": 3.688826, "distance_km": 0.276662, "n_geom": 2},
+     {"from_order": 2, "to_order": 3, "walk_min": 5.223122, "distance_km": 0.391734, "n_geom": 2},
+     {"from_order": 3, "to_order": 4, "walk_min": 2.273996, "distance_km": 0.17055, "n_geom": 2},
+     {"from_order": 4, "to_order": 5, "walk_min": 3.133048, "distance_km": 0.234979, "n_geom": 2},
+     {"from_order": 5, "to_order": -1, "walk_min": 6.666787, "distance_km": 0.500009, "n_geom": 2}
+    ],
+    "total_time_min": 165.048713,
+    "total_walk_min": 25.048713,
+    "total_dwell_min": 140.0,
+    "total_wait_min": 0.0,
+    "total_distance_km": 1.878653,
+    "over_budget": false,
+    "dropped_slots": [],
+    "note": ""
+   },
+   "render": {
+    "manual": false,
+    "variants_caption": "Вариант 1: 3 места · 1.0 км · до 18:28  ·  Вариант 2: 7 мест · 2.5 км · до 18:18  ·  **Вариант 3**: 6 мест · 1.9 км · до 18:15",
+    "metric_stops": "3 из 3 + 3",
+    "metric_finish_label": "Возвращение",
+    "metric_finish": "18:15",
+    "metric_delta": "+15 мин запаса",
+    "metric_walk": "1.9 км · 0:25",
+    "metric_window": "15:30–18:30",
+    "captions": ["Стиль «Максимум мест»: по пути добавлено мест — 3, чтобы занять окно 15:30–18:30. Только выбранные слоты — выключите «Добавлять места по пути»."],
+    "warnings": [],
+    "infos": [],
+    "stop_lines": [
+     ["1. Parcul Ateneului — Парк / природа", "15:32–15:42 · осмотр 10 мин", "🕒 часы работы неизвестны"],
+     ["2. Auditorium — Развлечение", "15:44–16:54 · осмотр 70 мин", "🕒 часы работы неизвестны"],
+     ["3. my romanian store — Шопинг", "16:58–17:28 · осмотр 30 мин", "🕒 вс 11:30–15:00, 16:00–20:00"],
+     ["4. Teatrul „Ion Creangă” - Sala Mare — Развлечение · по пути, можно пройти мимо", "17:33–17:43 · осмотр 10 мин", "🕒 часы работы неизвестны"],
+     ["5. EscapeReality - Escape Rooms București — Развлечение · по пути, можно пройти мимо", "17:45–17:55 · осмотр 10 мин", "🕒 вс 10:00–23:00"],
+     ["6. Nottara Theatre — Развлечение · по пути, можно пройти мимо", "17:58–18:08 · осмотр 10 мин", "🕒 часы работы неизвестны"]
+    ]
+   },
+   "navigation": {
+    "google": ["https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440287,26.097708&destination=44.440287,26.097708&waypoints=44.440977,26.096679%7C44.440483,26.095427%7C44.441859,26.097145%7C44.444035,26.095128%7C44.443424,26.096470%7C44.443548,26.098656&waypoint_place_ids=ChIJu73uv6r_sUAR5kbedi_nwnA%7CChIJrXmFekX_sUARWVXicPkmBbI%7CChIJP-8xoU__sUARhmRHyMMM420%7CChIJ8wou1lH_sUARV69LW2aBW4g%7CChIJmw0gWcv_sUARIW4nbuhjbNI%7CChIJJUmFWU7_sUARh7JHPDHMxpY"],
+    "legs": [
+     {"from": "Старт", "to": "Parcul Ateneului", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440287,26.097708&destination=44.440977,26.096679&destination_place_id=ChIJu73uv6r_sUAR5kbedi_nwnA", "apple": "https://maps.apple.com/?saddr=44.440287,26.097708&daddr=44.440977,26.096679&dirflg=w"},
+     {"from": "Parcul Ateneului", "to": "Auditorium", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440977,26.096679&destination=44.440483,26.095427&destination_place_id=ChIJrXmFekX_sUARWVXicPkmBbI&origin_place_id=ChIJu73uv6r_sUAR5kbedi_nwnA", "apple": "https://maps.apple.com/?saddr=44.440977,26.096679&daddr=44.440483,26.095427&dirflg=w"},
+     {"from": "Auditorium", "to": "my romanian store", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440483,26.095427&destination=44.441859,26.097145&destination_place_id=ChIJP-8xoU__sUARhmRHyMMM420&origin_place_id=ChIJrXmFekX_sUARWVXicPkmBbI", "apple": "https://maps.apple.com/?saddr=44.440483,26.095427&daddr=44.441859,26.097145&dirflg=w"},
+     {"from": "my romanian store", "to": "Teatrul „Ion Creangă” - Sala Mare", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.441859,26.097145&destination=44.444035,26.095128&destination_place_id=ChIJ8wou1lH_sUARV69LW2aBW4g&origin_place_id=ChIJP-8xoU__sUARhmRHyMMM420", "apple": "https://maps.apple.com/?saddr=44.441859,26.097145&daddr=44.444035,26.095128&dirflg=w"},
+     {"from": "Teatrul „Ion Creangă” - Sala Mare", "to": "EscapeReality - Escape Rooms București", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.444035,26.095128&destination=44.443424,26.096470&destination_place_id=ChIJmw0gWcv_sUARIW4nbuhjbNI&origin_place_id=ChIJ8wou1lH_sUARV69LW2aBW4g", "apple": "https://maps.apple.com/?saddr=44.444035,26.095128&daddr=44.443424,26.096470&dirflg=w"},
+     {"from": "EscapeReality - Escape Rooms București", "to": "Nottara Theatre", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.443424,26.096470&destination=44.443548,26.098656&destination_place_id=ChIJJUmFWU7_sUARh7JHPDHMxpY&origin_place_id=ChIJmw0gWcv_sUARIW4nbuhjbNI", "apple": "https://maps.apple.com/?saddr=44.443424,26.096470&daddr=44.443548,26.098656&dirflg=w"},
+     {"from": "Nottara Theatre", "to": "Старт", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.443548,26.098656&destination=44.440287,26.097708&origin_place_id=ChIJJUmFWU7_sUARh7JHPDHMxpY", "apple": "https://maps.apple.com/?saddr=44.443548,26.098656&daddr=44.440287,26.097708&dirflg=w"}
+    ]
+   }
+  }
+ ],
+ "edits": {}
+}

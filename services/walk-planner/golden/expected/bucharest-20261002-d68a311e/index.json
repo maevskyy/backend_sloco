@@ -1,0 +1,219 @@
+{
+ "format": "walk-golden/v1",
+ "bundle_id": "bucharest-20261002-d68a311e",
+ "city": "Bucharest",
+ "content_sha256": "d68a311ebdc40ca4505826901164b6b94a9135813d4cdd9bb45f892dd103c87b",
+ "catalog_sha256": "e667fd9c309b4475a1f6e432293051452531775c5be1490c019ea4f63047ce4d",
+ "interest_fingerprint": "c6dd60e98a3915f8ec5e3ee12a550927be7cdc84627791ce6d2cf99205c0c0d4",
+ "versions": {
+  "api": "v1",
+  "algorithm": "1.0.0",
+  "interest": "walk_interest_v1",
+  "bundle_schema": 1
+ },
+ "routing": "estimate: straight-line core.RoutingProvider (forced; no router, no network)",
+ "options": {
+  "lang": "ru",
+  "geometry": "geojson"
+ },
+ "photo_base_url": null,
+ "tolerance": {
+  "numbers_abs": 1e-06,
+  "strings": "exact",
+  "lists": "ordered"
+ },
+ "scenarios_file": "scenarios.json",
+ "scenarios_sha256": "545e9229cdfd6cdf80569261dfb0bf2d28b5f9eba1694e140d437411e66ca56e",
+ "generated_at": "2026-10-02T22:11:07Z",
+ "environment": {
+  "python": "3.13.3",
+  "numpy": "2.4.6",
+  "pandas": "3.0.3",
+  "pyarrow": "24.0.0",
+  "scikit_learn": "1.8.0"
+ },
+ "scenarios": {
+  "P01_fav_s1": {
+   "file": "P01_fav_s1.json",
+   "sha256": "5c882d0799cea1b29c5d473477ec081b56cbdca67d233f7c23d019f8814c0e0c",
+   "plan_status": 200,
+   "variants": 3,
+   "edit_calls": 6
+  },
+  "P02_fav_s4": {
+   "file": "P02_fav_s4.json",
+   "sha256": "3682593d28d8e356bdca88b3f386755828a44f298eee76f68acb625ea539de6d",
+   "plan_status": 200,
+   "variants": 3,
+   "edit_calls": 6
+  },
+  "S01_default": {
+   "file": "S01_default.json",
+   "sha256": "d20f85958e6ba3b34d8135c733c87506d375d353ad0c25bd7c3c43c2868b81f0",
+   "plan_status": 200,
+   "variants": 3,
+   "edit_calls": 6
+  },
+  "S02_chill": {
+   "file": "S02_chill.json",
+   "sha256": "ee68f5ed7da65af7e9c76f01eda841ce07c5438a5b4e84963a1d0e03462995ab",
+   "plan_status": 200,
+   "variants": 3,
+   "edit_calls": 6
+  },
+  "S03_scenic": {
+   "file": "S03_scenic.json",
+   "sha256": "5ad0ba13cf73e8919f2fb690b43e409c7fbc05135b62d2d52f1bfc6ca3560d60",
+   "plan_status": 200,
+   "variants": 3,
+   "edit_calls": 6
+  },
+  "S04_one_way": {
+   "file": "S04_one_way.json",
+   "sha256": "25d28f89767da2e2353e1b6e979384c062963452a72806c7b8d21481c879af6b",
+   "plan_status": 200,
+   "variants": 3,
+   "edit_calls": 6
+  },
+  "S05_free": {
+   "file": "S05_free.json",
+   "sha256": "59b4c9636397c08e06e3cc8d3d4b5a204ba924d2a12d21f4476daf98dc6f8287",
+   "plan_status": 200,
+   "variants": 3,
+   "edit_calls": 1
+  },
+  "S06_fill_off": {
+   "file": "S06_fill_off.json",
+   "sha256": "9815b5dcfb86c2e2f6b720a2e9f6665c69c499cbe3e9ce420e8144350ee453d2",
+   "plan_status": 200,
+   "variants": 3,
+   "edit_calls": 6
+  },
+  "S07_long_day": {
+   "file": "S07_long_day.json",
+   "sha256": "b32c00536d5137688e1efe8f73fbeb0bc9e364eaddacd38c670594e8f1b6d418",
+   "plan_status": 200,
+   "variants": 3,
+   "edit_calls": 0
+  },
+  "S08_full_day": {
+   "file": "S08_full_day.json",
+   "sha256": "6fd3870742322e199193240e0715d19542b39bb05465b6d240e69971c2e0478b",
+   "plan_status": 200,
+   "variants": 3,
+   "edit_calls": 0
+  },
+  "S09_night_bars": {
+   "file": "S09_night_bars.json",
+   "sha256": "460d458ce364acb67eee5bb13d9d578a41088b11a9a21a38e7b261712371b9a9",
+   "plan_status": 200,
+   "variants": 3,
+   "edit_calls": 0
+  },
+  "S10_short_15min": {
+   "file": "S10_short_15min.json",
+   "sha256": "bdd84298b8f456752a8f8ab433e49ffeb7fff436330078ae22674beec0661e03",
+   "plan_status": 200,
+   "variants": 3,
+   "edit_calls": 0
+  },
+  "S11_sunrise": {
+   "file": "S11_sunrise.json",
+   "sha256": "6d99e072fd25665d9761d0df7cce1d808ea85988a52e6092ad891863b0dc9891",
+   "plan_status": 200,
+   "variants": 1,
+   "edit_calls": 0
+  },
+  "S12_monday_evening": {
+   "file": "S12_monday_evening.json",
+   "sha256": "c251f373b222ecef6bda13cb537448c963e2550d66243a1f045079e78cea734c",
+   "plan_status": 200,
+   "variants": 3,
+   "edit_calls": 1
+  },
+  "S13_dwell_overrides": {
+   "file": "S13_dwell_overrides.json",
+   "sha256": "9f69d9859a42ef49609a07fa33fc19eb87f9d2a43ecef437a4ff5effdfd126ce",
+   "plan_status": 200,
+   "variants": 3,
+   "edit_calls": 0
+  },
+  "S14_known_hours_only": {
+   "file": "S14_known_hours_only.json",
+   "sha256": "c2c0fc02676a3fb7724fb58a3a9fa86b5b8bf3efaa8c529cd024f4d6c8ba48c1",
+   "plan_status": 200,
+   "variants": 3,
+   "edit_calls": 0
+  },
+  "S15_five_variants": {
+   "file": "S15_five_variants.json",
+   "sha256": "0594369d93df46711d9f16ab475fde08600e5321500999892c9b2d08d05db5c1",
+   "plan_status": 200,
+   "variants": 5,
+   "edit_calls": 0
+  },
+  "S16_all_slots": {
+   "file": "S16_all_slots.json",
+   "sha256": "3bb17057ad2ec85420b73c7f5cfb2f7d33bc4df7a0dc37355c40d3e11ad83382",
+   "plan_status": 200,
+   "variants": 3,
+   "edit_calls": 0
+  },
+  "S17_must_only": {
+   "file": "S17_must_only.json",
+   "sha256": "e8911c94db9070eafee6da2eb570fb0dd83808b8fe45bac51f2c7328ce90c5b5",
+   "plan_status": 200,
+   "variants": 1,
+   "edit_calls": 0
+  },
+  "S18_must_evening_bar": {
+   "file": "S18_must_evening_bar.json",
+   "sha256": "8bddd7c11a71873e014c6bf6c07ebb3a3b03b855fce60fc04c0f6367e2673fa6",
+   "plan_status": 200,
+   "variants": 3,
+   "edit_calls": 0
+  },
+  "S19_must_closed": {
+   "file": "S19_must_closed.json",
+   "sha256": "526dd1ae3c4edaeda14866f62e9ccea02c533ab6a261526b3c1cf7c0bde039aa",
+   "plan_status": 200,
+   "variants": 3,
+   "edit_calls": 0
+  },
+  "S20_start_place": {
+   "file": "S20_start_place.json",
+   "sha256": "d4b4e43c53afac7ecd136e301e0d5a4bf2d0f9b4ce2b9de9258238747f44c033",
+   "plan_status": 200,
+   "variants": 3,
+   "edit_calls": 0
+  },
+  "S21_radius_small": {
+   "file": "S21_radius_small.json",
+   "sha256": "115f83a91c35dbbe966918a538f066193d0f77819fdc502f07d4347c5cb6611d",
+   "plan_status": 200,
+   "variants": 3,
+   "edit_calls": 0
+  },
+  "S22_radius_huge": {
+   "file": "S22_radius_huge.json",
+   "sha256": "a572b89dc118c0a0cfba139ba1aaf0a5a5fa75031a34c4160427094f7a333d25",
+   "plan_status": 200,
+   "variants": 3,
+   "edit_calls": 0
+  },
+  "S23_ent_shopping": {
+   "file": "S23_ent_shopping.json",
+   "sha256": "546a199771fb8ac0b424bcc5239d8688e2a5c3445211d90b2d107c52774b5f1e",
+   "plan_status": 200,
+   "variants": 3,
+   "edit_calls": 0
+  },
+  "S24_topk20": {
+   "file": "S24_topk20.json",
+   "sha256": "5e74ebdaabcd38c1bb865e9e08be93e3796a2554b1b8054e292010ee6367047e",
+   "plan_status": 200,
+   "variants": 3,
+   "edit_calls": 6
+  }
+ }
+}

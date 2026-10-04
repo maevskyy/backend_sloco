@@ -1,0 +1,897 @@
+{
+ "scenario": {
+  "id": "S24_topk20",
+  "city": "Bucharest",
+  "date": "2026-10-03",
+  "start_time": "10:00",
+  "end_time": "14:00",
+  "end_day_offset": 0,
+  "shape": "loop",
+  "start": "city_center",
+  "style": "max",
+  "slots": [
+   {"activity": "sight", "dwell_min": null},
+   {"activity": "coffee", "dwell_min": null},
+   {"activity": "park", "dwell_min": null},
+   {"activity": "food", "dwell_min": null}
+  ],
+  "must_visit_place_ids": [],
+  "variants": 3,
+  "radius_km": 2.5,
+  "fill_window": true,
+  "known_hours_only": false,
+  "top_k": 20,
+  "edits": [
+   {
+    "chain": "A",
+    "ops": [
+     {"op": "move", "from": -1, "to": 0}
+    ]
+   },
+   {
+    "chain": "B",
+    "ops": [
+     {"op": "remove", "index": 1}
+    ]
+   },
+   {
+    "chain": "C",
+    "ops": [
+     {"op": "add", "place_id": "10915586233752676659"}
+    ]
+   },
+   {
+    "chain": "D",
+    "ops": [
+     {"op": "set_dwell", "index": 0, "dwell_min": 120}
+    ]
+   },
+   {
+    "chain": "E",
+    "ops": [
+     {"op": "remove", "index": 0},
+     {"op": "restore", "removed_index": 0, "to": 0}
+    ]
+   }
+  ]
+ },
+ "inputs_resolved": {
+  "start": [44.440287, 26.097708],
+  "center": [44.440287, 26.097708],
+  "start_exact": ["44.4402865461307", "26.097708464099995"],
+  "center_exact": ["44.4402865461307", "26.097708464099995"],
+  "t_start": "10:00",
+  "t0": 7800,
+  "budget_min": 240,
+  "end_abs": 840,
+  "next_day": false,
+  "end_label_ru": "14:00",
+  "slot_labels": ["Достопримечательность", "Кофе", "Парк / природа", "Еда / ресторан"],
+  "style_label": "Максимум мест",
+  "dwell_by_slot": {},
+  "must_ids": [],
+  "seed_ids": []
+ },
+ "error": null,
+ "notes": [
+  {"kind": "info", "text": "Радиус 2.5 км сужен до 1.4 км: за окно 10:00–14:00 дальше не успеть — ~190 мин уходит на сами места, и нужно вернуться к старту."}
+ ],
+ "search_km": 1.388889,
+ "area": [44.440287, 26.097708],
+ "request": {"mode": "slots", "n_slots": 4, "start": [44.440287, 26.097708], "shape": "loop", "style": "max", "time_budget_min": 240.0, "fit_budget": true, "start_week_min": 7800.0, "max_wait_min": 30.0, "fill_window": true, "walk_weight": null, "max_leg_min": 45.0, "interest_weight": null, "max_stops": null, "provider": "walk_planner.RoutingProvider(walk_kmh=4.5, detour=1.35)", "n_candidates": 207, "n_must_visit": 0, "n_variants_requested": 3},
+ "candidates": {
+  "slot": [
+   ["10915586233752676659", 0, 0.774828, 35.0, false, "culture_sights", "historical_landmark"],
+   ["9762822817967543429", 0, 0.76085, 75.0, false, "culture_sights", "museum"],
+   ["4799452667097853425", 0, 0.758888, 35.0, false, "culture_sights", "orthodox_church"],
+   ["16044012576954065712", 0, 0.750411, 90.0, false, "culture_sights", "art_museum"],
+   ["6194615972455793446", 0, 0.722035, 55.0, false, "culture_sights", "orthodox_church"],
+   ["4658405126684418777", 0, 0.718662, 55.0, false, "culture_sights", "catholic_cathedral"],
+   ["17991847120941406752", 0, 0.717282, 20.0, false, "culture_sights", "church"],
+   ["15978145016794525298", 0, 0.708654, 20.0, false, "culture_sights", "historical_landmark"],
+   ["15791376739079194771", 0, 0.693902, 45.0, false, "culture_sights", "orthodox_church"],
+   ["7192375974987078804", 0, 0.684384, 75.0, false, "culture_sights", "museum"],
+   ["10146158162049940249", 0, 0.681054, 25.0, false, "culture_sights", "orthodox_church"],
+   ["12643890721772099082", 0, 0.677815, 45.0, false, "culture_sights", "orthodox_church"],
+   ["5806071778867054569", 0, 0.671773, 75.0, false, "culture_sights", "national_museum"],
+   ["15678431129493490891", 0, 0.646326, 60.0, false, "culture_sights", "art_museum"],
+   ["1679221956388364890", 0, 0.645174, 60.0, false, "culture_sights", "museum"],
+   ["7134420911640911719", 0, 0.643296, 45.0, false, "culture_sights", "historical_landmark"],
+   ["4658762096759121924", 0, 0.641016, 45.0, false, "culture_sights", "orthodox_church"],
+   ["6975675940809821901", 0, 0.640453, 45.0, false, "culture_sights", "orthodox_church"],
+   ["11874471470887590398", 0, 0.637965, 45.0, false, "culture_sights", "orthodox_church"],
+   ["12123608012245025239", 0, 0.63663, 45.0, false, "culture_sights", "orthodox_church"],
+   ["9185679158235506995", 0, 0.621981, 45.0, false, "culture_sights", "auction_house"],
+   ["3676382838556882236", 0, 0.613857, 60.0, false, "culture_sights", "museum"],
+   ["12264421749383794754", 0, 0.510604, 45.0, false, "culture_sights", "museum"],
+   ["2302333767644454498", 0, 0.600764, 10.0, false, "culture_sights", "sculpture"],
+   ["11484690504626613379", 0, 0.583292, 25.0, false, "culture_sights", "orthodox_church"],
+   ["13484124012727544921", 0, 0.491894, 10.0, false, "culture_sights", "tourist_attraction"],
+   ["15198693957308866935", 0, 0.503081, 20.0, false, "culture_sights", "monument"],
+   ["3327560521143573631", 0, 0.503402, 35.0, false, "culture_sights", "art_gallery"],
+   ["6153831670984642249", 0, 0.349965, 20.0, false, "culture_sights", "tourist_attraction"],
+   ["8825391489902434532", 0, 0.61666, 25.0, false, "culture_sights", "catholic_church"],
+   ["2323796184066607182", 0, 0.636265, 60.0, false, "culture_sights", "museum"],
+   ["15387643079662744112", 0, 0.630728, 25.0, false, "culture_sights", "orthodox_church"],
+   ["4113312426607151481", 0, 0.388428, 10.0, false, "culture_sights", "historical_landmark"],
+   ["3531647606479213952", 0, 0.277696, 45.0, false, "culture_sights", "art_museum"],
+   ["13459769578362302506", 0, 0.315117, 10.0, false, "culture_sights", "tourist_attraction"],
+   ["3933325662776773114", 0, 0.19935, 35.0, false, "culture_sights", "historical_landmark"],
+   ["9279824186385889317", 1, 0.86082, 30.0, false, "coffee", "book_store"],
+   ["14169121335398956031", 1, 0.733931, 30.0, false, "coffee", "cafe"],
+   ["17733277001575791107", 1, 0.726842, 30.0, false, "coffee", "coffee_shop"],
+   ["3325034453752002666", 1, 0.717382, 30.0, false, "coffee", "dessert_shop"],
+   ["5564669006134392295", 1, 0.700591, 30.0, false, "coffee", "ice_cream_shop"],
+   ["7960103630939296652", 1, 0.699974, 30.0, false, "coffee", "ice_cream_shop"],
+   ["15263063180770304130", 1, 0.682671, 30.0, false, "coffee", "coffee_shop"],
+   ["1095210475860847216", 1, 0.682105, 30.0, false, "coffee", "fast_food_restaurant"],
+   ["10005805960616076113", 1, 0.668646, 30.0, false, "coffee", "cafe"],
+   ["15245410789463333923", 1, 0.664678, 30.0, false, "coffee", "book_store"],
+   ["14916341928181875966", 1, 0.661895, 30.0, false, "coffee", "cafe"],
+   ["14049685486032719847", 1, 0.661699, 30.0, false, "coffee", "bistro"],
+   ["4310840967937330496", 1, 0.657702, 30.0, false, "coffee", "coffee_shop"],
+   ["6974358533502390616", 1, 0.647171, 30.0, false, "coffee", "creperie"],
+   ["13297438447556140356", 1, 0.64706, 30.0, false, "coffee", "book_store"],
+   ["3906995415162022840", 1, 0.646741, 30.0, false, "coffee", "coffee_shop"],
+   ["9347737314523027711", 1, 0.643615, 30.0, false, "coffee", "cafe"],
+   ["1287347152411539768", 1, 0.641496, 30.0, false, "coffee", "coffee_shop"],
+   ["8429297383496818006", 1, 0.641239, 30.0, false, "coffee", "restaurant_brasserie"],
+   ["7544991547516631885", 1, 0.640292, 30.0, false, "coffee", "coffee_shop"],
+   ["11489947113366215995", 1, 0.544183, 30.0, false, "coffee", "pastry_shop"],
+   ["9624769939333197734", 1, 0.485205, 30.0, false, "coffee", "cafe"],
+   ["16436840839806217903", 1, 0.453017, 30.0, false, "coffee", "cake_shop"],
+   ["284364362787826053", 1, 0.611125, 30.0, false, "coffee", "dessert_shop"],
+   ["10532099939513755931", 1, 0.509175, 30.0, false, "coffee", "coffee_shop"],
+   ["14636091576834155908", 1, 0.562754, 75.0, false, "coffee", "restaurant"],
+   ["18329984334090271811", 1, 0.441704, 30.0, false, "coffee", "pastry_shop"],
+   ["4425007252737320613", 1, 0.586543, 30.0, false, "coffee", "coffee_shop"],
+   ["5718929160579013851", 1, 0.427, 30.0, false, "coffee", "coffee_shop"],
+   ["2239706416318450858", 1, 0.575194, 75.0, false, "coffee", "restaurant"],
+   ["10825115157458193067", 1, 0.58981, 30.0, false, "coffee", "cafe"],
+   ["10039533104628781535", 1, 0.613725, 30.0, false, "coffee", "coffee_shop"],
+   ["10216542823458282421", 1, 0.44934, 30.0, false, "coffee", "coffee_shop"],
+   ["9376418586907219061", 1, 0.589929, 30.0, false, "coffee", "coffee_shop"],
+   ["15407687128668206956", 1, 0.436955, 30.0, false, "coffee", "coffee_shop"],
+   ["13586446863539050445", 2, 0.557576, 25.0, false, "nature_outdoors", "park"],
+   ["6243762450561891153", 2, 0.477624, 25.0, false, "nature_outdoors", "park"],
+   ["84644100838256775", 2, 0.415381, 10.0, false, "nature_outdoors", "park"],
+   ["55295570421893244", 2, 0.411099, 30.0, false, "nature_outdoors", "lake"],
+   ["16102257020469288161", 2, 0.375125, 10.0, false, "nature_outdoors", "city_park"],
+   ["8303113599182351171", 2, 0.367701, 30.0, false, "nature_outdoors", "park"],
+   ["10934602441818715559", 2, 0.363563, 20.0, false, "nature_outdoors", "state_park"],
+   ["7777417464195066635", 2, 0.35715, 30.0, false, "nature_outdoors", "park"],
+   ["17632545185824967585", 2, 0.356793, 10.0, false, "nature_outdoors", "park"],
+   ["8125310868773553894", 2, 0.346162, 10.0, false, "nature_outdoors", "park"],
+   ["2357537659727089689", 2, 0.308967, 20.0, false, "nature_outdoors", "park"],
+   ["1344997006810932390", 2, 0.30079, 20.0, false, "nature_outdoors", "swimming_lake"],
+   ["16377842494171818990", 2, 0.299609, 10.0, false, "nature_outdoors", "park"],
+   ["18059558455186282552", 2, 0.281158, 10.0, false, "nature_outdoors", "park"],
+   ["875985552826720400", 2, 0.257758, 20.0, false, "nature_outdoors", "garden"],
+   ["5388868470799362403", 2, 0.249439, 10.0, false, "nature_outdoors", "promenade"],
+   ["1063257975472143451", 2, 0.249286, 20.0, false, "nature_outdoors", "park"],
+   ["8858617876382834004", 2, 0.22535, 10.0, false, "nature_outdoors", "state_park"],
+   ["10936297251308948904", 2, 0.221839, 10.0, false, "nature_outdoors", "state_park"],
+   ["7184257282832631611", 2, 0.211567, 10.0, false, "nature_outdoors", "park"],
+   ["15439727830362881762", 3, 0.87741, 75.0, false, "restaurant", "restaurant"],
+   ["14593284683301693268", 3, 0.85, 75.0, false, "restaurant", "romanian_restaurant"],
+   ["338092938835818764", 3, 0.810316, 75.0, false, "restaurant", "restaurant"],
+   ["17098114492056661983", 3, 0.796312, 75.0, false, "restaurant", "indian_restaurant"],
+   ["6438193657888648583", 3, 0.787452, 75.0, false, "restaurant", "restaurant"],
+   ["11525635674185778928", 3, 0.781715, 75.0, false, "restaurant", "brunch_restaurant"],
+   ["16068592796011144749", 3, 0.758946, 75.0, false, "restaurant", "korean_barbecue_restaurant"],
+   ["8424969494085117334", 3, 0.75006, 75.0, false, "restaurant", "restaurant"],
+   ["2947165069369882328", 3, 0.749725, 75.0, false, "restaurant", "restaurant"],
+   ["9089214841686984090", 3, 0.743429, 75.0, false, "restaurant", "hamburger_restaurant"],
+   ["11684961297863389958", 3, 0.743411, 75.0, false, "restaurant", "japanese_restaurant"],
+   ["14803764456397557850", 3, 0.74023, 75.0, false, "restaurant", "barbecue_restaurant"],
+   ["8409239162401707476", 3, 0.739993, 75.0, false, "restaurant", "hamburger_restaurant"],
+   ["516452116503593413", 3, 0.727358, 75.0, false, "restaurant", "restaurant"],
+   ["1073697829130679590", 3, 0.720266, 75.0, false, "restaurant", "bistro"],
+   ["4348878151895877331", 3, 0.711991, 75.0, false, "restaurant", "restaurant"],
+   ["2820960308764140776", 3, 0.707145, 75.0, false, "restaurant", "restaurant"],
+   ["13493793895024623801", 3, 0.70467, 75.0, false, "restaurant", "japanese_restaurant"],
+   ["6216190112863445712", 3, 0.695859, 75.0, false, "restaurant", "restaurant"],
+   ["16485724495374170726", 3, 0.694623, 75.0, false, "restaurant", "restaurant"],
+   ["6578908158205473452", 3, 0.560891, 75.0, false, "restaurant", "restaurant"],
+   ["8866774377161316252", 3, 0.637235, 75.0, false, "restaurant", "restaurant"],
+   ["6085466686473577591", 3, 0.555039, 75.0, false, "restaurant", "restaurant"],
+   ["14636091576834155908", 3, 0.562754, 75.0, false, "restaurant", "restaurant"],
+   ["888803041136561144", 3, 0.685463, 75.0, false, "restaurant", "restaurant"],
+   ["4739451140015138428", 3, 0.554918, 75.0, false, "restaurant", "restaurant"],
+   ["12491610463607191994", 3, 0.493656, 75.0, false, "restaurant", "restaurant"],
+   ["6429393411144108881", 3, 0.489555, 75.0, false, "restaurant", "italian_restaurant"],
+   ["2841531833543435614", 3, 0.350815, 75.0, false, "restaurant", "italian_restaurant"],
+   ["17767925148133819989", 3, 0.607769, 75.0, false, "restaurant", "italian_restaurant"],
+   ["2239706416318450858", 3, 0.575194, 75.0, false, "restaurant", "restaurant"],
+   ["15657031083505759579", 3, 0.4872, 75.0, false, "restaurant", "hotel"],
+   ["15317893634267745558", 3, 0.412626, 75.0, false, "restaurant", "restaurant"],
+   ["11051728239853514277", 3, 0.67649, 75.0, false, "restaurant", "restaurant"],
+   ["8135553444805848081", 3, 0.552571, 75.0, false, "restaurant", "bistro"],
+   ["14716704764002563473", 3, 0.587858, 75.0, false, "restaurant", "restaurant"],
+   ["14949006753149716599", 3, 0.519228, 75.0, false, "restaurant", "restaurant"]
+  ],
+  "extra": [
+   ["10915586233752676659", 0, 0.774828, 35.0, "Достопримечательность"],
+   ["9762822817967543429", 0, 0.76085, 75.0, "Достопримечательность"],
+   ["4799452667097853425", 0, 0.758888, 35.0, "Достопримечательность"],
+   ["16044012576954065712", 0, 0.750411, 90.0, "Достопримечательность"],
+   ["6194615972455793446", 0, 0.722035, 55.0, "Достопримечательность"],
+   ["4658405126684418777", 0, 0.718662, 55.0, "Достопримечательность"],
+   ["17991847120941406752", 0, 0.717282, 20.0, "Достопримечательность"],
+   ["15978145016794525298", 0, 0.708654, 20.0, "Достопримечательность"],
+   ["15791376739079194771", 0, 0.693902, 45.0, "Достопримечательность"],
+   ["7192375974987078804", 0, 0.684384, 75.0, "Достопримечательность"],
+   ["10146158162049940249", 0, 0.681054, 25.0, "Достопримечательность"],
+   ["12643890721772099082", 0, 0.677815, 45.0, "Достопримечательность"],
+   ["5806071778867054569", 0, 0.671773, 75.0, "Достопримечательность"],
+   ["15678431129493490891", 0, 0.646326, 60.0, "Достопримечательность"],
+   ["1679221956388364890", 0, 0.645174, 60.0, "Достопримечательность"],
+   ["7134420911640911719", 0, 0.643296, 45.0, "Достопримечательность"],
+   ["4658762096759121924", 0, 0.641016, 45.0, "Достопримечательность"],
+   ["6975675940809821901", 0, 0.640453, 45.0, "Достопримечательность"],
+   ["11874471470887590398", 0, 0.637965, 45.0, "Достопримечательность"],
+   ["12123608012245025239", 0, 0.63663, 45.0, "Достопримечательность"],
+   ["2323796184066607182", 0, 0.636265, 60.0, "Достопримечательность"],
+   ["8556422405600247126", 0, 0.636203, 60.0, "Достопримечательность"],
+   ["12889347466221093772", 0, 0.635674, 45.0, "Достопримечательность"],
+   ["15387643079662744112", 0, 0.630728, 25.0, "Достопримечательность"],
+   ["3163726658756557218", 0, 0.624265, 60.0, "Достопримечательность"],
+   ["9185679158235506995", 0, 0.621981, 45.0, "Достопримечательность"],
+   ["5549304498887187665", 0, 0.618379, 60.0, "Достопримечательность"],
+   ["8825391489902434532", 0, 0.61666, 25.0, "Достопримечательность"],
+   ["3676382838556882236", 0, 0.613857, 60.0, "Достопримечательность"],
+   ["5078886589616893113", 0, 0.612487, 60.0, "Достопримечательность"],
+   ["12264421749383794754", 0, 0.510604, 45.0, "Достопримечательность"],
+   ["2302333767644454498", 0, 0.600764, 10.0, "Достопримечательность"],
+   ["11484690504626613379", 0, 0.583292, 25.0, "Достопримечательность"],
+   ["13484124012727544921", 0, 0.491894, 10.0, "Достопримечательность"],
+   ["15198693957308866935", 0, 0.503081, 20.0, "Достопримечательность"],
+   ["3327560521143573631", 0, 0.503402, 35.0, "Достопримечательность"],
+   ["6153831670984642249", 0, 0.349965, 20.0, "Достопримечательность"],
+   ["4113312426607151481", 0, 0.388428, 10.0, "Достопримечательность"],
+   ["3531647606479213952", 0, 0.277696, 45.0, "Достопримечательность"],
+   ["13459769578362302506", 0, 0.315117, 10.0, "Достопримечательность"],
+   ["3933325662776773114", 0, 0.19935, 35.0, "Достопримечательность"],
+   ["14147436869860924214", 0, 0.497169, 10.0, "Достопримечательность"],
+   ["17060919567617799701", 0, 0.390115, 35.0, "Достопримечательность"],
+   ["9959063147543523625", 0, 0.277107, 45.0, "Достопримечательность"],
+   ["7910810057186574218", 0, 0.384501, 10.0, "Достопримечательность"],
+   ["8943340123139727326", 0, 0.46426, 20.0, "Достопримечательность"],
+   ["4243283208342501467", 0, 0.56675, 45.0, "Достопримечательность"],
+   ["9085047711132783084", 0, 0.423629, 35.0, "Достопримечательность"],
+   ["15812596167864568789", 0, 0.432784, 25.0, "Достопримечательность"],
+   ["13586446863539050445", 2, 0.557576, 25.0, "Парк / природа"],
+   ["6243762450561891153", 2, 0.477624, 25.0, "Парк / природа"],
+   ["84644100838256775", 2, 0.415381, 10.0, "Парк / природа"],
+   ["55295570421893244", 2, 0.411099, 30.0, "Парк / природа"],
+   ["16102257020469288161", 2, 0.375125, 10.0, "Парк / природа"],
+   ["8303113599182351171", 2, 0.367701, 30.0, "Парк / природа"],
+   ["10934602441818715559", 2, 0.363563, 20.0, "Парк / природа"],
+   ["7777417464195066635", 2, 0.35715, 30.0, "Парк / природа"],
+   ["17632545185824967585", 2, 0.356793, 10.0, "Парк / природа"],
+   ["8125310868773553894", 2, 0.346162, 10.0, "Парк / природа"],
+   ["2357537659727089689", 2, 0.308967, 20.0, "Парк / природа"],
+   ["1344997006810932390", 2, 0.30079, 20.0, "Парк / природа"],
+   ["16377842494171818990", 2, 0.299609, 10.0, "Парк / природа"],
+   ["18059558455186282552", 2, 0.281158, 10.0, "Парк / природа"],
+   ["875985552826720400", 2, 0.257758, 20.0, "Парк / природа"],
+   ["5388868470799362403", 2, 0.249439, 10.0, "Парк / природа"],
+   ["1063257975472143451", 2, 0.249286, 20.0, "Парк / природа"],
+   ["8858617876382834004", 2, 0.22535, 10.0, "Парк / природа"],
+   ["10936297251308948904", 2, 0.221839, 10.0, "Парк / природа"],
+   ["7184257282832631611", 2, 0.211567, 10.0, "Парк / природа"],
+   ["8888767313490677333", 2, 0.198067, 10.0, "Парк / природа"],
+   ["15343211877505974560", 2, 0.198067, 10.0, "Парк / природа"],
+   ["135209697355696080", 2, 0.198067, 10.0, "Парк / природа"],
+   ["6219057510612629349", 2, 0.193419, 10.0, "Парк / природа"],
+   ["4529158495336393423", 2, 0.193419, 10.0, "Парк / природа"],
+   ["8759555386899867271", 2, 0.150519, 20.0, "Парк / природа"],
+   ["4411129889031181588", 2, 0.1431, 40.0, "Парк / природа"],
+   ["18187033460928558101", 2, 0.1431, 40.0, "Парк / природа"],
+   ["16531603380007324509", 2, 0.1431, 10.0, "Парк / природа"],
+   ["13830024241463971150", 2, 0.1431, 40.0, "Парк / природа"]
+  ],
+  "must": []
+ },
+ "variants": [
+  {
+   "dropped": [],
+   "plan": {
+    "stops": [
+     {"order": 0, "place_id": "3676382838556882236", "name": "\"Theodor Aman\" Museum", "slot": 0, "theme": "culture_sights", "extra": true, "pinned": false, "interest": 0.613857, "dwell_min": 10.0, "arrival_min": 0.600914, "wait_min": 0.0, "depart_min": 10.600914, "hours_ok": true, "hours_label_ru": "сб 10:00–18:00"},
+     {"order": 1, "place_id": "12264421749383794754", "name": "Palatul Cesianu-Racoviță", "slot": 0, "theme": "culture_sights", "extra": true, "pinned": false, "interest": 0.510604, "dwell_min": 10.0, "arrival_min": 11.023294, "wait_min": 0.0, "depart_min": 21.023294, "hours_ok": true, "hours_label_ru": "сб 10:00–20:00"},
+     {"order": 2, "place_id": "9185679158235506995", "name": "Artmark", "slot": 0, "theme": "culture_sights", "extra": false, "pinned": false, "interest": 0.621981, "dwell_min": 45.0, "arrival_min": 21.127794, "wait_min": 0.0, "depart_min": 66.127794, "hours_ok": true, "hours_label_ru": "сб 10:00–20:00"},
+     {"order": 3, "place_id": "3325034453752002666", "name": "French Revolution Ateneul Român", "slot": 1, "theme": "coffee", "extra": false, "pinned": false, "interest": 0.717382, "dwell_min": 30.0, "arrival_min": 68.714009, "wait_min": 0.0, "depart_min": 98.714009, "hours_ok": true, "hours_label_ru": "сб 08:00–21:00"},
+     {"order": 4, "place_id": "8125310868773553894", "name": "Parcul Ateneului", "slot": 2, "theme": "nature_outdoors", "extra": false, "pinned": false, "interest": 0.346162, "dwell_min": 10.0, "arrival_min": 100.156783, "wait_min": 0.0, "depart_min": 110.156783, "hours_ok": null, "hours_label_ru": "часы работы неизвестны"},
+     {"order": 5, "place_id": "6578908158205473452", "name": "MACE by Joseph Hadad", "slot": 3, "theme": "restaurant", "extra": false, "pinned": false, "interest": 0.560891, "dwell_min": 75.0, "arrival_min": 112.182727, "wait_min": 0.0, "depart_min": 187.182727, "hours_ok": true, "hours_label_ru": "сб 11:00–22:00"},
+     {"order": 6, "place_id": "7134420911640911719", "name": "The Royal Palace of Bucharest", "slot": 0, "theme": "culture_sights", "extra": true, "pinned": false, "interest": 0.643296, "dwell_min": 10.0, "arrival_min": 191.50943, "wait_min": 0.0, "depart_min": 201.50943, "hours_ok": true, "hours_label_ru": "сб 10:00–18:00"},
+     {"order": 7, "place_id": "16044012576954065712", "name": "National Museum of Art", "slot": 0, "theme": "culture_sights", "extra": true, "pinned": false, "interest": 0.750411, "dwell_min": 10.0, "arrival_min": 202.470326, "wait_min": 0.0, "depart_min": 212.470326, "hours_ok": true, "hours_label_ru": "сб 11:00–19:00"},
+     {"order": 8, "place_id": "2302333767644454498", "name": "Equestrian Statue of Carol I", "slot": 0, "theme": "culture_sights", "extra": true, "pinned": false, "interest": 0.600764, "dwell_min": 10.0, "arrival_min": 214.196511, "wait_min": 0.0, "depart_min": 224.196511, "hours_ok": true, "hours_label_ru": "сб круглосуточно"}
+    ],
+    "segments": [
+     {"from_order": -1, "to_order": 0, "walk_min": 0.600914, "distance_km": 0.045069, "n_geom": 2},
+     {"from_order": 0, "to_order": 1, "walk_min": 0.422379, "distance_km": 0.031678, "n_geom": 2},
+     {"from_order": 1, "to_order": 2, "walk_min": 0.104501, "distance_km": 0.007838, "n_geom": 2},
+     {"from_order": 2, "to_order": 3, "walk_min": 2.586215, "distance_km": 0.193966, "n_geom": 2},
+     {"from_order": 3, "to_order": 4, "walk_min": 1.442773, "distance_km": 0.108208, "n_geom": 2},
+     {"from_order": 4, "to_order": 5, "walk_min": 2.025944, "distance_km": 0.151946, "n_geom": 2},
+     {"from_order": 5, "to_order": 6, "walk_min": 4.326703, "distance_km": 0.324503, "n_geom": 2},
+     {"from_order": 6, "to_order": 7, "walk_min": 0.960896, "distance_km": 0.072067, "n_geom": 2},
+     {"from_order": 7, "to_order": 8, "walk_min": 1.726185, "distance_km": 0.129464, "n_geom": 2},
+     {"from_order": 8, "to_order": -1, "walk_min": 1.616921, "distance_km": 0.121269, "n_geom": 2}
+    ],
+    "total_time_min": 225.813432,
+    "total_walk_min": 15.813432,
+    "total_dwell_min": 210.0,
+    "total_wait_min": 0.0,
+    "total_distance_km": 1.186007,
+    "over_budget": false,
+    "dropped_slots": [],
+    "note": ""
+   },
+   "render": {
+    "manual": false,
+    "variants_caption": "**Вариант 1**: 9 мест · 1.2 км · до 13:46  ·  Вариант 2: 7 мест · 2.5 км · до 13:43  ·  Вариант 3: 5 мест · 1.5 км · до 13:40",
+    "metric_stops": "4 из 4 + 5",
+    "metric_finish_label": "Возвращение",
+    "metric_finish": "13:46",
+    "metric_delta": "+14 мин запаса",
+    "metric_walk": "1.2 км · 0:16",
+    "metric_window": "10:00–14:00",
+    "captions": ["Стиль «Максимум мест»: по пути добавлено мест — 5, чтобы занять окно 10:00–14:00. Только выбранные слоты — выключите «Добавлять места по пути»."],
+    "warnings": [],
+    "infos": [],
+    "stop_lines": [
+     ["1. \"Theodor Aman\" Museum — Достопримечательность · по пути, можно пройти мимо", "10:01–10:11 · осмотр 10 мин", "🕒 сб 10:00–18:00"],
+     ["2. Palatul Cesianu-Racoviță — Достопримечательность · по пути, можно пройти мимо", "10:11–10:21 · осмотр 10 мин", "🕒 сб 10:00–20:00"],
+     ["3. Artmark — Достопримечательность", "10:21–11:06 · осмотр 45 мин", "🕒 сб 10:00–20:00"],
+     ["4. French Revolution Ateneul Român — Кофе", "11:09–11:39 · осмотр 30 мин", "🕒 сб 08:00–21:00"],
+     ["5. Parcul Ateneului — Парк / природа", "11:40–11:50 · осмотр 10 мин", "🕒 часы работы неизвестны"],
+     ["6. MACE by Joseph Hadad — Еда / ресторан", "11:52–13:07 · осмотр 75 мин", "🕒 сб 11:00–22:00"],
+     ["7. The Royal Palace of Bucharest — Достопримечательность · по пути, можно пройти мимо", "13:12–13:22 · осмотр 10 мин", "🕒 сб 10:00–18:00"],
+     ["8. National Museum of Art — Достопримечательность · по пути, можно пройти мимо", "13:22–13:32 · осмотр 10 мин", "🕒 сб 11:00–19:00"],
+     ["9. Equestrian Statue of Carol I — Достопримечательность · по пути, можно пройти мимо", "13:34–13:44 · осмотр 10 мин", "🕒 сб круглосуточно"]
+    ]
+   },
+   "navigation": {
+    "google": ["https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440287,26.097708&destination=44.440287,26.097708&waypoints=44.440249,26.098126%7C44.440430,26.097974%7C44.440482,26.097988%7C44.441621,26.097134%7C44.440977,26.096679%7C44.441239,26.098049%7C44.439838,26.095743%7C44.439367,26.095874%7C44.439648,26.097016&waypoint_place_ids=ChIJ5YmJ9UX_sUARPHWGnrYiBTM%7CChIJMenVX0__sUARQpCY85n6M6o%7CChIJ8WjAX0__sUARMylWz4YWen8%7CChIJze7an0__sUARarjSCTjlJC4%7CChIJu73uv6r_sUAR5kbedi_nwnA%7CChIJz7sYKOv_sUARrLLBAx36TFs%7CChIJ0bKXvEX_sUARZ5959ASOAmM%7CChIJb0jBokX_sUARMCM_FW_Ip94%7CChIJpa8ak0X_sUARYp7VBl2I8x8"],
+    "legs": [
+     {"from": "Старт", "to": "\"Theodor Aman\" Museum", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440287,26.097708&destination=44.440249,26.098126&destination_place_id=ChIJ5YmJ9UX_sUARPHWGnrYiBTM", "apple": "https://maps.apple.com/?saddr=44.440287,26.097708&daddr=44.440249,26.098126&dirflg=w"},
+     {"from": "\"Theodor Aman\" Museum", "to": "Palatul Cesianu-Racoviță", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440249,26.098126&destination=44.440430,26.097974&destination_place_id=ChIJMenVX0__sUARQpCY85n6M6o&origin_place_id=ChIJ5YmJ9UX_sUARPHWGnrYiBTM", "apple": "https://maps.apple.com/?saddr=44.440249,26.098126&daddr=44.440430,26.097974&dirflg=w"},
+     {"from": "Palatul Cesianu-Racoviță", "to": "Artmark", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440430,26.097974&destination=44.440482,26.097988&destination_place_id=ChIJ8WjAX0__sUARMylWz4YWen8&origin_place_id=ChIJMenVX0__sUARQpCY85n6M6o", "apple": "https://maps.apple.com/?saddr=44.440430,26.097974&daddr=44.440482,26.097988&dirflg=w"},
+     {"from": "Artmark", "to": "French Revolution Ateneul Român", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440482,26.097988&destination=44.441621,26.097134&destination_place_id=ChIJze7an0__sUARarjSCTjlJC4&origin_place_id=ChIJ8WjAX0__sUARMylWz4YWen8", "apple": "https://maps.apple.com/?saddr=44.440482,26.097988&daddr=44.441621,26.097134&dirflg=w"},
+     {"from": "French Revolution Ateneul Român", "to": "Parcul Ateneului", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.441621,26.097134&destination=44.440977,26.096679&destination_place_id=ChIJu73uv6r_sUAR5kbedi_nwnA&origin_place_id=ChIJze7an0__sUARarjSCTjlJC4", "apple": "https://maps.apple.com/?saddr=44.441621,26.097134&daddr=44.440977,26.096679&dirflg=w"},
+     {"from": "Parcul Ateneului", "to": "MACE by Joseph Hadad", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440977,26.096679&destination=44.441239,26.098049&destination_place_id=ChIJz7sYKOv_sUARrLLBAx36TFs&origin_place_id=ChIJu73uv6r_sUAR5kbedi_nwnA", "apple": "https://maps.apple.com/?saddr=44.440977,26.096679&daddr=44.441239,26.098049&dirflg=w"},
+     {"from": "MACE by Joseph Hadad", "to": "The Royal Palace of Bucharest", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.441239,26.098049&destination=44.439838,26.095743&destination_place_id=ChIJ0bKXvEX_sUARZ5959ASOAmM&origin_place_id=ChIJz7sYKOv_sUARrLLBAx36TFs", "apple": "https://maps.apple.com/?saddr=44.441239,26.098049&daddr=44.439838,26.095743&dirflg=w"},
+     {"from": "The Royal Palace of Bucharest", "to": "National Museum of Art", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.439838,26.095743&destination=44.439367,26.095874&destination_place_id=ChIJb0jBokX_sUARMCM_FW_Ip94&origin_place_id=ChIJ0bKXvEX_sUARZ5959ASOAmM", "apple": "https://maps.apple.com/?saddr=44.439838,26.095743&daddr=44.439367,26.095874&dirflg=w"},
+     {"from": "National Museum of Art", "to": "Equestrian Statue of Carol I", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.439367,26.095874&destination=44.439648,26.097016&destination_place_id=ChIJpa8ak0X_sUARYp7VBl2I8x8&origin_place_id=ChIJb0jBokX_sUARMCM_FW_Ip94", "apple": "https://maps.apple.com/?saddr=44.439367,26.095874&daddr=44.439648,26.097016&dirflg=w"},
+     {"from": "Equestrian Statue of Carol I", "to": "Старт", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.439648,26.097016&destination=44.440287,26.097708&origin_place_id=ChIJpa8ak0X_sUARYp7VBl2I8x8", "apple": "https://maps.apple.com/?saddr=44.439648,26.097016&daddr=44.440287,26.097708&dirflg=w"}
+    ]
+   }
+  },
+  {
+   "dropped": [],
+   "plan": {
+    "stops": [
+     {"order": 0, "place_id": "6975675940809821901", "name": "Kretzulescu Church", "slot": 0, "theme": "culture_sights", "extra": false, "pinned": false, "interest": 0.640453, "dwell_min": 45.0, "arrival_min": 4.607569, "wait_min": 0.0, "depart_min": 49.607569, "hours_ok": true, "hours_label_ru": "сб 08:00–18:00"},
+     {"order": 1, "place_id": "13297438447556140356", "name": "Libraria Humanitas Kretzulescu", "slot": 1, "theme": "coffee", "extra": false, "pinned": false, "interest": 0.64706, "dwell_min": 30.0, "arrival_min": 50.391098, "wait_min": 0.0, "depart_min": 80.391098, "hours_ok": true, "hours_label_ru": "сб 10:00–21:00"},
+     {"order": 2, "place_id": "84644100838256775", "name": "Piața Revoluției", "slot": 2, "theme": "nature_outdoors", "extra": false, "pinned": false, "interest": 0.415381, "dwell_min": 10.0, "arrival_min": 81.583733, "wait_min": 0.0, "depart_min": 91.583733, "hours_ok": null, "hours_label_ru": "часы работы неизвестны"},
+     {"order": 3, "place_id": "10146158162049940249", "name": "St. Nicholas in-a-Day Church", "slot": 0, "theme": "culture_sights", "extra": true, "pinned": false, "interest": 0.681054, "dwell_min": 10.0, "arrival_min": 95.977961, "wait_min": 0.0, "depart_min": 105.977961, "hours_ok": true, "hours_label_ru": "сб 08:00–13:00"},
+     {"order": 4, "place_id": "1073697829130679590", "name": "MAYFAIR 39", "slot": 3, "theme": "restaurant", "extra": false, "pinned": false, "interest": 0.720266, "dwell_min": 75.0, "arrival_min": 109.434415, "wait_min": 0.0, "depart_min": 184.434415, "hours_ok": true, "hours_label_ru": "сб 10:00–00:30"},
+     {"order": 5, "place_id": "9762822817967543429", "name": "Velonova Mirage 3D Museum", "slot": 0, "theme": "culture_sights", "extra": true, "pinned": false, "interest": 0.76085, "dwell_min": 10.0, "arrival_min": 189.671778, "wait_min": 0.0, "depart_min": 199.671778, "hours_ok": true, "hours_label_ru": "сб 11:00–20:00"},
+     {"order": 6, "place_id": "11484690504626613379", "name": "Boteanu Church", "slot": 0, "theme": "culture_sights", "extra": true, "pinned": false, "interest": 0.583292, "dwell_min": 10.0, "arrival_min": 210.813766, "wait_min": 0.0, "depart_min": 220.813766, "hours_ok": null, "hours_label_ru": "часы работы неизвестны"}
+    ],
+    "segments": [
+     {"from_order": -1, "to_order": 0, "walk_min": 4.607569, "distance_km": 0.345568, "n_geom": 2},
+     {"from_order": 0, "to_order": 1, "walk_min": 0.783529, "distance_km": 0.058765, "n_geom": 2},
+     {"from_order": 1, "to_order": 2, "walk_min": 1.192635, "distance_km": 0.089448, "n_geom": 2},
+     {"from_order": 2, "to_order": 3, "walk_min": 4.394227, "distance_km": 0.329567, "n_geom": 2},
+     {"from_order": 3, "to_order": 4, "walk_min": 3.456454, "distance_km": 0.259234, "n_geom": 2},
+     {"from_order": 4, "to_order": 5, "walk_min": 5.237363, "distance_km": 0.392802, "n_geom": 2},
+     {"from_order": 5, "to_order": 6, "walk_min": 11.141988, "distance_km": 0.835649, "n_geom": 2},
+     {"from_order": 6, "to_order": -1, "walk_min": 1.940318, "distance_km": 0.145524, "n_geom": 2}
+    ],
+    "total_time_min": 222.754084,
+    "total_walk_min": 32.754084,
+    "total_dwell_min": 190.0,
+    "total_wait_min": 0.0,
+    "total_distance_km": 2.456556,
+    "over_budget": false,
+    "dropped_slots": [],
+    "note": ""
+   },
+   "render": {
+    "manual": false,
+    "variants_caption": "Вариант 1: 9 мест · 1.2 км · до 13:46  ·  **Вариант 2**: 7 мест · 2.5 км · до 13:43  ·  Вариант 3: 5 мест · 1.5 км · до 13:40",
+    "metric_stops": "4 из 4 + 3",
+    "metric_finish_label": "Возвращение",
+    "metric_finish": "13:43",
+    "metric_delta": "+17 мин запаса",
+    "metric_walk": "2.5 км · 0:33",
+    "metric_window": "10:00–14:00",
+    "captions": ["Стиль «Максимум мест»: по пути добавлено мест — 3, чтобы занять окно 10:00–14:00. Только выбранные слоты — выключите «Добавлять места по пути»."],
+    "warnings": [],
+    "infos": [],
+    "stop_lines": [
+     ["1. Kretzulescu Church — Достопримечательность", "10:05–10:50 · осмотр 45 мин", "🕒 сб 08:00–18:00"],
+     ["2. Libraria Humanitas Kretzulescu — Кофе", "10:50–11:20 · осмотр 30 мин", "🕒 сб 10:00–21:00"],
+     ["3. Piața Revoluției — Парк / природа", "11:22–11:32 · осмотр 10 мин", "🕒 часы работы неизвестны"],
+     ["4. St. Nicholas in-a-Day Church — Достопримечательность · по пути, можно пройти мимо", "11:36–11:46 · осмотр 10 мин", "🕒 сб 08:00–13:00"],
+     ["5. MAYFAIR 39 — Еда / ресторан", "11:49–13:04 · осмотр 75 мин", "🕒 сб 10:00–00:30"],
+     ["6. Velonova Mirage 3D Museum — Достопримечательность · по пути, можно пройти мимо", "13:10–13:20 · осмотр 10 мин", "🕒 сб 11:00–20:00"],
+     ["7. Boteanu Church — Достопримечательность · по пути, можно пройти мимо", "13:31–13:41 · осмотр 10 мин", "🕒 часы работы неизвестны"]
+    ]
+   },
+   "navigation": {
+    "google": ["https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440287,26.097708&destination=44.440287,26.097708&waypoints=44.438130,26.096582%7C44.438010,26.097104%7C44.438490,26.097598%7C44.436745,26.099463%7C44.437599,26.097361%7C44.435651,26.094914%7C44.440365,26.099062&waypoint_place_ids=ChIJiaBUzUX_sUARzU41OE-UzmA%7CChIJUSC5yEb_sUARRJ00sdD9ibg%7CChIJzzxBU3f_sUARh_DLely3LAE%7CChIJi2Am5Ub_sUARGbvqexdlzow%7CChIJ62720Jb_sUARJjVxpXyK5g4%7CChIJr2w5NgD_sUARhZQIlqCDfIc%7CChIJgyfXUE__sUARgyySWyrRYZ8"],
+    "legs": [
+     {"from": "Старт", "to": "Kretzulescu Church", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440287,26.097708&destination=44.438130,26.096582&destination_place_id=ChIJiaBUzUX_sUARzU41OE-UzmA", "apple": "https://maps.apple.com/?saddr=44.440287,26.097708&daddr=44.438130,26.096582&dirflg=w"},
+     {"from": "Kretzulescu Church", "to": "Libraria Humanitas Kretzulescu", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.438130,26.096582&destination=44.438010,26.097104&destination_place_id=ChIJUSC5yEb_sUARRJ00sdD9ibg&origin_place_id=ChIJiaBUzUX_sUARzU41OE-UzmA", "apple": "https://maps.apple.com/?saddr=44.438130,26.096582&daddr=44.438010,26.097104&dirflg=w"},
+     {"from": "Libraria Humanitas Kretzulescu", "to": "Piața Revoluției", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.438010,26.097104&destination=44.438490,26.097598&destination_place_id=ChIJzzxBU3f_sUARh_DLely3LAE&origin_place_id=ChIJUSC5yEb_sUARRJ00sdD9ibg", "apple": "https://maps.apple.com/?saddr=44.438010,26.097104&daddr=44.438490,26.097598&dirflg=w"},
+     {"from": "Piața Revoluției", "to": "St. Nicholas in-a-Day Church", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.438490,26.097598&destination=44.436745,26.099463&destination_place_id=ChIJi2Am5Ub_sUARGbvqexdlzow&origin_place_id=ChIJzzxBU3f_sUARh_DLely3LAE", "apple": "https://maps.apple.com/?saddr=44.438490,26.097598&daddr=44.436745,26.099463&dirflg=w"},
+     {"from": "St. Nicholas in-a-Day Church", "to": "MAYFAIR 39", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.436745,26.099463&destination=44.437599,26.097361&destination_place_id=ChIJ62720Jb_sUARJjVxpXyK5g4&origin_place_id=ChIJi2Am5Ub_sUARGbvqexdlzow", "apple": "https://maps.apple.com/?saddr=44.436745,26.099463&daddr=44.437599,26.097361&dirflg=w"},
+     {"from": "MAYFAIR 39", "to": "Velonova Mirage 3D Museum", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.437599,26.097361&destination=44.435651,26.094914&destination_place_id=ChIJr2w5NgD_sUARhZQIlqCDfIc&origin_place_id=ChIJ62720Jb_sUARJjVxpXyK5g4", "apple": "https://maps.apple.com/?saddr=44.437599,26.097361&daddr=44.435651,26.094914&dirflg=w"},
+     {"from": "Velonova Mirage 3D Museum", "to": "Boteanu Church", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.435651,26.094914&destination=44.440365,26.099062&destination_place_id=ChIJgyfXUE__sUARgyySWyrRYZ8&origin_place_id=ChIJr2w5NgD_sUARhZQIlqCDfIc", "apple": "https://maps.apple.com/?saddr=44.435651,26.094914&daddr=44.440365,26.099062&dirflg=w"},
+     {"from": "Boteanu Church", "to": "Старт", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440365,26.099062&destination=44.440287,26.097708&origin_place_id=ChIJgyfXUE__sUARgyySWyrRYZ8", "apple": "https://maps.apple.com/?saddr=44.440365,26.099062&daddr=44.440287,26.097708&dirflg=w"}
+    ]
+   }
+  },
+  {
+   "dropped": [],
+   "plan": {
+    "stops": [
+     {"order": 0, "place_id": "15198693957308866935", "name": "Memorial of Rebirth", "slot": 0, "theme": "culture_sights", "extra": false, "pinned": false, "interest": 0.503081, "dwell_min": 20.0, "arrival_min": 2.811346, "wait_min": 0.0, "depart_min": 22.811346, "hours_ok": true, "hours_label_ru": "сб круглосуточно"},
+     {"order": 1, "place_id": "2239706416318450858", "name": "ALMA", "slot": 1, "theme": "coffee", "extra": false, "pinned": false, "interest": 0.575194, "dwell_min": 75.0, "arrival_min": 24.664647, "wait_min": 0.0, "depart_min": 99.664647, "hours_ok": true, "hours_label_ru": "сб 10:00–23:00"},
+     {"order": 2, "place_id": "10934602441818715559", "name": "Kretzulescu Park", "slot": 2, "theme": "nature_outdoors", "extra": false, "pinned": false, "interest": 0.363563, "dwell_min": 20.0, "arrival_min": 102.277721, "wait_min": 0.0, "depart_min": 122.277721, "hours_ok": true, "hours_label_ru": "сб круглосуточно"},
+     {"order": 3, "place_id": "2820960308764140776", "name": "The Lobby", "slot": 3, "theme": "restaurant", "extra": false, "pinned": false, "interest": 0.707145, "dwell_min": 75.0, "arrival_min": 124.888669, "wait_min": 0.0, "depart_min": 199.888669, "hours_ok": true, "hours_label_ru": "сб 12:00–01:00"},
+     {"order": 4, "place_id": "8825391489902434532", "name": "The Italian Church", "slot": 0, "theme": "culture_sights", "extra": true, "pinned": false, "interest": 0.61666, "dwell_min": 10.0, "arrival_min": 205.564789, "wait_min": 0.0, "depart_min": 215.564789, "hours_ok": null, "hours_label_ru": "часы работы неизвестны"}
+    ],
+    "segments": [
+     {"from_order": -1, "to_order": 0, "walk_min": 2.811346, "distance_km": 0.210851, "n_geom": 2},
+     {"from_order": 0, "to_order": 1, "walk_min": 1.853301, "distance_km": 0.138998, "n_geom": 2},
+     {"from_order": 1, "to_order": 2, "walk_min": 2.613074, "distance_km": 0.195981, "n_geom": 2},
+     {"from_order": 2, "to_order": 3, "walk_min": 2.610948, "distance_km": 0.195821, "n_geom": 2},
+     {"from_order": 3, "to_order": 4, "walk_min": 5.67612, "distance_km": 0.425709, "n_geom": 2},
+     {"from_order": 4, "to_order": -1, "walk_min": 4.491464, "distance_km": 0.33686, "n_geom": 2}
+    ],
+    "total_time_min": 220.056253,
+    "total_walk_min": 20.056253,
+    "total_dwell_min": 200.0,
+    "total_wait_min": 0.0,
+    "total_distance_km": 1.504219,
+    "over_budget": false,
+    "dropped_slots": [],
+    "note": ""
+   },
+   "render": {
+    "manual": false,
+    "variants_caption": "Вариант 1: 9 мест · 1.2 км · до 13:46  ·  Вариант 2: 7 мест · 2.5 км · до 13:43  ·  **Вариант 3**: 5 мест · 1.5 км · до 13:40",
+    "metric_stops": "4 из 4 + 1",
+    "metric_finish_label": "Возвращение",
+    "metric_finish": "13:40",
+    "metric_delta": "+20 мин запаса",
+    "metric_walk": "1.5 км · 0:20",
+    "metric_window": "10:00–14:00",
+    "captions": ["Стиль «Максимум мест»: по пути добавлено мест — 1, чтобы занять окно 10:00–14:00. Только выбранные слоты — выключите «Добавлять места по пути»."],
+    "warnings": [],
+    "infos": [],
+    "stop_lines": [
+     ["1. Memorial of Rebirth — Достопримечательность", "10:03–10:23 · осмотр 20 мин", "🕒 сб круглосуточно"],
+     ["2. ALMA — Кофе", "10:25–11:40 · осмотр 75 мин", "🕒 сб 10:00–23:00"],
+     ["3. Kretzulescu Park — Парк / природа", "11:42–12:02 · осмотр 20 мин", "🕒 сб круглосуточно"],
+     ["4. The Lobby — Еда / ресторан", "12:05–13:20 · осмотр 75 мин", "🕒 сб 12:00–01:00"],
+     ["5. The Italian Church — Достопримечательность · по пути, можно пройти мимо", "13:26–13:36 · осмотр 10 мин", "🕒 часы работы неизвестны"]
+    ]
+   },
+   "navigation": {
+    "google": ["https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440287,26.097708&destination=44.440287,26.097708&waypoints=44.438894,26.097453%7C44.437973,26.097584%7C44.438127,26.095769%7C44.437935,26.097576%7C44.439662,26.100727&waypoint_place_ids=ChIJGQaz3EX_sUARd2FFx6Cb7NI%7CChIJ58Mc79H_sUARqgzTgR4JFR8%7CChIJP-rP9_n_sUARpzW5oPyCv5c%7CChIJh0UJGkX_sUAR6ORcaXQQJic%7CChIJLyg1p0j_sUAR5NhjF80Weno"],
+    "legs": [
+     {"from": "Старт", "to": "Memorial of Rebirth", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440287,26.097708&destination=44.438894,26.097453&destination_place_id=ChIJGQaz3EX_sUARd2FFx6Cb7NI", "apple": "https://maps.apple.com/?saddr=44.440287,26.097708&daddr=44.438894,26.097453&dirflg=w"},
+     {"from": "Memorial of Rebirth", "to": "ALMA", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.438894,26.097453&destination=44.437973,26.097584&destination_place_id=ChIJ58Mc79H_sUARqgzTgR4JFR8&origin_place_id=ChIJGQaz3EX_sUARd2FFx6Cb7NI", "apple": "https://maps.apple.com/?saddr=44.438894,26.097453&daddr=44.437973,26.097584&dirflg=w"},
+     {"from": "ALMA", "to": "Kretzulescu Park", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.437973,26.097584&destination=44.438127,26.095769&destination_place_id=ChIJP-rP9_n_sUARpzW5oPyCv5c&origin_place_id=ChIJ58Mc79H_sUARqgzTgR4JFR8", "apple": "https://maps.apple.com/?saddr=44.437973,26.097584&daddr=44.438127,26.095769&dirflg=w"},
+     {"from": "Kretzulescu Park", "to": "The Lobby", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.438127,26.095769&destination=44.437935,26.097576&destination_place_id=ChIJh0UJGkX_sUAR6ORcaXQQJic&origin_place_id=ChIJP-rP9_n_sUARpzW5oPyCv5c", "apple": "https://maps.apple.com/?saddr=44.438127,26.095769&daddr=44.437935,26.097576&dirflg=w"},
+     {"from": "The Lobby", "to": "The Italian Church", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.437935,26.097576&destination=44.439662,26.100727&destination_place_id=ChIJLyg1p0j_sUAR5NhjF80Weno&origin_place_id=ChIJh0UJGkX_sUAR6ORcaXQQJic", "apple": "https://maps.apple.com/?saddr=44.437935,26.097576&daddr=44.439662,26.100727&dirflg=w"},
+     {"from": "The Italian Church", "to": "Старт", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.439662,26.100727&destination=44.440287,26.097708&origin_place_id=ChIJLyg1p0j_sUAR5NhjF80Weno", "apple": "https://maps.apple.com/?saddr=44.439662,26.100727&daddr=44.440287,26.097708&dirflg=w"}
+    ]
+   }
+  }
+ ],
+ "edits": {
+  "A": {
+   "ops": [
+    {"op": "move", "from": 8, "to": 0, "place_id": "2302333767644454498", "applied": true}
+   ],
+   "manual": true,
+   "removed": [],
+   "plan": {
+    "stops": [
+     {"order": 0, "place_id": "2302333767644454498", "name": "Equestrian Statue of Carol I", "slot": 0, "theme": "culture_sights", "extra": true, "pinned": false, "interest": 0.600764, "dwell_min": 10.0, "arrival_min": 1.616921, "wait_min": 0.0, "depart_min": 11.616921, "hours_ok": true, "hours_label_ru": "сб круглосуточно"},
+     {"order": 1, "place_id": "3676382838556882236", "name": "\"Theodor Aman\" Museum", "slot": 0, "theme": "culture_sights", "extra": true, "pinned": false, "interest": 0.613857, "dwell_min": 10.0, "arrival_min": 13.60796, "wait_min": 0.0, "depart_min": 23.60796, "hours_ok": true, "hours_label_ru": "сб 10:00–18:00"},
+     {"order": 2, "place_id": "12264421749383794754", "name": "Palatul Cesianu-Racoviță", "slot": 0, "theme": "culture_sights", "extra": true, "pinned": false, "interest": 0.510604, "dwell_min": 10.0, "arrival_min": 24.030339, "wait_min": 0.0, "depart_min": 34.030339, "hours_ok": true, "hours_label_ru": "сб 10:00–20:00"},
+     {"order": 3, "place_id": "9185679158235506995", "name": "Artmark", "slot": 0, "theme": "culture_sights", "extra": false, "pinned": false, "interest": 0.621981, "dwell_min": 45.0, "arrival_min": 34.13484, "wait_min": 0.0, "depart_min": 79.13484, "hours_ok": true, "hours_label_ru": "сб 10:00–20:00"},
+     {"order": 4, "place_id": "3325034453752002666", "name": "French Revolution Ateneul Român", "slot": 1, "theme": "coffee", "extra": false, "pinned": false, "interest": 0.717382, "dwell_min": 30.0, "arrival_min": 81.721055, "wait_min": 0.0, "depart_min": 111.721055, "hours_ok": true, "hours_label_ru": "сб 08:00–21:00"},
+     {"order": 5, "place_id": "8125310868773553894", "name": "Parcul Ateneului", "slot": 2, "theme": "nature_outdoors", "extra": false, "pinned": false, "interest": 0.346162, "dwell_min": 10.0, "arrival_min": 113.163828, "wait_min": 0.0, "depart_min": 123.163828, "hours_ok": null, "hours_label_ru": "часы работы неизвестны"},
+     {"order": 6, "place_id": "6578908158205473452", "name": "MACE by Joseph Hadad", "slot": 3, "theme": "restaurant", "extra": false, "pinned": false, "interest": 0.560891, "dwell_min": 75.0, "arrival_min": 125.189772, "wait_min": 0.0, "depart_min": 200.189772, "hours_ok": true, "hours_label_ru": "сб 11:00–22:00"},
+     {"order": 7, "place_id": "7134420911640911719", "name": "The Royal Palace of Bucharest", "slot": 0, "theme": "culture_sights", "extra": true, "pinned": false, "interest": 0.643296, "dwell_min": 10.0, "arrival_min": 204.516475, "wait_min": 0.0, "depart_min": 214.516475, "hours_ok": true, "hours_label_ru": "сб 10:00–18:00"},
+     {"order": 8, "place_id": "16044012576954065712", "name": "National Museum of Art", "slot": 0, "theme": "culture_sights", "extra": true, "pinned": false, "interest": 0.750411, "dwell_min": 10.0, "arrival_min": 215.477372, "wait_min": 0.0, "depart_min": 225.477372, "hours_ok": true, "hours_label_ru": "сб 11:00–19:00"}
+    ],
+    "segments": [
+     {"from_order": -1, "to_order": 0, "walk_min": 1.616921, "distance_km": 0.121269, "n_geom": 2},
+     {"from_order": 0, "to_order": 1, "walk_min": 1.991039, "distance_km": 0.149328, "n_geom": 2},
+     {"from_order": 1, "to_order": 2, "walk_min": 0.422379, "distance_km": 0.031678, "n_geom": 2},
+     {"from_order": 2, "to_order": 3, "walk_min": 0.104501, "distance_km": 0.007838, "n_geom": 2},
+     {"from_order": 3, "to_order": 4, "walk_min": 2.586215, "distance_km": 0.193966, "n_geom": 2},
+     {"from_order": 4, "to_order": 5, "walk_min": 1.442773, "distance_km": 0.108208, "n_geom": 2},
+     {"from_order": 5, "to_order": 6, "walk_min": 2.025944, "distance_km": 0.151946, "n_geom": 2},
+     {"from_order": 6, "to_order": 7, "walk_min": 4.326703, "distance_km": 0.324503, "n_geom": 2},
+     {"from_order": 7, "to_order": 8, "walk_min": 0.960896, "distance_km": 0.072067, "n_geom": 2},
+     {"from_order": 8, "to_order": -1, "walk_min": 3.203332, "distance_km": 0.24025, "n_geom": 2}
+    ],
+    "total_time_min": 228.680704,
+    "total_walk_min": 18.680704,
+    "total_dwell_min": 210.0,
+    "total_wait_min": 0.0,
+    "total_distance_km": 1.401053,
+    "over_budget": false,
+    "dropped_slots": [],
+    "note": ""
+   },
+   "render": {
+    "manual": true,
+    "variants_caption": "**Вариант 1**: 9 мест · 1.4 км · до 13:49 · ✏️ изменён  ·  Вариант 2: 7 мест · 2.5 км · до 13:43  ·  Вариант 3: 5 мест · 1.5 км · до 13:40",
+    "metric_stops": "4 из 4 + 5",
+    "metric_finish_label": "Возвращение",
+    "metric_finish": "13:49",
+    "metric_delta": "+11 мин запаса",
+    "metric_walk": "1.4 км · 0:19",
+    "metric_window": "10:00–14:00",
+    "captions": [],
+    "warnings": [],
+    "infos": [],
+    "stop_lines": [
+     ["1. Equestrian Statue of Carol I — Достопримечательность · по пути, можно пройти мимо", "10:02–10:12 · осмотр 10 мин", "🕒 сб круглосуточно"],
+     ["2. \"Theodor Aman\" Museum — Достопримечательность · по пути, можно пройти мимо", "10:14–10:24 · осмотр 10 мин", "🕒 сб 10:00–18:00"],
+     ["3. Palatul Cesianu-Racoviță — Достопримечательность · по пути, можно пройти мимо", "10:24–10:34 · осмотр 10 мин", "🕒 сб 10:00–20:00"],
+     ["4. Artmark — Достопримечательность", "10:34–11:19 · осмотр 45 мин", "🕒 сб 10:00–20:00"],
+     ["5. French Revolution Ateneul Român — Кофе", "11:22–11:52 · осмотр 30 мин", "🕒 сб 08:00–21:00"],
+     ["6. Parcul Ateneului — Парк / природа", "11:53–12:03 · осмотр 10 мин", "🕒 часы работы неизвестны"],
+     ["7. MACE by Joseph Hadad — Еда / ресторан", "12:05–13:20 · осмотр 75 мин", "🕒 сб 11:00–22:00"],
+     ["8. The Royal Palace of Bucharest — Достопримечательность · по пути, можно пройти мимо", "13:25–13:35 · осмотр 10 мин", "🕒 сб 10:00–18:00"],
+     ["9. National Museum of Art — Достопримечательность · по пути, можно пройти мимо", "13:35–13:45 · осмотр 10 мин", "🕒 сб 11:00–19:00"]
+    ]
+   },
+   "navigation": {
+    "google": ["https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440287,26.097708&destination=44.440287,26.097708&waypoints=44.439648,26.097016%7C44.440249,26.098126%7C44.440430,26.097974%7C44.440482,26.097988%7C44.441621,26.097134%7C44.440977,26.096679%7C44.441239,26.098049%7C44.439838,26.095743%7C44.439367,26.095874&waypoint_place_ids=ChIJpa8ak0X_sUARYp7VBl2I8x8%7CChIJ5YmJ9UX_sUARPHWGnrYiBTM%7CChIJMenVX0__sUARQpCY85n6M6o%7CChIJ8WjAX0__sUARMylWz4YWen8%7CChIJze7an0__sUARarjSCTjlJC4%7CChIJu73uv6r_sUAR5kbedi_nwnA%7CChIJz7sYKOv_sUARrLLBAx36TFs%7CChIJ0bKXvEX_sUARZ5959ASOAmM%7CChIJb0jBokX_sUARMCM_FW_Ip94"],
+    "legs": [
+     {"from": "Старт", "to": "Equestrian Statue of Carol I", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440287,26.097708&destination=44.439648,26.097016&destination_place_id=ChIJpa8ak0X_sUARYp7VBl2I8x8", "apple": "https://maps.apple.com/?saddr=44.440287,26.097708&daddr=44.439648,26.097016&dirflg=w"},
+     {"from": "Equestrian Statue of Carol I", "to": "\"Theodor Aman\" Museum", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.439648,26.097016&destination=44.440249,26.098126&destination_place_id=ChIJ5YmJ9UX_sUARPHWGnrYiBTM&origin_place_id=ChIJpa8ak0X_sUARYp7VBl2I8x8", "apple": "https://maps.apple.com/?saddr=44.439648,26.097016&daddr=44.440249,26.098126&dirflg=w"},
+     {"from": "\"Theodor Aman\" Museum", "to": "Palatul Cesianu-Racoviță", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440249,26.098126&destination=44.440430,26.097974&destination_place_id=ChIJMenVX0__sUARQpCY85n6M6o&origin_place_id=ChIJ5YmJ9UX_sUARPHWGnrYiBTM", "apple": "https://maps.apple.com/?saddr=44.440249,26.098126&daddr=44.440430,26.097974&dirflg=w"},
+     {"from": "Palatul Cesianu-Racoviță", "to": "Artmark", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440430,26.097974&destination=44.440482,26.097988&destination_place_id=ChIJ8WjAX0__sUARMylWz4YWen8&origin_place_id=ChIJMenVX0__sUARQpCY85n6M6o", "apple": "https://maps.apple.com/?saddr=44.440430,26.097974&daddr=44.440482,26.097988&dirflg=w"},
+     {"from": "Artmark", "to": "French Revolution Ateneul Român", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440482,26.097988&destination=44.441621,26.097134&destination_place_id=ChIJze7an0__sUARarjSCTjlJC4&origin_place_id=ChIJ8WjAX0__sUARMylWz4YWen8", "apple": "https://maps.apple.com/?saddr=44.440482,26.097988&daddr=44.441621,26.097134&dirflg=w"},
+     {"from": "French Revolution Ateneul Român", "to": "Parcul Ateneului", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.441621,26.097134&destination=44.440977,26.096679&destination_place_id=ChIJu73uv6r_sUAR5kbedi_nwnA&origin_place_id=ChIJze7an0__sUARarjSCTjlJC4", "apple": "https://maps.apple.com/?saddr=44.441621,26.097134&daddr=44.440977,26.096679&dirflg=w"},
+     {"from": "Parcul Ateneului", "to": "MACE by Joseph Hadad", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440977,26.096679&destination=44.441239,26.098049&destination_place_id=ChIJz7sYKOv_sUARrLLBAx36TFs&origin_place_id=ChIJu73uv6r_sUAR5kbedi_nwnA", "apple": "https://maps.apple.com/?saddr=44.440977,26.096679&daddr=44.441239,26.098049&dirflg=w"},
+     {"from": "MACE by Joseph Hadad", "to": "The Royal Palace of Bucharest", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.441239,26.098049&destination=44.439838,26.095743&destination_place_id=ChIJ0bKXvEX_sUARZ5959ASOAmM&origin_place_id=ChIJz7sYKOv_sUARrLLBAx36TFs", "apple": "https://maps.apple.com/?saddr=44.441239,26.098049&daddr=44.439838,26.095743&dirflg=w"},
+     {"from": "The Royal Palace of Bucharest", "to": "National Museum of Art", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.439838,26.095743&destination=44.439367,26.095874&destination_place_id=ChIJb0jBokX_sUARMCM_FW_Ip94&origin_place_id=ChIJ0bKXvEX_sUARZ5959ASOAmM", "apple": "https://maps.apple.com/?saddr=44.439838,26.095743&daddr=44.439367,26.095874&dirflg=w"},
+     {"from": "National Museum of Art", "to": "Старт", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.439367,26.095874&destination=44.440287,26.097708&origin_place_id=ChIJb0jBokX_sUARMCM_FW_Ip94", "apple": "https://maps.apple.com/?saddr=44.439367,26.095874&daddr=44.440287,26.097708&dirflg=w"}
+    ]
+   }
+  },
+  "B": {
+   "ops": [
+    {"op": "remove", "index": 1, "place_id": "12264421749383794754", "applied": true}
+   ],
+   "manual": true,
+   "removed": ["12264421749383794754"],
+   "plan": {
+    "stops": [
+     {"order": 0, "place_id": "3676382838556882236", "name": "\"Theodor Aman\" Museum", "slot": 0, "theme": "culture_sights", "extra": true, "pinned": false, "interest": 0.613857, "dwell_min": 10.0, "arrival_min": 0.600914, "wait_min": 0.0, "depart_min": 10.600914, "hours_ok": true, "hours_label_ru": "сб 10:00–18:00"},
+     {"order": 1, "place_id": "9185679158235506995", "name": "Artmark", "slot": 0, "theme": "culture_sights", "extra": false, "pinned": false, "interest": 0.621981, "dwell_min": 45.0, "arrival_min": 11.106272, "wait_min": 0.0, "depart_min": 56.106272, "hours_ok": true, "hours_label_ru": "сб 10:00–20:00"},
+     {"order": 2, "place_id": "3325034453752002666", "name": "French Revolution Ateneul Român", "slot": 1, "theme": "coffee", "extra": false, "pinned": false, "interest": 0.717382, "dwell_min": 30.0, "arrival_min": 58.692487, "wait_min": 0.0, "depart_min": 88.692487, "hours_ok": true, "hours_label_ru": "сб 08:00–21:00"},
+     {"order": 3, "place_id": "8125310868773553894", "name": "Parcul Ateneului", "slot": 2, "theme": "nature_outdoors", "extra": false, "pinned": false, "interest": 0.346162, "dwell_min": 10.0, "arrival_min": 90.13526, "wait_min": 0.0, "depart_min": 100.13526, "hours_ok": null, "hours_label_ru": "часы работы неизвестны"},
+     {"order": 4, "place_id": "6578908158205473452", "name": "MACE by Joseph Hadad", "slot": 3, "theme": "restaurant", "extra": false, "pinned": false, "interest": 0.560891, "dwell_min": 75.0, "arrival_min": 102.161205, "wait_min": 0.0, "depart_min": 177.161205, "hours_ok": true, "hours_label_ru": "сб 11:00–22:00"},
+     {"order": 5, "place_id": "7134420911640911719", "name": "The Royal Palace of Bucharest", "slot": 0, "theme": "culture_sights", "extra": true, "pinned": false, "interest": 0.643296, "dwell_min": 10.0, "arrival_min": 181.487908, "wait_min": 0.0, "depart_min": 191.487908, "hours_ok": true, "hours_label_ru": "сб 10:00–18:00"},
+     {"order": 6, "place_id": "16044012576954065712", "name": "National Museum of Art", "slot": 0, "theme": "culture_sights", "extra": true, "pinned": false, "interest": 0.750411, "dwell_min": 10.0, "arrival_min": 192.448804, "wait_min": 0.0, "depart_min": 202.448804, "hours_ok": true, "hours_label_ru": "сб 11:00–19:00"},
+     {"order": 7, "place_id": "2302333767644454498", "name": "Equestrian Statue of Carol I", "slot": 0, "theme": "culture_sights", "extra": true, "pinned": false, "interest": 0.600764, "dwell_min": 10.0, "arrival_min": 204.174989, "wait_min": 0.0, "depart_min": 214.174989, "hours_ok": true, "hours_label_ru": "сб круглосуточно"}
+    ],
+    "segments": [
+     {"from_order": -1, "to_order": 0, "walk_min": 0.600914, "distance_km": 0.045069, "n_geom": 2},
+     {"from_order": 0, "to_order": 1, "walk_min": 0.505358, "distance_km": 0.037902, "n_geom": 2},
+     {"from_order": 1, "to_order": 2, "walk_min": 2.586215, "distance_km": 0.193966, "n_geom": 2},
+     {"from_order": 2, "to_order": 3, "walk_min": 1.442773, "distance_km": 0.108208, "n_geom": 2},
+     {"from_order": 3, "to_order": 4, "walk_min": 2.025944, "distance_km": 0.151946, "n_geom": 2},
+     {"from_order": 4, "to_order": 5, "walk_min": 4.326703, "distance_km": 0.324503, "n_geom": 2},
+     {"from_order": 5, "to_order": 6, "walk_min": 0.960896, "distance_km": 0.072067, "n_geom": 2},
+     {"from_order": 6, "to_order": 7, "walk_min": 1.726185, "distance_km": 0.129464, "n_geom": 2},
+     {"from_order": 7, "to_order": -1, "walk_min": 1.616921, "distance_km": 0.121269, "n_geom": 2}
+    ],
+    "total_time_min": 215.79191,
+    "total_walk_min": 15.79191,
+    "total_dwell_min": 200.0,
+    "total_wait_min": 0.0,
+    "total_distance_km": 1.184393,
+    "over_budget": false,
+    "dropped_slots": [],
+    "note": ""
+   },
+   "render": {
+    "manual": true,
+    "variants_caption": "**Вариант 1**: 8 мест · 1.2 км · до 13:36 · ✏️ изменён  ·  Вариант 2: 7 мест · 2.5 км · до 13:43  ·  Вариант 3: 5 мест · 1.5 км · до 13:40",
+    "metric_stops": "4 из 4 + 4",
+    "metric_finish_label": "Возвращение",
+    "metric_finish": "13:36",
+    "metric_delta": "+24 мин запаса",
+    "metric_walk": "1.2 км · 0:16",
+    "metric_window": "10:00–14:00",
+    "captions": [],
+    "warnings": [],
+    "infos": [],
+    "stop_lines": [
+     ["1. \"Theodor Aman\" Museum — Достопримечательность · по пути, можно пройти мимо", "10:01–10:11 · осмотр 10 мин", "🕒 сб 10:00–18:00"],
+     ["2. Artmark — Достопримечательность", "10:11–10:56 · осмотр 45 мин", "🕒 сб 10:00–20:00"],
+     ["3. French Revolution Ateneul Român — Кофе", "10:59–11:29 · осмотр 30 мин", "🕒 сб 08:00–21:00"],
+     ["4. Parcul Ateneului — Парк / природа", "11:30–11:40 · осмотр 10 мин", "🕒 часы работы неизвестны"],
+     ["5. MACE by Joseph Hadad — Еда / ресторан", "11:42–12:57 · осмотр 75 мин", "🕒 сб 11:00–22:00"],
+     ["6. The Royal Palace of Bucharest — Достопримечательность · по пути, можно пройти мимо", "13:01–13:11 · осмотр 10 мин", "🕒 сб 10:00–18:00"],
+     ["7. National Museum of Art — Достопримечательность · по пути, можно пройти мимо", "13:12–13:22 · осмотр 10 мин", "🕒 сб 11:00–19:00"],
+     ["8. Equestrian Statue of Carol I — Достопримечательность · по пути, можно пройти мимо", "13:24–13:34 · осмотр 10 мин", "🕒 сб круглосуточно"]
+    ]
+   },
+   "navigation": {
+    "google": ["https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440287,26.097708&destination=44.440287,26.097708&waypoints=44.440249,26.098126%7C44.440482,26.097988%7C44.441621,26.097134%7C44.440977,26.096679%7C44.441239,26.098049%7C44.439838,26.095743%7C44.439367,26.095874%7C44.439648,26.097016&waypoint_place_ids=ChIJ5YmJ9UX_sUARPHWGnrYiBTM%7CChIJ8WjAX0__sUARMylWz4YWen8%7CChIJze7an0__sUARarjSCTjlJC4%7CChIJu73uv6r_sUAR5kbedi_nwnA%7CChIJz7sYKOv_sUARrLLBAx36TFs%7CChIJ0bKXvEX_sUARZ5959ASOAmM%7CChIJb0jBokX_sUARMCM_FW_Ip94%7CChIJpa8ak0X_sUARYp7VBl2I8x8"],
+    "legs": [
+     {"from": "Старт", "to": "\"Theodor Aman\" Museum", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440287,26.097708&destination=44.440249,26.098126&destination_place_id=ChIJ5YmJ9UX_sUARPHWGnrYiBTM", "apple": "https://maps.apple.com/?saddr=44.440287,26.097708&daddr=44.440249,26.098126&dirflg=w"},
+     {"from": "\"Theodor Aman\" Museum", "to": "Artmark", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440249,26.098126&destination=44.440482,26.097988&destination_place_id=ChIJ8WjAX0__sUARMylWz4YWen8&origin_place_id=ChIJ5YmJ9UX_sUARPHWGnrYiBTM", "apple": "https://maps.apple.com/?saddr=44.440249,26.098126&daddr=44.440482,26.097988&dirflg=w"},
+     {"from": "Artmark", "to": "French Revolution Ateneul Român", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440482,26.097988&destination=44.441621,26.097134&destination_place_id=ChIJze7an0__sUARarjSCTjlJC4&origin_place_id=ChIJ8WjAX0__sUARMylWz4YWen8", "apple": "https://maps.apple.com/?saddr=44.440482,26.097988&daddr=44.441621,26.097134&dirflg=w"},
+     {"from": "French Revolution Ateneul Român", "to": "Parcul Ateneului", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.441621,26.097134&destination=44.440977,26.096679&destination_place_id=ChIJu73uv6r_sUAR5kbedi_nwnA&origin_place_id=ChIJze7an0__sUARarjSCTjlJC4", "apple": "https://maps.apple.com/?saddr=44.441621,26.097134&daddr=44.440977,26.096679&dirflg=w"},
+     {"from": "Parcul Ateneului", "to": "MACE by Joseph Hadad", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440977,26.096679&destination=44.441239,26.098049&destination_place_id=ChIJz7sYKOv_sUARrLLBAx36TFs&origin_place_id=ChIJu73uv6r_sUAR5kbedi_nwnA", "apple": "https://maps.apple.com/?saddr=44.440977,26.096679&daddr=44.441239,26.098049&dirflg=w"},
+     {"from": "MACE by Joseph Hadad", "to": "The Royal Palace of Bucharest", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.441239,26.098049&destination=44.439838,26.095743&destination_place_id=ChIJ0bKXvEX_sUARZ5959ASOAmM&origin_place_id=ChIJz7sYKOv_sUARrLLBAx36TFs", "apple": "https://maps.apple.com/?saddr=44.441239,26.098049&daddr=44.439838,26.095743&dirflg=w"},
+     {"from": "The Royal Palace of Bucharest", "to": "National Museum of Art", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.439838,26.095743&destination=44.439367,26.095874&destination_place_id=ChIJb0jBokX_sUARMCM_FW_Ip94&origin_place_id=ChIJ0bKXvEX_sUARZ5959ASOAmM", "apple": "https://maps.apple.com/?saddr=44.439838,26.095743&daddr=44.439367,26.095874&dirflg=w"},
+     {"from": "National Museum of Art", "to": "Equestrian Statue of Carol I", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.439367,26.095874&destination=44.439648,26.097016&destination_place_id=ChIJpa8ak0X_sUARYp7VBl2I8x8&origin_place_id=ChIJb0jBokX_sUARMCM_FW_Ip94", "apple": "https://maps.apple.com/?saddr=44.439367,26.095874&daddr=44.439648,26.097016&dirflg=w"},
+     {"from": "Equestrian Statue of Carol I", "to": "Старт", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.439648,26.097016&destination=44.440287,26.097708&origin_place_id=ChIJpa8ak0X_sUARYp7VBl2I8x8", "apple": "https://maps.apple.com/?saddr=44.439648,26.097016&daddr=44.440287,26.097708&dirflg=w"}
+    ]
+   }
+  },
+  "C": {
+   "ops": [
+    {"op": "add", "place_id": "10915586233752676659", "name": "The Church of the \"Stavropoleos\" Monastery", "applied": true}
+   ],
+   "manual": true,
+   "removed": [],
+   "plan": {
+    "stops": [
+     {"order": 0, "place_id": "3676382838556882236", "name": "\"Theodor Aman\" Museum", "slot": 0, "theme": "culture_sights", "extra": true, "pinned": false, "interest": 0.613857, "dwell_min": 10.0, "arrival_min": 0.600914, "wait_min": 0.0, "depart_min": 10.600914, "hours_ok": true, "hours_label_ru": "сб 10:00–18:00"},
+     {"order": 1, "place_id": "12264421749383794754", "name": "Palatul Cesianu-Racoviță", "slot": 0, "theme": "culture_sights", "extra": true, "pinned": false, "interest": 0.510604, "dwell_min": 10.0, "arrival_min": 11.023294, "wait_min": 0.0, "depart_min": 21.023294, "hours_ok": true, "hours_label_ru": "сб 10:00–20:00"},
+     {"order": 2, "place_id": "9185679158235506995", "name": "Artmark", "slot": 0, "theme": "culture_sights", "extra": false, "pinned": false, "interest": 0.621981, "dwell_min": 45.0, "arrival_min": 21.127794, "wait_min": 0.0, "depart_min": 66.127794, "hours_ok": true, "hours_label_ru": "сб 10:00–20:00"},
+     {"order": 3, "place_id": "3325034453752002666", "name": "French Revolution Ateneul Român", "slot": 1, "theme": "coffee", "extra": false, "pinned": false, "interest": 0.717382, "dwell_min": 30.0, "arrival_min": 68.714009, "wait_min": 0.0, "depart_min": 98.714009, "hours_ok": true, "hours_label_ru": "сб 08:00–21:00"},
+     {"order": 4, "place_id": "8125310868773553894", "name": "Parcul Ateneului", "slot": 2, "theme": "nature_outdoors", "extra": false, "pinned": false, "interest": 0.346162, "dwell_min": 10.0, "arrival_min": 100.156783, "wait_min": 0.0, "depart_min": 110.156783, "hours_ok": null, "hours_label_ru": "часы работы неизвестны"},
+     {"order": 5, "place_id": "6578908158205473452", "name": "MACE by Joseph Hadad", "slot": 3, "theme": "restaurant", "extra": false, "pinned": false, "interest": 0.560891, "dwell_min": 75.0, "arrival_min": 112.182727, "wait_min": 0.0, "depart_min": 187.182727, "hours_ok": true, "hours_label_ru": "сб 11:00–22:00"},
+     {"order": 6, "place_id": "7134420911640911719", "name": "The Royal Palace of Bucharest", "slot": 0, "theme": "culture_sights", "extra": true, "pinned": false, "interest": 0.643296, "dwell_min": 10.0, "arrival_min": 191.50943, "wait_min": 0.0, "depart_min": 201.50943, "hours_ok": true, "hours_label_ru": "сб 10:00–18:00"},
+     {"order": 7, "place_id": "16044012576954065712", "name": "National Museum of Art", "slot": 0, "theme": "culture_sights", "extra": true, "pinned": false, "interest": 0.750411, "dwell_min": 10.0, "arrival_min": 202.470326, "wait_min": 0.0, "depart_min": 212.470326, "hours_ok": true, "hours_label_ru": "сб 11:00–19:00"},
+     {"order": 8, "place_id": "10915586233752676659", "name": "The Church of the \"Stavropoleos\" Monastery", "slot": -1, "theme": "culture_sights", "extra": false, "pinned": true, "interest": 0.0, "dwell_min": 35.0, "arrival_min": 228.218515, "wait_min": 0.0, "depart_min": 263.218515, "hours_ok": true, "hours_label_ru": "сб 08:00–19:00"},
+     {"order": 9, "place_id": "2302333767644454498", "name": "Equestrian Statue of Carol I", "slot": 0, "theme": "culture_sights", "extra": true, "pinned": false, "interest": 0.600764, "dwell_min": 10.0, "arrival_min": 279.15895, "wait_min": 0.0, "depart_min": 289.15895, "hours_ok": true, "hours_label_ru": "сб круглосуточно"}
+    ],
+    "segments": [
+     {"from_order": -1, "to_order": 0, "walk_min": 0.600914, "distance_km": 0.045069, "n_geom": 2},
+     {"from_order": 0, "to_order": 1, "walk_min": 0.422379, "distance_km": 0.031678, "n_geom": 2},
+     {"from_order": 1, "to_order": 2, "walk_min": 0.104501, "distance_km": 0.007838, "n_geom": 2},
+     {"from_order": 2, "to_order": 3, "walk_min": 2.586215, "distance_km": 0.193966, "n_geom": 2},
+     {"from_order": 3, "to_order": 4, "walk_min": 1.442773, "distance_km": 0.108208, "n_geom": 2},
+     {"from_order": 4, "to_order": 5, "walk_min": 2.025944, "distance_km": 0.151946, "n_geom": 2},
+     {"from_order": 5, "to_order": 6, "walk_min": 4.326703, "distance_km": 0.324503, "n_geom": 2},
+     {"from_order": 6, "to_order": 7, "walk_min": 0.960896, "distance_km": 0.072067, "n_geom": 2},
+     {"from_order": 7, "to_order": 8, "walk_min": 15.748189, "distance_km": 1.181114, "n_geom": 2},
+     {"from_order": 8, "to_order": 9, "walk_min": 15.940435, "distance_km": 1.195533, "n_geom": 2},
+     {"from_order": 9, "to_order": -1, "walk_min": 1.616921, "distance_km": 0.121269, "n_geom": 2}
+    ],
+    "total_time_min": 290.775871,
+    "total_walk_min": 45.775871,
+    "total_dwell_min": 245.0,
+    "total_wait_min": 0.0,
+    "total_distance_km": 3.43319,
+    "over_budget": true,
+    "dropped_slots": [],
+    "note": "Route needs ~291 min but the budget is 240 min."
+   },
+   "render": {
+    "manual": true,
+    "variants_caption": "**Вариант 1**: 10 мест · 3.4 км · до 14:51 · ✏️ изменён  ·  Вариант 2: 7 мест · 2.5 км · до 13:43  ·  Вариант 3: 5 мест · 1.5 км · до 13:40",
+    "metric_stops": "4 из 4 + 5 + 📍1",
+    "metric_finish_label": "Возвращение",
+    "metric_finish": "14:51",
+    "metric_delta": "-51 мин, не успеваю",
+    "metric_walk": "3.4 км · 0:46",
+    "metric_window": "10:00–14:00",
+    "captions": [],
+    "warnings": ["Маршрут займёт ~291 мин, а окно 240 мин: финиш в 14:51, позже 14:00."],
+    "infos": [],
+    "stop_lines": [
+     ["1. \"Theodor Aman\" Museum — Достопримечательность · по пути, можно пройти мимо", "10:01–10:11 · осмотр 10 мин", "🕒 сб 10:00–18:00"],
+     ["2. Palatul Cesianu-Racoviță — Достопримечательность · по пути, можно пройти мимо", "10:11–10:21 · осмотр 10 мин", "🕒 сб 10:00–20:00"],
+     ["3. Artmark — Достопримечательность", "10:21–11:06 · осмотр 45 мин", "🕒 сб 10:00–20:00"],
+     ["4. French Revolution Ateneul Român — Кофе", "11:09–11:39 · осмотр 30 мин", "🕒 сб 08:00–21:00"],
+     ["5. Parcul Ateneului — Парк / природа", "11:40–11:50 · осмотр 10 мин", "🕒 часы работы неизвестны"],
+     ["6. MACE by Joseph Hadad — Еда / ресторан", "11:52–13:07 · осмотр 75 мин", "🕒 сб 11:00–22:00"],
+     ["7. The Royal Palace of Bucharest — Достопримечательность · по пути, можно пройти мимо", "13:12–13:22 · осмотр 10 мин", "🕒 сб 10:00–18:00"],
+     ["8. National Museum of Art — Достопримечательность · по пути, можно пройти мимо", "13:22–13:32 · осмотр 10 мин", "🕒 сб 11:00–19:00"],
+     ["9. The Church of the \"Stavropoleos\" Monastery — 📍 ваше место", "13:48–14:23 · осмотр 35 мин", "🕒 сб 08:00–19:00"],
+     ["10. Equestrian Statue of Carol I — Достопримечательность · по пути, можно пройти мимо", "14:39–14:49 · осмотр 10 мин", "🕒 сб круглосуточно"]
+    ]
+   },
+   "navigation": {
+    "google": ["https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440287,26.097708&destination=44.439648,26.097016&destination_place_id=ChIJpa8ak0X_sUARYp7VBl2I8x8&waypoints=44.440249,26.098126%7C44.440430,26.097974%7C44.440482,26.097988%7C44.441621,26.097134%7C44.440977,26.096679%7C44.441239,26.098049%7C44.439838,26.095743%7C44.439367,26.095874%7C44.431793,26.098859&waypoint_place_ids=ChIJ5YmJ9UX_sUARPHWGnrYiBTM%7CChIJMenVX0__sUARQpCY85n6M6o%7CChIJ8WjAX0__sUARMylWz4YWen8%7CChIJze7an0__sUARarjSCTjlJC4%7CChIJu73uv6r_sUAR5kbedi_nwnA%7CChIJz7sYKOv_sUARrLLBAx36TFs%7CChIJ0bKXvEX_sUARZ5959ASOAmM%7CChIJb0jBokX_sUARMCM_FW_Ip94%7CChIJEZe8dkD_sUARM-n4qdjze5c", "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.439648,26.097016&destination=44.440287,26.097708&origin_place_id=ChIJpa8ak0X_sUARYp7VBl2I8x8"],
+    "legs": [
+     {"from": "Старт", "to": "\"Theodor Aman\" Museum", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440287,26.097708&destination=44.440249,26.098126&destination_place_id=ChIJ5YmJ9UX_sUARPHWGnrYiBTM", "apple": "https://maps.apple.com/?saddr=44.440287,26.097708&daddr=44.440249,26.098126&dirflg=w"},
+     {"from": "\"Theodor Aman\" Museum", "to": "Palatul Cesianu-Racoviță", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440249,26.098126&destination=44.440430,26.097974&destination_place_id=ChIJMenVX0__sUARQpCY85n6M6o&origin_place_id=ChIJ5YmJ9UX_sUARPHWGnrYiBTM", "apple": "https://maps.apple.com/?saddr=44.440249,26.098126&daddr=44.440430,26.097974&dirflg=w"},
+     {"from": "Palatul Cesianu-Racoviță", "to": "Artmark", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440430,26.097974&destination=44.440482,26.097988&destination_place_id=ChIJ8WjAX0__sUARMylWz4YWen8&origin_place_id=ChIJMenVX0__sUARQpCY85n6M6o", "apple": "https://maps.apple.com/?saddr=44.440430,26.097974&daddr=44.440482,26.097988&dirflg=w"},
+     {"from": "Artmark", "to": "French Revolution Ateneul Român", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440482,26.097988&destination=44.441621,26.097134&destination_place_id=ChIJze7an0__sUARarjSCTjlJC4&origin_place_id=ChIJ8WjAX0__sUARMylWz4YWen8", "apple": "https://maps.apple.com/?saddr=44.440482,26.097988&daddr=44.441621,26.097134&dirflg=w"},
+     {"from": "French Revolution Ateneul Român", "to": "Parcul Ateneului", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.441621,26.097134&destination=44.440977,26.096679&destination_place_id=ChIJu73uv6r_sUAR5kbedi_nwnA&origin_place_id=ChIJze7an0__sUARarjSCTjlJC4", "apple": "https://maps.apple.com/?saddr=44.441621,26.097134&daddr=44.440977,26.096679&dirflg=w"},
+     {"from": "Parcul Ateneului", "to": "MACE by Joseph Hadad", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440977,26.096679&destination=44.441239,26.098049&destination_place_id=ChIJz7sYKOv_sUARrLLBAx36TFs&origin_place_id=ChIJu73uv6r_sUAR5kbedi_nwnA", "apple": "https://maps.apple.com/?saddr=44.440977,26.096679&daddr=44.441239,26.098049&dirflg=w"},
+     {"from": "MACE by Joseph Hadad", "to": "The Royal Palace of Bucharest", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.441239,26.098049&destination=44.439838,26.095743&destination_place_id=ChIJ0bKXvEX_sUARZ5959ASOAmM&origin_place_id=ChIJz7sYKOv_sUARrLLBAx36TFs", "apple": "https://maps.apple.com/?saddr=44.441239,26.098049&daddr=44.439838,26.095743&dirflg=w"},
+     {"from": "The Royal Palace of Bucharest", "to": "National Museum of Art", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.439838,26.095743&destination=44.439367,26.095874&destination_place_id=ChIJb0jBokX_sUARMCM_FW_Ip94&origin_place_id=ChIJ0bKXvEX_sUARZ5959ASOAmM", "apple": "https://maps.apple.com/?saddr=44.439838,26.095743&daddr=44.439367,26.095874&dirflg=w"},
+     {"from": "National Museum of Art", "to": "The Church of the \"Stavropoleos\" Monastery", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.439367,26.095874&destination=44.431793,26.098859&destination_place_id=ChIJEZe8dkD_sUARM-n4qdjze5c&origin_place_id=ChIJb0jBokX_sUARMCM_FW_Ip94", "apple": "https://maps.apple.com/?saddr=44.439367,26.095874&daddr=44.431793,26.098859&dirflg=w"},
+     {"from": "The Church of the \"Stavropoleos\" Monastery", "to": "Equestrian Statue of Carol I", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.431793,26.098859&destination=44.439648,26.097016&destination_place_id=ChIJpa8ak0X_sUARYp7VBl2I8x8&origin_place_id=ChIJEZe8dkD_sUARM-n4qdjze5c", "apple": "https://maps.apple.com/?saddr=44.431793,26.098859&daddr=44.439648,26.097016&dirflg=w"},
+     {"from": "Equestrian Statue of Carol I", "to": "Старт", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.439648,26.097016&destination=44.440287,26.097708&origin_place_id=ChIJpa8ak0X_sUARYp7VBl2I8x8", "apple": "https://maps.apple.com/?saddr=44.439648,26.097016&daddr=44.440287,26.097708&dirflg=w"}
+    ]
+   }
+  },
+  "D": {
+   "ops": [
+    {"op": "set_dwell", "index": 0, "dwell_min": 120, "place_id": "3676382838556882236", "applied": true}
+   ],
+   "manual": true,
+   "removed": [],
+   "plan": {
+    "stops": [
+     {"order": 0, "place_id": "3676382838556882236", "name": "\"Theodor Aman\" Museum", "slot": 0, "theme": "culture_sights", "extra": true, "pinned": false, "interest": 0.613857, "dwell_min": 120.0, "arrival_min": 0.600914, "wait_min": 0.0, "depart_min": 120.600914, "hours_ok": true, "hours_label_ru": "сб 10:00–18:00"},
+     {"order": 1, "place_id": "12264421749383794754", "name": "Palatul Cesianu-Racoviță", "slot": 0, "theme": "culture_sights", "extra": true, "pinned": false, "interest": 0.510604, "dwell_min": 10.0, "arrival_min": 121.023294, "wait_min": 0.0, "depart_min": 131.023294, "hours_ok": true, "hours_label_ru": "сб 10:00–20:00"},
+     {"order": 2, "place_id": "9185679158235506995", "name": "Artmark", "slot": 0, "theme": "culture_sights", "extra": false, "pinned": false, "interest": 0.621981, "dwell_min": 45.0, "arrival_min": 131.127794, "wait_min": 0.0, "depart_min": 176.127794, "hours_ok": true, "hours_label_ru": "сб 10:00–20:00"},
+     {"order": 3, "place_id": "3325034453752002666", "name": "French Revolution Ateneul Român", "slot": 1, "theme": "coffee", "extra": false, "pinned": false, "interest": 0.717382, "dwell_min": 30.0, "arrival_min": 178.714009, "wait_min": 0.0, "depart_min": 208.714009, "hours_ok": true, "hours_label_ru": "сб 08:00–21:00"},
+     {"order": 4, "place_id": "8125310868773553894", "name": "Parcul Ateneului", "slot": 2, "theme": "nature_outdoors", "extra": false, "pinned": false, "interest": 0.346162, "dwell_min": 10.0, "arrival_min": 210.156783, "wait_min": 0.0, "depart_min": 220.156783, "hours_ok": null, "hours_label_ru": "часы работы неизвестны"},
+     {"order": 5, "place_id": "6578908158205473452", "name": "MACE by Joseph Hadad", "slot": 3, "theme": "restaurant", "extra": false, "pinned": false, "interest": 0.560891, "dwell_min": 75.0, "arrival_min": 222.182727, "wait_min": 0.0, "depart_min": 297.182727, "hours_ok": true, "hours_label_ru": "сб 11:00–22:00"},
+     {"order": 6, "place_id": "7134420911640911719", "name": "The Royal Palace of Bucharest", "slot": 0, "theme": "culture_sights", "extra": true, "pinned": false, "interest": 0.643296, "dwell_min": 10.0, "arrival_min": 301.50943, "wait_min": 0.0, "depart_min": 311.50943, "hours_ok": true, "hours_label_ru": "сб 10:00–18:00"},
+     {"order": 7, "place_id": "16044012576954065712", "name": "National Museum of Art", "slot": 0, "theme": "culture_sights", "extra": true, "pinned": false, "interest": 0.750411, "dwell_min": 10.0, "arrival_min": 312.470326, "wait_min": 0.0, "depart_min": 322.470326, "hours_ok": true, "hours_label_ru": "сб 11:00–19:00"},
+     {"order": 8, "place_id": "2302333767644454498", "name": "Equestrian Statue of Carol I", "slot": 0, "theme": "culture_sights", "extra": true, "pinned": false, "interest": 0.600764, "dwell_min": 10.0, "arrival_min": 324.196511, "wait_min": 0.0, "depart_min": 334.196511, "hours_ok": true, "hours_label_ru": "сб круглосуточно"}
+    ],
+    "segments": [
+     {"from_order": -1, "to_order": 0, "walk_min": 0.600914, "distance_km": 0.045069, "n_geom": 2},
+     {"from_order": 0, "to_order": 1, "walk_min": 0.422379, "distance_km": 0.031678, "n_geom": 2},
+     {"from_order": 1, "to_order": 2, "walk_min": 0.104501, "distance_km": 0.007838, "n_geom": 2},
+     {"from_order": 2, "to_order": 3, "walk_min": 2.586215, "distance_km": 0.193966, "n_geom": 2},
+     {"from_order": 3, "to_order": 4, "walk_min": 1.442773, "distance_km": 0.108208, "n_geom": 2},
+     {"from_order": 4, "to_order": 5, "walk_min": 2.025944, "distance_km": 0.151946, "n_geom": 2},
+     {"from_order": 5, "to_order": 6, "walk_min": 4.326703, "distance_km": 0.324503, "n_geom": 2},
+     {"from_order": 6, "to_order": 7, "walk_min": 0.960896, "distance_km": 0.072067, "n_geom": 2},
+     {"from_order": 7, "to_order": 8, "walk_min": 1.726185, "distance_km": 0.129464, "n_geom": 2},
+     {"from_order": 8, "to_order": -1, "walk_min": 1.616921, "distance_km": 0.121269, "n_geom": 2}
+    ],
+    "total_time_min": 335.813432,
+    "total_walk_min": 15.813432,
+    "total_dwell_min": 320.0,
+    "total_wait_min": 0.0,
+    "total_distance_km": 1.186007,
+    "over_budget": true,
+    "dropped_slots": [],
+    "note": "Route needs ~336 min but the budget is 240 min."
+   },
+   "render": {
+    "manual": true,
+    "variants_caption": "**Вариант 1**: 9 мест · 1.2 км · до 15:36 · ✏️ изменён  ·  Вариант 2: 7 мест · 2.5 км · до 13:43  ·  Вариант 3: 5 мест · 1.5 км · до 13:40",
+    "metric_stops": "4 из 4 + 5",
+    "metric_finish_label": "Возвращение",
+    "metric_finish": "15:36",
+    "metric_delta": "-96 мин, не успеваю",
+    "metric_walk": "1.2 км · 0:16",
+    "metric_window": "10:00–14:00",
+    "captions": [],
+    "warnings": ["Маршрут займёт ~336 мин, а окно 240 мин: финиш в 15:36, позже 14:00."],
+    "infos": [],
+    "stop_lines": [
+     ["1. \"Theodor Aman\" Museum — Достопримечательность · по пути, можно пройти мимо", "10:01–12:01 · осмотр 120 мин", "🕒 сб 10:00–18:00"],
+     ["2. Palatul Cesianu-Racoviță — Достопримечательность · по пути, можно пройти мимо", "12:01–12:11 · осмотр 10 мин", "🕒 сб 10:00–20:00"],
+     ["3. Artmark — Достопримечательность", "12:11–12:56 · осмотр 45 мин", "🕒 сб 10:00–20:00"],
+     ["4. French Revolution Ateneul Român — Кофе", "12:59–13:29 · осмотр 30 мин", "🕒 сб 08:00–21:00"],
+     ["5. Parcul Ateneului — Парк / природа", "13:30–13:40 · осмотр 10 мин", "🕒 часы работы неизвестны"],
+     ["6. MACE by Joseph Hadad — Еда / ресторан", "13:42–14:57 · осмотр 75 мин", "🕒 сб 11:00–22:00"],
+     ["7. The Royal Palace of Bucharest — Достопримечательность · по пути, можно пройти мимо", "15:02–15:12 · осмотр 10 мин", "🕒 сб 10:00–18:00"],
+     ["8. National Museum of Art — Достопримечательность · по пути, можно пройти мимо", "15:12–15:22 · осмотр 10 мин", "🕒 сб 11:00–19:00"],
+     ["9. Equestrian Statue of Carol I — Достопримечательность · по пути, можно пройти мимо", "15:24–15:34 · осмотр 10 мин", "🕒 сб круглосуточно"]
+    ]
+   },
+   "navigation": {
+    "google": ["https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440287,26.097708&destination=44.440287,26.097708&waypoints=44.440249,26.098126%7C44.440430,26.097974%7C44.440482,26.097988%7C44.441621,26.097134%7C44.440977,26.096679%7C44.441239,26.098049%7C44.439838,26.095743%7C44.439367,26.095874%7C44.439648,26.097016&waypoint_place_ids=ChIJ5YmJ9UX_sUARPHWGnrYiBTM%7CChIJMenVX0__sUARQpCY85n6M6o%7CChIJ8WjAX0__sUARMylWz4YWen8%7CChIJze7an0__sUARarjSCTjlJC4%7CChIJu73uv6r_sUAR5kbedi_nwnA%7CChIJz7sYKOv_sUARrLLBAx36TFs%7CChIJ0bKXvEX_sUARZ5959ASOAmM%7CChIJb0jBokX_sUARMCM_FW_Ip94%7CChIJpa8ak0X_sUARYp7VBl2I8x8"],
+    "legs": [
+     {"from": "Старт", "to": "\"Theodor Aman\" Museum", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440287,26.097708&destination=44.440249,26.098126&destination_place_id=ChIJ5YmJ9UX_sUARPHWGnrYiBTM", "apple": "https://maps.apple.com/?saddr=44.440287,26.097708&daddr=44.440249,26.098126&dirflg=w"},
+     {"from": "\"Theodor Aman\" Museum", "to": "Palatul Cesianu-Racoviță", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440249,26.098126&destination=44.440430,26.097974&destination_place_id=ChIJMenVX0__sUARQpCY85n6M6o&origin_place_id=ChIJ5YmJ9UX_sUARPHWGnrYiBTM", "apple": "https://maps.apple.com/?saddr=44.440249,26.098126&daddr=44.440430,26.097974&dirflg=w"},
+     {"from": "Palatul Cesianu-Racoviță", "to": "Artmark", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440430,26.097974&destination=44.440482,26.097988&destination_place_id=ChIJ8WjAX0__sUARMylWz4YWen8&origin_place_id=ChIJMenVX0__sUARQpCY85n6M6o", "apple": "https://maps.apple.com/?saddr=44.440430,26.097974&daddr=44.440482,26.097988&dirflg=w"},
+     {"from": "Artmark", "to": "French Revolution Ateneul Român", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440482,26.097988&destination=44.441621,26.097134&destination_place_id=ChIJze7an0__sUARarjSCTjlJC4&origin_place_id=ChIJ8WjAX0__sUARMylWz4YWen8", "apple": "https://maps.apple.com/?saddr=44.440482,26.097988&daddr=44.441621,26.097134&dirflg=w"},
+     {"from": "French Revolution Ateneul Român", "to": "Parcul Ateneului", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.441621,26.097134&destination=44.440977,26.096679&destination_place_id=ChIJu73uv6r_sUAR5kbedi_nwnA&origin_place_id=ChIJze7an0__sUARarjSCTjlJC4", "apple": "https://maps.apple.com/?saddr=44.441621,26.097134&daddr=44.440977,26.096679&dirflg=w"},
+     {"from": "Parcul Ateneului", "to": "MACE by Joseph Hadad", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440977,26.096679&destination=44.441239,26.098049&destination_place_id=ChIJz7sYKOv_sUARrLLBAx36TFs&origin_place_id=ChIJu73uv6r_sUAR5kbedi_nwnA", "apple": "https://maps.apple.com/?saddr=44.440977,26.096679&daddr=44.441239,26.098049&dirflg=w"},
+     {"from": "MACE by Joseph Hadad", "to": "The Royal Palace of Bucharest", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.441239,26.098049&destination=44.439838,26.095743&destination_place_id=ChIJ0bKXvEX_sUARZ5959ASOAmM&origin_place_id=ChIJz7sYKOv_sUARrLLBAx36TFs", "apple": "https://maps.apple.com/?saddr=44.441239,26.098049&daddr=44.439838,26.095743&dirflg=w"},
+     {"from": "The Royal Palace of Bucharest", "to": "National Museum of Art", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.439838,26.095743&destination=44.439367,26.095874&destination_place_id=ChIJb0jBokX_sUARMCM_FW_Ip94&origin_place_id=ChIJ0bKXvEX_sUARZ5959ASOAmM", "apple": "https://maps.apple.com/?saddr=44.439838,26.095743&daddr=44.439367,26.095874&dirflg=w"},
+     {"from": "National Museum of Art", "to": "Equestrian Statue of Carol I", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.439367,26.095874&destination=44.439648,26.097016&destination_place_id=ChIJpa8ak0X_sUARYp7VBl2I8x8&origin_place_id=ChIJb0jBokX_sUARMCM_FW_Ip94", "apple": "https://maps.apple.com/?saddr=44.439367,26.095874&daddr=44.439648,26.097016&dirflg=w"},
+     {"from": "Equestrian Statue of Carol I", "to": "Старт", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.439648,26.097016&destination=44.440287,26.097708&origin_place_id=ChIJpa8ak0X_sUARYp7VBl2I8x8", "apple": "https://maps.apple.com/?saddr=44.439648,26.097016&daddr=44.440287,26.097708&dirflg=w"}
+    ]
+   }
+  },
+  "E": {
+   "ops": [
+    {"op": "remove", "index": 0, "place_id": "3676382838556882236", "applied": true},
+    {"op": "restore", "removed_index": 0, "to": 0, "place_id": "3676382838556882236", "applied": true}
+   ],
+   "manual": true,
+   "removed": [],
+   "plan": {
+    "stops": [
+     {"order": 0, "place_id": "3676382838556882236", "name": "\"Theodor Aman\" Museum", "slot": 0, "theme": "culture_sights", "extra": true, "pinned": false, "interest": 0.613857, "dwell_min": 10.0, "arrival_min": 0.600914, "wait_min": 0.0, "depart_min": 10.600914, "hours_ok": true, "hours_label_ru": "сб 10:00–18:00"},
+     {"order": 1, "place_id": "12264421749383794754", "name": "Palatul Cesianu-Racoviță", "slot": 0, "theme": "culture_sights", "extra": true, "pinned": false, "interest": 0.510604, "dwell_min": 10.0, "arrival_min": 11.023294, "wait_min": 0.0, "depart_min": 21.023294, "hours_ok": true, "hours_label_ru": "сб 10:00–20:00"},
+     {"order": 2, "place_id": "9185679158235506995", "name": "Artmark", "slot": 0, "theme": "culture_sights", "extra": false, "pinned": false, "interest": 0.621981, "dwell_min": 45.0, "arrival_min": 21.127794, "wait_min": 0.0, "depart_min": 66.127794, "hours_ok": true, "hours_label_ru": "сб 10:00–20:00"},
+     {"order": 3, "place_id": "3325034453752002666", "name": "French Revolution Ateneul Român", "slot": 1, "theme": "coffee", "extra": false, "pinned": false, "interest": 0.717382, "dwell_min": 30.0, "arrival_min": 68.714009, "wait_min": 0.0, "depart_min": 98.714009, "hours_ok": true, "hours_label_ru": "сб 08:00–21:00"},
+     {"order": 4, "place_id": "8125310868773553894", "name": "Parcul Ateneului", "slot": 2, "theme": "nature_outdoors", "extra": false, "pinned": false, "interest": 0.346162, "dwell_min": 10.0, "arrival_min": 100.156783, "wait_min": 0.0, "depart_min": 110.156783, "hours_ok": null, "hours_label_ru": "часы работы неизвестны"},
+     {"order": 5, "place_id": "6578908158205473452", "name": "MACE by Joseph Hadad", "slot": 3, "theme": "restaurant", "extra": false, "pinned": false, "interest": 0.560891, "dwell_min": 75.0, "arrival_min": 112.182727, "wait_min": 0.0, "depart_min": 187.182727, "hours_ok": true, "hours_label_ru": "сб 11:00–22:00"},
+     {"order": 6, "place_id": "7134420911640911719", "name": "The Royal Palace of Bucharest", "slot": 0, "theme": "culture_sights", "extra": true, "pinned": false, "interest": 0.643296, "dwell_min": 10.0, "arrival_min": 191.50943, "wait_min": 0.0, "depart_min": 201.50943, "hours_ok": true, "hours_label_ru": "сб 10:00–18:00"},
+     {"order": 7, "place_id": "16044012576954065712", "name": "National Museum of Art", "slot": 0, "theme": "culture_sights", "extra": true, "pinned": false, "interest": 0.750411, "dwell_min": 10.0, "arrival_min": 202.470326, "wait_min": 0.0, "depart_min": 212.470326, "hours_ok": true, "hours_label_ru": "сб 11:00–19:00"},
+     {"order": 8, "place_id": "2302333767644454498", "name": "Equestrian Statue of Carol I", "slot": 0, "theme": "culture_sights", "extra": true, "pinned": false, "interest": 0.600764, "dwell_min": 10.0, "arrival_min": 214.196511, "wait_min": 0.0, "depart_min": 224.196511, "hours_ok": true, "hours_label_ru": "сб круглосуточно"}
+    ],
+    "segments": [
+     {"from_order": -1, "to_order": 0, "walk_min": 0.600914, "distance_km": 0.045069, "n_geom": 2},
+     {"from_order": 0, "to_order": 1, "walk_min": 0.422379, "distance_km": 0.031678, "n_geom": 2},
+     {"from_order": 1, "to_order": 2, "walk_min": 0.104501, "distance_km": 0.007838, "n_geom": 2},
+     {"from_order": 2, "to_order": 3, "walk_min": 2.586215, "distance_km": 0.193966, "n_geom": 2},
+     {"from_order": 3, "to_order": 4, "walk_min": 1.442773, "distance_km": 0.108208, "n_geom": 2},
+     {"from_order": 4, "to_order": 5, "walk_min": 2.025944, "distance_km": 0.151946, "n_geom": 2},
+     {"from_order": 5, "to_order": 6, "walk_min": 4.326703, "distance_km": 0.324503, "n_geom": 2},
+     {"from_order": 6, "to_order": 7, "walk_min": 0.960896, "distance_km": 0.072067, "n_geom": 2},
+     {"from_order": 7, "to_order": 8, "walk_min": 1.726185, "distance_km": 0.129464, "n_geom": 2},
+     {"from_order": 8, "to_order": -1, "walk_min": 1.616921, "distance_km": 0.121269, "n_geom": 2}
+    ],
+    "total_time_min": 225.813432,
+    "total_walk_min": 15.813432,
+    "total_dwell_min": 210.0,
+    "total_wait_min": 0.0,
+    "total_distance_km": 1.186007,
+    "over_budget": false,
+    "dropped_slots": [],
+    "note": ""
+   },
+   "render": {
+    "manual": true,
+    "variants_caption": "**Вариант 1**: 9 мест · 1.2 км · до 13:46 · ✏️ изменён  ·  Вариант 2: 7 мест · 2.5 км · до 13:43  ·  Вариант 3: 5 мест · 1.5 км · до 13:40",
+    "metric_stops": "4 из 4 + 5",
+    "metric_finish_label": "Возвращение",
+    "metric_finish": "13:46",
+    "metric_delta": "+14 мин запаса",
+    "metric_walk": "1.2 км · 0:16",
+    "metric_window": "10:00–14:00",
+    "captions": [],
+    "warnings": [],
+    "infos": [],
+    "stop_lines": [
+     ["1. \"Theodor Aman\" Museum — Достопримечательность · по пути, можно пройти мимо", "10:01–10:11 · осмотр 10 мин", "🕒 сб 10:00–18:00"],
+     ["2. Palatul Cesianu-Racoviță — Достопримечательность · по пути, можно пройти мимо", "10:11–10:21 · осмотр 10 мин", "🕒 сб 10:00–20:00"],
+     ["3. Artmark — Достопримечательность", "10:21–11:06 · осмотр 45 мин", "🕒 сб 10:00–20:00"],
+     ["4. French Revolution Ateneul Român — Кофе", "11:09–11:39 · осмотр 30 мин", "🕒 сб 08:00–21:00"],
+     ["5. Parcul Ateneului — Парк / природа", "11:40–11:50 · осмотр 10 мин", "🕒 часы работы неизвестны"],
+     ["6. MACE by Joseph Hadad — Еда / ресторан", "11:52–13:07 · осмотр 75 мин", "🕒 сб 11:00–22:00"],
+     ["7. The Royal Palace of Bucharest — Достопримечательность · по пути, можно пройти мимо", "13:12–13:22 · осмотр 10 мин", "🕒 сб 10:00–18:00"],
+     ["8. National Museum of Art — Достопримечательность · по пути, можно пройти мимо", "13:22–13:32 · осмотр 10 мин", "🕒 сб 11:00–19:00"],
+     ["9. Equestrian Statue of Carol I — Достопримечательность · по пути, можно пройти мимо", "13:34–13:44 · осмотр 10 мин", "🕒 сб круглосуточно"]
+    ]
+   },
+   "navigation": {
+    "google": ["https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440287,26.097708&destination=44.440287,26.097708&waypoints=44.440249,26.098126%7C44.440430,26.097974%7C44.440482,26.097988%7C44.441621,26.097134%7C44.440977,26.096679%7C44.441239,26.098049%7C44.439838,26.095743%7C44.439367,26.095874%7C44.439648,26.097016&waypoint_place_ids=ChIJ5YmJ9UX_sUARPHWGnrYiBTM%7CChIJMenVX0__sUARQpCY85n6M6o%7CChIJ8WjAX0__sUARMylWz4YWen8%7CChIJze7an0__sUARarjSCTjlJC4%7CChIJu73uv6r_sUAR5kbedi_nwnA%7CChIJz7sYKOv_sUARrLLBAx36TFs%7CChIJ0bKXvEX_sUARZ5959ASOAmM%7CChIJb0jBokX_sUARMCM_FW_Ip94%7CChIJpa8ak0X_sUARYp7VBl2I8x8"],
+    "legs": [
+     {"from": "Старт", "to": "\"Theodor Aman\" Museum", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440287,26.097708&destination=44.440249,26.098126&destination_place_id=ChIJ5YmJ9UX_sUARPHWGnrYiBTM", "apple": "https://maps.apple.com/?saddr=44.440287,26.097708&daddr=44.440249,26.098126&dirflg=w"},
+     {"from": "\"Theodor Aman\" Museum", "to": "Palatul Cesianu-Racoviță", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440249,26.098126&destination=44.440430,26.097974&destination_place_id=ChIJMenVX0__sUARQpCY85n6M6o&origin_place_id=ChIJ5YmJ9UX_sUARPHWGnrYiBTM", "apple": "https://maps.apple.com/?saddr=44.440249,26.098126&daddr=44.440430,26.097974&dirflg=w"},
+     {"from": "Palatul Cesianu-Racoviță", "to": "Artmark", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440430,26.097974&destination=44.440482,26.097988&destination_place_id=ChIJ8WjAX0__sUARMylWz4YWen8&origin_place_id=ChIJMenVX0__sUARQpCY85n6M6o", "apple": "https://maps.apple.com/?saddr=44.440430,26.097974&daddr=44.440482,26.097988&dirflg=w"},
+     {"from": "Artmark", "to": "French Revolution Ateneul Român", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440482,26.097988&destination=44.441621,26.097134&destination_place_id=ChIJze7an0__sUARarjSCTjlJC4&origin_place_id=ChIJ8WjAX0__sUARMylWz4YWen8", "apple": "https://maps.apple.com/?saddr=44.440482,26.097988&daddr=44.441621,26.097134&dirflg=w"},
+     {"from": "French Revolution Ateneul Român", "to": "Parcul Ateneului", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.441621,26.097134&destination=44.440977,26.096679&destination_place_id=ChIJu73uv6r_sUAR5kbedi_nwnA&origin_place_id=ChIJze7an0__sUARarjSCTjlJC4", "apple": "https://maps.apple.com/?saddr=44.441621,26.097134&daddr=44.440977,26.096679&dirflg=w"},
+     {"from": "Parcul Ateneului", "to": "MACE by Joseph Hadad", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440977,26.096679&destination=44.441239,26.098049&destination_place_id=ChIJz7sYKOv_sUARrLLBAx36TFs&origin_place_id=ChIJu73uv6r_sUAR5kbedi_nwnA", "apple": "https://maps.apple.com/?saddr=44.440977,26.096679&daddr=44.441239,26.098049&dirflg=w"},
+     {"from": "MACE by Joseph Hadad", "to": "The Royal Palace of Bucharest", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.441239,26.098049&destination=44.439838,26.095743&destination_place_id=ChIJ0bKXvEX_sUARZ5959ASOAmM&origin_place_id=ChIJz7sYKOv_sUARrLLBAx36TFs", "apple": "https://maps.apple.com/?saddr=44.441239,26.098049&daddr=44.439838,26.095743&dirflg=w"},
+     {"from": "The Royal Palace of Bucharest", "to": "National Museum of Art", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.439838,26.095743&destination=44.439367,26.095874&destination_place_id=ChIJb0jBokX_sUARMCM_FW_Ip94&origin_place_id=ChIJ0bKXvEX_sUARZ5959ASOAmM", "apple": "https://maps.apple.com/?saddr=44.439838,26.095743&daddr=44.439367,26.095874&dirflg=w"},
+     {"from": "National Museum of Art", "to": "Equestrian Statue of Carol I", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.439367,26.095874&destination=44.439648,26.097016&destination_place_id=ChIJpa8ak0X_sUARYp7VBl2I8x8&origin_place_id=ChIJb0jBokX_sUARMCM_FW_Ip94", "apple": "https://maps.apple.com/?saddr=44.439367,26.095874&daddr=44.439648,26.097016&dirflg=w"},
+     {"from": "Equestrian Statue of Carol I", "to": "Старт", "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.439648,26.097016&destination=44.440287,26.097708&origin_place_id=ChIJpa8ak0X_sUARYp7VBl2I8x8", "apple": "https://maps.apple.com/?saddr=44.439648,26.097016&daddr=44.440287,26.097708&dirflg=w"}
+    ]
+   }
+  }
+ }
+}

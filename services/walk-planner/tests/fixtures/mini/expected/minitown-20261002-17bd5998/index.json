@@ -1,0 +1,93 @@
+{
+ "format": "walk-golden/v1",
+ "bundle_id": "minitown-20261002-17bd5998",
+ "city": "Minitown",
+ "content_sha256": "17bd5998ed1a33bd692481e67208cb451f438c9a629eb182f3491e53134497fd",
+ "catalog_sha256": "5fc79d8c8c5895813ab8bfe40e26d61871cc84a2d31705c9cb10cb3dcdc227d1",
+ "interest_fingerprint": "df8bf80ea4bc525ea78d99c60eb9fac5b0b337fe366d6f74a4ded46d5b137c6a",
+ "versions": {
+  "api": "v1",
+  "algorithm": "1.0.0",
+  "interest": "walk_interest_v1",
+  "bundle_schema": 1
+ },
+ "routing": "estimate: straight-line core.RoutingProvider (forced; no router, no network)",
+ "options": {
+  "lang": "ru",
+  "geometry": "geojson"
+ },
+ "photo_base_url": null,
+ "tolerance": {
+  "numbers_abs": 1e-06,
+  "strings": "exact",
+  "lists": "ordered"
+ },
+ "scenarios_file": "scenarios.json",
+ "scenarios_sha256": "36f806766b9b40c0db5ee20a8fa8aa3675bf9545fdf9c4830c39deac95c655be",
+ "generated_at": "2026-10-02T19:25:48Z",
+ "environment": {
+  "python": "3.13.3",
+  "numpy": "2.4.6",
+  "pandas": "3.0.3",
+  "pyarrow": "24.0.0",
+  "scikit_learn": "1.8.0"
+ },
+ "scenarios": {
+  "M01_default": {
+   "file": "M01_default.json",
+   "sha256": "982832eb7de06314a322925dc559b13f6f7e92ddd201a9fc144a7392cde0ed9d",
+   "plan_status": 200,
+   "variants": 1,
+   "edit_calls": 6
+  },
+  "M02_one_way_scenic": {
+   "file": "M02_one_way_scenic.json",
+   "sha256": "50f9514e90566151a568d12b7500967dafd2040ea2705734abea37a20344ae63",
+   "plan_status": 200,
+   "variants": 3,
+   "edit_calls": 0
+  },
+  "M03_free_chill": {
+   "file": "M03_free_chill.json",
+   "sha256": "a45ae650bb857fdb09fa4df7cd7c31e8d63e2130bff07dfe5c00fd90cee55f4f",
+   "plan_status": 200,
+   "variants": 3,
+   "edit_calls": 1
+  },
+  "M04_must_status": {
+   "file": "M04_must_status.json",
+   "sha256": "2c0f76829825c4c80099243438da07eaeaaeff5c084f26169f21df8bb1eec405",
+   "plan_status": 200,
+   "variants": 3,
+   "edit_calls": 6
+  },
+  "M05_favourites": {
+   "file": "M05_favourites.json",
+   "sha256": "eb57261ddd2e1e9f70a9039297c61a7d0f135c0eca33af7261406bb5adfc36c6",
+   "plan_status": 200,
+   "variants": 2,
+   "edit_calls": 2
+  },
+  "M06_night_bars": {
+   "file": "M06_night_bars.json",
+   "sha256": "4d52c51c16b371394392d6c99ab0af6095729c663215532a00a39c9c8a616bb4",
+   "plan_status": 200,
+   "variants": 2,
+   "edit_calls": 0
+  },
+  "M07_all_slots_long": {
+   "file": "M07_all_slots_long.json",
+   "sha256": "8e695c6f7fbfedd6d8d15b7ad3a02f8e16c96dbaeae56de9cd929f959850c903",
+   "plan_status": 200,
+   "variants": 1,
+   "edit_calls": 2
+  },
+  "M08_invalid_duplicate_slot": {
+   "file": "M08_invalid_duplicate_slot.json",
+   "sha256": "905f659a387e4a6bc00e7db1743e4a2d7158892bc910078397aa9a275e027691",
+   "plan_status": 422,
+   "variants": 0,
+   "edit_calls": 0
+  }
+ }
+}

@@ -1,0 +1,232 @@
+{
+ "format": "walk-golden/v1",
+ "scenario": {
+  "id": "S11_sunrise",
+  "city": "Bucharest",
+  "date": "2026-10-04",
+  "start_time": "05:30",
+  "end_time": "09:00",
+  "end_day_offset": 0,
+  "shape": "loop",
+  "start": "city_center",
+  "style": "max",
+  "slots": [{"activity": "coffee", "dwell_min": null}, {"activity": "sight", "dwell_min": null}],
+  "must_visit_place_ids": [],
+  "variants": 1,
+  "radius_km": 2.5,
+  "fill_window": false,
+  "known_hours_only": false,
+  "top_k": 8,
+  "edits": []
+ },
+ "plan": {
+  "call": "POST /v1/walks/plan",
+  "options": {"lang": "ru", "geometry": "geojson"},
+  "body": {
+   "city": "Bucharest",
+   "date": "2026-10-04",
+   "start_time": "05:30",
+   "end_time": "09:00",
+   "end_day_offset": 0,
+   "shape": "loop",
+   "start": "city_center",
+   "style": "max",
+   "slots": [{"activity": "coffee", "dwell_min": null}, {"activity": "sight", "dwell_min": null}],
+   "must_visit_place_ids": [],
+   "variants": 1,
+   "radius_km": 2.5,
+   "fill_window": false,
+   "known_hours_only": false,
+   "top_k": 8
+  },
+  "status": 200,
+  "response": {
+   "plan_id": "a88c7313991af220753cb181b430fb15a75d8431",
+   "versions": {
+    "api": "v1",
+    "algorithm": "1.0.0",
+    "catalog": "bucharest-20261002-d68a311e",
+    "interest": "walk_interest_v1",
+    "routing": null
+   },
+   "status": "ok",
+   "request": {
+    "city": "Bucharest",
+    "date": "2026-10-04",
+    "start_time": "05:30",
+    "end_time": "09:00",
+    "end_day_offset": 0,
+    "shape": "loop",
+    "start": {"lat": 44.4402865461307, "lon": 26.097708464099995, "place_id": null},
+    "style": "max",
+    "slots": [{"activity": "coffee", "dwell_min": null}, {"activity": "sight", "dwell_min": null}],
+    "must_visit_place_ids": [],
+    "favourite_place_ids": [],
+    "want_to_go_place_ids": [],
+    "personalization_strength": 0.5,
+    "variants": 1,
+    "radius_km": 2.5,
+    "fill_window": false,
+    "known_hours_only": false,
+    "top_k": 8,
+    "timezone": "Europe/Bucharest",
+    "weekday": 6,
+    "window_min": 210,
+    "window_start": "2026-10-04T05:30",
+    "window_end": "2026-10-04T09:00",
+    "search_radius_km": 2.5,
+    "catalog_version": "bucharest-20261002-d68a311e"
+   },
+   "personalization": {"mode": "popularity", "strength": 0.5, "favourites_used": [], "favourites_ignored": [], "profiles": 0},
+   "messages": [],
+   "variants": [
+    {
+     "index": 0,
+     "edited": false,
+     "summary": {
+      "stops_total": 1,
+      "slots_requested": 2,
+      "slots_filled": 1,
+      "on_the_way": 0,
+      "pinned": 0,
+      "dropped_slot_indices": [0],
+      "finish_at": {"offset_min": 13.23384155573855, "local": "2026-10-04T05:43"},
+      "finish_kind": "return",
+      "window_min": 210,
+      "total_min": 13.23384155573855,
+      "walk_min": 3.2338415557385507,
+      "dwell_min": 10.0,
+      "wait_min": 0.0,
+      "distance_km": 0.2425381166803913,
+      "slack_min": 196.76615844426146,
+      "over_budget": false,
+      "routing": "estimate"
+     },
+     "messages": [
+      {
+       "code": "slots_dropped",
+       "severity": "warning",
+       "scope": "variant",
+       "params": {"activities": ["coffee"], "slot_indices": [0], "window_end_label": "09:00"},
+       "stop_index": null,
+       "text": "Не поместилось в окно: Кофе. Остальное уложено до 09:00; чтобы вернуть слоты, раздвиньте окно."
+      },
+      {
+       "code": "routing_estimate",
+       "severity": "info",
+       "scope": "variant",
+       "params": {"segments_estimated": 2, "segments_total": 2},
+       "stop_index": null,
+       "text": "Пешие отрезки посчитаны по прямой (оценка): 2 из 2 — по улицам путь может быть длиннее."
+      }
+     ],
+     "stops": [
+      {
+       "index": 0,
+       "number": 1,
+       "place_id": "2302333767644454498",
+       "name": "Equestrian Statue of Carol I",
+       "lat": 44.4396476,
+       "lon": 26.097016099999998,
+       "kind": "slot",
+       "slot_index": 1,
+       "activity": "sight",
+       "arrival": {"offset_min": 1.6169207778692753, "local": "2026-10-04T05:32"},
+       "visit_start": {"offset_min": 1.6169207778692753, "local": "2026-10-04T05:32"},
+       "departure": {"offset_min": 11.616920777869275, "local": "2026-10-04T05:42"},
+       "dwell_min": 10.0,
+       "dwell_fixed": false,
+       "wait_min": 0.0,
+       "hours": {
+        "status": "open",
+        "day": {"weekday": 6, "open_24h": true, "closed_all_day": false, "intervals": [], "carryover_until": null}
+       },
+       "business_status": "operational",
+       "interest": 0.6007636874324409
+      }
+     ],
+     "segments": [
+      {
+       "index": 0,
+       "from": {"kind": "start", "stop_index": null},
+       "to": {"kind": "stop", "stop_index": 0},
+       "walk_min": 1.6169207778692753,
+       "distance_m": 121,
+       "depart": {"offset_min": 0.0, "local": "2026-10-04T05:30"},
+       "arrive": {"offset_min": 1.6169207778692753, "local": "2026-10-04T05:32"},
+       "quality": "estimate",
+       "provider": "haversine",
+       "geometry": {"type": "LineString", "coordinates": [[26.097708464099995, 44.4402865461307], [26.097016099999998, 44.4396476]]}
+      },
+      {
+       "index": 1,
+       "from": {"kind": "stop", "stop_index": 0},
+       "to": {"kind": "start", "stop_index": null},
+       "walk_min": 1.6169207778692753,
+       "distance_m": 121,
+       "depart": {"offset_min": 11.616920777869275, "local": "2026-10-04T05:42"},
+       "arrive": {"offset_min": 13.23384155573855, "local": "2026-10-04T05:43"},
+       "quality": "estimate",
+       "provider": "haversine",
+       "geometry": {"type": "LineString", "coordinates": [[26.097016099999998, 44.4396476], [26.097708464099995, 44.4402865461307]]}
+      }
+     ],
+     "navigation": {
+      "google_parts": ["https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440287,26.097708&destination=44.440287,26.097708&waypoints=44.439648,26.097016&waypoint_place_ids=ChIJpa8ak0X_sUARYp7VBl2I8x8"],
+      "legs": [
+       {
+        "segment_index": 0,
+        "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.440287,26.097708&destination=44.439648,26.097016&destination_place_id=ChIJpa8ak0X_sUARYp7VBl2I8x8",
+        "apple": "https://maps.apple.com/?saddr=44.440287,26.097708&daddr=44.439648,26.097016&dirflg=w"
+       },
+       {
+        "segment_index": 1,
+        "google": "https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=44.439648,26.097016&destination=44.440287,26.097708&origin_place_id=ChIJpa8ak0X_sUARYp7VBl2I8x8",
+        "apple": "https://maps.apple.com/?saddr=44.439648,26.097016&daddr=44.440287,26.097708&dirflg=w"
+       }
+      ]
+     },
+     "bbox": [26.097016099999998, 44.4396476, 26.097708464099995, 44.4402865461307],
+     "sequence": [
+      {
+       "place_id": "2302333767644454498",
+       "kind": "slot",
+       "slot_index": 1,
+       "activity": "sight",
+       "dwell_min": 10.0,
+       "dwell_fixed": false
+      }
+     ]
+    }
+   ],
+   "places": {
+    "2302333767644454498": {
+     "place_id": "2302333767644454498",
+     "name": "Equestrian Statue of Carol I",
+     "type_label": "historic equestrian monument",
+     "primary_type": "sculpture",
+     "theme": "culture_sights",
+     "theme_group": "sights",
+     "rating": 4.7,
+     "rating_count": 577,
+     "summary": "A monumental bronze equestrian statue of Romania's first king, set among Bucharest's grand historic buildings and ideal for a quick photo stop.",
+     "summary_lang": "en",
+     "photos": [
+      {"key": "photos_cid/2302333767644454498/00_all.jpg", "url": null},
+      {"key": "photos_cid/2302333767644454498/01_all.jpg", "url": null},
+      {"key": "photos_cid/2302333767644454498/02_all.jpg", "url": null},
+      {"key": "photos_cid/2302333767644454498/03_all.jpg", "url": null}
+     ],
+     "google_maps_url": "https://www.google.com/maps?cid=2302333767644454498",
+     "google_place_id": "ChIJpa8ak0X_sUARYp7VBl2I8x8",
+     "address": "030167 Bucharest, Romania",
+     "business_status": "operational",
+     "lat": 44.4396476,
+     "lon": 26.097016099999998,
+     "price_level": null
+    }
+   }
+  }
+ },
+ "edits": {}
+}

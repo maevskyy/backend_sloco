@@ -12,6 +12,9 @@ public internet
   -> backend container (services/gateway, Node/Fastify)
   -> http://recommendation-service:8000 over sloco_net
   -> recommendation-service container (services/recommendation, Python/FastAPI)
+  -> http://walk-planner:8000 over sloco_net (profile walk-planner; not in prod
+     until SLO-68)
+  -> walk-planner container (services/walk-planner, Python/FastAPI)
 
 Gateway also talks to:
   -> Supabase managed Postgres: ALL queries and RPCs over one direct pg pool
@@ -37,6 +40,8 @@ services.
 services/
   gateway/          public API Gateway, Fastify, Postgres stores, OpenAPI
   recommendation/   private recommendation runtime, FastAPI
+  walk-planner/     private walking-route planner, FastAPI (vendored as-is from
+                    the research repo; data bundles mounted read-only, not in git)
 
 observability/      monitoring stack config (own concern)
   grafana/          provisioning + dashboards (dashboards/{app,infra})
@@ -60,6 +65,7 @@ deployment, observability, and operations docs live in root `docs/`.
 | --- | --- | --- | --- | --- |
 | `backend` | `services/gateway/` | Node 24, Fastify | `127.0.0.1:3000` | Yes, through Nginx |
 | `recommendation-service` | `services/recommendation/` | Python 3.12, FastAPI | `8000` on Docker network | No |
+| `walk-planner` | `services/walk-planner/` | Python 3.12, FastAPI | `8000` on Docker network | No |
 | `redis` | Docker image | Redis | `6379` on Docker network | No |
 | `loki` | `observability/loki/` | Loki | `127.0.0.1:3100` | No |
 | `prometheus` | `observability/prometheus/` | Prometheus | `127.0.0.1:9090` | No |
@@ -77,6 +83,7 @@ The Gateway calls internal services by compose DNS:
 
 ```text
 http://recommendation-service:8000
+http://walk-planner:8000
 redis://redis:6379/0
 ```
 
@@ -108,6 +115,11 @@ is host-level, not containerized.
    then does it render `GF_*` and run `--profile observability`.
 
 No production compose/config file should be copied by hand during normal deploys.
+
+`walk-planner` sits behind the compose profile `walk-planner`, so step 5 skips
+it until its rollout (SLO-68: image, bundle sync, OSRM, photos). Locally:
+`WALK_BUNDLES_HOST_DIR=<dir with bundle dirs> docker compose --profile walk-planner up -d walk-planner`
+(the override builds the image and publishes `127.0.0.1:18600`).
 
 ## What Belongs Where
 

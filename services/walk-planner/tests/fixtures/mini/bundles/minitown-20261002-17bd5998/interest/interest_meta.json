@@ -1,0 +1,50 @@
+{
+  "axis_columns": [
+    "axis_quiet_lively",
+    "axis_work_social",
+    "axis_day_night",
+    "axis_casual_premium",
+    "axis_drinks_food",
+    "axis_local_tourist",
+    "axis_cheap_expensive",
+    "axis_traditional_experimental"
+  ],
+  "built_at": "2026-10-02T19:25:01Z",
+  "catalog_source": "locations_minitown.csv",
+  "city": "Minitown",
+  "csls_k": 10,
+  "csls_penalty": 0.5,
+  "files": [
+    "text_f16.npy",
+    "image_f16.npy",
+    "has_image.npy",
+    "csls_density.npy",
+    "features.parquet"
+  ],
+  "fingerprint": "df8bf80ea4bc525ea78d99c60eb9fac5b0b337fe366d6f74a4ded46d5b137c6a",
+  "image_dim": 4,
+  "image_model": "openclip_vitb32_v1",
+  "image_model_tag": "openclip_vitb32_laion2b",
+  "image_source": "image_minitown.npy",
+  "missing_image_policy": "zero",
+  "places_with_image": 48,
+  "places_with_text": 59,
+  "quality": {
+    "shrinkage_prior": 25.0,
+    "version": "v2"
+  },
+  "rows": 60,
+  "text_dim": 8,
+  "text_model": "text-embedding-3-small",
+  "text_run_id": null,
+  "text_source": "text_minitown.npy",
+  "version": "walk_interest_v1",
+  "weights": {
+    "axis": 0.06,
+    "image": 0.5,
+    "price": 0.04,
+    "quality": 0.06,
+    "tag": 0.08,
+    "text": 0.26
+  }
+}
