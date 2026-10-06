@@ -37,6 +37,10 @@ import {
   type ReactionsService
 } from "./modules/reactions/index.js";
 import {
+  registerReviewsModule,
+  type ReviewsService
+} from "./modules/reviews/index.js";
+import {
   registerSavedPlacesModule,
   type SavedPlacesService
 } from "./modules/saved-places/index.js";
@@ -73,6 +77,7 @@ type AppOptions = {
   meService?: MeService;
   onboardingService?: OnboardingService;
   reactionsService?: ReactionsService;
+  reviewsService?: ReviewsService;
   savedPlacesService?: SavedPlacesService;
   placeDetailsService?: PlaceDetailsService;
   cacheStore?: CacheStore;
@@ -163,6 +168,13 @@ export async function buildApp(options: AppOptions = {}) {
     db,
     authService: options.authService,
     reactionsService: options.reactionsService
+  });
+
+  await app.register(registerReviewsModule, {
+    prefix: API_PREFIX,
+    db,
+    authService: options.authService,
+    reviewsService: options.reviewsService
   });
 
   await app.register(registerSavedPlacesModule, {

@@ -94,6 +94,11 @@ start at the monorepo root:
   FRONTEND_EVENTS_API.md
   ```
 
+- Frontend user reviews contract (`/v1/me/reviews`, `/v1/me/places/:placeId/review`):
+  ```text
+  FRONTEND_REVIEWS_API.md
+  ```
+
 - Frontend walk planner contract (`/v1/walks/*`):
   ```text
   FRONTEND_WALKS_API.md

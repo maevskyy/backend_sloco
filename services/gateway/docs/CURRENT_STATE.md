@@ -58,6 +58,9 @@ GET /v1/me/reactions
 GET /v1/me/saved/ids
 PUT /v1/me/places/:placeId/reaction
 DELETE /v1/me/places/:placeId/reaction
+GET /v1/me/reviews
+PUT /v1/me/places/:placeId/review
+DELETE /v1/me/places/:placeId/review
 GET /v1/me/saved
 GET /v1/me/saved/collections/:collectionId
 POST /v1/me/saved/places
@@ -139,6 +142,7 @@ Saved collections table: public.saved_collections
 Saved collection membership table: public.saved_collection_places
 Place photos table: public.place_photos (R2 public_url; primary + bounded photos[])
 Reactions table: public.place_reactions (favorite|dislike|hide, keyed by source_id)
+Reviews table: public.place_reviews (one per user per place, keyed by place_source + place_source_id; no photos yet)
 Telemetry events table: public.events_raw (append-only, dedupe by event_id)
 Identity stitching table: public.identity_links (anon_id -> user_id)
 Serving receipt tables: public.rec_served + public.rec_served_items (score_components at serve time)
@@ -229,7 +233,7 @@ controller -> service -> store
 
 `src/modules/saved-places/` is the reference implementation. All product modules
 (`map`, `me`, `health`, `saved-places`, `places`, `search`, `feed`, `reactions`,
-`events`, `walks`) use this shape; `auth` stays a shared service (no HTTP) with its
+`reviews`, `events`, `walks`) use this shape; `auth` stays a shared service (no HTTP) with its
 Supabase call isolated in a store.
 
 Shared code is split by responsibility: `src/lib/` (infrastructure adapters),

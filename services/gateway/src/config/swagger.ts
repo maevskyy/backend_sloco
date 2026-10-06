@@ -10,6 +10,7 @@ import { meComponentSchemas } from "../modules/me/index.js";
 import { onboardingComponentSchemas } from "../modules/onboarding/index.js";
 import { placesComponentSchemas } from "../modules/places/index.js";
 import { reactionsComponentSchemas } from "../modules/reactions/index.js";
+import { reviewsComponentSchemas } from "../modules/reviews/index.js";
 import { savedPlacesComponentSchemas } from "../modules/saved-places/index.js";
 import { searchComponentSchemas } from "../modules/search/index.js";
 import { walksComponentSchemas } from "../modules/walks/index.js";
@@ -38,6 +39,10 @@ export async function registerSwaggerDocs(app: FastifyInstance) {
   }
 
   for (const schema of reactionsComponentSchemas) {
+    app.addSchema(schema);
+  }
+
+  for (const schema of reviewsComponentSchemas) {
     app.addSchema(schema);
   }
 
@@ -124,6 +129,11 @@ export async function registerSwaggerDocs(app: FastifyInstance) {
         {
           name: "Reactions",
           description: "Authenticated place reaction endpoints."
+        },
+        {
+          name: "Reviews",
+          description:
+            "The authenticated user's own place reviews: one per place."
         },
         {
           name: "Places",

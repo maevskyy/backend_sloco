@@ -199,6 +199,9 @@ GET /v1/cities
 GET /v1/me/reactions
 PUT /v1/me/places/:placeId/reaction
 DELETE /v1/me/places/:placeId/reaction
+GET /v1/me/reviews
+PUT /v1/me/places/:placeId/review
+DELETE /v1/me/places/:placeId/review
 POST /v1/onboarding/complete
 GET /v1/walks/config
 POST /v1/walks/plan | /v1/walks/schedule | /v1/walks/insert
@@ -216,6 +219,7 @@ docs/FRONTEND_SEARCH_API.md
 docs/FRONTEND_FEED_API.md
 docs/FRONTEND_ONBOARDING_API.md
 docs/FRONTEND_CITIES_API.md
+docs/FRONTEND_REVIEWS_API.md
 docs/FRONTEND_WALKS_API.md
 ```
 
@@ -238,6 +242,7 @@ Current serving tables:
 public.places                    the catalog (source `sloco_ai`, Google CID as source_id)
 public.place_photos              R2 photo metadata
 public.place_reactions           favorite | dislike | hide, keyed by source_id
+public.place_reviews             one review per user per place, keyed by (place_source, place_source_id)
 public.profiles                  display name + onboarding_status
 public.saved_places
 public.saved_collections

@@ -1,0 +1,31 @@
+import type { Review } from "./reviews.schemas.js";
+import type { ReviewRow } from "./reviews.types.js";
+
+export function mapReviewRow(row: ReviewRow): Review {
+  return {
+    placeId: row.place_id,
+    place: {
+      id: row.place_id,
+      name: row.place_name,
+      rating: row.place_rating,
+      numberOfReviews: row.place_reviews_count,
+      primaryPhoto: row.primary_photo_path
+        ? {
+            path: row.primary_photo_path,
+            url: row.primary_photo_url,
+            width: row.primary_photo_width,
+            height: row.primary_photo_height,
+            source: row.primary_photo_source
+          }
+        : null
+    },
+    rating: row.rating,
+    text: row.body,
+    tags: row.tags,
+    // Review photos ship with SLO-70.
+    photos: [],
+    helpfulCount: row.helpful_count,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at
+  };
+}

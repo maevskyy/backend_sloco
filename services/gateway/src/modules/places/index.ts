@@ -8,6 +8,7 @@ export {
 } from "./services/places.service.js";
 export { PlacesStore } from "./stores/places.store.js";
 export { placesComponentSchemas } from "./common/places.openapi.js";
+export { placePrimaryPhotoSchema } from "./common/places.schemas.js";
 export {
   PLACE_BUCKET_NAMES,
   placeBucketsQuerySchema,
