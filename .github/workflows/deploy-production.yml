@@ -397,6 +397,10 @@ jobs:
             # Health gate on the walk planner, seen from the gateway container
             # (same network path as real calls). Ready ~5–6 s after start.
             if [ "${WALK_PLANNER_ENABLED:-}" = "true" ]; then
+              # The gateway caches config / place screens for up to 1 h; a new
+              # bundle or PHOTO_BASE_URL must not keep serving the old answer.
+              docker compose exec -T redis redis-cli --scan --pattern 'walks:v1:*' \
+                | xargs -r docker compose exec -T redis redis-cli del >/dev/null || true
               walk_ready=0
               for attempt in $(seq 1 24); do
                 if docker compose exec -T backend node -e "fetch('http://walk-planner:8000/v1/health/ready').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"; then

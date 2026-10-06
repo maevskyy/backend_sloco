@@ -189,7 +189,15 @@ state:
 | `WALK_PLANNER_ENABLED` | `true` | profile `walk-planner` up; gateway gets `WALK_PLANNER_URL=http://walk-planner:8000`. Anything else: gateway answers 503 `walk_planner_unavailable`, the containers are removed |
 | `WALK_OSRM_ENABLED` | `true` | profile `walk-osrm` up (`osrm-foot`), `WALK_ROUTER_URL=http://osrm-foot:5000`. Off: legs come from ORS (if `ORS_API_KEY`) or a straight-line estimate, and every response says so |
 | `WALK_BUNDLE_ID` | e.g. `bucharest-20261002-d68a311e` | data bundle to serve (default: that one) |
-| `WALK_PHOTO_BASE_URL` | e.g. `https://sloco.pp.ua/walk-media` | absolute card photo URLs; empty = `url: null`, key only |
+| `WALK_PHOTO_BASE_URL` | `https://sloco.pp.ua/walk-media` (set 2026-10-06) | absolute card photo URLs, served by host Nginx (`deploy/nginx/walk-media.conf` in `/etc/nginx/snippets/`, included in the HTTPS vhost); empty = `url: null`, key only |
+
+Every deploy with the planner on drops the gateway's `walks:v1:*` Redis cache
+(config 10 min, place screens 1 h), so a new bundle or photo URL shows at once.
+
+Photos live in `/opt/sloco-data/visual_photo_profiles/photos_cid` (synced by the
+research side). Nginx (`www-data`) needs `o+x` on `visual_photo_profiles` and
+`o+rx` / `o+r` on the `photos_cid` dirs / files; a sync that resets them makes
+every photo 403 — the research sync must keep `--chmod=Do+rx,Fo+r`.
 
 Runtime: `walk-planner` 2 uvicorn workers, limit 2 CPU / 3 GB (~0.9 GB idle);
 `osrm-foot` 1 CPU / 2 GB. The gateway queues at most `WALK_PLANNER_MAX_CONCURRENT`
