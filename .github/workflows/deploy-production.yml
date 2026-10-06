@@ -206,7 +206,9 @@ jobs:
           WITH_OBS: ${{ inputs.with_observability }}
           GATEWAY_IMAGE: ${{ env.GATEWAY_IMAGE }}
           RECOMMENDER_IMAGE: ${{ env.RECOMMENDER_IMAGE }}
-          WALK_PLANNER_IMAGE: ${{ env.WALK_PLANNER_IMAGE }}
+          # Not WALK_PLANNER_IMAGE: compose reads the shell env before .env, so
+          # the bare repo name would shadow the tagged image rendered into .env.
+          WALK_PLANNER_REPO: ${{ env.WALK_PLANNER_IMAGE }}
           GHCR_USERNAME: ${{ secrets.GHCR_USERNAME }}
           GHCR_READ_TOKEN: ${{ secrets.GHCR_READ_TOKEN }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -231,7 +233,7 @@ jobs:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
-          envs: SERVICE,SHORT_SHA,WITH_OBS,GATEWAY_IMAGE,RECOMMENDER_IMAGE,WALK_PLANNER_IMAGE,GHCR_USERNAME,GHCR_READ_TOKEN,SUPABASE_URL,SUPABASE_SERVICE_ROLE_KEY,SUPABASE_DB_URL,GF_SECURITY_ADMIN_USER,GF_SECURITY_ADMIN_PASSWORD,GF_SERVER_ROOT_URL,RECOMMENDER_ALGORITHM,WALK_PLANNER_ENABLED,WALK_OSRM_ENABLED,WALK_BUNDLE_ID,WALK_PHOTO_BASE_URL,ORS_API_KEY
+          envs: SERVICE,SHORT_SHA,WITH_OBS,GATEWAY_IMAGE,RECOMMENDER_IMAGE,WALK_PLANNER_REPO,GHCR_USERNAME,GHCR_READ_TOKEN,SUPABASE_URL,SUPABASE_SERVICE_ROLE_KEY,SUPABASE_DB_URL,GF_SECURITY_ADMIN_USER,GF_SECURITY_ADMIN_PASSWORD,GF_SERVER_ROOT_URL,RECOMMENDER_ALGORITHM,WALK_PLANNER_ENABLED,WALK_OSRM_ENABLED,WALK_BUNDLE_ID,WALK_PHOTO_BASE_URL,ORS_API_KEY
           script: |
             set -euo pipefail
             cd /opt/backend_sloco
@@ -242,7 +244,7 @@ jobs:
             CUR_WALK="$(grep -E '^WALK_PLANNER_IMAGE=' .env 2>/dev/null | cut -d= -f2- || true)"
             BACKEND_IMAGE_TAG="${CUR_BACKEND:-${GATEWAY_IMAGE}:prod-latest}"
             REC_IMAGE_TAG="${CUR_REC:-${RECOMMENDER_IMAGE}:prod-latest}"
-            WALK_IMAGE_TAG="${CUR_WALK:-${WALK_PLANNER_IMAGE}:prod-latest}"
+            WALK_IMAGE_TAG="${CUR_WALK:-${WALK_PLANNER_REPO}:prod-latest}"
 
             if [ "$SERVICE" = "gateway" ] || [ "$SERVICE" = "all" ]; then
               BACKEND_IMAGE_TAG="${GATEWAY_IMAGE}:${SHORT_SHA}"
@@ -251,7 +253,7 @@ jobs:
               REC_IMAGE_TAG="${RECOMMENDER_IMAGE}:${SHORT_SHA}"
             fi
             if [ "$SERVICE" = "walk-planner" ] || [ "$SERVICE" = "all" ]; then
-              WALK_IMAGE_TAG="${WALK_PLANNER_IMAGE}:${SHORT_SHA}"
+              WALK_IMAGE_TAG="${WALK_PLANNER_REPO}:${SHORT_SHA}"
             fi
 
             # Render .env from secrets (single source of truth, idempotent).
