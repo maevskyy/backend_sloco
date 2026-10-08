@@ -27,6 +27,13 @@ export const listReviewsQuerySchema = z.object({
   offset: z.coerce.number().int().min(0).default(0)
 });
 
+// A place's reviews page smaller than the user's own list: the iOS spec
+// (PLACE_REVIEWS_API.md) asks for 1..50, default 20.
+export const listPlaceReviewsQuerySchema = z.object({
+  limit: z.coerce.number().int().min(1).max(50).default(20),
+  offset: z.coerce.number().int().min(0).default(0)
+});
+
 export const upsertReviewBodySchema = z.object({
   rating: z.number().int().min(1).max(5),
   text: z.string().max(REVIEW_TEXT_MAX_LENGTH).default(""),
@@ -70,10 +77,33 @@ export const reviewsListResponseSchema = z.object({
   total: z.number().int()
 });
 
+// The author of a review on a place's list. Never the email or the user id:
+// displayName is profiles.display_name (as on /v1/me), null when unset.
+export const placeReviewAuthorSchema = z.object({
+  displayName: z.string().nullable(),
+  avatarUrl: z.string().nullable()
+});
+
+// One review on a place's list: the ReviewDTO fields without the place card,
+// plus the author and whether the caller wrote it.
+export const placeReviewSchema = z.object({
+  author: placeReviewAuthorSchema,
+  isMine: z.boolean(),
+  ...reviewSchema.omit({ placeId: true, place: true }).shape
+});
+
+export const placeReviewsListResponseSchema = z.object({
+  reviews: z.array(placeReviewSchema),
+  total: z.number().int()
+});
+
 export const reviewsSchemaRegistry = z.registry<{ id: string }>();
 
 reviewsSchemaRegistry.add(reviewParamsSchema, { id: "ReviewParams" });
 reviewsSchemaRegistry.add(listReviewsQuerySchema, { id: "ListReviewsQuery" });
+reviewsSchemaRegistry.add(listPlaceReviewsQuerySchema, {
+  id: "ListPlaceReviewsQuery"
+});
 reviewsSchemaRegistry.add(upsertReviewBodySchema, { id: "UpsertReviewBody" });
 reviewsSchemaRegistry.add(reviewPlaceSchema, { id: "ReviewPlace" });
 reviewsSchemaRegistry.add(reviewPhotoSchema, { id: "ReviewPhoto" });
@@ -83,10 +113,20 @@ reviewsSchemaRegistry.add(reviewResponseSchema, { id: "ReviewResponse" });
 reviewsSchemaRegistry.add(reviewsListResponseSchema, {
   id: "ReviewsListResponse"
 });
+reviewsSchemaRegistry.add(placeReviewAuthorSchema, { id: "PlaceReviewAuthor" });
+reviewsSchemaRegistry.add(placeReviewSchema, { id: "PlaceReviewDTO" });
+reviewsSchemaRegistry.add(placeReviewsListResponseSchema, {
+  id: "PlaceReviewsListResponse"
+});
 
 export type ReviewTag = z.infer<typeof reviewTagSchema>;
 export type ListReviewsQuery = z.infer<typeof listReviewsQuerySchema>;
+export type ListPlaceReviewsQuery = z.infer<typeof listPlaceReviewsQuerySchema>;
 export type UpsertReviewBody = z.infer<typeof upsertReviewBodySchema>;
 export type Review = z.infer<typeof reviewSchema>;
 export type ReviewResponse = z.infer<typeof reviewResponseSchema>;
 export type ReviewsListResponse = z.infer<typeof reviewsListResponseSchema>;
+export type PlaceReview = z.infer<typeof placeReviewSchema>;
+export type PlaceReviewsListResponse = z.infer<
+  typeof placeReviewsListResponseSchema
+>;

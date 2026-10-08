@@ -193,6 +193,7 @@ The rest of the product surface (full list in `docs/CURRENT_STATE.md`):
 GET /v1/map/config
 GET /v1/map/tiles/:z/:x/:y.mvt
 GET /v1/places/:placeId
+GET /v1/places/:placeId/reviews
 GET /v1/search/places
 GET /v1/feed/places
 GET /v1/cities

@@ -1,5 +1,7 @@
 import type {
+  ListPlaceReviewsQuery,
   ListReviewsQuery,
+  PlaceReviewsListResponse,
   ReviewResponse,
   ReviewTag,
   ReviewsListResponse,
@@ -25,6 +27,19 @@ export type ReviewRow = {
   updated_at: string;
 };
 
+// One review of a place's list, with its author's profile name. The author's
+// user_id stays in SQL: is_mine is computed there against the caller.
+export type PlaceReviewRow = {
+  author_display_name: string | null;
+  is_mine: boolean;
+  rating: number;
+  body: string;
+  tags: ReviewTag[];
+  helpful_count: number;
+  created_at: string;
+  updated_at: string;
+};
+
 export type ReviewInput = {
   rating: number;
   text: string;
@@ -33,6 +48,11 @@ export type ReviewInput = {
 
 export type ReviewRowsPage = {
   rows: ReviewRow[];
+  total: number;
+};
+
+export type PlaceReviewRowsPage = {
+  rows: PlaceReviewRow[];
   total: number;
 };
 
@@ -47,6 +67,13 @@ export type ReviewsStoreContract = {
   // is not an error.
   deleteReview(userId: string, placeId: number): Promise<void>;
   listReviews(userId: string, page: ListReviewsQuery): Promise<ReviewRowsPage>;
+  // Every user's review of one place; viewerId (null when anonymous) only
+  // sets is_mine. Throws PlaceNotFoundError when placeId is not a place.
+  listPlaceReviews(
+    placeId: number,
+    viewerId: string | null,
+    page: ListPlaceReviewsQuery
+  ): Promise<PlaceReviewRowsPage>;
 };
 
 export type ReviewsServiceContract = {
@@ -60,4 +87,9 @@ export type ReviewsServiceContract = {
     userId: string,
     page: ListReviewsQuery
   ): Promise<ReviewsListResponse>;
+  listPlaceReviews(
+    placeId: number,
+    viewerId: string | null,
+    page: ListPlaceReviewsQuery
+  ): Promise<PlaceReviewsListResponse>;
 };

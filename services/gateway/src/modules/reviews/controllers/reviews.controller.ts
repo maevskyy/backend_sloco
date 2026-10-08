@@ -6,7 +6,10 @@ import type {
 import { ZodError } from "zod";
 import { AppRoute, VersionedAppRoute } from "../../../config/routes.js";
 import { createAuthGuard, type AuthGuard } from "../../../http/auth-guard.js";
-import { handleCommonError } from "../../../http/errors.js";
+import {
+  handleCommonError,
+  unauthorizedResponse
+} from "../../../http/errors.js";
 import { docsRoute } from "../../../http/route.js";
 import {
   LogMessagePrefix,
@@ -40,6 +43,11 @@ export class ReviewsController {
 
   register(app: FastifyInstance) {
     app.get(
+      AppRoute.PlaceReviews,
+      docsRoute(openApi.listPlaceReviewsRouteSchema),
+      this.listPlaceReviews.bind(this)
+    );
+    app.get(
       AppRoute.MeReviews,
       docsRoute(openApi.listReviewsRouteSchema),
       this.listReviews.bind(this)
@@ -54,6 +62,45 @@ export class ReviewsController {
       docsRoute(openApi.deleteReviewRouteSchema),
       this.deleteReview.bind(this)
     );
+  }
+
+  private async listPlaceReviews(
+    request: FastifyRequest,
+    reply: FastifyReply
+  ) {
+    try {
+      const user = await this.authGuard.optionalUser(request);
+
+      if (user === "invalid") {
+        return reply.code(401).send(unauthorizedResponse);
+      }
+
+      const { placeId } = schemas.reviewParamsSchema.parse(request.params);
+      const page = schemas.listPlaceReviewsQuerySchema.parse(request.query);
+      const result = await this.service.listPlaceReviews(
+        placeId,
+        user?.id ?? null,
+        page
+      );
+
+      logResponseSummary(
+        request,
+        VersionedAppRoute.placeReviews,
+        {
+          placeId,
+          authenticated: user !== null,
+          reviewsCount: result.reviews.length,
+          total: result.total,
+          limit: page.limit,
+          offset: page.offset
+        },
+        `${LogMessagePrefix.Response} ${VersionedAppRoute.placeReviews} ${result.reviews.length} of ${result.total} reviews for place ${placeId}`
+      );
+
+      return result;
+    } catch (error) {
+      return this.handleError(request, reply, error);
+    }
   }
 
   private async listReviews(request: FastifyRequest, reply: FastifyReply) {

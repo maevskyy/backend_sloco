@@ -5,13 +5,17 @@ place sheet (Leave a review / Edit your review). Answers the iOS spec
 `USER_REVIEWS_API.md` (2026-10-01), stage 1 — **without photos** (SLO-69).
 Photo upload (`POST /v1/me/review-photos`) is SLO-70.
 
+Every Sloco user's reviews of one place — the place sheet's review strip —
+come from the public [`GET /v1/places/{placeId}/reviews`](#get-v1placesplaceidreviews)
+(iOS spec `PLACE_REVIEWS_API.md`, 2026-10-06, SLO-71).
+
 Swagger remains the source of truth:
 
 ```text
 https://sloco.pp.ua/v1/swagger/openapi.json
 ```
 
-All three endpoints need `Authorization: Bearer <Supabase access token>`;
+The three `/v1/me/…` endpoints need `Authorization: Bearer <Supabase access token>`;
 without a valid one they answer `401`.
 
 ## The model
@@ -97,12 +101,52 @@ A replace keeps `createdAt` and `helpfulCount` and moves `updatedAt`. On create
 - If a place leaves the catalog, its review disappears from the list and from
   `total`.
 
+## `GET /v1/places/{placeId}/reviews`
+
+Every user's review of one place, newest first (`createdAt` descending). Query:
+`limit` 1…50 (default 20), `offset` ≥ 0 (default 0).
+
+Public, like `GET /v1/places/{placeId}`: the token is optional. With a valid
+bearer token `isMine` marks the caller's review; without a token `isMine` is
+always `false`; an invalid token is `401`.
+
+```json
+{
+  "reviews": [
+    {
+      "author": { "displayName": "Veronika Ignatenko", "avatarUrl": null },
+      "isMine": false,
+      "rating": 5,
+      "text": "A really nice place!",
+      "tags": ["romantic", "trendy"],
+      "photos": [],
+      "helpfulCount": 0,
+      "createdAt": "2026-10-06T10:00:00.130625+00:00",
+      "updatedAt": "2026-10-06T10:05:12.153043+00:00"
+    }
+  ],
+  "total": 3
+}
+```
+
+- `rating`, `text`, `tags`, `photos`, `helpfulCount`, `createdAt`, `updatedAt`
+  — the same names, types and formats as in `ReviewDTO`. There is no `place`
+  card: the client is already on that place.
+- `author.displayName` is the profile display name — the same value as
+  `profile.displayName` on `GET /v1/me` — or `null`. Never the email. Nothing
+  sets a display name yet, so for now it is `null` for everyone: draw a
+  neutral name.
+- `author.avatarUrl` is always `null` for now.
+- No user id in the payload; `isMine` is the only per-caller field.
+- `total` counts all reviews of the place, not just this page. A place nobody
+  has reviewed gives `{"reviews": [], "total": 0}`.
+
 ## Errors
 
 | status | when |
 |---|---|
-| `401` | no or invalid session |
-| `404` | `placeId` is not a place (`PUT` and `DELETE`) |
+| `401` | no or invalid session (`/v1/me/…`); an invalid token (`/v1/places/{placeId}/reviews`) |
+| `404` | `placeId` is not a place (`PUT`, `DELETE`, `GET /v1/places/{placeId}/reviews`) |
 | `422` | `rating` outside 1…5 or not an integer, `text` over 2000, an unknown tag, more than 10 `photoIds`, any `photoIds` entry (no photo can be uploaded yet, so every id is "not uploaded by this user"), `limit`/`offset` out of range |
 
 `422` body: `{"status": "error", "message": "Invalid review request", "issues": [...]}`.

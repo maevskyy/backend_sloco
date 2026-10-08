@@ -1,6 +1,10 @@
 import { ReviewPhotoNotFoundError } from "../common/reviews.errors.js";
-import { mapReviewRow } from "../common/reviews.mappers.js";
+import {
+  mapPlaceReviewRow,
+  mapReviewRow
+} from "../common/reviews.mappers.js";
 import type {
+  ListPlaceReviewsQuery,
   ListReviewsQuery,
   UpsertReviewBody
 } from "../common/reviews.schemas.js";
@@ -41,6 +45,23 @@ export class ReviewsServiceImpl implements ReviewsServiceContract {
 
     return {
       reviews: rows.map(mapReviewRow),
+      total
+    };
+  }
+
+  async listPlaceReviews(
+    placeId: number,
+    viewerId: string | null,
+    page: ListPlaceReviewsQuery
+  ) {
+    const { rows, total } = await this.store.listPlaceReviews(
+      placeId,
+      viewerId,
+      page
+    );
+
+    return {
+      reviews: rows.map(mapPlaceReviewRow),
       total
     };
   }

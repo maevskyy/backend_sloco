@@ -133,7 +133,7 @@ export async function registerSwaggerDocs(app: FastifyInstance) {
         {
           name: "Reviews",
           description:
-            "The authenticated user's own place reviews: one per place."
+            "Place reviews: the authenticated user's own (one per place) and every user's reviews of a place."
         },
         {
           name: "Places",

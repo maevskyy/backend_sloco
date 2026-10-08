@@ -13,10 +13,13 @@ export {
 } from "./common/reviews.errors.js";
 export {
   REVIEW_TAGS,
+  type PlaceReview,
   type Review,
   type ReviewTag
 } from "./common/reviews.schemas.js";
 export type {
+  PlaceReviewRow,
+  PlaceReviewRowsPage,
   ReviewInput,
   ReviewRow,
   ReviewRowsPage,

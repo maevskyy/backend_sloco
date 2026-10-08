@@ -17,6 +17,22 @@ const defineRoute = makeDefineRoute({
   errorResponses: reviewsErrorResponses
 });
 
+// Public routes: auth is optional and only marks the caller's own review.
+const definePublicRoute = makeDefineRoute({
+  tag: "Reviews",
+  security: false,
+  errorResponses: reviewsErrorResponses
+});
+
+export const listPlaceReviewsRouteSchema = definePublicRoute({
+  summary: "List every user's review of a place.",
+  description:
+    "Newest first (createdAt descending). Auth is optional: with a valid bearer token isMine marks the caller's review, without one isMine is always false; an invalid token is 401. author.displayName is the profile display name (null when unset), never the email; author.avatarUrl is null for now. No user ids. total counts all reviews of the place. limit 1..50 (default 20), offset >= 0; out of range is 422. 404: placeId is not a place.",
+  params: "ReviewParams",
+  query: "ListPlaceReviewsQuery",
+  ok: "PlaceReviewsListResponse"
+});
+
 export const listReviewsRouteSchema = defineRoute({
   summary: "List the authenticated user's reviews.",
   description:

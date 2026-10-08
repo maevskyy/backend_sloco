@@ -113,4 +113,106 @@ describe("reviews store", () => {
     ).resolves.toEqual({ rows: [], total: 3 });
     expect(past.statements).toHaveLength(2);
   });
+
+  describe("listPlaceReviews", () => {
+    const reviewed = {
+      author_display_name: "Veronika Ignatenko",
+      is_mine: false,
+      rating: 5,
+      body: "A really nice place!",
+      tags: ["romantic"],
+      helpful_count: 0,
+      created_at: "2026-10-06T10:00:00.000000+00:00",
+      updated_at: "2026-10-06T10:00:00.000000+00:00"
+    };
+    // What the left join yields for a place without reviews.
+    const unreviewed = {
+      author_display_name: null,
+      is_mine: false,
+      rating: null,
+      body: null,
+      tags: null,
+      helpful_count: null,
+      created_at: null,
+      updated_at: null,
+      total: 0
+    };
+
+    it("reads a page and its total in one statement", async () => {
+      const fake = createFakeDb(() => [{ ...reviewed, total: 7 }]);
+
+      const page = await new ReviewsStore(fake.db).listPlaceReviews(
+        6124,
+        userId,
+        { limit: 20, offset: 0 }
+      );
+
+      expect(page.total).toBe(7);
+      expect(page.rows).toHaveLength(1);
+      expect(page.rows[0]).toMatchObject(reviewed);
+      expect(fake.statements).toHaveLength(1);
+      expect(fake.statements[0]!.params).toEqual([6124, userId, 20, 0]);
+      // The author's id is compared in SQL and never selected.
+      expect(fake.statements[0]!.text).not.toMatch(/r\.user_id as|email/);
+    });
+
+    it("passes a null viewer for an anonymous caller", async () => {
+      const fake = createFakeDb(() => [{ ...reviewed, total: 1 }]);
+
+      await new ReviewsStore(fake.db).listPlaceReviews(6124, null, {
+        limit: 20,
+        offset: 0
+      });
+
+      expect(fake.statements[0]!.params).toEqual([6124, null, 20, 0]);
+    });
+
+    it("turns the place's no-reviews row into an empty page", async () => {
+      const fake = createFakeDb(() => [unreviewed]);
+
+      await expect(
+        new ReviewsStore(fake.db).listPlaceReviews(6124, null, {
+          limit: 20,
+          offset: 0
+        })
+      ).resolves.toEqual({ rows: [], total: 0 });
+      expect(fake.statements).toHaveLength(1);
+    });
+
+    it("throws PlaceNotFoundError when the first page has no rows", async () => {
+      const fake = createFakeDb(() => []);
+
+      await expect(
+        new ReviewsStore(fake.db).listPlaceReviews(999999999, null, {
+          limit: 20,
+          offset: 0
+        })
+      ).rejects.toBeInstanceOf(PlaceNotFoundError);
+      expect(fake.statements).toHaveLength(1);
+    });
+
+    it("counts separately for an empty page past the end", async () => {
+      const known = createFakeDb((text) =>
+        /place_exists/.test(text) ? [{ place_exists: true, total: 3 }] : []
+      );
+      const unknown = createFakeDb((text) =>
+        /place_exists/.test(text) ? [{ place_exists: false, total: 0 }] : []
+      );
+
+      await expect(
+        new ReviewsStore(known.db).listPlaceReviews(6124, null, {
+          limit: 20,
+          offset: 20
+        })
+      ).resolves.toEqual({ rows: [], total: 3 });
+      expect(known.statements).toHaveLength(2);
+
+      await expect(
+        new ReviewsStore(unknown.db).listPlaceReviews(999999999, null, {
+          limit: 20,
+          offset: 20
+        })
+      ).rejects.toBeInstanceOf(PlaceNotFoundError);
+    });
+  });
 });

@@ -2,14 +2,25 @@ import { getDb, type Db } from "../../../lib/db.js";
 import { measureDependencyMetric } from "../../../observability/metrics.js";
 import { PlaceNotFoundError } from "../common/reviews.errors.js";
 import type {
+  ListPlaceReviewsQuery,
   ListReviewsQuery
 } from "../common/reviews.schemas.js";
 import type {
+  PlaceReviewRow,
+  PlaceReviewRowsPage,
   ReviewInput,
   ReviewRow,
   ReviewRowsPage,
   ReviewsStoreContract
 } from "../common/reviews.types.js";
+
+type Nullable<T> = { [K in keyof T]: T[K] | null };
+
+function isReviewed<T extends Nullable<PlaceReviewRow>>(
+  row: T
+): row is T & PlaceReviewRow {
+  return row.rating !== null;
+}
 
 function measureReviewsDependency<T>(
   operation: string,
@@ -167,6 +178,105 @@ export class ReviewsStore implements ReviewsStoreContract {
     return {
       rows: [],
       total: page.offset === 0 ? 0 : await this.countReviews(userId)
+    };
+  }
+
+  async listPlaceReviews(
+    placeId: number,
+    viewerId: string | null,
+    page: ListPlaceReviewsQuery
+  ): Promise<PlaceReviewRowsPage> {
+    // The place left-joins its reviews, so a place without reviews still
+    // yields one all-null row and "no rows" on the first page means "no
+    // place". count(r.user_id) skips that null row. A seq scan of
+    // place_reviews for now: no index by place until the table grows
+    // (docs/DECISIONS.md).
+    const result = await measureReviewsDependency(
+      "select",
+      "place_reviews_by_place_list",
+      async () =>
+        this.db.query<Nullable<PlaceReviewRow> & { total: number }>(
+          `with target as (
+             select source, source_id
+               from public.places
+              where id = $1
+           )
+           select pr.display_name as author_display_name,
+                  coalesce(r.user_id = $2::uuid, false) as is_mine,
+                  r.rating,
+                  r.body,
+                  r.tags,
+                  r.helpful_count,
+                  r.created_at,
+                  r.updated_at,
+                  count(r.user_id) over () as total
+             from target t
+             left join public.place_reviews r
+               on r.place_source = t.source
+              and r.place_source_id = t.source_id
+             left join public.profiles pr
+               on pr.user_id = r.user_id
+            order by r.created_at desc, r.user_id
+            limit $3
+           offset $4`,
+          [placeId, viewerId, page.limit, page.offset]
+        ),
+      (queryResult) => queryResult.rowCount ?? undefined
+    );
+
+    const first = result.rows[0];
+
+    if (first) {
+      return {
+        // Only the no-reviews row has a null rating.
+        rows: result.rows.filter(isReviewed),
+        total: first.total
+      };
+    }
+
+    if (page.offset === 0) {
+      throw new PlaceNotFoundError(placeId);
+    }
+
+    // Past the end of the list: one more query tells "no place" from "no
+    // more reviews" and counts them.
+    const { placeExists, total } = await this.countPlaceReviews(placeId);
+
+    if (!placeExists) {
+      throw new PlaceNotFoundError(placeId);
+    }
+
+    return {
+      rows: [],
+      total
+    };
+  }
+
+  private async countPlaceReviews(placeId: number) {
+    const result = await measureReviewsDependency(
+      "select",
+      "place_reviews_by_place_count",
+      async () =>
+        this.db.query<{ place_exists: boolean; total: number }>(
+          `with target as (
+             select source, source_id
+               from public.places
+              where id = $1
+           )
+           select exists (select 1 from target) as place_exists,
+                  (select count(*)
+                     from public.place_reviews r
+                     join target t
+                       on r.place_source = t.source
+                      and r.place_source_id = t.source_id) as total`,
+          [placeId]
+        )
+    );
+    const row = result.rows[0];
+
+    return {
+      placeExists: row?.place_exists ?? false,
+      total: row?.total ?? 0
     };
   }
 

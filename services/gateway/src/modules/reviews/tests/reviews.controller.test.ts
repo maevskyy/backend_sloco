@@ -25,21 +25,29 @@ const authHeaders = { authorization: "Bearer valid-token" };
 const knownPlaceId = 6124;
 const reviewPath = (placeId: number) =>
   VersionedAppRoute.mePlaceReview.replace(":placeId", String(placeId));
+const placeReviewsPath = (placeId: number) =>
+  VersionedAppRoute.placeReviews.replace(":placeId", String(placeId));
 
-// The real service over an in-memory store: one review per place, a replace
-// keeps createdAt/helpfulCount, unknown places throw like the SQL store.
-function createMemoryStore(): ReviewsStoreContract {
-  const reviews = new Map<number, ReviewRow>();
+const otherUserId = "5d1c2b3a-9e8f-4a7b-8c6d-1e2f3a4b5c6d";
+const displayNames = new Map([[otherUserId, "Veronika Ignatenko"]]);
+
+// The real service over an in-memory store: one review per user per place, a
+// replace keeps createdAt/helpfulCount, unknown places throw like the SQL store.
+function createMemoryStore() {
+  const reviews = new Map<string, { userId: string; row: ReviewRow }>();
   let clock = 0;
   const now = () => `2026-10-06T10:00:0${clock++}.000000+00:00`;
+  const key = (userId: string, placeId: number) => `${userId}:${placeId}`;
+  const newestFirst = (a: ReviewRow, b: ReviewRow) =>
+    b.created_at.localeCompare(a.created_at);
 
-  return {
-    async upsertReview(_userId, placeId, input: ReviewInput) {
+  const store: ReviewsStoreContract = {
+    async upsertReview(userId, placeId, input: ReviewInput) {
       if (placeId !== knownPlaceId) {
         throw new PlaceNotFoundError(placeId);
       }
 
-      const existing = reviews.get(placeId);
+      const existing = reviews.get(key(userId, placeId))?.row;
       const timestamp = now();
       const row: ReviewRow = {
         place_id: placeId,
@@ -59,32 +67,60 @@ function createMemoryStore(): ReviewsStoreContract {
         created_at: existing?.created_at ?? timestamp,
         updated_at: timestamp
       };
-      reviews.set(placeId, row);
+      reviews.set(key(userId, placeId), { userId, row });
       return row;
     },
-    async deleteReview(_userId, placeId) {
+    async deleteReview(userId, placeId) {
       if (placeId !== knownPlaceId) {
         throw new PlaceNotFoundError(placeId);
       }
 
-      reviews.delete(placeId);
+      reviews.delete(key(userId, placeId));
     },
-    async listReviews(_userId, page) {
-      const rows = [...reviews.values()];
+    async listReviews(userId, page) {
+      const rows = [...reviews.values()]
+        .filter((review) => review.userId === userId)
+        .map((review) => review.row)
+        .sort(newestFirst);
+      return {
+        rows: rows.slice(page.offset, page.offset + page.limit),
+        total: rows.length
+      };
+    },
+    async listPlaceReviews(placeId, viewerId, page) {
+      if (placeId !== knownPlaceId) {
+        throw new PlaceNotFoundError(placeId);
+      }
+
+      const rows = [...reviews.values()]
+        .filter((review) => review.row.place_id === placeId)
+        .sort((a, b) => newestFirst(a.row, b.row))
+        .map(({ userId, row }) => ({
+          author_display_name: displayNames.get(userId) ?? null,
+          is_mine: userId === viewerId,
+          rating: row.rating,
+          body: row.body,
+          tags: row.tags,
+          helpful_count: row.helpful_count,
+          created_at: row.created_at,
+          updated_at: row.updated_at
+        }));
       return {
         rows: rows.slice(page.offset, page.offset + page.limit),
         total: rows.length
       };
     }
   };
+
+  return store;
 }
 
 let app: Awaited<ReturnType<typeof buildApp>> | undefined;
 
-async function createApp() {
+async function createApp(store = createMemoryStore()) {
   app = await buildApp({
     authService,
-    reviewsService: createReviewsService(createMemoryStore())
+    reviewsService: createReviewsService(store)
   });
   return app;
 }
@@ -268,7 +304,148 @@ describe("reviews routes", () => {
     expect(del.statusCode).toBe(404);
   });
 
-  it("publishes the three paths and the ReviewDTO schema", async () => {
+  it("walks the place reviews spec's done-means flow", async () => {
+    const store = createMemoryStore();
+    const server = await createApp(store);
+
+    const empty = await server.inject({
+      method: "GET",
+      url: placeReviewsPath(knownPlaceId)
+    });
+    expect(empty.statusCode).toBe(200);
+    expect(empty.json()).toEqual({ reviews: [], total: 0 });
+
+    const put = await server.inject({
+      method: "PUT",
+      url: reviewPath(knownPlaceId),
+      headers: authHeaders,
+      payload: { rating: 4, text: "ok", tags: ["cozy"], photoIds: [] }
+    });
+    expect(put.statusCode).toBe(200);
+
+    const anonymous = await server.inject({
+      method: "GET",
+      url: placeReviewsPath(knownPlaceId)
+    });
+    expect(anonymous.statusCode).toBe(200);
+    expect(anonymous.json().total).toBe(1);
+    const [review] = anonymous.json().reviews;
+    expect(review).toMatchObject({
+      author: { displayName: null, avatarUrl: null },
+      isMine: false,
+      rating: 4,
+      text: "ok",
+      tags: ["cozy"],
+      photos: [],
+      helpfulCount: 0
+    });
+    expect(Object.keys(review)).toEqual([
+      "author",
+      "isMine",
+      "rating",
+      "text",
+      "tags",
+      "photos",
+      "helpfulCount",
+      "createdAt",
+      "updatedAt"
+    ]);
+    expect(anonymous.body).not.toContain(authenticatedUser.email);
+    expect(anonymous.body).not.toContain(authenticatedUser.id);
+
+    const mine = await server.inject({
+      method: "GET",
+      url: placeReviewsPath(knownPlaceId),
+      headers: authHeaders
+    });
+    expect(mine.json().reviews[0].isMine).toBe(true);
+
+    const deleted = await server.inject({
+      method: "DELETE",
+      url: reviewPath(knownPlaceId),
+      headers: authHeaders
+    });
+    expect(deleted.statusCode).toBe(204);
+
+    const emptyAgain = await server.inject({
+      method: "GET",
+      url: placeReviewsPath(knownPlaceId)
+    });
+    expect(emptyAgain.json()).toEqual({ reviews: [], total: 0 });
+  });
+
+  it("lists other users' reviews newest first with their names", async () => {
+    const store = createMemoryStore();
+    await store.upsertReview(otherUserId, knownPlaceId, {
+      rating: 5,
+      text: "A really nice place!",
+      tags: ["romantic"]
+    });
+    await store.upsertReview(authenticatedUser.id, knownPlaceId, {
+      rating: 3,
+      text: "",
+      tags: []
+    });
+    const server = await createApp(store);
+
+    const response = await server.inject({
+      method: "GET",
+      url: `${placeReviewsPath(knownPlaceId)}?limit=1&offset=1`,
+      headers: authHeaders
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toMatchObject({
+      reviews: [
+        {
+          author: { displayName: "Veronika Ignatenko", avatarUrl: null },
+          isMine: false,
+          rating: 5
+        }
+      ],
+      total: 2
+    });
+  });
+
+  it("answers 401 for an invalid token on the place reviews list", async () => {
+    const server = await createApp();
+
+    const response = await server.inject({
+      method: "GET",
+      url: placeReviewsPath(knownPlaceId),
+      headers: { authorization: "Bearer expired-token" }
+    });
+
+    expect(response.statusCode).toBe(401);
+  });
+
+  it("answers 404 for the reviews of an unknown place", async () => {
+    const server = await createApp();
+
+    const response = await server.inject({
+      method: "GET",
+      url: placeReviewsPath(999999999)
+    });
+
+    expect(response.statusCode).toBe(404);
+    expect(response.json()).toEqual({ status: "error", message: "Place not found" });
+  });
+
+  it.each([["limit=0"], ["limit=51"], ["offset=-1"], ["limit=abc"]])(
+    "answers 422 for a place reviews page with %s",
+    async (query) => {
+      const server = await createApp();
+
+      const response = await server.inject({
+        method: "GET",
+        url: `${placeReviewsPath(knownPlaceId)}?${query}`
+      });
+
+      expect(response.statusCode).toBe(422);
+    }
+  );
+
+  it("publishes the review paths and the DTO schemas", async () => {
     const server = await createApp();
 
     const response = await server.inject({
@@ -280,6 +457,8 @@ describe("reviews routes", () => {
     expect(spec.paths["/v1/me/reviews"].get).toBeDefined();
     expect(spec.paths["/v1/me/places/{placeId}/review"].put).toBeDefined();
     expect(spec.paths["/v1/me/places/{placeId}/review"].delete).toBeDefined();
+    expect(spec.paths["/v1/places/{placeId}/reviews"].get).toBeDefined();
     expect(spec.components.schemas.ReviewDTO).toBeDefined();
+    expect(spec.components.schemas.PlaceReviewDTO).toBeDefined();
   });
 });
