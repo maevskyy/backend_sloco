@@ -166,6 +166,13 @@ Default application path:
 Nginx -> 127.0.0.1:3000 -> backend -> recommendation-service / Supabase / Redis
 ```
 
+Landing path (separate repo `maevskyy/landing_sloco`, its own deploy workflow and
+compose project in `/opt/landing_sloco`):
+
+```text
+Nginx -> 127.0.0.1:3002 -> landing (static site, nginx container)
+```
+
 Observability path:
 
 ```text
@@ -294,6 +301,7 @@ Nginx should proxy only intended public surfaces:
 
 ```text
 sloco.pp.ua/v1/*       -> http://127.0.0.1:3000
+sloco.pp.ua/*          -> http://127.0.0.1:3002   (landing_sloco)
 grafana.sloco.pp.ua/*  -> http://127.0.0.1:3001
 ```
 
